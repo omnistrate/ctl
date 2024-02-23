@@ -1,0 +1,15 @@
+# Binaries for programs and plugins
+*.dll
+*.so
+*.dylib
+ctl
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below to include it)
+vendor/
+
+# Idea files
+*.idea
+*.DS_Store
