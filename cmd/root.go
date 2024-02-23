@@ -17,12 +17,15 @@ deploying, and managing your Omnistrate SaaS. `,
 
 func runRoot(cmd *cobra.Command, args []string) {
 	printLogo()
-	cmd.Help()
+	err := cmd.Help()
+	if err != nil {
+		return
+	}
 }
 
 // printLogo prints an ASCII logo, which was generated with figlet
 func printLogo() {
-	fmt.Printf(figletStr)
+	fmt.Print(figletStr)
 }
 
 const figletStr = `                  _     __           __     

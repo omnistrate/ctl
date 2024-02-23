@@ -1,0 +1,7 @@
+mode: count
+github.com/omnistrate/ctl/main.go:5.13,7.2 1 0
+github.com/omnistrate/ctl/cmd/root.go:18.49,21.2 2 0
+github.com/omnistrate/ctl/cmd/root.go:24.18,26.2 1 0
+github.com/omnistrate/ctl/cmd/root.go:37.16,39.16 2 0
+github.com/omnistrate/ctl/cmd/root.go:39.16,41.3 1 0
+github.com/omnistrate/ctl/cmd/root.go:44.14,53.2 0 0
