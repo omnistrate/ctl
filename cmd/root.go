@@ -14,7 +14,7 @@ var rootCmd = &cobra.Command{
 	Use:   "omnistrate-ctl",
 	Short: "Omnistrate ctl in Go.",
 	Long: `Omnistrate ctl is a command line tool for creating,
-	deploying, and managing your Omnistrate SaaS. `,
+deploying, and managing your Omnistrate SaaS. `,
 	Run: runRoot,
 }
 
