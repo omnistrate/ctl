@@ -1,0 +1,6 @@
+# Dependency directories (remove the comment below to include it)
+vendor/
+
+# Idea files
+*.idea
+*.DS_Store
