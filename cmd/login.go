@@ -104,7 +104,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	fmt.Println("credentials saved for", authConfig.Email)
+	fmt.Println("credential saved for", authConfig.Email)
 
 	return nil
 }
