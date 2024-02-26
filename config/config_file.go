@@ -60,7 +60,7 @@ type AuthConfigNotFoundError struct {
 }
 
 func (e *AuthConfigNotFoundError) Error() string {
-	return fmt.Sprintf("no auth config found")
+	return "no auth config found"
 }
 
 // New initializes a config file for the given file path
