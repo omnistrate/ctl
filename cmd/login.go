@@ -129,9 +129,9 @@ func validateLogin(email string, pass string, timeout time.Duration) (string, er
 		return "", fmt.Errorf("unable to login, %s", err.Error())
 	}
 
-	if serviceErr.Name == "forbidden" {
-		return "", fmt.Errorf("unable to login, either username or password is incorrect")
+	if serviceErr.Name == "auth_failure" {
+		return "", fmt.Errorf("unable to login, either email or password is incorrect")
 	}
 
-	return "", fmt.Errorf("unable to login, %s", err.Error())
+	return "", fmt.Errorf("unable to login, %s", serviceErr.Name)
 }
