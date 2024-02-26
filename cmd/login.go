@@ -29,9 +29,8 @@ var loginCmd = &cobra.Command{
 	Use:   `login [--email EMAIL] [--password PASSWORD]`,
 	Short: "Log in to Omnistrate platform",
 	Long:  "Log in to Omnistrate platform",
-	Example: `  cat ~/omnistrate_pass.txt | omnistrate-cli login -u user --password-stdin
-	  echo $PASSWORD | omnistrate-cli auth login -s 
-	  omnistrate-cli login -u user -p password`,
+	Example: `cat ~/omnistrate_pass.txt | omnistrate-cli login -e email --password-stdin
+	  echo $PASSWORD | omnistrate-cli login -e email --password password`,
 	RunE: runLogin,
 }
 
@@ -52,11 +51,11 @@ func runLogin(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(email) == 0 {
-		return fmt.Errorf("must provide --email or -u")
+		return fmt.Errorf("must provide --email or -e")
 	}
 
 	if len(password) > 0 {
-		fmt.Println("WARNING! Using --password is insecure, consider using: cat ~/omnistrate_pass.txt | omnistrate-cli login -u user --password-stdin")
+		fmt.Println("WARNING! Using --password is insecure, consider using: cat ~/omnistrate_pass.txt | omnistrate-cli login -e email --password-stdin echo $PASSWORD")
 		if passwordStdin {
 			return fmt.Errorf("--password and --password-stdin are mutually exclusive")
 		}

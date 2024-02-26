@@ -12,7 +12,7 @@ func Test_login(t *testing.T) {
 		WantErr        bool
 		ExpectedErrMsg string
 	}{
-		{[]string{"login"}, true, "must provide --email or -u"},
+		{[]string{"login"}, true, "must provide --email or -e"},
 		{[]string{"login", "--email=xzhang+ctltest@omnistrate.com"}, true, "must provide a non-empty password via --password or --password-stdin"},
 		{[]string{"login", "--email=xzhang+ctltest@omnistrate.com", "--password=wrong_password"}, true, "unable to login, either email or password is incorrect"},
 		{[]string{"login", "--email=xzhang+ctltest@omnistrate.com", "--password=ctltest"}, false, ""},
