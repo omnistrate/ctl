@@ -195,7 +195,7 @@ func (configFile *ConfigFile) load() error {
 	return nil
 }
 
-// UpdateAuthConfig creates or updates the username and password
+// UpdateAuthConfig creates or updates the email and password
 func UpdateAuthConfig(authConfig AuthConfig) error {
 	configPath, err := EnsureFile()
 	if err != nil {
@@ -224,7 +224,7 @@ func UpdateAuthConfig(authConfig AuthConfig) error {
 	return nil
 }
 
-// LookupAuthConfig returns the username and password
+// LookupAuthConfig returns the email and password
 func LookupAuthConfig() (AuthConfig, error) {
 	var authConfig AuthConfig
 
@@ -251,4 +251,35 @@ func LookupAuthConfig() (AuthConfig, error) {
 	}
 
 	return authConfig, &AuthConfigNotFoundError{}
+}
+
+// RemoveAuthConfig deletes the email and password
+func RemoveAuthConfig() error {
+	if !fileExists() {
+		return ErrConfigNotFound
+	}
+
+	configPath, err := EnsureFile()
+	if err != nil {
+		return err
+	}
+
+	cfg, err := New(configPath)
+	if err != nil {
+		return err
+	}
+
+	if err = cfg.load(); err != nil {
+		return err
+	}
+
+	if len(cfg.AuthConfigs) > 0 {
+		cfg.AuthConfigs = make([]AuthConfig, 0)
+		if err = cfg.save(); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	return &AuthConfigNotFoundError{}
 }

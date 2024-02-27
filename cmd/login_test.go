@@ -28,4 +28,9 @@ func Test_login(t *testing.T) {
 			require.NoError(err)
 		}
 	}
+
+	// cleanup: logout
+	rootCmd.SetArgs([]string{"logout"})
+	err := rootCmd.Execute()
+	require.NoError(err)
 }
