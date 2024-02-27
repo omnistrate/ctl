@@ -4,15 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/omnistrate/api-design/v1/pkg/registration/gen/http/signin_api/client"
 	signinapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/signin_api"
+	"github.com/omnistrate/commons/pkg/httpclientwrapper"
 	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/config"
 	"github.com/spf13/cobra"
-	goahttp "goa.design/goa/v3/http"
 	goa "goa.design/goa/v3/pkg"
 	"io"
-	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -109,28 +107,29 @@ func runLogin(cmd *cobra.Command, args []string) error {
 }
 
 func validateLogin(email string, pass string, timeout time.Duration) (string, error) {
-	cli := client.NewClient("https", "api.omnistrate.cloud", &http.Client{Timeout: timeout}, goahttp.RequestEncoder, goahttp.ResponseDecoder, false)
+	signin, err := httpclientwrapper.NewSignin("https", "api.omnistrate.cloud")
+	if err != nil {
+		return "", fmt.Errorf("unable to login, %s", err.Error())
+	}
+
 	request := signinapi.SigninRequest{
 		Email:          email,
 		HashedPassword: utils.HashPassword(pass),
 	}
-	endpoint := cli.Signin()
-	res, err := endpoint(context.Background(), &request)
 
-	if err == nil {
-		result := res.(*signinapi.SigninResult)
-		return result.JWTToken, nil
+	res, err := signin.Signin(context.Background(), &request)
+	if err != nil {
+		var serviceErr *goa.ServiceError
+		ok := errors.As(err, &serviceErr)
+		if !ok {
+			return "", fmt.Errorf("unable to login, %s", err.Error())
+		}
+
+		if serviceErr.Name == "auth_failure" {
+			return "", fmt.Errorf("unable to login, either email or password is incorrect")
+		}
+
+		return "", fmt.Errorf("unable to login, %s", serviceErr.Name)
 	}
-
-	var serviceErr *goa.ServiceError
-	ok := errors.As(err, &serviceErr)
-	if !ok {
-		return "", fmt.Errorf("unable to login, %s", err.Error())
-	}
-
-	if serviceErr.Name == "auth_failure" {
-		return "", fmt.Errorf("unable to login, either email or password is incorrect")
-	}
-
-	return "", fmt.Errorf("unable to login, %s", serviceErr.Name)
+	return res.JWTToken, nil
 }
