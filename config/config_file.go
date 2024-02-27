@@ -24,7 +24,7 @@ const (
 	// When not set, DefaultDir location is used.
 	ConfigLocationEnv string = "OMNISTRATE_CONFIG"
 
-	DefaultDir         string      = "~/.omnistrate"
+	DefaultDir         string      = "./.omnistrate"
 	DefaultFile        string      = "config.yml"
 	DefaultPermissions os.FileMode = 0700
 
@@ -80,7 +80,7 @@ func New(filePath string) (*ConfigFile, error) {
 // When
 // 1. CI = "true" and OMNISTRATE_CONFIG="", then it will return `.omnistrate`, which is located in the current working directory.
 // 2. CI = "true" and OMNISTRATE_CONFIG="<path>", then it will return the path value in  OMNISTRATE_CONFIG
-// 3. CI = "" and OMNISTRATE_CONFIG="", then it will return the default location ~/.omnistrate
+// 3. CI = "" and OMNISTRATE_CONFIG="", then it will return the default location ./.omnistrate
 func ConfigDir() string {
 	override := os.Getenv(ConfigLocationEnv)
 	ci := isRunningInCI()
