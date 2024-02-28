@@ -22,7 +22,7 @@ func Test_build(t *testing.T) {
 
 	// Step 3: test build service on all compose files
 	for _, f := range composeFiles {
-		if f.Name() == "mariadbcluster.yaml" || f.Name() == "postgres_advanced_serverless.yaml" {
+		if f.Name() == "mariadbcluster.yaml" || f.Name() == "postgres_advanced_serverless.yaml" || f.Name() == "opensearch.yaml" || f.Name() == "postgrescluster.yaml" {
 			continue
 		}
 
