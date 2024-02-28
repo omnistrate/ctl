@@ -1,0 +1,15 @@
+version: '3'
+services:
+  server:
+    image: clickhouse/clickhouse-server:latest
+    restart: always
+    environment:
+      CLICKHOUSE_USER: your_username_here
+      CLICKHOUSE_PASSWORD: your_password_here
+      NUM_REPLICAS: 2
+    volumes:
+      - ./data:/var/lib/clickhouse
+    ports:
+      - '8123:8123'
+      - '9000:9000'
+      - '9009:9009'

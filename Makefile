@@ -24,6 +24,8 @@ BUILD_FLAGS=-ldflags "-X $(BUILD_INFO_PKG).CommitID=$(BUILD_COMMIT) -X $(BUILD_I
 CGO_ENABLED=0
 GOPRIVATE=github.com/omnistrate
 
+export ROOT_DOMAIN=omnistrate.dev
+
 .PHONY: tidy
 tidy:
 	echo "Tidy dependency modules"

@@ -1,0 +1,246 @@
+version: '3.9'
+services:
+  couchserver:
+    image: couchbase:enterprise-7.1.4
+    restart: always
+    ports:
+      - '8091:8091'
+      - '8092:8092'
+      - '8093:8093'
+      - '8094:8094'
+      - '8095:8095'
+      - '8096:8096'
+      - '8097:8097'
+      - '9123:9123'
+      - '11207:11207'
+      - '11210:11210'
+      - '11280:11280'
+      - '18091:18091'
+      - '18092:18092'
+      - '18093:18093'
+      - '18094:18094'
+      - '18095:18095'
+      - '18096:18096'
+      - '18097:18097'
+    environment:
+      - username=admin
+      - password=password
+      - instanceType=t3.large
+      - CLUSTER_NAME=couchbasecluster
+      - NUM_REPLICAS=2
+    volumes:
+      - ./config:/opt/couchbase/var
+      - ./data:/opt/data/couchdata
+      - ./analytics:/opt/data/couchanalytics
+    x-omnistrate-apiparams:
+      - key: username
+        description: username of the database
+        value: admin
+        required: true
+        modifiable: true
+        defaultValue: admin
+      - key: password
+        description: password of the database
+        value: password
+        required: true
+        modifiable: true
+        defaultValue: password
+      - key: instanceType
+        description: instanceType for database
+        value: t3.large
+        required: true
+        modifiable: true
+        defaultValue: t3.large
+      - key: CLUSTER_NAME
+        description: name of the cluster
+        value: couchbasecluster
+        required: true
+        modifiable: true
+        defaultValue: couchbasecluster
+      - key: NUM_REPLICAS
+        description: number of replicas
+        value: '2'
+        required: true
+        modifiable: true
+        defaultValue: '2'
+    x-omnistrate-actionhooks:
+      - scope: CLUSTER
+        type: INIT
+        commandTemplate: |
+          set -e
+
+          username={{ $var.username }}
+          password={{ $var.password }}
+          endpoint={{ $sys.compute.nodes[0].name }}
+          hostname={{ $sys.network.node.internalEndpoint }}
+          services='kv,index,cbas'
+
+          attempt=0
+          max_attempts=20
+          delay=1
+
+          while [ $attempt -le $max_attempts ]
+          do
+            # Load CA certs
+            echo "Loading CA certs"
+            curl -s --fail-with-body -X POST http://{{ $sys.compute.nodes[0].name }}:8091/node/controller/loadTrustedCAs -u {{ $var.username }}:{{ $var.password }}
+          
+            # Reload node certs and key
+            echo "Reloading node certs and key"
+            curl -s --fail-with-body -X POST http://{{ $sys.compute.nodes[0].name }}:8091/node/controller/reloadCertificate -u {{ $var.username }}:{{ $var.password }}
+          
+            # Init the cluster
+            echo "Initializing the cluster"
+            curl -s -w '%{http_code}' -m 5 --fail-early http://{{ $sys.compute.nodes[0].name  }}:8091/pools/default -u {{ $var.username }}:{{ $var.password  }}  -o /dev/null | grep -q '200' && echo 'Already configured' || \
+            curl --fail-with-body -X POST http://{{ $sys.compute.nodes[0].name }}:8091/clusterInit \
+              -d hostname={{ $sys.network.node.internalEndpoint }} \
+              -d username={{ $var.username }} \
+              -d password={{ $var.password }} \
+              -d sendStats=true \
+              -d nodeEncryption='on' \
+              -d clusterName={{ $var.clusterName }} \
+              -d services='kv,index,cbas' \
+              -d port='SAME'
+          
+            rc=$?
+          
+            if [ $rc -eq 0 ]
+            then
+              echo "Command succeeded."
+              exit 0
+            else
+              echo "Command failed. Retrying in $delay seconds..."
+              sleep $delay
+            fi
+          
+            attempt=$((attempt+1))
+            delay=$((delay*2))
+          done
+
+          echo "Command failed after $max_attempts attempts."
+          exit 1
+      - scope: NODE
+        type: ADD
+        commandTemplate: |
+          set -e
+
+          first_node_endpoint={{ $sys.compute.nodes[0].name }}
+          current_node_endpoint={{ $sys.compute.node.name }}
+
+          echo "Starting setup"
+
+          # Skip for the first node
+          if [ "$first_node_endpoint" = "$current_node_endpoint" ]; then
+            echo "Skipping script execution"
+            exit 0
+          fi
+
+          username={{ $var.username }}
+          password={{ $var.password }}
+          endpoint={{ $sys.compute.nodes[0].name }}
+          hostname={{ $sys.network.node.internalEndpoint }}
+          services='kv,index,cbas'
+
+          attempt=0
+          max_attempts=20
+          delay=1
+
+          while [ $attempt -le $max_attempts ]
+          do
+            # Load CA certs
+            echo "Loading CA certs"
+            curl -s --max-time 10 --fail-with-body -X POST http://{{ $sys.compute.node.name }}:8091/node/controller/loadTrustedCAs -u {{ $var.username }}:{{ $var.password }}
+          
+            # Reload node certs and key
+            echo "Reloading node certs and key"
+            curl -s --max-time 10 --fail-with-body -X POST http://{{ $sys.compute.node.name }}:8091/node/controller/reloadCertificate -u {{ $var.username }}:{{ $var.password }}
+          
+            # Add the node
+            echo "Adding the node to the cluster"
+            curl -s --max-time 10 -k --fail-with-body -X POST https://$endpoint:18091/controller/addNode -u $username:$password \
+              -d hostname=$hostname \
+              -d user=$username \
+              -d password=$password \
+              -d services=$services
+          
+            rc=$?
+          
+            if [ $rc -eq 0 ]
+            then
+              echo "Command succeeded."
+              exit 0
+            else
+              echo "Command failed. Retrying in $delay seconds..."
+              sleep $delay
+            fi
+          
+            attempt=$((attempt+1))
+            delay=$((delay*2))
+          done
+
+          echo "Command failed after $max_attempts attempts."
+          exit 1
+      - scope: NODE
+        type: POST_START
+        commandTemplate: >
+          set -e
+
+
+          mkdir -p /opt/couchbase/var/lib/couchbase/inbox/
+
+          mkdir -p /opt/couchbase/var/lib/couchbase/inbox/CA
+
+
+          # Copy the full chain into the CA dir
+
+          cp /etc/tls/tls.crt /opt/couchbase/var/lib/couchbase/inbox/CA/ca.pem
+
+
+          # Copy the full chain into the node dir
+
+          cp /etc/tls/tls.crt /opt/couchbase/var/lib/couchbase/inbox/chain.pem
+
+
+          # Copy the node TLS private key
+
+          cp /etc/tls/tls.key /opt/couchbase/var/lib/couchbase/inbox/pkey.key
+
+
+          ## Post-process the node cert to remove the root CA from the chain
+
+          # File path
+
+          chain="/opt/couchbase/var/lib/couchbase/inbox/chain.pem"
+
+
+          # Create a temporary directory
+
+          tmp_dir=$(mktemp -d)
+
+
+          # Split the file
+
+          csplit -f "$tmp_dir/cert" -b "%02d.pem" "$chain" '/-----BEGIN
+          CERTIFICATE-----/' '{*}'
+
+
+          # Get the total number of certs
+
+          num_certs=$(ls "$tmp_dir" | wc -l)
+
+
+          # If there are more than one certs, remove the last one
+
+          if [ "$num_certs" -gt 1 ]; then
+            rm "${tmp_dir}/cert$(printf "%02d" $((num_certs-1))).pem"
+          fi
+
+
+          # Concatenate the remaining certs back into the chain
+
+          cat "${tmp_dir}/cert"*.pem > "$chain"
+
+
+          # Clean up
+
+          rm -r "$tmp_dir"

@@ -4,8 +4,8 @@ go 1.22.0
 
 require (
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/omnistrate/api-design v0.6.128
-	github.com/omnistrate/commons/pkg/httpclientwrapper v0.0.0-20240227004543-7a47a9da594c
+	github.com/omnistrate/api-design v0.6.132
+	github.com/omnistrate/commons/pkg/httpclientwrapper v0.0.0-20240228061623-5c4af1fcffca
 	github.com/omnistrate/commons/pkg/utils v0.0.0-20240225224344-602e3262fcca
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4

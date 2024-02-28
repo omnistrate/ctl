@@ -1,0 +1,199 @@
+version: "3"
+
+x-omnistrate-integrations:
+  - omnistrateLogging
+  - omnistrateMetrics
+
+services:
+  Master:
+    image: 'omnistrate/pgvector:c227409'
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    x-omnistrate-storage:
+      aws:
+        instanceStorageType: AWS::EBS_GP3
+        instanceStorageSizeGi: 100
+        instanceStorageIOPSAPIParam: 3000
+        instanceStorageThroughputAPIParam: 125
+      gcp:
+        instanceStorageType: GCP::PD_BALANCED
+        instanceStorageSizeGi: 100
+    x-omnistrate-compute:
+      instanceTypes:
+        - cloudProvider: aws
+          apiParam: masterInstanceType
+        - cloudProvider: gcp
+          apiParam: masterInstanceType
+    x-omnistrate-capabilities:
+      autoscaling:
+        maxReplicas: 1
+        minReplicas: 1
+        idleMinutesBeforeScalingDown: 2
+        idleThreshold: 20
+        overUtilizedMinutesBeforeScalingUp: 3
+        overUtilizedThreshold: 80
+      serverlessConfiguration:
+        targetPort: 5432
+        enableAutoStop: true
+        minimumNodesInPool: 5
+    environment:
+      - POSTGRESQL_PASSWORD=$parameterGroup.var.postgresqlPassword
+      - POSTGRESQL_DATABASE=$parameterGroup.var.postgresqlDatabase
+      - POSTGRESQL_USERNAME=$parameterGroup.var.postgresqlUsername
+      - POSTGRESQL_POSTGRES_PASSWORD=$parameterGroup.var.postgresqlRootPassword
+      - POSTGRESQL_PGAUDIT_LOG=READ,WRITE
+      - POSTGRESQL_LOG_HOSTNAME=true
+      - POSTGRESQL_REPLICATION_MODE=master
+      - POSTGRESQL_REPLICATION_USER=$parameterGroup.var.replUsername
+      - POSTGRESQL_REPLICATION_PASSWORD=$parameterGroup.var.replPassword
+      - POSTGRESQL_DATA_DIR=/var/lib/postgresql/data/dbdata
+      - DATA_SOURCE_NAME=postgresql://{{ $parameterGroup.var.postgresqlUsername }}:{{ $parameterGroup.var.postgresqlPassword }}@localhost:5432/{{ $parameterGroup.var.postgresqlDatabase }}?sslmode=disable
+      - SECURITY_CONTEXT_USER_ID=1001
+      - SECURITY_CONTEXT_FS_GROUP=1001
+      - SECURITY_CONTEXT_GROUP_ID=0
+    x-omnistrate-api-params:
+      - key: masterInstanceType
+        description: Master Instance Type
+        name: Master Instance Type
+        type: String
+        modifiable: true
+        required: true
+        export: true
+      - key: parameterGroupId
+        description: Replica configuration
+        name: Parameter Group Id
+        dependentResourceKey: ParameterGroup
+        type: Resource
+        modifiable: true
+        required: true
+        export: true
+    x-omnistrate-actionhooks:
+      - scope: CLUSTER
+        type: INIT
+        commandTemplate: >
+          PGPASSWORD={{ $parameterGroup.var.postgresqlRootPassword }} psql -U postgres
+          -h master {{ $parameterGroup.var.postgresqlDatabase }} -c "create extension vector"
+
+  Replica:
+    image: 'omnistrate/pgvector:c227409'
+    ports:
+      - 5433:5432
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    x-omnistrate-compute:
+      replicaCountAPIParam: numReadReplicas
+      instanceTypes:
+        - cloudProvider: aws
+          apiParam: replicaInstanceType
+        - cloudProvider: gcp
+          apiParam: replicaInstanceType
+    x-omnistrate-capabilities:
+      enableMultiZone: true
+      endpointPerReplica: true
+      autoscaling:
+        maxReplicas: 5
+        minReplicas: 1
+        idleMinutesBeforeScalingDown: 2
+        idleThreshold: 20
+        overUtilizedMinutesBeforeScalingUp: 3
+        overUtilizedThreshold: 80
+      serverlessConfiguration:
+        targetPort: 5432
+        enableAutoStop: true
+        minimumNodesInPool: 5
+    environment:
+      - POSTGRESQL_PASSWORD=$parameterGroup.var.postgresqlPassword
+      - POSTGRESQL_MASTER_HOST=master #$master.var.serverlessDNS
+      - POSTGRESQL_PGAUDIT_LOG=READ,WRITE
+      - POSTGRESQL_LOG_HOSTNAME=true
+      - POSTGRESQL_REPLICATION_MODE=slave
+      - POSTGRESQL_REPLICATION_USER=$parameterGroup.var.replUsername
+      - POSTGRESQL_REPLICATION_PASSWORD=$parameterGroup.var.replPassword
+      - POSTGRESQL_MASTER_PORT_NUMBER=30001 #$master.var.serverlessPort
+      - POSTGRESQL_DATA_DIR=/var/lib/postgresql/data/dbdata
+      - SECURITY_CONTEXT_USER_ID=1001
+      - SECURITY_CONTEXT_FS_GROUP=1001
+      - SECURITY_CONTEXT_GROUP_ID=0
+    x-omnistrate-api-params:
+      - key: replicaInstanceType
+        description: Replica Instance Type
+        name: Replica Instance Type
+        type: String
+        modifiable: true
+        required: true
+        export: true
+      - key: masterInstanceId
+        description: Instance Id of the Master to connect
+        name: Master Instance Id
+        dependentResourceKey: Master
+        type: Resource
+        modifiable: true
+        required: true
+        export: true
+      - key: parameterGroupId
+        description: Replica configuration
+        name: Parameter Group Id
+        dependentResourceKey: ParameterGroup
+        type: Resource
+        modifiable: true
+        required: true
+        export: true
+      - key: numReadReplicas
+        description: Number of Read Replicas
+        name: Number of Read Replicas
+        type: Float64
+        modifiable: true
+        required: false
+        export: true
+        defaultValue: "1"
+        limits:
+          min: 1
+          max: 10
+
+  ParameterGroup:
+    image: omnistrate/noop
+    x-omnistrate-api-params:
+      - key: postgresqlPassword
+        description: Default DB Password
+        name: Password
+        type: String
+        modifiable: false
+        required: true
+        export: false
+      - key: postgresqlDatabase
+        description: Default DB Name
+        name: Default Database
+        type: String
+        modifiable: false
+        required: true
+        export: true
+      - key: postgresqlUsername
+        description: Username
+        name: Default DB Username
+        type: String
+        modifiable: false
+        required: true
+        export: true
+      - key: postgresqlRootPassword
+        description: Root Password
+        name: Root DB Password
+        type: String
+        modifiable: false
+        required: true
+        export: false
+      - key: replUsername
+        description: Username
+        name: Default DB Replication Username
+        type: String
+        modifiable: false
+        required: true
+        export: true
+      - key: replPassword
+        description: Default DB Replication Password
+        name: Password
+        type: String
+        modifiable: false
+        required: true
+        export: false

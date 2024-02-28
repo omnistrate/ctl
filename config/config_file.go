@@ -40,18 +40,21 @@ const (
 type ConfigFile struct {
 	AuthConfigs []AuthConfig `yaml:"auths"`
 	FilePath    string       `yaml:"-"`
+
+	ServiceConfig *ServiceConfig `yaml:"service"`
 }
 
 type AuthConfig struct {
-	Auth    AuthType `yaml:"auth,omitempty"`
-	Email   string   `yaml:"email,omitempty"`
-	Token   string   `yaml:"token,omitempty"`
-	Options []Option `yaml:"options,omitempty"`
+	Auth  AuthType `yaml:"auth,omitempty"`
+	Email string   `yaml:"email,omitempty"`
+	Token string   `yaml:"token,omitempty"`
 }
 
-type Option struct {
-	Name  string `yaml:"name"`
-	Value string `yaml:"value"`
+type ServiceConfig struct {
+	ID             string `yaml:"id,omitempty"`
+	Name           string `yaml:"name,omitempty"`
+	Description    string `yaml:"description,omitempty"`
+	ServiceLogoURL string `yaml:"serviceLogoURL,omitempty"`
 }
 
 var ErrConfigNotFound = errors.New("config file not found")
@@ -61,6 +64,13 @@ type AuthConfigNotFoundError struct {
 
 func (e *AuthConfigNotFoundError) Error() string {
 	return "no auth config found"
+}
+
+type ServiceConfigNotFoundError struct {
+}
+
+func (e *ServiceConfigNotFoundError) Error() string {
+	return "no service config found"
 }
 
 // New initializes a config file for the given file path
@@ -192,6 +202,10 @@ func (configFile *ConfigFile) load() error {
 	if len(conf.AuthConfigs) > 0 {
 		configFile.AuthConfigs = conf.AuthConfigs
 	}
+
+	if conf.ServiceConfig != nil {
+		configFile.ServiceConfig = conf.ServiceConfig
+	}
 	return nil
 }
 
@@ -282,4 +296,91 @@ func RemoveAuthConfig() error {
 	}
 
 	return &AuthConfigNotFoundError{}
+}
+
+// UpdateServiceConfig creates or updates the email and password
+func UpdateServiceConfig(serviceConfig ServiceConfig) error {
+	configPath, err := EnsureFile()
+	if err != nil {
+		return err
+	}
+
+	cfg, err := New(configPath)
+	if err != nil {
+		return err
+	}
+
+	if err = cfg.load(); err != nil {
+		return err
+	}
+
+	if cfg.ServiceConfig == nil {
+		cfg.ServiceConfig = &serviceConfig
+	}
+
+	if err = cfg.save(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// LookupServiceConfig returns the email and password
+func LookupServiceConfig() (ServiceConfig, error) {
+	var serviceConfig ServiceConfig
+
+	if !fileExists() {
+		return serviceConfig, ErrConfigNotFound
+	}
+
+	configPath, err := EnsureFile()
+	if err != nil {
+		return serviceConfig, err
+	}
+
+	cfg, err := New(configPath)
+	if err != nil {
+		return serviceConfig, err
+	}
+
+	if err = cfg.load(); err != nil {
+		return serviceConfig, err
+	}
+
+	if cfg.ServiceConfig != nil {
+		return *cfg.ServiceConfig, nil
+	}
+
+	return serviceConfig, &ServiceConfigNotFoundError{}
+}
+
+// RemoveServiceConfig deletes the email and password
+func RemoveServiceConfig() error {
+	if !fileExists() {
+		return ErrConfigNotFound
+	}
+
+	configPath, err := EnsureFile()
+	if err != nil {
+		return err
+	}
+
+	cfg, err := New(configPath)
+	if err != nil {
+		return err
+	}
+
+	if err = cfg.load(); err != nil {
+		return err
+	}
+
+	if cfg.ServiceConfig != nil {
+		cfg.ServiceConfig = nil
+		if err = cfg.save(); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	return &ServiceConfigNotFoundError{}
 }

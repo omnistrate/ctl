@@ -18,6 +18,7 @@ env:
   IAM_ROLE_ARN: arn:aws:iam::469745361314:role/github-actions-s3-store-test-role
   IAM_ROLE_SESSION_DURATION: 900
   AWS_REGION: us-west-2
+  ROOT_DOMAIN: omnistrate.dev
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}

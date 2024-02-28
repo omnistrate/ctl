@@ -1,0 +1,93 @@
+version: "3"
+x-omnistrate-my-account:
+  AwsAccountId: '541226919570'
+  AwsBootstrapRoleAccountArn: 'arn:aws:iam::541226919570:role/omnistrate-bootstrap-role'
+  GcpProjectId: 'omnistrate-internal70'
+  GcpProjectNumber: '1035915676470'
+  GcpServiceAccountEmail: 'bootstrap.service@gcp.test.iam'
+x-omnistrate-integrations:
+  - omnistrateLogging
+  - omnistrateMetrics
+services:
+  proxy:
+    image: docker.io/njnjyyh/pg-proxy-demo:2.0
+    x-omnistrate-compute:
+      instanceTypes:
+        - cloudProvider: aws
+          apiParam: proxyInstanceType
+        - cloudProvider: gcp
+          apiParam: proxyInstanceType
+    environment:
+      - SECURITY_CONTEXT_USER_ID=0
+      - SECURITY_CONTEXT_FS_GROUP=0
+      - SECURITY_CONTEXT_GROUP_ID=0
+    x-omnistrate-api-params:
+      - key: proxyInstanceType
+        description: Proxy Instance Type
+        name: Proxy Instance Type
+        type: String
+        modifiable: true
+        required: false
+        export: true
+        defaultValue: "t4g.medium"
+    x-omnistrate-mode-internal: false
+    x-omnistrate-proxy-type: "PortsBasedProxy"
+  postgres:
+    image: njnjyyh/pg-proxy-demo:1
+    ports:
+      - 5432:5432
+    x-omnistrate-compute:
+      instanceTypes:
+        - cloudProvider: aws
+          apiParam: writerInstanceType
+        - cloudProvider: gcp
+          apiParam: writerInstanceType
+    x-omnistrate-capabilities:
+      autoscaling:
+        maxReplicas: 1
+        minReplicas: 1
+        idleMinutesBeforeScalingDown: 2
+        idleThreshold: 1
+        overUtilizedMinutesBeforeScalingUp: 3
+        overUtilizedThreshold: 80
+        scalingMetric:
+          metricEndpoint: "http://localhost:9187/metrics"
+          metricLabelName: "application_name"
+          metricLabelValue: "psql"
+          metricName: "pg_stat_activity_count"
+      enableEndpointPerReplica: true
+      serverlessConfiguration:
+        referenceProxyKey: "proxy"
+        portsMappingProxyConfig:
+          maxNumberOfClustersPerProxyInstance: 9
+          numberOfPortsPerCluster: 1
+        enableAutoStop: true
+        minimumNodesInPool: 5
+    environment:
+      - POSTGRESQL_PASSWORD=$var.postgresqlPassword
+      - POSTGRESQL_DATABASE=postgres
+      - POSTGRESQL_USERNAME=postgres
+      - POSTGRESQL_POSTGRES_PASSWORD=$var.postgresqlPassword
+      - DATA_SOURCE_NAME=postgresql://postgres:{{ $var.postgresqlPassword }}@localhost:5432/postgres?sslmode=disable
+      - SECURITY_CONTEXT_USER_ID=1001
+      - SECURITY_CONTEXT_FS_GROUP=1001
+      - SECURITY_CONTEXT_GROUP_ID=0
+    x-omnistrate-api-params:
+      - key: writerInstanceType
+        description: Writer Instance Type
+        name: Writer Instance Type
+        type: String
+        modifiable: true
+        required: false
+        export: true
+        defaultValue: "t4g.medium"
+      - key: postgresqlPassword
+        description: Default DB Password
+        name: Password
+        type: String
+        modifiable: false
+        required: false
+        export: false
+        defaultValue: "postgres"
+    x-omnistrate-mode-internal: false
+    
