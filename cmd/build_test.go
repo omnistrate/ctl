@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func Test_build(t *testing.T) {
+func Test_build_basic(t *testing.T) {
 	require := require.New(t)
 	defer testutils.Cleanup()
 
@@ -39,4 +39,34 @@ func Test_build(t *testing.T) {
 		err = rootCmd.Execute()
 		require.NoError(err)
 	}
+}
+
+func Test_build_invalid_file(t *testing.T) {
+	require := require.New(t)
+	defer testutils.Cleanup()
+
+	rootCmd.SetArgs([]string{"build", "-f", "invalid_file.yaml", "--name", "My Service", "--description", "My Service Description", "--service-logo-url", "https://my-service-logo.com/logo.png"})
+	err := rootCmd.Execute()
+	require.Error(err)
+	require.Contains(err.Error(), "file does not exist: invalid_file.yaml")
+}
+
+func Test_build_no_file(t *testing.T) {
+	require := require.New(t)
+	defer testutils.Cleanup()
+
+	rootCmd.SetArgs([]string{"build", "--name", "My Service", "--description", "My Service Description", "--service-logo-url", "https://my-service-logo.com/logo.png"})
+	err := rootCmd.Execute()
+	require.Error(err)
+	require.Contains(err.Error(), "must provide --file or -f")
+}
+
+func Test_build_invalid_file_format(t *testing.T) {
+	require := require.New(t)
+	defer testutils.Cleanup()
+
+	rootCmd.SetArgs([]string{"build", "-f", "invalid_file.txt", "--name", "My Service", "--description", "My Service Description", "--service-logo-url", "https://my-service-logo.com/logo.png"})
+	err := rootCmd.Execute()
+	require.Error(err)
+	require.Contains(err.Error(), "file must be a valid docker-compose file in .yaml or .yml format")
 }
