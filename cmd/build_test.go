@@ -26,7 +26,11 @@ func Test_build(t *testing.T) {
 			continue
 		}
 
-		rootCmd.SetArgs([]string{"build", "-f", "../composefiles/" + f.Name(), "--name", f.Name(), "--description", "My Service Description"})
+		rootCmd.SetArgs([]string{"build", "-f", "../composefiles/" + f.Name(), "--name", f.Name(), "--description", "My Service Description", "--service-logo-url", "https://my-service-logo.com/logo.png"})
+		err = rootCmd.Execute()
+		require.NoError(err)
+
+		rootCmd.SetArgs([]string{"describe"})
 		err = rootCmd.Execute()
 		require.NoError(err)
 
