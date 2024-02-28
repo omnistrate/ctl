@@ -1,0 +1,14 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgis/postgis
+    ports:
+      - '5432:5432'
+    environment:
+      - SECURITY_CONTEXT_USER_ID=999
+      - SECURITY_CONTEXT_GROUP_ID=999
+      - POSTGRES_USER=username
+      - POSTGRES_PASSWORD=password
+      - PGDATA=/var/lib/postgresql/data/dbdata
+    volumes:
+      - ./data:/var/lib/postgresql/data

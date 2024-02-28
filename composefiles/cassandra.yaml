@@ -1,0 +1,35 @@
+version: '3.9'
+x-custom:
+  omnistrate-mode-internal:
+    - true
+    - false
+services:
+  cassandra_seed:
+    image: cassandra:latest
+    ports:
+      - '9042:9042'
+    volumes:
+      - cassandra_seed:/var/lib/cassandra
+    environment:
+      - CASSANDRA_CLUSTER_NAME=ClusterName
+      - CASSANDRA_DC=se1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+    x-omnistrate-mode-internal: true
+  cassandra:
+    image: cassandra:latest
+    depends_on:
+      cassandra_seed:
+        condition: service_healthy
+    ports:
+      - '9043:9042'
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    environment:
+      - NUM_REPLICAS=3
+      - CASSANDRA_SEEDS=cassandra-seed
+      - CASSANDRA_CLUSTER_NAME=ClusterName
+      - CASSANDRA_DC=se1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+volumes:
+  cassandra_seed: null
+  cassandra_data: null

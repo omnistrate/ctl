@@ -13,7 +13,6 @@ import (
 	"io"
 	"os"
 	"strings"
-	"time"
 )
 
 var (
@@ -27,7 +26,7 @@ var loginCmd = &cobra.Command{
 	Use:   `login [--email EMAIL] [--password PASSWORD]`,
 	Short: "Log in to Omnistrate platform",
 	Long:  "Log in to Omnistrate platform",
-	Example: `cat ~/omnistrate_pass.txt | omnistrate-cli login -e email --password-stdin
+	Example: `  cat ~/omnistrate_pass.txt | omnistrate-cli login -e email --password-stdin
 	  echo $PASSWORD | omnistrate-cli login -e email --password password`,
 	RunE: runLogin,
 }
@@ -38,16 +37,9 @@ func init() {
 	loginCmd.Flags().StringVarP(&email, "email", "e", "", "email")
 	loginCmd.Flags().StringVarP(&password, "password", "p", "", "password")
 	loginCmd.Flags().BoolVarP(&passwordStdin, "password-stdin", "s", false, "Reads the password from stdin")
-	loginCmd.Flags().Duration("timeout", 5*time.Second, "Override the timeout for this API call")
 }
 
 func runLogin(cmd *cobra.Command, args []string) error {
-
-	timeout, err := cmd.Flags().GetDuration("timeout")
-	if err != nil {
-		return err
-	}
-
 	if len(email) == 0 {
 		return fmt.Errorf("must provide --email or -e")
 	}
@@ -68,8 +60,8 @@ func runLogin(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("must provide --email with --password-stdin")
 		}
 
-		var passwordFromStdin []byte
-		if passwordFromStdin, err = io.ReadAll(os.Stdin); err != nil {
+		passwordFromStdin, err := io.ReadAll(os.Stdin)
+		if err != nil {
 			return err
 		}
 		password = strings.TrimSpace(string(passwordFromStdin))
@@ -82,8 +74,8 @@ func runLogin(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("Calling the Omnistrate server to validate the credentials...")
 
-	var token string
-	if token, err = validateLogin(email, password, timeout); err != nil {
+	token, err := validateLogin(email, password)
+	if err != nil {
 		return err
 	}
 
@@ -106,7 +98,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func validateLogin(email string, pass string, timeout time.Duration) (string, error) {
+func validateLogin(email string, pass string) (string, error) {
 	signin, err := httpclientwrapper.NewSignin("https", "api.omnistrate.cloud")
 	if err != nil {
 		return "", fmt.Errorf("unable to login, %s", err.Error())

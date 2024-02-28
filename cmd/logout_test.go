@@ -7,6 +7,7 @@ import (
 
 func Test_logout(t *testing.T) {
 	require := require.New(t)
+	defer cleanup()
 
 	// FAIL: logout without login
 	rootCmd.SetArgs([]string{"logout"})

@@ -1,0 +1,173 @@
+version: "3.9"
+x-omnistrate-my-account:
+  AwsAccountId: '541226919569'
+  AwsBootstrapRoleAccountArn: 'arn:aws:iam::541226919569:role/omnistrate-bootstrap-role'
+x-omnistrate-integrations:
+- omnistrateLogging
+- omnistrateMetrics
+services:
+  opensearch-cluster:
+    x-omnistrate-mode-internal: true
+    x-omnistrate-compute:
+      replicaCountAPIParam: numReplicas
+      instanceTypes:
+        - cloudProvider: aws
+          apiParam: instanceType
+        - cloudProvider: gcp
+          apiParam: instanceType
+    x-omnistrate-capabilities:
+      enableMultiZone: true
+      enableEndpointPerReplica: true
+    image: opensearchproject/opensearch:latest
+    environment:
+      - cluster.name=$var.clusterName
+      - node.name=$sys.compute.node.name
+      - discovery.seed_hosts=$sys.compute.nodes[*].name
+      - cluster.initial_cluster_manager_nodes=$sys.compute.nodes[*].name
+      - bootstrap.memory_lock=true
+    volumes:
+      - source: ./data
+        target: /usr/share/opensearch/data
+        type: bind
+        x-omnistrate-storage:
+          aws:
+            instanceStorageType: AWS::EBS_GP3
+            instanceStorageSizeGiAPIParam: instanceStorageSizeGi
+            instanceStorageIOPSAPIParam: instanceStorageIOPS
+            instanceStorageThroughputAPIParam: instanceStorageThroughput
+          gcp:
+            instanceStorageType: GCP::PD_BALANCED
+            instanceStorageSizeGiAPIParam: instanceStorageSizeGi
+    ports:
+      - '9200:9200'
+    x-omnistrate-api-params:
+      - key: instanceType
+        description: Instance Type
+        name: Instance Type
+        type: String
+        modifiable: true
+        required: true
+        export: true
+      - key: instanceStorageIOPS
+        description: Instance Storage IOPS
+        name: Instance Storage IOPS (AWS Only)
+        type: Float64
+        modifiable: true
+        required: true
+        export: true
+      - key: instanceStorageThroughput
+        description: Instance Storage Throughput
+        name: Instance Storage Throughput (AWS Only)
+        type: Float64
+        modifiable: true
+        required: true
+        export: true
+      - key: instanceStorageSizeGi
+        description: Instance Storage Size
+        name: Instance Storage Size (GiB)
+        type: Float64
+        modifiable: true
+        required: true
+        export: true
+      - key: clusterName
+        description: Cluster Name
+        name: Cluster Name
+        type: String
+        modifiable: true
+        required: true
+        export: true
+      - key: numReplicas
+        description: Number of Replicas
+        name: Number of Replicas
+        type: Float64
+        modifiable: true
+        required: true
+        export: true
+
+  opensearch:
+    x-omnistrate-mode-internal: false
+    image: opensearchproject/opensearch-dashboards:latest
+    ports:
+      - '5601:5601'
+    environment:
+      - OPENSEARCH_HOSTS=https://{{ $opensearch-cluster.sys.network.externalClusterEndpoint }}:9200
+    x-omnistrate-compute:
+      instanceTypes:
+        - name: t4g.small
+          cloudProvider: aws
+        - name: e2-medium
+          cloudProvider: gcp
+    depends_on:
+      - opensearch-cluster
+    x-omnistrate-capabilities:
+      autoscaling:
+        minReplicas: 1
+        maxReplicas: 10
+      httpReverseProxy:
+        targetPort: 5601
+      enableMultiZone: true
+      enableEndpointPerReplica: false
+    x-omnistrate-api-params:
+      - key: instanceType
+        description: Instance Type
+        name: Instance Type
+        type: String
+        modifiable: true
+        required: false
+        export: true
+        defaultValue: t4g.large
+        parameterDependencyMap:
+          opensearch-cluster: instanceType
+      - key: clusterName
+        description: Cluster Name
+        name: Cluster Name
+        type: String
+        modifiable: true
+        required: true
+        export: true
+        parameterDependencyMap:
+          opensearch-cluster: clusterName
+      - key: numReplicas
+        description: Number of Replicas
+        name: Number of Replicas
+        type: Float64
+        modifiable: true
+        required: false
+        export: true
+        defaultValue: "1"
+        limits:
+          min: 1
+          max: 10
+        parameterDependencyMap:
+          opensearch-cluster: numReplicas
+      - key: instanceStorageIOPS
+        description: Instance Storage IOPS
+        name: Instance Storage IOPS (AWS Only)
+        type: Float64
+        modifiable: true
+        required: false
+        export: true
+        defaultValue: "3000"
+        parameterDependencyMap:
+          opensearch-cluster: instanceStorageIOPS
+      - key: instanceStorageThroughput
+        description: Instance Storage Throughput
+        name: Instance Storage Throughput (AWS Only)
+        type: Float64
+        modifiable: true
+        required: false
+        export: true
+        defaultValue: "125"
+        parameterDependencyMap:
+          opensearch-cluster: instanceStorageThroughput
+      - key: instanceStorageSizeGi
+        description: Instance Storage Size
+        name: Instance Storage Size (GiB)
+        type: Float64
+        modifiable: true
+        required: false
+        export: true
+        defaultValue: "30"
+        parameterDependencyMap:
+          opensearch-cluster: instanceStorageSizeGi
+    

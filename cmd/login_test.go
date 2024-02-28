@@ -7,6 +7,8 @@ import (
 
 func Test_login(t *testing.T) {
 	require := require.New(t)
+	defer cleanup()
+
 	tests := []struct {
 		Args           []string
 		WantErr        bool
@@ -28,9 +30,4 @@ func Test_login(t *testing.T) {
 			require.NoError(err)
 		}
 	}
-
-	// cleanup: logout
-	rootCmd.SetArgs([]string{"logout"})
-	err := rootCmd.Execute()
-	require.NoError(err)
 }
