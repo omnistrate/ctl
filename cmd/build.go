@@ -7,6 +7,7 @@ import (
 	"fmt"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/commons/pkg/httpclientwrapper"
+	utils2 "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
@@ -44,6 +45,8 @@ func init() {
 }
 
 func runBuild(cmd *cobra.Command, args []string) error {
+	defer resetBuild()
+
 	// Validate input arguments
 	if len(file) == 0 {
 		return fmt.Errorf("must provide --file or -f")
@@ -119,7 +122,7 @@ func createService(file, token, name, description string, serviceLogoURL *string
 		return "", errors.New("description is required for creating service")
 	}
 
-	service, err := httpclientwrapper.NewService("https", "api.omnistrate.cloud")
+	service, err := httpclientwrapper.NewService("https", "api."+utils2.GetEnv("ROOT_DOMAIN", "omnistrate.cloud"))
 	if err != nil {
 		return "", fmt.Errorf("unable to create service, %s", err.Error())
 	}
@@ -143,4 +146,11 @@ func createService(file, token, name, description string, serviceLogoURL *string
 		return "", fmt.Errorf("unable to create service, %s", err.Error())
 	}
 	return string(serviceId), nil
+}
+
+func resetBuild() {
+	file = ""
+	name = ""
+	description = ""
+	serviceLogoURL = ""
 }

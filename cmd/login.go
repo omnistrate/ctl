@@ -7,6 +7,7 @@ import (
 	signinapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/signin_api"
 	"github.com/omnistrate/commons/pkg/httpclientwrapper"
 	"github.com/omnistrate/commons/pkg/utils"
+	utils2 "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/config"
 	"github.com/spf13/cobra"
 	goa "goa.design/goa/v3/pkg"
@@ -40,6 +41,8 @@ func init() {
 }
 
 func runLogin(cmd *cobra.Command, args []string) error {
+	defer resetLogin()
+
 	if len(email) == 0 {
 		return fmt.Errorf("must provide --email or -e")
 	}
@@ -80,9 +83,10 @@ func runLogin(cmd *cobra.Command, args []string) error {
 	}
 
 	authConfig := config.AuthConfig{
-		Email: email,
-		Token: token,
-		Auth:  config.JWTAuthType,
+		Email:      email,
+		Token:      token,
+		Auth:       config.JWTAuthType,
+		RootDomain: utils2.GetEnv("ROOT_DOMAIN", "omnistrate.cloud"),
 	}
 	if err = config.UpdateAuthConfig(authConfig); err != nil {
 		return err
@@ -99,7 +103,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 }
 
 func validateLogin(email string, pass string) (string, error) {
-	signin, err := httpclientwrapper.NewSignin("https", "api.omnistrate.cloud")
+	signin, err := httpclientwrapper.NewSignin("https", "api."+utils2.GetEnv("ROOT_DOMAIN", "omnistrate.cloud"))
 	if err != nil {
 		return "", fmt.Errorf("unable to login, %s", err.Error())
 	}
@@ -124,4 +128,10 @@ func validateLogin(email string, pass string) (string, error) {
 		return "", fmt.Errorf("unable to login, %s", serviceErr.Name)
 	}
 	return res.JWTToken, nil
+}
+
+func resetLogin() {
+	email = ""
+	password = ""
+	passwordStdin = false
 }

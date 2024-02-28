@@ -45,9 +45,10 @@ type ConfigFile struct {
 }
 
 type AuthConfig struct {
-	Auth  AuthType `yaml:"auth,omitempty"`
-	Email string   `yaml:"email,omitempty"`
-	Token string   `yaml:"token,omitempty"`
+	Auth       AuthType `yaml:"auth,omitempty"`
+	Email      string   `yaml:"email,omitempty"`
+	Token      string   `yaml:"token,omitempty"`
+	RootDomain string   `yaml:"rootDomain,omitempty"`
 }
 
 type ServiceConfig struct {
