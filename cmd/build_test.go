@@ -17,6 +17,7 @@ func Test_build(t *testing.T) {
 
 	// Step 2: get compose files
 	composeFiles, err := os.ReadDir("../composefiles")
+	require.NoError(err)
 
 	// Step 3: test build service on all compose files
 	for _, f := range composeFiles {
