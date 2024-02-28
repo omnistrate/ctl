@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/omnistrate/ctl/testutils"
 	"github.com/stretchr/testify/require"
 	"os"
 	"testing"
@@ -8,7 +9,7 @@ import (
 
 func Test_build(t *testing.T) {
 	require := require.New(t)
-	defer cleanup()
+	defer testutils.Cleanup()
 
 	// Step 1: login
 	rootCmd.SetArgs([]string{"login", "--email=xzhang+ctltest@omnistrate.com", "--password=ctltest"})

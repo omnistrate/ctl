@@ -1,13 +1,14 @@
 package cmd
 
 import (
+	"github.com/omnistrate/ctl/testutils"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
 func Test_login(t *testing.T) {
 	require := require.New(t)
-	defer cleanup()
+	defer testutils.Cleanup()
 
 	tests := []struct {
 		Args           []string
