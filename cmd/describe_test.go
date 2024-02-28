@@ -40,3 +40,25 @@ func Test_describe_no_service(t *testing.T) {
 	require.Error(err)
 	require.Contains(err.Error(), "service does not exist")
 }
+
+// TODO: Fix this test
+//func Test_describe_no_service_logo_url(t *testing.T) {
+//	require := require.New(t)
+//	defer testutils.Cleanup()
+//
+//	rootCmd.SetArgs([]string{"login", "--email=xzhang+ctltest@omnistrate.com", "--password=ctltest"})
+//	err := rootCmd.Execute()
+//	require.NoError(err)
+//
+//	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/ferretdb.yaml", "--name", "ferretdb", "--description", "My Service Description"})
+//	err = rootCmd.Execute()
+//	require.NoError(err)
+//
+//	rootCmd.SetArgs([]string{"describe"})
+//	err = rootCmd.Execute()
+//	require.NoError(err)
+//
+//	rootCmd.SetArgs([]string{"remove"})
+//	err = rootCmd.Execute()
+//	require.NoError(err)
+//}

@@ -122,4 +122,8 @@ func Test_build_create_no_service_logo_url(t *testing.T) {
 	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/cassandra.yaml", "--name", "cassandra", "--description", "My Service Description"})
 	err = rootCmd.Execute()
 	require.NoError(err)
+
+	rootCmd.SetArgs([]string{"remove"})
+	err = rootCmd.Execute()
+	require.NoError(err)
 }
