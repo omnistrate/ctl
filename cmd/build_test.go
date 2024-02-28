@@ -111,16 +111,15 @@ func Test_build_create_no_description(t *testing.T) {
 	require.Contains(err.Error(), "description is required for creating service")
 }
 
-// TODO: fix this test
-//func Test_build_create_no_service_logo_url(t *testing.T) {
-//	require := require.New(t)
-//	defer testutils.Cleanup()
-//
-//	rootCmd.SetArgs([]string{"login", "--email=xzhang+ctltest@omnistrate.com", "--password=ctltest"})
-//	err := rootCmd.Execute()
-//	require.NoError(err)
-//
-//	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/cassandra.yaml", "--name", "cassandra", "--description", "My Service Description"})
-//	err = rootCmd.Execute()
-//	require.NoError(err)
-//}
+func Test_build_create_no_service_logo_url(t *testing.T) {
+	require := require.New(t)
+	defer testutils.Cleanup()
+
+	rootCmd.SetArgs([]string{"login", "--email=xzhang+ctltest@omnistrate.com", "--password=ctltest"})
+	err := rootCmd.Execute()
+	require.NoError(err)
+
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/cassandra.yaml", "--name", "cassandra", "--description", "My Service Description"})
+	err = rootCmd.Execute()
+	require.NoError(err)
+}
