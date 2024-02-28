@@ -5,7 +5,6 @@ import (
 	"fmt"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/commons/pkg/httpclientwrapper"
-	utils2 "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
@@ -71,7 +70,7 @@ func runRemove(cmd *cobra.Command, args []string) error {
 }
 
 func removeService(serviceId, token string) error {
-	service, err := httpclientwrapper.NewService("https", "api."+utils2.GetEnv("ROOT_DOMAIN", "omnistrate.cloud"))
+	service, err := httpclientwrapper.NewService("https", utils.GetHost())
 	if err != nil {
 		return fmt.Errorf("unable to remove service, %s", err.Error())
 	}

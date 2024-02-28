@@ -7,8 +7,8 @@ import (
 	signinapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/signin_api"
 	"github.com/omnistrate/commons/pkg/httpclientwrapper"
 	"github.com/omnistrate/commons/pkg/utils"
-	utils2 "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/config"
+	utils2 "github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 	goa "goa.design/goa/v3/pkg"
 	"io"
@@ -83,10 +83,9 @@ func runLogin(cmd *cobra.Command, args []string) error {
 	}
 
 	authConfig := config.AuthConfig{
-		Email:      email,
-		Token:      token,
-		Auth:       config.JWTAuthType,
-		RootDomain: utils2.GetEnv("ROOT_DOMAIN", "omnistrate.cloud"),
+		Email: email,
+		Token: token,
+		Auth:  config.JWTAuthType,
 	}
 	if err = config.UpdateAuthConfig(authConfig); err != nil {
 		return err
@@ -103,7 +102,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 }
 
 func validateLogin(email string, pass string) (string, error) {
-	signin, err := httpclientwrapper.NewSignin("https", "api."+utils2.GetEnv("ROOT_DOMAIN", "omnistrate.cloud"))
+	signin, err := httpclientwrapper.NewSignin("https", utils2.GetHost())
 	if err != nil {
 		return "", fmt.Errorf("unable to login, %s", err.Error())
 	}
