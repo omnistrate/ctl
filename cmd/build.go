@@ -79,7 +79,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		return errors.New("feature to update existing service is not yet implemented")
 	}
 
-	fmt.Println("Creating new service...")
+	fmt.Printf("Creating new service %s...\n", name)
 
 	// If not exists, create new service
 	serviceLogoURLPtr := &serviceLogoURL
