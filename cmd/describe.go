@@ -62,7 +62,10 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	fmt.Println("Service Description:", res.Description)
 	fmt.Println("Service Provider Name:", res.ServiceProviderName)
 	fmt.Println("Service Provider ID:", res.ServiceProviderID)
-	fmt.Println("Service Logo URL:", *res.ServiceLogoURL)
+	if res.ServiceLogoURL != nil {
+		fmt.Println("Service Logo URL:", *res.ServiceLogoURL)
+		return nil
+	}
 
 	return nil
 }
