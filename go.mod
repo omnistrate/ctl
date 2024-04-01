@@ -8,7 +8,7 @@ require (
 	github.com/omnistrate/commons/pkg/httpclientwrapper v0.0.0-20240228061623-5c4af1fcffca
 	github.com/omnistrate/commons/pkg/utils v0.0.0-20240225224344-602e3262fcca
 	github.com/spf13/cobra v1.8.0
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	goa.design/goa/v3 v3.15.0
 	gopkg.in/yaml.v3 v3.0.1
 )
