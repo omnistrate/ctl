@@ -41,7 +41,9 @@ func runList(cmd *cobra.Command, args []string) error {
 	fmt.Println("Service retrieved successfully")
 
 	// Print service details
-	for _, service := range res.Services {
+	fmt.Println("Total Services:", len(res.Services))
+	for idx, service := range res.Services {
+		fmt.Println("No.", idx+1, " Service Details:")
 		fmt.Println("Service ID:", service.ID)
 		fmt.Println("Service Name:", service.Name)
 		fmt.Println("Service Created At:", service.CreatedAt)
@@ -50,8 +52,10 @@ func runList(cmd *cobra.Command, args []string) error {
 		fmt.Println("Service Provider ID:", service.ServiceProviderID)
 		if service.ServiceLogoURL != nil {
 			fmt.Println("Service Logo URL:", *service.ServiceLogoURL)
-			return nil
 		}
+		fmt.Println()
+		fmt.Println("--------------------------------------------------")
+		fmt.Println()
 	}
 
 	return nil
