@@ -44,8 +44,8 @@ func runList(cmd *cobra.Command, args []string) error {
 	fmt.Println("Total Services:", len(res.Services))
 	for _, service := range res.Services {
 		fmt.Println()
-		fmt.Println("Service ID:", service.ID)
 		fmt.Println("Service Name:", service.Name)
+		fmt.Println("Service ID:", service.ID)
 	}
 
 	fmt.Println()
