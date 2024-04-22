@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func Test_describe_basic(t *testing.T) {
+func Test_list_basic(t *testing.T) {
 	require := require.New(t)
 	defer testutils.Cleanup()
 
@@ -18,21 +18,26 @@ func Test_describe_basic(t *testing.T) {
 	err = rootCmd.Execute()
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"describe"})
-	err = rootCmd.Execute()
-	require.Error(err)
-	require.Contains(err.Error(), "must provide --service-id")
-
-	rootCmd.SetArgs([]string{"describe", "--service-id", "1"})
-	err = rootCmd.Execute()
-	require.NoError(err)
-
-	rootCmd.SetArgs([]string{"remove", "--service-id", "1"})
+	rootCmd.SetArgs([]string{"list"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 }
 
-func Test_describe_no_service_logo_url(t *testing.T) {
+func Test_list_no_service(t *testing.T) {
+	require := require.New(t)
+	defer testutils.Cleanup()
+
+	rootCmd.SetArgs([]string{"login", "--email=xzhang+cli@omnistrate.com", "--password=Test@1234"})
+	err := rootCmd.Execute()
+	require.NoError(err)
+
+	rootCmd.SetArgs([]string{"list"})
+	err = rootCmd.Execute()
+	require.Error(err)
+	require.Contains(err.Error(), "service does not exist")
+}
+
+func Test_list_no_service_logo_url(t *testing.T) {
 	require := require.New(t)
 	defer testutils.Cleanup()
 
@@ -44,11 +49,11 @@ func Test_describe_no_service_logo_url(t *testing.T) {
 	err = rootCmd.Execute()
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"describe", "--service-id", "1"})
+	rootCmd.SetArgs([]string{"list"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"remove", "--service-id", "1"})
+	rootCmd.SetArgs([]string{"remove"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 }

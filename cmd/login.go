@@ -35,9 +35,9 @@ var loginCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(loginCmd)
 
-	loginCmd.Flags().StringVarP(&email, "email", "e", "", "email")
-	loginCmd.Flags().StringVarP(&password, "password", "p", "", "password")
-	loginCmd.Flags().BoolVarP(&passwordStdin, "password-stdin", "s", false, "Reads the password from stdin")
+	loginCmd.Flags().StringVarP(&email, "email", "", "", "email")
+	loginCmd.Flags().StringVarP(&password, "password", "", "", "password")
+	loginCmd.Flags().BoolVarP(&passwordStdin, "password-stdin", "", false, "Reads the password from stdin")
 }
 
 func runLogin(cmd *cobra.Command, args []string) error {

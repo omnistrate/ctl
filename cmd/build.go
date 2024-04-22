@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
-	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 	"os"
@@ -67,47 +66,18 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	}
 	fmt.Println("Authentication credentials retrieved")
 
-	// Check if service already exists
-	fmt.Println("Checking if service already exists...")
-	serviceConfig, err := config.LookupServiceConfig()
-
-	if err != nil && !strings.Contains(err.Error(), "no service config found") {
-		return err
-	}
-
-	// If exists, update existing service
-	if err == nil {
-		fmt.Println("Service already exists. Updating existing service:", serviceConfig.Name)
-		return errors.New("feature to update existing service is not yet implemented")
-	}
-
-	fmt.Printf("Creating new service %s...\n", name)
-
 	// If not exists, create new service
 	serviceLogoURLPtr := &serviceLogoURL
 	if serviceLogoURL == "" {
 		serviceLogoURLPtr = nil
 	}
-	serviceId, err := createService(file, token, name, description, serviceLogoURLPtr)
+	buildServiceID, err := createService(file, token, name, description, serviceLogoURLPtr)
 	if err != nil {
 		return err
 	}
 	fmt.Println("Service created successfully")
 
-	// Save service config
-	fmt.Println("Updating service config...")
-	serviceConfig = config.ServiceConfig{
-		ID:             serviceId,
-		Name:           name,
-		Description:    description,
-		ServiceLogoURL: serviceLogoURL,
-	}
-	if err = config.UpdateServiceConfig(serviceConfig); err != nil {
-		return err
-	}
-	fmt.Println("Service config updated")
-
-	fmt.Printf("Service %s has been created successfully\n", name)
+	fmt.Printf("Service %s %s has been created successfully\n", buildServiceID, name)
 
 	return nil
 }

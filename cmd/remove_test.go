@@ -20,19 +20,6 @@ func Test_remove_basic(t *testing.T) {
 
 	rootCmd.SetArgs([]string{"remove"})
 	err = rootCmd.Execute()
-	require.NoError(err)
-}
-
-func Test_remove_no_service(t *testing.T) {
-	require := require.New(t)
-	defer testutils.Cleanup()
-
-	rootCmd.SetArgs([]string{"login", "--email=xzhang+cli@omnistrate.com", "--password=Test@1234"})
-	err := rootCmd.Execute()
-	require.NoError(err)
-
-	rootCmd.SetArgs([]string{"remove"})
-	err = rootCmd.Execute()
 	require.Error(err)
-	require.Contains(err.Error(), "service does not exist")
+	require.Contains(err.Error(), "must provide --service-id")
 }

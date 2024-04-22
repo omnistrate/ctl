@@ -5,26 +5,37 @@ import (
 	"fmt"
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
-	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
-	"strings"
+)
+
+var (
+	describeServiceID string
 )
 
 // describeCmd represents the describe command
 var describeCmd = &cobra.Command{
-	Use:     "describe",
+	Use:     "describe [--service-id SERVICE_ID]",
 	Short:   "Describe service",
-	Long:    `Describe service. The service must be created before it can be described.`,
-	Example: `  ./omnistrate-cli describe`,
+	Long:    `Describe service for a given service id.`,
+	Example: `  ./omnistrate-cli describe --service-id SERVICE_ID`,
 	RunE:    runDescribe,
 }
 
 func init() {
 	rootCmd.AddCommand(describeCmd)
+
+	describeCmd.Flags().StringVarP(&describeServiceID, "service-id", "", "", "service id")
 }
 
 func runDescribe(cmd *cobra.Command, args []string) error {
+	defer resetDescribe()
+
+	// Validate input arguments
+	if len(describeServiceID) == 0 {
+		return fmt.Errorf("must provide --service-id")
+	}
+
 	// Validate user is currently logged in
 	fmt.Println("Retrieving authentication credentials...")
 	token, err := utils.GetToken()
@@ -33,22 +44,9 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 	fmt.Println("Authentication credentials retrieved")
 
-	// Check if service already exists
-	fmt.Println("Checking if service already exists...")
-	serviceConfig, err := config.LookupServiceConfig()
-
-	if err != nil && strings.Contains(err.Error(), "no service config found") {
-		return fmt.Errorf("cannot describe service, service does not exist")
-	}
-
-	if err != nil {
-		fmt.Println("Error checking if service exists:", err.Error())
-		return err
-	}
-
 	// Describe service
 	fmt.Println("Retrieving service...")
-	res, err := describeService(serviceConfig.ID, token)
+	res, err := describeService(describeServiceID, token)
 	if err != nil {
 		fmt.Println("Error describing service:", err.Error())
 		return err
@@ -86,4 +84,8 @@ func describeService(serviceId, token string) (*serviceapi.DescribeServiceResult
 		return nil, fmt.Errorf("unable to describe service, %s", err.Error())
 	}
 	return res, nil
+}
+
+func resetDescribe() {
+	describeServiceID = ""
 }
