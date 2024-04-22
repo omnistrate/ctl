@@ -17,7 +17,7 @@ func Test_logout(t *testing.T) {
 	require.Contains(err.Error(), "config file not found")
 
 	// PASS: logout after login
-	rootCmd.SetArgs([]string{"login", "--email=xzhang+ctltest@omnistrate.com", "--password=ctltest"})
+	rootCmd.SetArgs([]string{"login", "--email=xzhang+cli@omnistrate.com", "--password=Test@1234"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 

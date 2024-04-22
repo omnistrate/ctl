@@ -12,7 +12,7 @@ func Test_build_basic(t *testing.T) {
 	defer testutils.Cleanup()
 
 	// Step 1: login
-	rootCmd.SetArgs([]string{"login", "--email=xzhang+ctltest@omnistrate.com", "--password=ctltest"})
+	rootCmd.SetArgs([]string{"login", "--email=xzhang+cli@omnistrate.com", "--password=Test@1234"})
 	err := rootCmd.Execute()
 	require.NoError(err)
 
@@ -45,7 +45,7 @@ func Test_build_invalid_file(t *testing.T) {
 	require := require.New(t)
 	defer testutils.Cleanup()
 
-	rootCmd.SetArgs([]string{"login", "--email=xzhang+ctltest@omnistrate.com", "--password=ctltest"})
+	rootCmd.SetArgs([]string{"login", "--email=xzhang+cli@omnistrate.com", "--password=Test@1234"})
 	err := rootCmd.Execute()
 	require.NoError(err)
 
@@ -59,7 +59,7 @@ func Test_build_no_file(t *testing.T) {
 	require := require.New(t)
 	defer testutils.Cleanup()
 
-	rootCmd.SetArgs([]string{"login", "--email=xzhang+ctltest@omnistrate.com", "--password=ctltest"})
+	rootCmd.SetArgs([]string{"login", "--email=xzhang+cli@omnistrate.com", "--password=Test@1234"})
 	err := rootCmd.Execute()
 	require.NoError(err)
 
@@ -73,7 +73,7 @@ func Test_build_invalid_file_format(t *testing.T) {
 	require := require.New(t)
 	defer testutils.Cleanup()
 
-	rootCmd.SetArgs([]string{"login", "--email=xzhang+ctltest@omnistrate.com", "--password=ctltest"})
+	rootCmd.SetArgs([]string{"login", "--email=xzhang+cli@omnistrate.com", "--password=Test@1234"})
 	err := rootCmd.Execute()
 	require.NoError(err)
 
@@ -87,7 +87,7 @@ func Test_build_create_no_name(t *testing.T) {
 	require := require.New(t)
 	defer testutils.Cleanup()
 
-	rootCmd.SetArgs([]string{"login", "--email=xzhang+ctltest@omnistrate.com", "--password=ctltest"})
+	rootCmd.SetArgs([]string{"login", "--email=xzhang+cli@omnistrate.com", "--password=Test@1234"})
 	err := rootCmd.Execute()
 	require.NoError(err)
 
@@ -101,7 +101,7 @@ func Test_build_create_no_description(t *testing.T) {
 	require := require.New(t)
 	defer testutils.Cleanup()
 
-	rootCmd.SetArgs([]string{"login", "--email=xzhang+ctltest@omnistrate.com", "--password=ctltest"})
+	rootCmd.SetArgs([]string{"login", "--email=xzhang+cli@omnistrate.com", "--password=Test@1234"})
 	err := rootCmd.Execute()
 	require.NoError(err)
 
@@ -115,7 +115,7 @@ func Test_build_create_no_service_logo_url(t *testing.T) {
 	require := require.New(t)
 	defer testutils.Cleanup()
 
-	rootCmd.SetArgs([]string{"login", "--email=xzhang+ctltest@omnistrate.com", "--password=ctltest"})
+	rootCmd.SetArgs([]string{"login", "--email=xzhang+cli@omnistrate.com", "--password=Test@1234"})
 	err := rootCmd.Execute()
 	require.NoError(err)
 
