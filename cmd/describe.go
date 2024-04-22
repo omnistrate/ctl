@@ -16,7 +16,7 @@ var describeCmd = &cobra.Command{
 	Use:     "describe",
 	Short:   "Describe service",
 	Long:    `Describe service. The service must be created before it can be described.`,
-	Example: `  omnistrate-cli describe`,
+	Example: `  ./omnistrate-cli describe`,
 	RunE:    runDescribe,
 }
 

@@ -11,7 +11,7 @@ var logoutCmd = &cobra.Command{
 	Use:     "logout",
 	Short:   "Logout from Omnistrate platform",
 	Long:    `Logout from Omnistrate platform.`,
-	Example: `  omnistrate-cli logout`,
+	Example: `  ./omnistrate-cli logout`,
 	RunE:    runLogout,
 }
 

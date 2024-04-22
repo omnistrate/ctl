@@ -16,7 +16,7 @@ var removeCmd = &cobra.Command{
 	Use:     "remove",
 	Short:   "Remove service from Omnistrate platform",
 	Long:    `Remove service from Omnistrate platform. The service must be created before it can be removed.`,
-	Example: `  omnistrate-cli remove`,
+	Example: `  ./omnistrate-cli remove`,
 	RunE:    runRemove,
 }
 
