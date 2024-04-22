@@ -120,7 +120,7 @@ func validateLogin(email string, pass string) (string, error) {
 			return "", fmt.Errorf("unable to login, %s", err.Error())
 		}
 
-		if serviceErr.Name == "auth_failure" {
+		if serviceErr.Name == "auth_failure" || serviceErr.Name == "bad_request" {
 			return "", fmt.Errorf("unable to login, either email or password is incorrect")
 		}
 
