@@ -28,7 +28,7 @@ var loginCmd = &cobra.Command{
 	Short: "Log in to Omnistrate platform",
 	Long:  "Log in to Omnistrate platform",
 	Example: `  cat ~/omnistrate_pass.txt | ./omnistrate-cli login -e email --password-stdin
-	  echo $PASSWORD | ./omnistrate-cli login -e email --password password`,
+	  echo $OMNISTRATE_PASSWORD | ./omnistrate-cli login -e email --password-stdin`,
 	RunE: runLogin,
 }
 
