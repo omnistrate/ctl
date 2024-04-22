@@ -3,8 +3,8 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
-	"github.com/omnistrate/commons/pkg/httpclientwrapper"
 	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"

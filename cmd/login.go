@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	signinapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/signin_api"
-	"github.com/omnistrate/commons/pkg/httpclientwrapper"
 	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/config"
 	utils2 "github.com/omnistrate/ctl/utils"
@@ -108,8 +108,8 @@ func validateLogin(email string, pass string) (string, error) {
 	}
 
 	request := signinapi.SigninRequest{
-		Email:          email,
-		HashedPassword: utils.HashPassword(pass),
+		Email:    email,
+		Password: utils.ToPtr(pass),
 	}
 
 	res, err := signin.Signin(context.Background(), &request)
