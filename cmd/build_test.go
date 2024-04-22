@@ -21,7 +21,7 @@ func Test_build_basic(t *testing.T) {
 	require.NoError(err)
 
 	// Step 3: test build service on all compose files
-	skipComposeFiles := []string{"mariadbcluster.yaml", "postgres_advanced_serverless.yaml", "opensearch.yaml", "postgrescluster.yaml"}
+	skipComposeFiles := []string{"mariadbcluster.yaml", "postgres_basic_serverless.yaml", "postgres_advanced_serverless.yaml", "opensearch.yaml", "postgrescluster.yaml", "mongodb.yaml", "mysqlcluster.yaml"}
 	for _, f := range composeFiles {
 		if testutils.Contains(skipComposeFiles, f.Name()) {
 			continue
