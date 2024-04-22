@@ -42,21 +42,13 @@ func runList(cmd *cobra.Command, args []string) error {
 
 	// Print service details
 	fmt.Println("Total Services:", len(res.Services))
-	for idx, service := range res.Services {
-		fmt.Println("No.", idx+1, " Service Details:")
+	for _, service := range res.Services {
+		fmt.Println()
 		fmt.Println("Service ID:", service.ID)
 		fmt.Println("Service Name:", service.Name)
-		fmt.Println("Service Created At:", service.CreatedAt)
-		fmt.Println("Service Description:", service.Description)
-		fmt.Println("Service Provider Name:", service.ServiceProviderName)
-		fmt.Println("Service Provider ID:", service.ServiceProviderID)
-		if service.ServiceLogoURL != nil {
-			fmt.Println("Service Logo URL:", *service.ServiceLogoURL)
-		}
-		fmt.Println()
-		fmt.Println("--------------------------------------------------")
-		fmt.Println()
 	}
+
+	fmt.Println()
 
 	return nil
 }
