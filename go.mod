@@ -8,8 +8,8 @@ require (
 	github.com/omnistrate/commons/pkg/httpclientwrapper v0.0.0-20240228061623-5c4af1fcffca
 	github.com/omnistrate/commons/pkg/utils v0.0.0-20240225224344-602e3262fcca
 	github.com/spf13/cobra v1.8.0
-	github.com/stretchr/testify v1.8.4
-	goa.design/goa/v3 v3.15.0
+	github.com/stretchr/testify v1.9.0
+	goa.design/goa/v3 v3.16.1
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -34,8 +34,8 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
-	golang.org/x/net v0.21.0 // indirect
-	golang.org/x/sys v0.17.0 // indirect
+	golang.org/x/net v0.24.0 // indirect
+	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	google.golang.org/protobuf v1.32.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 )
