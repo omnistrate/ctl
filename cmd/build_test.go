@@ -45,6 +45,56 @@ func Test_build_basic(t *testing.T) {
 	}
 }
 
+func Test_build_update_service(t *testing.T) {
+	require := require.New(t)
+	defer testutils.Cleanup()
+
+	err := os.Setenv("ROOT_DOMAIN", "omnistrate.dev")
+	require.NoError(err)
+
+	// PASS: login
+	testEmail, testPassword := testutils.GetTestAccount()
+	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
+	err = rootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: create mysql cluster service
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_original.yaml", "--name", "mysql cluster", "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
+	err = rootCmd.Execute()
+	require.NoError(err)
+
+	rootCmd.SetArgs([]string{"describe", "--service-id", serviceID})
+	err = rootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: update mysql cluster service
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_variation.yaml", "--name", "mysql cluster"})
+	err = rootCmd.Execute()
+	require.NoError(err)
+
+	rootCmd.SetArgs([]string{"remove", "--service-id", serviceID})
+	err = rootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: create postgres cluster service
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/postgrescluster_original.yaml", "--name", "postgres cluster", "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
+	err = rootCmd.Execute()
+	require.NoError(err)
+
+	rootCmd.SetArgs([]string{"describe", "--service-id", serviceID})
+	err = rootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: update postgres cluster service
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/postgrescluster_variation.yaml", "--name", "postgres cluster"})
+	err = rootCmd.Execute()
+	require.NoError(err)
+
+	rootCmd.SetArgs([]string{"remove", "--service-id", serviceID})
+	err = rootCmd.Execute()
+	require.NoError(err)
+}
+
 func Test_build_invalid_file(t *testing.T) {
 	require := require.New(t)
 	defer testutils.Cleanup()

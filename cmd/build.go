@@ -36,8 +36,8 @@ func init() {
 
 	buildCmd.Flags().StringVarP(&file, "file", "f", "", "Path to the docker compose yaml file")
 	buildCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the service")
-	buildCmd.Flags().StringVarP(&description, "description", "d", "", "Description of the service")
-	buildCmd.Flags().StringVarP(&serviceLogoURL, "service-logo-url", "l", "", "URL to the service logo")
+	buildCmd.Flags().StringVarP(&description, "description", "", "", "Description of the service")
+	buildCmd.Flags().StringVarP(&serviceLogoURL, "service-logo-url", "", "", "URL to the service logo")
 
 	// Set Bash completion options
 	validYAMLFilenames := []string{"yaml", "yml"}
@@ -73,7 +73,13 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	if serviceLogoURL == "" {
 		serviceLogoURLPtr = nil
 	}
-	serviceID, productTierID, err = buildService(file, token, name, description, serviceLogoURLPtr)
+
+	descriptionPtr := &description
+	if description == "" {
+		descriptionPtr = nil
+	}
+
+	serviceID, productTierID, err = buildService(file, token, name, descriptionPtr, serviceLogoURLPtr)
 	if err != nil {
 		return err
 	}
@@ -84,14 +90,14 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func buildService(file, token, name, description string, serviceLogoURL *string) (serviceID string, productTierID string, err error) {
+func buildService(file, token, name string, description, serviceLogoURL *string) (serviceID string, productTierID string, err error) {
 	if name == "" {
 		return "", "", errors.New("name is required")
 	}
 
 	service, err := httpclientwrapper.NewService("https", utils.GetHost())
 	if err != nil {
-		return "", "", fmt.Errorf("unable to create service, %s", err.Error())
+		return "", "", fmt.Errorf("unable to build service, %s", err.Error())
 	}
 
 	fileData, err := os.ReadFile(file)
@@ -102,7 +108,7 @@ func buildService(file, token, name, description string, serviceLogoURL *string)
 	request := serviceapi.BuildServiceFromComposeSpecRequest{
 		Token:          token,
 		Name:           name,
-		Description:    &description,
+		Description:    description,
 		ServiceLogoURL: serviceLogoURL,
 		FileContent:    base64.StdEncoding.EncodeToString(fileData),
 	}
@@ -110,7 +116,7 @@ func buildService(file, token, name, description string, serviceLogoURL *string)
 	var buildRes *serviceapi.BuildServiceFromComposeSpecResult
 	buildRes, err = service.BuildServiceFromComposeSpec(context.Background(), &request)
 	if err != nil {
-		return "", "", fmt.Errorf("unable to create service, %s", err.Error())
+		return "", "", fmt.Errorf("unable to build service, %s", err.Error())
 	}
 	return string(buildRes.ServiceID), string(buildRes.ProductTierID), nil
 }
