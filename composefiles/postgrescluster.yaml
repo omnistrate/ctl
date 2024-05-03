@@ -1,7 +1,7 @@
 version: "3"
 x-omnistrate-service-plan:
   name: 'BYOA Postgres cluster'
-  tenancyType: 'OMNISTRATE_DEDICATED_TENANCY'
+  tenancyType: 'OMNISTRATE_MULTI_TENANCY'
   deployment:
     byoaDeployment:
       AwsAccountId: '339713121445'
@@ -359,6 +359,3 @@ services:
       - Reader
       - PGAdmin
     x-omnistrate-mode-internal: false
-
-x-omnistrate-service-plan:
-  tenancyType: 'OMNISTRATE_MULTI_TENANCY'
