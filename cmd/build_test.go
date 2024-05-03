@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/omnistrate/ctl/testutils"
 	"github.com/stretchr/testify/require"
 	"os"
@@ -161,7 +162,7 @@ func Test_build_create_no_name(t *testing.T) {
 	err = rootCmd.Execute()
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/cassandra.yaml", "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/postgresql.yaml", "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = rootCmd.Execute()
 	require.Error(err)
 	require.Contains(err.Error(), "name is required")
@@ -179,7 +180,7 @@ func Test_build_create_no_description(t *testing.T) {
 	err = rootCmd.Execute()
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/cassandra.yaml", "--name", "cassandra", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/postgresql.yaml", "--name", "postgresql" + uuid.NewString(), "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = rootCmd.Execute()
 	require.Error(err)
 	require.Contains(err.Error(), "Invalid request: description: parameter is empty")
@@ -197,7 +198,7 @@ func Test_build_create_no_service_logo_url(t *testing.T) {
 	err = rootCmd.Execute()
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/cassandra.yaml", "--name", "cassandra", "--description", "My Service Description"})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/postgresql.yaml", "--name", "postgresql" + uuid.NewString(), "--description", "My Service Description"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 

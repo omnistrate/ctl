@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/omnistrate/ctl/testutils"
 	"github.com/stretchr/testify/require"
 	"os"
@@ -20,7 +21,7 @@ func Test_remove_basic(t *testing.T) {
 	err = rootCmd.Execute()
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/cassandra.yaml", "--name", "cassandra", "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/postgresql.yaml", "--name", "postgresql" + uuid.NewString(), "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 
