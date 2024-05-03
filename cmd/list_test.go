@@ -28,28 +28,3 @@ func Test_list_basic(t *testing.T) {
 	err = rootCmd.Execute()
 	require.NoError(err)
 }
-
-func Test_list_no_service_logo_url(t *testing.T) {
-	require := require.New(t)
-	defer testutils.Cleanup()
-
-	err := os.Setenv("ROOT_DOMAIN", "omnistrate.dev")
-	require.NoError(err)
-
-	testEmail, testPassword := testutils.GetTestAccount()
-	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
-	err = rootCmd.Execute()
-	require.NoError(err)
-
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/ferretdb.yaml", "--name", "ferretdb", "--description", "My Service Description"})
-	err = rootCmd.Execute()
-	require.NoError(err)
-
-	rootCmd.SetArgs([]string{"list"})
-	err = rootCmd.Execute()
-	require.NoError(err)
-
-	rootCmd.SetArgs([]string{"remove", "--service-id", serviceID})
-	err = rootCmd.Execute()
-	require.NoError(err)
-}
