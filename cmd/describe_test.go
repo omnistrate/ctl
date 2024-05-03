@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/omnistrate/ctl/testutils"
 	"github.com/stretchr/testify/require"
 	"os"
@@ -20,7 +21,7 @@ func Test_describe_basic(t *testing.T) {
 	err = rootCmd.Execute()
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/ferretdb.yaml", "--name", "ferretdb", "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/postgres.yaml", "--name", "postgres" + uuid.NewString(), "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 
@@ -50,7 +51,7 @@ func Test_describe_no_service_logo_url(t *testing.T) {
 	err = rootCmd.Execute()
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/ferretdb.yaml", "--name", "ferretdb", "--description", "My Service Description"})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/postgres.yaml", "--name", "postgres" + uuid.NewString(), "--description", "My Service Description"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 

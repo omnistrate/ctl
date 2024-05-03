@@ -32,7 +32,7 @@ func Test_build_basic(t *testing.T) {
 			continue
 		}
 
-		rootCmd.SetArgs([]string{"build", "-f", "../composefiles/" + f.Name(), "--name", f.Name(), "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
+		rootCmd.SetArgs([]string{"build", "-f", "../composefiles/" + f.Name(), "--name", f.Name() + uuid.NewString(), "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 		err = rootCmd.Execute()
 		require.NoError(err, f.Name())
 
@@ -60,7 +60,8 @@ func Test_build_update_service(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: create mysql cluster service
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_original.yaml", "--name", "mysql cluster", "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
+	serviceName := "mysql cluster" + uuid.NewString()
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 
@@ -69,7 +70,7 @@ func Test_build_update_service(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: update mysql cluster service
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_variation.yaml", "--name", "mysql cluster"})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_variation.yaml", "--name", serviceName})
 	err = rootCmd.Execute()
 	require.NoError(err)
 
@@ -78,7 +79,8 @@ func Test_build_update_service(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: create postgres cluster service
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/postgrescluster_original.yaml", "--name", "postgres cluster", "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
+	serviceName = "postgres cluster" + uuid.NewString()
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/postgrescluster_original.yaml", "--name", serviceName, "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 
@@ -87,7 +89,7 @@ func Test_build_update_service(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: update postgres cluster service
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/postgrescluster_variation.yaml", "--name", "postgres cluster"})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/postgrescluster_variation.yaml", "--name", serviceName})
 	err = rootCmd.Execute()
 	require.NoError(err)
 
@@ -108,7 +110,7 @@ func Test_build_invalid_file(t *testing.T) {
 	err = rootCmd.Execute()
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"build", "-f", "invalid_file.yaml", "--name", "My Service", "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
+	rootCmd.SetArgs([]string{"build", "-f", "invalid_file.yaml", "--name", "My Service" + uuid.NewString(), "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = rootCmd.Execute()
 	require.Error(err)
 	require.Contains(err.Error(), "file does not exist: invalid_file.yaml")
@@ -126,7 +128,7 @@ func Test_build_no_file(t *testing.T) {
 	err = rootCmd.Execute()
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"build", "--name", "My Service", "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
+	rootCmd.SetArgs([]string{"build", "--name", "My Service" + uuid.NewString(), "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = rootCmd.Execute()
 	require.Error(err)
 	require.Contains(err.Error(), "must provide --file or -f")
@@ -144,7 +146,7 @@ func Test_build_invalid_file_format(t *testing.T) {
 	err = rootCmd.Execute()
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"build", "-f", "invalid_file.txt", "--name", "My Service", "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
+	rootCmd.SetArgs([]string{"build", "-f", "invalid_file.txt", "--name", "My Service" + uuid.NewString(), "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = rootCmd.Execute()
 	require.Error(err)
 	require.Contains(err.Error(), "file must be a valid docker-compose file in .yaml or .yml format")
