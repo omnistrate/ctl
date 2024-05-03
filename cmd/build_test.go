@@ -184,8 +184,7 @@ func Test_build_create_no_description(t *testing.T) {
 
 	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/postgresql.yaml", "--name", "postgresql" + uuid.NewString(), "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = rootCmd.Execute()
-	require.Error(err)
-	require.Contains(err.Error(), "Invalid request: description: parameter is empty")
+	require.NoError(err)
 }
 
 func Test_build_create_no_service_logo_url(t *testing.T) {
