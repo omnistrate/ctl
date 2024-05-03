@@ -1,7 +1,32 @@
-version: '3'
+# Logo: https://assets.stickpng.com/images/62debc4fff3c6e4b8b5de8d3.png
+version: "3"
+x-omnistrate-service-plan:
+  name: 'Hosted MySQL Cluster'
+  tenancyType: 'OMNISTRATE_DEDICATED_TENANCY'
+  deployment:
+    hostedDeployment:
+      AwsAccountId: '541226919599'
+      AwsBootstrapRoleAccountArn: 'arn:aws:iam::541226919599:role/omnistrate-bootstrap-role'
+      GcpProjectId: 'omnistrate-internal99'
+      GcpProjectNumber: '1035915676499'
+      GcpServiceAccountEmail: 'bootstrap.service@gcp.test.iam'
 x-omnistrate-integrations:
-  - omnistrateLogging
-  - omnistrateMetrics
+  - omnistrateMetrics:
+      additionalMetrics:
+        mySQL: # pod
+          prometheusEndpoint: ':9090/metrics'
+          metrics:
+            Aborted_connects: # metric name
+            Threads_connected: # metric name
+              https-only: # serie definition
+                aggregationFunction: max
+                labelFilters:
+                  protocol: https
+              all: # another serie
+                aggregationFunction: sum
+x-internal-integrations:
+  billing:
+    S3BucketARN: arn:aws:s3:::my_billing_bucket_name
 services:
   MySQL:
     image: mysql:latest
@@ -71,9 +96,5 @@ services:
         overUtilizedMinutesBeforeScalingUp: 3
         overUtilizedThreshold: 80
       enableMultiZone: true
-      serverlessConfiguration:
-        enableAutoStop: true
-        minimumNodesInPool: 3
-        targetPort: 3306
     ports:
       - '3306:3306'

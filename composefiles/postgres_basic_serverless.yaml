@@ -1,35 +1,13 @@
 version: "3"
-x-omnistrate-byoa: # Customer-Account
-  AwsAccountId: '541226919571'
-  AwsBootstrapRoleAccountArn: 'arn:aws:iam::541226919571:role/omnistrate-bootstrap-role'
+x-omnistrate-my-account:
+  AwsAccountId: '541226919570'
+  AwsBootstrapRoleAccountArn: 'arn:aws:iam::541226919570:role/omnistrate-bootstrap-role'
+  GcpProjectId: 'omnistrate-internal70'
+  GcpProjectNumber: '1035915676470'
+  GcpServiceAccountEmail: 'bootstrap.service@gcp.test.iam'
 x-omnistrate-integrations:
   - omnistrateLogging
   - omnistrateMetrics
-x-omnistrate-load-balancer:
-  https:
-    - name: PGAdmin
-      description: L7 Load Balancer for PGAdmin
-      paths:
-        - associatedResourceKey: pGAdmin
-          path: /
-          backendPort: 80
-  tcp:
-    - name: Reader
-      description: L4 Load Balancer for Reader
-      ports:
-        - associatedResourceKeys:
-            - reader
-          ingressPort: 5432
-          backendPort: 5432
-    - name: HA Endpoint
-      description: L4 Load Balancer for HA Endpoint
-      ports:
-        - associatedResourceKeys:
-            - writer
-            - reader
-          ingressPort: 5432
-          backendPort: 5432
-
 services:
   PGAdmin:
     image: omnistrate/pgadmin4:7.5
@@ -91,9 +69,10 @@ services:
         export: true
     x-omnistrate-mode-internal: true
   Writer:
-    image: omnistrate/lanterndb:v0.0.2-2
+    image: njnjyyh/laterndb-exporter:1
     ports:
       - 5432:5432
+      - 9187:9187
     volumes:
       - source: ./data
         target: /var/lib/postgresql/data
@@ -107,15 +86,6 @@ services:
           gcp:
             instanceStorageType: GCP::PD_BALANCED
             instanceStorageSizeGi: 100
-    platform: linux/arm64
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 50M
-        reservations:
-          cpus: '0.25'
-          memory: 20M
     x-omnistrate-compute:
       instanceTypes:
         - cloudProvider: aws
@@ -123,8 +93,29 @@ services:
         - cloudProvider: gcp
           apiParam: writerInstanceType
     x-omnistrate-capabilities:
+      autoscaling:
+        maxReplicas: 1
+        minReplicas: 1
+        idleMinutesBeforeScalingDown: 2
+        idleThreshold: 1
+        overUtilizedMinutesBeforeScalingUp: 3
+        overUtilizedThreshold: 80
+        scalingMetric:
+          metricEndpoint: "http://localhost:9187/metrics"
+          metricLabelName: "application_name"
+          metricLabelValue: "psql"
+          metricName: "pg_stat_activity_count"
       enableEndpointPerReplica: true
-      enableNodeLoadBalancer: true
+      serverlessConfiguration:
+        proxyServiceAccountPolicy:
+          aws:
+            - "SECRETS_MANAGER"
+        enableAutoStop: true
+        minimumNodesInPool: 1
+        targetPort: 5432
+        proxyStorageConfig:
+          aws:
+            storageType: "s3"
     environment:
       - POSTGRESQL_PASSWORD=$var.postgresqlPassword
       - POSTGRESQL_DATABASE=$var.postgresqlDatabase
@@ -136,6 +127,7 @@ services:
       - POSTGRESQL_REPLICATION_USER=repl_user
       - POSTGRESQL_REPLICATION_PASSWORD=repl_password
       - POSTGRESQL_DATA_DIR=/var/lib/postgresql/data/dbdata
+      - DATA_SOURCE_NAME=postgresql://{{ $var.postgresqlUsername }}:{{ $var.postgresqlPassword }}@localhost:5432/{{ $var.postgresqlDatabase }}?sslmode=disable
       - SECURITY_CONTEXT_USER_ID=1001
       - SECURITY_CONTEXT_FS_GROUP=1001
       - SECURITY_CONTEXT_GROUP_ID=0
@@ -215,7 +207,6 @@ services:
     x-omnistrate-capabilities:
       enableMultiZone: true
       enableEndpointPerReplica: true
-      enableClusterLoadBalancer: true
     environment:
       - POSTGRESQL_PASSWORD=$var.postgresqlPassword
       - POSTGRESQL_MASTER_HOST=Writer
@@ -312,9 +303,6 @@ services:
         modifiable: false
         required: true
         export: true
-        limits:
-          minLength: 1
-          maxLength: 63
         parameterDependencyMap:
           Writer: postgresqlDatabase
       - key: numReadReplicas
@@ -325,9 +313,6 @@ services:
         required: false
         export: true
         defaultValue: "1"
-        limits:
-          min: 1
-          max: 10
         parameterDependencyMap:
           Reader: numReadReplicas
       - key: writerInstanceStorageIOPS
@@ -355,6 +340,3 @@ services:
       - Reader
       - PGAdmin
     x-omnistrate-mode-internal: false
-
-x-omnistrate-service-plan:
-  tenancyType: 'OMNISTRATE_MULTI_TENANCY'

@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/omnistrate/ctl/testutils"
 	"github.com/stretchr/testify/require"
+	"os"
 	"testing"
 )
 
@@ -10,11 +12,15 @@ func Test_describe_basic(t *testing.T) {
 	require := require.New(t)
 	defer testutils.Cleanup()
 
-	rootCmd.SetArgs([]string{"login", "--email=xzhang+cli@omnistrate.com", "--password=Test@1234"})
-	err := rootCmd.Execute()
+	err := os.Setenv("ROOT_DOMAIN", "omnistrate.dev")
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/ferretdb.yaml", "--name", "ferretdb", "--description", "My Service Description", "--service-logo-url", "https://my-service-logo.com/logo.png"})
+	testEmail, testPassword := testutils.GetTestAccount()
+	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
+	err = rootCmd.Execute()
+	require.NoError(err)
+
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/ferretdb.yaml", "--name", "ferretdb", "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 
@@ -23,11 +29,11 @@ func Test_describe_basic(t *testing.T) {
 	require.Error(err)
 	require.Contains(err.Error(), "must provide --service-id")
 
-	rootCmd.SetArgs([]string{"describe", "--service-id", "1"})
+	rootCmd.SetArgs([]string{"describe", "--service-id", serviceID})
 	err = rootCmd.Execute()
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"remove", "--service-id", "1"})
+	rootCmd.SetArgs([]string{"remove", "--service-id", serviceID})
 	err = rootCmd.Execute()
 	require.NoError(err)
 }
@@ -36,19 +42,23 @@ func Test_describe_no_service_logo_url(t *testing.T) {
 	require := require.New(t)
 	defer testutils.Cleanup()
 
-	rootCmd.SetArgs([]string{"login", "--email=xzhang+cli@omnistrate.com", "--password=Test@1234"})
-	err := rootCmd.Execute()
+	err := os.Setenv("ROOT_DOMAIN", "omnistrate.dev")
+	require.NoError(err)
+
+	testEmail, testPassword := testutils.GetTestAccount()
+	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
+	err = rootCmd.Execute()
 	require.NoError(err)
 
 	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/ferretdb.yaml", "--name", "ferretdb", "--description", "My Service Description"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"describe", "--service-id", "1"})
+	rootCmd.SetArgs([]string{"describe", "--service-id", serviceID})
 	err = rootCmd.Execute()
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"remove", "--service-id", "1"})
+	rootCmd.SetArgs([]string{"remove", "--service-id", serviceID})
 	err = rootCmd.Execute()
 	require.NoError(err)
 }

@@ -18,6 +18,8 @@ var (
 	name           string
 	description    string
 	serviceLogoURL string
+	serviceID      string
+	productTierID  string
 )
 
 // buildCmd represents the build command
@@ -25,7 +27,7 @@ var buildCmd = &cobra.Command{
 	Use:     "build [--file FILE] [--name NAME] [--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL]",
 	Short:   "Build service from a docker-compose file",
 	Long:    `Build service from a docker-compose file. The file must be in .yaml or .yml format. The name, description and service logo URL are required when the service is first created. They can be updated later. The service logo URL must be a valid URL to an image.`,
-	Example: `  ./omnistrate-cli build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://my-service-logo.com/logo.png"`,
+	Example: `  ./omnistrate-cli build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"`,
 	RunE:    runBuild,
 }
 
@@ -66,55 +68,51 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	}
 	fmt.Println("Authentication credentials retrieved")
 
-	// If not exists, create new service
+	// Build service
 	serviceLogoURLPtr := &serviceLogoURL
 	if serviceLogoURL == "" {
 		serviceLogoURLPtr = nil
 	}
-	buildServiceID, err := createService(file, token, name, description, serviceLogoURLPtr)
+	serviceID, productTierID, err = buildService(file, token, name, description, serviceLogoURLPtr)
 	if err != nil {
 		return err
 	}
-	fmt.Println("Service created successfully")
-
-	fmt.Printf("Service %s %s has been created successfully\n", buildServiceID, name)
+	fmt.Println("Service built successfully")
+	fmt.Println("Service ID:", serviceID)
+	fmt.Println("Product Tier ID:", productTierID)
 
 	return nil
 }
 
-func createService(file, token, name, description string, serviceLogoURL *string) (string, error) {
+func buildService(file, token, name, description string, serviceLogoURL *string) (serviceID string, productTierID string, err error) {
 	if name == "" {
-		return "", errors.New("name is required for creating service")
-	}
-
-	if description == "" {
-		return "", errors.New("description is required for creating service")
+		return "", "", errors.New("name is required")
 	}
 
 	service, err := httpclientwrapper.NewService("https", utils.GetHost())
 	if err != nil {
-		return "", fmt.Errorf("unable to create service, %s", err.Error())
+		return "", "", fmt.Errorf("unable to create service, %s", err.Error())
 	}
 
 	fileData, err := os.ReadFile(file)
 	if err != nil {
-		return "", fmt.Errorf("unable to read file, %s", err.Error())
+		return "", "", fmt.Errorf("unable to read file, %s", err.Error())
 	}
 
-	request := serviceapi.CreateServiceFromComposeSpecRequest{
+	request := serviceapi.BuildServiceFromComposeSpecRequest{
 		Token:          token,
 		Name:           name,
-		Description:    description,
-		FileContent:    base64.StdEncoding.EncodeToString(fileData),
-		FileFormat:     "yaml",
+		Description:    &description,
 		ServiceLogoURL: serviceLogoURL,
+		FileContent:    base64.StdEncoding.EncodeToString(fileData),
 	}
 
-	serviceId, err := service.CreateServiceFromComposeSpec(context.Background(), &request)
+	var buildRes *serviceapi.BuildServiceFromComposeSpecResult
+	buildRes, err = service.BuildServiceFromComposeSpec(context.Background(), &request)
 	if err != nil {
-		return "", fmt.Errorf("unable to create service, %s", err.Error())
+		return "", "", fmt.Errorf("unable to create service, %s", err.Error())
 	}
-	return string(serviceId), nil
+	return string(buildRes.ServiceID), string(buildRes.ProductTierID), nil
 }
 
 func resetBuild() {

@@ -3,12 +3,16 @@ package cmd
 import (
 	"github.com/omnistrate/ctl/testutils"
 	"github.com/stretchr/testify/require"
+	"os"
 	"testing"
 )
 
 func Test_login(t *testing.T) {
 	require := require.New(t)
 	defer testutils.Cleanup()
+
+	err := os.Setenv("ROOT_DOMAIN", "omnistrate.dev")
+	require.NoError(err)
 
 	tests := []struct {
 		Args           []string
@@ -23,7 +27,7 @@ func Test_login(t *testing.T) {
 
 	for _, tt := range tests {
 		rootCmd.SetArgs(tt.Args)
-		err := rootCmd.Execute()
+		err = rootCmd.Execute()
 		if tt.WantErr {
 			require.Error(err, tt.ExpectedErrMsg)
 			require.Contains(err.Error(), tt.ExpectedErrMsg)

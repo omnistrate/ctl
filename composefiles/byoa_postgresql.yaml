@@ -1,0 +1,25 @@
+version: '3.9'
+x-omnistrate-byoa: # Customer-Account
+  AwsAccountId: '339713121445'
+  AwsBootstrapRoleAccountArn: 'arn:aws:iam::339713121445:role/omnistrate-bootstrap-role'
+x-customer-integrations:
+  metrics:
+    prometheusEndpoint: ':9090'
+    provider: native
+  logs:
+    provider: native
+services:
+  postgres:
+    image: postgres
+    ports:
+      - '5432:5432'
+    environment:
+      - SECURITY_CONTEXT_USER_ID=999
+      - SECURITY_CONTEXT_GROUP_ID=999
+      - POSTGRES_USER=username
+      - POSTGRES_PASSWORD=password
+      - PGDATA=/var/lib/postgresql/data/dbdata
+    x-omnistrate-compute:
+      rootVolumeSizeGi: 20
+    volumes:
+      - ./data:/var/lib/postgresql/data

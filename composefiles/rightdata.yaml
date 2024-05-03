@@ -1,0 +1,686 @@
+# Logo: https://media.licdn.com/dms/image/D560BAQGCmXcDgMnyzA/company-logo_200_200/0/1708620012902/getrightdata_logo?e=2147483647&v=beta&t=dWx74UpmWKJvVHfUy5GQbyXEAtftkdKssW90cH_bIqY
+version: "3.8"
+
+name: rightdata
+
+x-omnistrate-integrations:
+  - omnistrateLogging
+  - omnistrateMetrics
+
+x-omnistrate-load-balancer:
+  https:
+    - name: dextrus
+      description: L7 Load Balancer for PGAdmin
+      paths:
+        - associatedResourceKey: dextrusui
+          path: /
+          backendPort: 8080
+        - associatedResourceKey: dextrusweb
+          path: /dweb
+          backendPort: 8080
+        - associatedResourceKey: system-variables
+          path: /system
+          backendPort: 8085
+        - associatedResourceKey: business-modeler
+          path: /business-modeler
+          backendPort: 8093
+        - associatedResourceKey: dbexplorer
+          path: /dbexplorer
+          backendPort: 8084
+        - associatedResourceKey: dextrus-datascience
+          path: /datascience
+          backendPort: 8000
+        - associatedResourceKey: datamarket-consumption
+          path: /datamarket
+          backendPort: 8094
+
+services:
+  business-modeler:
+    x-omnistrate-mode-internal: true
+    container_name: business-modeler
+    deploy:
+      resources:
+        limits:
+          cpus: "5"
+          memory: "8589934592"
+    image: public.ecr.aws/n9g8r8n8/business-modeler:release-1.9.2
+    logging:
+      driver: json-file
+      options:
+        max-file: "10"
+        max-size: 10m
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 8093
+        published: "8093"
+        protocol: tcp
+    restart: always
+    volumes:
+      - type: volume
+        source: persist
+        target: /home/ubuntu
+        volume: {}
+    # - type: bind
+    #   source: /Users/aloknikhil/containers/demos/rightdata/final/config_files/application-bm.yml
+    #   target: /resources/application.yml
+    #   bind:
+    #     create_host_path: true
+
+  common-service:
+    x-omnistrate-mode-internal: true
+    container_name: common-service
+    image: public.ecr.aws/n9g8r8n8/common-service:uat-release-2.4
+    logging:
+      driver: json-file
+      options:
+        max-file: "10"
+        max-size: 10m
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 8091
+        published: "8095"
+        protocol: tcp
+    restart: always
+    volumes:
+      - type: volume
+        source: persist
+        target: /home/ubuntu
+        volume: {}
+    # - type: bind
+    #   source: /Users/aloknikhil/containers/demos/rightdata/final/config_files/commonservices/application.yml
+    #   target: /resources/application.yml
+    #   bind:
+    #     create_host_path: true
+
+  data-wrangler-python:
+    x-omnistrate-compute:
+      rootVolumeSizeGi: 100
+    x-omnistrate-mode-internal: true
+    container_name: data-wrangler-python
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: "16106127360"
+    environment:
+      AIML_DB_URI: mysql+pymysql://root:my-secret-pw@hive-metastore-mysql:3306/dextrus_db
+      AIML_SOURCE_PATH: /home/ubuntu/spark-warehouse/
+      API_VERSION: v1.5
+      CRYPTOGRAPHY_OPENSSL_NO_LEGACY: "1"
+      DB_URI: mysql+aiomysql://root:my-secret-pw@hive-metastore-mysql:3306/dextrus_db
+      DELTA_PATH: /home/ubuntu/DELTA_WAREHOUSE/
+      DEXTRUS_DS_SOURCE_PATH: /home/ubuntu/spark-warehouse/
+      DW_DESIGN_PATH: /home/ubuntu/spark-warehouse/
+      EXE_DOCKER: "False"
+      FILES_PATH: local
+      KAFKA_BOOTSTRAP_SERVER: 10.10.20.64:9092
+      KAFKA_LISTENER: "true"
+      LOCAL_IP: 10.10.20.64
+      LOG_LEVEL: debug
+      NEO4J_PASSWORD: password
+      NEO4J_URI: bolt://10.10.20.64:5007
+      NEO4J_USERNAME: neo4j
+      OPENAI_API_KEY: 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
+      RUN_ALEMBIC: "true"
+      TRINO_HOST: trino-dm.getrightdata.com
+    image: public.ecr.aws/n9g8r8n8/wrangler-python:release-1.9.2
+    logging:
+      driver: json-file
+      options:
+        max-file: "10"
+        max-size: 10m
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 8000
+        published: "5002"
+        protocol: tcp
+    restart: always
+    volumes:
+      - type: volume
+        source: persist
+        target: /home/ubuntu
+        volume: {}
+
+  datamarket-consumption:
+    x-omnistrate-mode-internal: true
+    container_name: datamarket-consumption
+    deploy:
+      resources:
+        limits:
+          cpus: "5"
+          memory: "8589934592"
+    environment:
+      _JAVA_OPTIONS: -Xmx10g
+    image: public.ecr.aws/n9g8r8n8/datamarket-consumption:release-1.9.2
+    logging:
+      driver: json-file
+      options:
+        max-file: "10"
+        max-size: 10m
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 8094
+        published: "8094"
+        protocol: tcp
+    restart: always
+    volumes:
+      - type: volume
+        source: persist
+        target: /home/ubuntu
+        volume: {}
+
+  datanode:
+    x-omnistrate-mode-internal: true
+    command:
+      - hadoop
+      - datanode
+      - -D
+      - FOREGROUND
+    container_name: datanode
+    image: public.ecr.aws/n9g8r8n8/hadoop-hive:hadoop-3.2.3
+    environment:
+      - SECURITY_CONTEXT_FS_GROUP=0
+      - SECURITY_CONTEXT_USER_ID=0
+      - SECURITY_CONTEXT_GROUP_ID=0
+    networks:
+      default: null
+    restart: always
+    volumes:
+      - type: volume
+        source: datanode_data
+        target: /opt/hadoop/data
+        volume: {}
+      - type: volume
+        source: datanode_logs
+        target: /opt/hadoop/logs
+        volume: {}
+
+  dbexplorer:
+    x-omnistrate-mode-internal: true
+    container_name: dbexplorer
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: "2147483648"
+        reservations:
+          memory: "1073741824"
+    image: public.ecr.aws/n9g8r8n8/dbexplorer:release-1.9.2
+    logging:
+      driver: json-file
+      options:
+        max-file: "10"
+        max-size: 10m
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 8084
+        published: "8084"
+        protocol: tcp
+    restart: always
+    volumes:
+      - type: volume
+        source: persist
+        target: /home/ubuntu
+        volume: {}
+
+  dextrus-datascience:
+    x-omnistrate-compute:
+      rootVolumeSizeGi: 100
+    x-omnistrate-mode-internal: true
+    container_name: dextrus_datascience
+    deploy:
+      resources:
+        limits:
+          cpus: "10"
+          memory: "21474836480"
+    environment:
+      AIML_DB_URI: mysql+pymysql://root:my-secret-pw@hive-metastore-mysql:3306/dextrus_db
+      AIML_SOURCE_PATH: /home/ubuntu/spark-warehouse/
+      API_VERSION: v1.5
+      CRYPTOGRAPHY_OPENSSL_NO_LEGACY: "1"
+      DB_URI: mysql+aiomysql://root:my-secret-pw@hive-metastore-mysql:3306/dextrus_db
+      DELTA_PATH: /home/ubuntu/DELTA_WAREHOUSE/
+      DEXTRUS_DS_SOURCE_PATH: /home/ubuntu/spark-warehouse/
+      DW_DESIGN_PATH: /home/ubuntu/spark-warehouse/
+      EXE_DOCKER: "False"
+      FILES_PATH: local
+      KAFKA_BOOTSTRAP_SERVER: 10.10.20.64:9092
+      KAFKA_LISTENER: "true"
+      LOCAL_IP: 10.10.20.64
+      LOG_LEVEL: debug
+      NEO4J_PASSWORD: password
+      NEO4J_URI: bolt://10.10.20.64:5007
+      NEO4J_USERNAME: neo4j
+      OPENAI_API_KEY: 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
+      RUN_ALEMBIC: "true"
+      TRINO_HOST: trino-dm.getrightdata.com
+      HF_HOME: /home/ubuntu/hf
+    image: public.ecr.aws/n9g8r8n8/dextrus_datascience:release-1.9.2
+    logging:
+      driver: json-file
+      options:
+        max-file: "10"
+        max-size: 10m
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 8000
+        published: "5008"
+        protocol: tcp
+    restart: always
+    volumes:
+      - type: volume
+        source: persist
+        target: /home/ubuntu
+        volume: {}
+
+  dextrusui:
+    x-omnistrate-mode-internal: true
+    container_name: dextrusui
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: "2147483648"
+    image: public.ecr.aws/n9g8r8n8/dextrusui:release-1.9.2
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 8080
+        published: "9091"
+        protocol: tcp
+    restart: always
+    # volumes:
+    # - type: bind
+    #   source: /Users/aloknikhil/containers/demos/rightdata/final/config_files/ui/api-config.json
+    #   target: /usr/local/tomcat/webapps/Dextrus/api-config.json
+    #   bind:
+    #     create_host_path: true
+
+  dextrusweb:
+    x-omnistrate-mode-internal: true
+    container_name: dextrusweb
+    environment:
+      _JAVA_OPTIONS: -Xmx30g
+    image: public.ecr.aws/n9g8r8n8/dextrusweb:release-1.9.2
+    logging:
+      driver: json-file
+      options:
+        max-file: "10"
+        max-size: 20m
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 8080
+        published: "8080"
+        protocol: tcp
+      - mode: ingress
+        target: 44103
+        published: "44103"
+        protocol: tcp
+      - mode: ingress
+        target: 44104
+        published: "44104"
+        protocol: tcp
+      - mode: ingress
+        target: 44105
+        published: "44105"
+        protocol: tcp
+      - mode: ingress
+        target: 44106
+        published: "44106"
+        protocol: tcp
+      - mode: ingress
+        target: 44107
+        published: "44107"
+        protocol: tcp
+      - mode: ingress
+        target: 44108
+        published: "44108"
+        protocol: tcp
+      - mode: ingress
+        target: 44109
+        published: "44109"
+        protocol: tcp
+      - mode: ingress
+        target: 44110
+        published: "44110"
+        protocol: tcp
+      - mode: ingress
+        target: 44111
+        published: "44111"
+        protocol: tcp
+      - mode: ingress
+        target: 44112
+        published: "44112"
+        protocol: tcp
+      - mode: ingress
+        target: 44113
+        published: "44113"
+        protocol: tcp
+      - mode: ingress
+        target: 44114
+        published: "44114"
+        protocol: tcp
+      - mode: ingress
+        target: 44115
+        published: "44115"
+        protocol: tcp
+      - mode: ingress
+        target: 44116
+        published: "44116"
+        protocol: tcp
+      - mode: ingress
+        target: 44117
+        published: "44117"
+        protocol: tcp
+      - mode: ingress
+        target: 44118
+        published: "44118"
+        protocol: tcp
+      - mode: ingress
+        target: 44119
+        published: "44119"
+        protocol: tcp
+      - mode: ingress
+        target: 44120
+        published: "44120"
+        protocol: tcp
+      - mode: ingress
+        target: 44121
+        published: "44121"
+        protocol: tcp
+      - mode: ingress
+        target: 44122
+        published: "44122"
+        protocol: tcp
+      - mode: ingress
+        target: 44123
+        published: "44123"
+        protocol: tcp
+      - mode: ingress
+        target: 61023
+        published: "61023"
+        protocol: tcp
+      - mode: ingress
+        target: 4050
+        published: "4050"
+        protocol: tcp
+    restart: always
+    volumes:
+      - type: volume
+        source: persist
+        target: /home/ubuntu
+        volume: {}
+
+  hcatalog:
+    x-omnistrate-mode-internal: true
+    container_name: hcatalog
+    environment:
+      HADOOP_HOME: /opt/hadoop
+    image: public.ecr.aws/n9g8r8n8/hadoop-hive:hive-2.3.9
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 9083
+        published: "9083"
+        protocol: tcp
+    restart: always
+    volumes:
+      - type: volume
+        source: hcatalog_data
+        target: /opt/hive/data
+        volume: {}
+      - type: volume
+        source: persist
+        target: /home/ubuntu
+        volume: {}
+    # - type: bind
+    #   source: /Users/aloknikhil/containers/demos/rightdata/final/config_files/hive-site.xml
+    #   target: /opt/hive/conf/hive-site.xml
+    #   bind:
+    #     create_host_path: true
+
+  hive-metastore-mysql:
+    x-omnistrate-mode-internal: true
+    container_name: hive-metastore-mysql
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: "12884901888"
+    environment:
+      MYSQL_ROOT_PASSWORD: my-secret-pw
+    image: public.ecr.aws/n9g8r8n8/mysql-db:5.7.33-hive-2.3.2
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 3306
+        published: "3306"
+        protocol: tcp
+    restart: always
+    volumes:
+      - type: volume
+        source: datavolume
+        target: /var/lib/mysql
+        volume: {}
+
+  kafka1:
+    x-omnistrate-mode-internal: true
+    container_name: kafka1
+    depends_on:
+      zoo1:
+        condition: service_started
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka1:19092,EXTERNAL://kafka1:9092,DOCKER://kafka1:29092
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "true"
+      KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.authorizer.AclAuthorizer
+      KAFKA_BROKER_ID: "1"
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_JMX_HOSTNAME: kafka1
+      KAFKA_JMX_PORT: "9999"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,DOCKER:PLAINTEXT
+      KAFKA_LOG4J_LOGGERS: kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_ZOOKEEPER_CONNECT: zoo1:2181
+    hostname: kafka1
+    image: confluentinc/cp-kafka:7.3.2
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 9092
+        published: "9092"
+        protocol: tcp
+      - mode: ingress
+        target: 29092
+        published: "29092"
+        protocol: tcp
+      - mode: ingress
+        target: 9999
+        published: "9999"
+        protocol: tcp
+    restart: always
+
+  namenode:
+    x-omnistrate-mode-internal: true
+    command:
+      - hadoop
+      - namenode
+      - -D
+      - FOREGROUND
+    container_name: namenode
+    image: public.ecr.aws/n9g8r8n8/hadoop-hive:hadoop-3.2.3
+    environment:
+      - SECURITY_CONTEXT_FS_GROUP=0
+      - SECURITY_CONTEXT_USER_ID=0
+      - SECURITY_CONTEXT_GROUP_ID=0
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 9870
+        published: "9870"
+        protocol: tcp
+    restart: always
+    volumes:
+      - type: volume
+        source: namenode_data
+        target: /opt/hadoop/data
+        volume: {}
+      - type: volume
+        source: datanode_logs
+        target: /opt/hadoop/logs
+        volume: {}
+
+  neo4j:
+    x-omnistrate-mode-internal: true
+    container_name: neo4j
+    deploy:
+      resources:
+        limits:
+          cpus: "10"
+          memory: "10737418240"
+    image: neo4j:community
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 7474
+        published: "5004"
+        protocol: tcp
+      - mode: ingress
+        target: 7687
+        published: "5007"
+        protocol: tcp
+    restart: always
+    volumes:
+      - type: bind
+        source: /Users/aloknikhil/containers/demos/rightdata/final/neo4j/data
+        target: /data
+        bind:
+          create_host_path: true
+      - type: volume
+        source: persist
+        target: /home/ubuntu
+        volume: {}
+
+  nodemanager:
+    x-omnistrate-mode-internal: true
+    command:
+      - yarn
+      - nodemanager
+    container_name: nodemanager
+    image: public.ecr.aws/n9g8r8n8/hadoop-hive:hadoop-3.2.3
+    environment:
+      - SECURITY_CONTEXT_FS_GROUP=0
+      - SECURITY_CONTEXT_USER_ID=0
+      - SECURITY_CONTEXT_GROUP_ID=0
+    volumes:
+      - type: volume
+        source: datanode_logs
+        target: /opt/hadoop/logs
+        volume: {}
+    networks:
+      default: null
+    restart: always
+
+  system-variables:
+    x-omnistrate-mode-internal: true
+    container_name: system-variables
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: "2147483648"
+    image: public.ecr.aws/n9g8r8n8/system-variables:release-1.9.2
+    logging:
+      driver: json-file
+      options:
+        max-file: "10"
+        max-size: 10m
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 8085
+        published: "8085"
+        protocol: tcp
+    restart: always
+    volumes:
+      - type: volume
+        source: persist
+        target: /home/ubuntu
+        volume: {}
+
+  zoo1:
+    x-omnistrate-mode-internal: true
+    container_name: zoo1
+    environment:
+      ZOOKEEPER_CLIENT_PORT: "2181"
+      ZOOKEEPER_SERVER_ID: "1"
+      ZOOKEEPER_SERVERS: zoo1:2888:3888
+    hostname: zoo1
+    image: confluentinc/cp-zookeeper:7.3.2
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 2181
+        published: "2181"
+        protocol: tcp
+    restart: always
+
+  cluster:
+    image: omnistrate/noop
+    depends_on:
+      - namenode
+      - datanode
+      - nodemanager
+      - system-variables
+      - hive-metastore-mysql
+      - hcatalog
+      - kafka1
+      - neo4j
+      - dextrusui
+      - dextrusweb
+      - common-service
+      - business-modeler
+      - datamarket-consumption
+      - data-wrangler-python
+      - dbexplorer
+      - dextrus-datascience
+
+networks:
+  default:
+    name: final_default
+volumes:
+  datanode_data:
+    name: final_datanode_data
+  datanode_logs:
+    name: final_datanode_logs
+  datavolume:
+    name: final_datavolume
+  hcatalog_data:
+    name: final_hcatalog_data
+  namenode_data:
+    name: final_namenode_data
+  persist:
+    name: final_persist
