@@ -27,6 +27,10 @@ func Test_build_basic(t *testing.T) {
 
 	// Step 3: test build service on all compose files
 	for _, f := range composeFiles {
+		if f.IsDir() {
+			continue
+		}
+
 		rootCmd.SetArgs([]string{"build", "-f", "../composefiles/" + f.Name(), "--name", f.Name(), "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 		err = rootCmd.Execute()
 		require.NoError(err, f.Name())
