@@ -53,7 +53,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	}
 
 	if !strings.HasSuffix(file, ".yaml") && !strings.HasSuffix(file, ".yml") {
-		return fmt.Errorf("file must be a valid docker-compose file in .yaml or .yml format")
+		return fmt.Errorf("file must be a valid docker-compose file in .yaml or .yml format, got %s", file)
 	}
 
 	if _, err := os.Stat(file); os.IsNotExist(err) {

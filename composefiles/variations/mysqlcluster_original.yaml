@@ -5,8 +5,8 @@ x-omnistrate-service-plan:
   tenancyType: 'OMNISTRATE_DEDICATED_TENANCY'
   deployment:
     hostedDeployment:
-      AwsAccountId: '541226919599'
-      AwsBootstrapRoleAccountArn: 'arn:aws:iam::541226919599:role/omnistrate-bootstrap-role'
+      AwsAccountId: '339713121445'
+      AwsBootstrapRoleAccountArn: 'arn:aws:iam::339713121445:role/omnistrate-bootstrap-role'
 x-omnistrate-integrations:
   - omnistrateLogging
 x-internal-integrations:

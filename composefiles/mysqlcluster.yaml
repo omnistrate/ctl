@@ -1,10 +1,10 @@
 # Logo: https://assets.stickpng.com/images/62debc4fff3c6e4b8b5de8d3.png
 version: "3"
 x-omnistrate-my-account:
-  AwsAccountId: '541226919568'
-  AwsBootstrapRoleAccountArn: 'arn:aws:iam::541226919568:role/omnistrate-bootstrap-role'
-  GcpProjectId: 'omnistrate-internal68'
-  GcpProjectNumber: '1035915676468'
+  AwsAccountId: '339713121445'
+  AwsBootstrapRoleAccountArn: 'arn:aws:iam::339713121445:role/omnistrate-bootstrap-role'
+  GcpProjectId: 'omnistrate-dataplane-host-dev'
+  GcpProjectNumber: '61114262792'
   GcpServiceAccountEmail: 'bootstrap.service@gcp.test.iam'
 x-omnistrate-integrations:
   - omnistrateLogging

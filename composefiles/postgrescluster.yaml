@@ -1,7 +1,7 @@
 version: "3"
 x-omnistrate-byoa: # Customer-Account
-  AwsAccountId: '541226919571'
-  AwsBootstrapRoleAccountArn: 'arn:aws:iam::541226919571:role/omnistrate-bootstrap-role'
+  AwsAccountId: '339713121445'
+  AwsBootstrapRoleAccountArn: 'arn:aws:iam::339713121445:role/omnistrate-bootstrap-role'
 x-omnistrate-integrations:
   - omnistrateLogging
   - omnistrateMetrics
