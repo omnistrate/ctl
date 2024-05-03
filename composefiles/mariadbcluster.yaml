@@ -1,11 +1,15 @@
 # Logo: https://cdn.icon-icons.com/icons2/2699/PNG/512/mariadb_logo_icon_168996.png
 version: "3"
-x-omnistrate-my-account:
-  AwsAccountId: '541226919566'
-  AwsBootstrapRoleAccountArn: 'arn:aws:iam::541226919566:role/omnistrate-bootstrap-role'
-  GcpProjectId: 'omnistrate-internal61'
-  GcpProjectNumber: '1035915676461'
-  GcpServiceAccountEmail: 'bootstrap.service@gcp.test.iam'
+x-omnistrate-service-plan:
+  name: 'Hosted MariaDB Cluster'
+  tenancyType: 'OMNISTRATE_DEDICATED_TENANCY'
+  deployment:
+    hostedDeployment:
+      AwsAccountId: '339713121445'
+      AwsBootstrapRoleAccountArn: 'arn:aws:iam::339713121445:role/omnistrate-bootstrap-role'
+      GcpProjectId: 'omnistrate-dataplane-host-dev'
+      GcpProjectNumber: '61114262792'
+      GcpServiceAccountEmail: 'bootstrap.service@gcp.test.iam'
 x-omnistrate-integrations:
   - omnistrateLogging
   - omnistrateMetrics

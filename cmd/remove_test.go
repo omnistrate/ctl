@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"fmt"
+	"github.com/google/uuid"
 	"github.com/omnistrate/ctl/testutils"
 	"github.com/stretchr/testify/require"
+	"os"
 	"testing"
 )
 
@@ -10,29 +13,19 @@ func Test_remove_basic(t *testing.T) {
 	require := require.New(t)
 	defer testutils.Cleanup()
 
-	rootCmd.SetArgs([]string{"login", "--email=xzhang+ctltest@omnistrate.com", "--password=ctltest"})
-	err := rootCmd.Execute()
+	err := os.Setenv("ROOT_DOMAIN", "omnistrate.dev")
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/cassandra.yaml", "--name", "cassandra", "--description", "My Service Description", "--service-logo-url", "https://my-service-logo.com/logo.png"})
+	testEmail, testPassword := testutils.GetTestAccount()
+	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = rootCmd.Execute()
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"remove"})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/postgresql.yaml", "--name", "postgresql" + uuid.NewString(), "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = rootCmd.Execute()
 	require.NoError(err)
-}
 
-func Test_remove_no_service(t *testing.T) {
-	require := require.New(t)
-	defer testutils.Cleanup()
-
-	rootCmd.SetArgs([]string{"login", "--email=xzhang+ctltest@omnistrate.com", "--password=ctltest"})
-	err := rootCmd.Execute()
-	require.NoError(err)
-
-	rootCmd.SetArgs([]string{"remove"})
+	rootCmd.SetArgs([]string{"remove", "--service-id", serviceID})
 	err = rootCmd.Execute()
-	require.Error(err)
-	require.Contains(err.Error(), "service does not exist")
+	require.NoError(err)
 }

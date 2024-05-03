@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	signinapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/signin_api"
-	"github.com/omnistrate/commons/pkg/httpclientwrapper"
 	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/config"
 	utils2 "github.com/omnistrate/ctl/utils"
@@ -27,17 +27,17 @@ var loginCmd = &cobra.Command{
 	Use:   `login [--email EMAIL] [--password PASSWORD]`,
 	Short: "Log in to Omnistrate platform",
 	Long:  "Log in to Omnistrate platform",
-	Example: `  cat ~/omnistrate_pass.txt | omnistrate-cli login -e email --password-stdin
-	  echo $PASSWORD | omnistrate-cli login -e email --password password`,
+	Example: `  cat ~/omnistrate_pass.txt | ./omnistrate-cli login -e email --password-stdin
+	  echo $OMNISTRATE_PASSWORD | ./omnistrate-cli login -e email --password-stdin`,
 	RunE: runLogin,
 }
 
 func init() {
 	rootCmd.AddCommand(loginCmd)
 
-	loginCmd.Flags().StringVarP(&email, "email", "e", "", "email")
-	loginCmd.Flags().StringVarP(&password, "password", "p", "", "password")
-	loginCmd.Flags().BoolVarP(&passwordStdin, "password-stdin", "s", false, "Reads the password from stdin")
+	loginCmd.Flags().StringVarP(&email, "email", "", "", "email")
+	loginCmd.Flags().StringVarP(&password, "password", "", "", "password")
+	loginCmd.Flags().BoolVarP(&passwordStdin, "password-stdin", "", false, "Reads the password from stdin")
 }
 
 func runLogin(cmd *cobra.Command, args []string) error {
@@ -48,7 +48,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(password) > 0 {
-		fmt.Println("WARNING! Using --password is insecure, consider using: cat ~/omnistrate_pass.txt | omnistrate-cli login -e email --password-stdin echo $PASSWORD")
+		fmt.Println("WARNING! Using --password is insecure, consider using: cat ~/omnistrate_pass.txt | ./omnistrate-cli login -e email --password-stdin echo $PASSWORD")
 		if passwordStdin {
 			return fmt.Errorf("--password and --password-stdin are mutually exclusive")
 		}
@@ -108,8 +108,8 @@ func validateLogin(email string, pass string) (string, error) {
 	}
 
 	request := signinapi.SigninRequest{
-		Email:          email,
-		HashedPassword: utils.HashPassword(pass),
+		Email:    email,
+		Password: utils.ToPtr(pass),
 	}
 
 	res, err := signin.Signin(context.Background(), &request)
@@ -120,7 +120,7 @@ func validateLogin(email string, pass string) (string, error) {
 			return "", fmt.Errorf("unable to login, %s", err.Error())
 		}
 
-		if serviceErr.Name == "auth_failure" {
+		if serviceErr.Name == "auth_failure" || serviceErr.Name == "bad_request" {
 			return "", fmt.Errorf("unable to login, either email or password is incorrect")
 		}
 

@@ -7,25 +7,8 @@ x-omnistrate-service-plan:
     hostedDeployment:
       AwsAccountId: '339713121445'
       AwsBootstrapRoleAccountArn: 'arn:aws:iam::339713121445:role/omnistrate-bootstrap-role'
-      GcpProjectId: 'omnistrate-dataplane-host-dev'
-      GcpProjectNumber: '61114262792'
-      GcpServiceAccountEmail: 'bootstrap.service@gcp.test.iam'
 x-omnistrate-integrations:
   - omnistrateLogging
-  - omnistrateMetrics:
-      additionalMetrics:
-        writer: # pod
-          prometheusEndpoint: ':9090/metrics'
-          metrics:
-            Aborted_connects: # metric name
-            Threads_connected: # metric name
-              https-only: # serie definition
-                aggregationFunction: max
-                labelFilters:
-                  protocol: https
-              all: # another serie
-                aggregationFunction: sum
-
 x-internal-integrations:
   metrics:
     prometheusEndpoint: ':9090'
@@ -40,8 +23,6 @@ x-internal-integrations:
     secretLocators:
       # gcp: projects/my-project/secrets/my-secret/versions/latest
       aws: arn:aws:secretsmanager:us-west-2:1234567890:secret:compose-secret
-  billing:
-    S3BucketARN: arn:aws:s3:::my_billing_bucket_name
 services:
   writer:
     image: docker.io/bitnami/mysql:8.1.0

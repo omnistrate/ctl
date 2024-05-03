@@ -1,0 +1,100 @@
+# Logo: https://assets.stickpng.com/images/62debc4fff3c6e4b8b5de8d3.png
+version: "3"
+x-omnistrate-service-plan:
+  name: 'Hosted MySQL Cluster'
+  tenancyType: 'OMNISTRATE_DEDICATED_TENANCY'
+  deployment:
+    hostedDeployment:
+      AwsAccountId: '339713121445'
+      AwsBootstrapRoleAccountArn: 'arn:aws:iam::339713121445:role/omnistrate-bootstrap-role'
+      GcpProjectId: 'omnistrate-dataplane-host-dev'
+      GcpProjectNumber: '61114262792'
+      GcpServiceAccountEmail: 'bootstrap.service@gcp.test.iam'
+x-omnistrate-integrations:
+  - omnistrateMetrics:
+      additionalMetrics:
+        mySQL: # pod
+          prometheusEndpoint: ':9090/metrics'
+          metrics:
+            Aborted_connects: # metric name
+            Threads_connected: # metric name
+              https-only: # serie definition
+                aggregationFunction: max
+                labelFilters:
+                  protocol: https
+              all: # another serie
+                aggregationFunction: sum
+x-internal-integrations:
+  billing:
+    S3BucketARN: arn:aws:s3:::my_billing_bucket_name
+services:
+  MySQL:
+    image: mysql:latest
+    x-omnistrate-api-params:
+      - key: rootPassword
+        description: Default root password
+        name: Password
+        type: String
+        modifiable: true
+        required: true
+        export: false
+        defaultValue: a_secure_root_password
+      - key: password
+        description: Default database password
+        name: Password
+        type: String
+        modifiable: true
+        required: true
+        export: false
+        defaultValue: a_secure_password
+      - key: username
+        description: Default database username
+        name: Username
+        type: String
+        modifiable: true
+        required: true
+        export: true
+        defaultValue: user
+      - key: databaseName
+        description: Default database name
+        name: Database Name
+        type: String
+        modifiable: true
+        required: true
+        export: true
+        defaultValue: default
+    environment:
+      MYSQL_ROOT_PASSWORD: $var.rootPassword
+      MYSQL_DATABASE: $var.databaseName
+      MYSQL_USER: $var.username
+      MYSQL_PASSWORD: $var.password
+    x-omnistrate-compute:
+      instanceTypes:
+        - name: t3.medium
+          cloudProvider: aws
+        - name: e2-medium
+          cloudProvider: gcp
+    volumes:
+      - source: ./data
+        target: /var/lib/mysql
+        type: bind
+        x-omnistrate-storage:
+          aws:
+            instanceStorageType: AWS::EBS_GP3
+            instanceStorageSizeGi: 100
+            instanceStorageIOPS: 3000
+            instanceStorageThroughputMiBps: 125
+          gcp:
+            instanceStorageType: GCP::PD_BALANCED
+            instanceStorageSizeGi: 100
+    x-omnistrate-capabilities:
+      autoscaling:
+        maxReplicas: 1
+        minReplicas: 1
+        idleMinutesBeforeScalingDown: 20
+        idleThreshold: 1
+        overUtilizedMinutesBeforeScalingUp: 3
+        overUtilizedThreshold: 80
+      enableMultiZone: true
+    ports:
+      - '3306:3306'

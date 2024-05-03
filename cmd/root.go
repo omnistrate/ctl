@@ -8,9 +8,9 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "omnistrate-ctl",
-	Short: "Omnistrate ctl in Go.",
-	Long: `Omnistrate ctl is a command line tool for creating,
+	Use:   "omnistrate-cli",
+	Short: "Omnistrate cli in Go.",
+	Long: `Omnistrate cli is a command line tool for creating,
 deploying, and managing your Omnistrate SaaS. `,
 	Run: runRoot,
 }

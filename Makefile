@@ -40,8 +40,8 @@ unit-test:
 
 .PHONY: build
 build:
-	echo "Building go binaries for ctl"
-	go build -mod=mod ${BUILD_FLAGS} -o ctl main.go
+	echo "Building go binaries for omnistrate cli"
+	go build -mod=mod ${BUILD_FLAGS} -o omnistrate-cli main.go
 
 .PHONY: test-coverage-report
 test-coverage-report:
