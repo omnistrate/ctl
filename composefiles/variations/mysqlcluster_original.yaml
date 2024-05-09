@@ -61,13 +61,13 @@ services:
       - SECURITY_CONTEXT_FS_GROUP=1001
       - SECURITY_CONTEXT_GROUP_ID=0
     x-omnistrate-api-params:
-      - key: writerInstanceType
-        description: Writer Instance Type
-        name: Writer Instance Type
-        type: String
-        modifiable: true
-        required: true
-        export: true
+#      - key: writerInstanceType
+#        description: Writer Instance Type
+#        name: Writer Instance Type
+#        type: String
+#        modifiable: true
+#        required: true
+#        export: true
       - key: password
         description: Default DB Password
         name: Password
@@ -165,7 +165,7 @@ services:
         export: true
         defaultValue: t4g.small
         parameterDependencyMap:
-          writer: writerInstanceType
+#          writer: writerInstanceType
           reader: readerInstanceType
       - key: password
         description: Default DB Password
