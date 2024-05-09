@@ -17,5 +17,10 @@ func GetToken() (string, error) {
 
 // GetHost returns the host of the Omnistrate server
 func GetHost() string {
-	return "api." + utils.GetEnv("ROOT_DOMAIN", "omnistrate.cloud")
+	return "api." + GetRootDomain()
+}
+
+// GetRootDomain returns the root domain of the Omnistrate server
+func GetRootDomain() string {
+	return utils.GetEnv("ROOT_DOMAIN", "omnistrate.cloud")
 }

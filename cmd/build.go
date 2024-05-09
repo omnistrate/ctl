@@ -84,8 +84,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	fmt.Println("Service built successfully")
-	fmt.Println("Service ID:", serviceID)
-	fmt.Println("Product Tier ID:", productTierID)
+	fmt.Printf("Check the service plan at https://%s/product-tier/build?serviceId=%s&productTierId=%s\n", utils.GetRootDomain(), serviceID, productTierID)
 
 	return nil
 }
