@@ -25,7 +25,7 @@ var (
 
 // buildCmd represents the build command
 var buildCmd = &cobra.Command{
-	Use:     "build [--file FILE] [--name NAME] [--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL]",
+	Use:     "build [--file FILE] [--name NAME] [--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] [--release]",
 	Short:   "Build service from a docker-compose file",
 	Long:    `Build service from a docker-compose file. The file must be in .yaml or .yml format. Name is required. Description and service logo URL are optional.`,
 	Example: `  ./omnistrate-cli build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png" --release`,
