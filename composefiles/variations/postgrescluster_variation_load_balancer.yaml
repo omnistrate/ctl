@@ -12,25 +12,17 @@ x-omnistrate-integrations:
 x-omnistrate-load-balancer:
   https:
     - name: PGAdmin
-      description: L7 Load Balancer for PGAdmin
+      description: L7 Load Balancer for PGAdmin - New
       paths:
         - associatedResourceKey: pGAdmin
           path: /
           backendPort: 80
   tcp:
-    - name: Reader
-      description: L4 Load Balancer for Reader
-      ports:
-        - associatedResourceKeys:
-            - reader
-          ingressPort: 5432
-          backendPort: 5432
-    - name: HA Endpoint
-      description: L4 Load Balancer for HA Endpoint
+    - name: Writer
+      description: L4 Load Balancer for Writer
       ports:
         - associatedResourceKeys:
             - writer
-            - reader
           ingressPort: 5432
           backendPort: 5432
 
