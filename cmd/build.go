@@ -35,8 +35,8 @@ var buildCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(buildCmd)
 
-	buildCmd.Flags().StringVarP(&file, "file", "-f", "", "Path to the docker compose yaml file")
-	buildCmd.Flags().StringVarP(&name, "name", "-n", "", "Name of the service")
+	buildCmd.Flags().StringVarP(&file, "file", "f", "", "Path to the docker compose yaml file")
+	buildCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the service")
 	buildCmd.Flags().StringVarP(&description, "description", "", "", "Description of the service")
 	buildCmd.Flags().StringVarP(&serviceLogoURL, "service-logo-url", "", "", "URL to the service logo")
 	buildCmd.Flags().BoolVarP(&release, "release", "", false, "Release the service after building it")
