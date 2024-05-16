@@ -4,9 +4,9 @@ go 1.22.0
 
 require (
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/omnistrate/api-design v0.6.312
-	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240503190212-d0a2bd5030e5
-	github.com/omnistrate/commons/pkg/utils v0.0.0-20240501220459-340a06822319
+	github.com/omnistrate/api-design v0.6.334
+	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240516164837-7f138031067f
+	github.com/omnistrate/commons/pkg/utils v0.0.0-20240513183537-793100581af7
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0
 	goa.design/goa/v3 v3.16.1
@@ -23,10 +23,10 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/omnistrate/commons/pkg/constants v0.0.0-20240501220459-340a06822319 // indirect
+	github.com/omnistrate/commons/pkg/constants v0.0.0-20240514232635-cfaa6e7cbdba // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/prometheus/client_golang v1.19.0 // indirect
+	github.com/prometheus/client_golang v1.19.1 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.53.0 // indirect
 	github.com/prometheus/procfs v0.14.0 // indirect
@@ -34,9 +34,9 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
-	golang.org/x/crypto v0.22.0 // indirect
-	golang.org/x/net v0.24.0 // indirect
-	golang.org/x/sys v0.19.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
-	google.golang.org/protobuf v1.34.0 // indirect
+	golang.org/x/crypto v0.23.0 // indirect
+	golang.org/x/net v0.25.0 // indirect
+	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/text v0.15.0 // indirect
+	google.golang.org/protobuf v1.34.1 // indirect
 )
