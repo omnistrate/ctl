@@ -20,14 +20,15 @@ var (
 	serviceLogoURL string
 	serviceID      string
 	productTierID  string
+	release        bool
 )
 
 // buildCmd represents the build command
 var buildCmd = &cobra.Command{
 	Use:     "build [--file FILE] [--name NAME] [--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL]",
 	Short:   "Build service from a docker-compose file",
-	Long:    `Build service from a docker-compose file. The file must be in .yaml or .yml format. The name, description and service logo URL are required when the service is first created. They can be updated later. The service logo URL must be a valid URL to an image.`,
-	Example: `  ./omnistrate-cli build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"`,
+	Long:    `Build service from a docker-compose file. The file must be in .yaml or .yml format. Name is required. Description and service logo URL are optional.`,
+	Example: `  ./omnistrate-cli build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png" --release`,
 	RunE:    runBuild,
 }
 
@@ -38,6 +39,7 @@ func init() {
 	buildCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the service")
 	buildCmd.Flags().StringVarP(&description, "description", "", "", "Description of the service")
 	buildCmd.Flags().StringVarP(&serviceLogoURL, "service-logo-url", "", "", "URL to the service logo")
+	buildCmd.Flags().BoolVarP(&release, "release", "", false, "Release the service after building it")
 
 	// Set Bash completion options
 	validYAMLFilenames := []string{"yaml", "yml"}
@@ -79,7 +81,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		descriptionPtr = nil
 	}
 
-	serviceID, productTierID, err = buildService(file, token, name, descriptionPtr, serviceLogoURLPtr)
+	serviceID, productTierID, err = buildService(file, token, name, descriptionPtr, serviceLogoURLPtr, release)
 	if err != nil {
 		return err
 	}
@@ -89,7 +91,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func buildService(file, token, name string, description, serviceLogoURL *string) (serviceID string, productTierID string, err error) {
+func buildService(file, token, name string, description, serviceLogoURL *string, release bool) (serviceID string, productTierID string, err error) {
 	if name == "" {
 		return "", "", errors.New("name is required")
 	}
@@ -110,6 +112,7 @@ func buildService(file, token, name string, description, serviceLogoURL *string)
 		Description:    description,
 		ServiceLogoURL: serviceLogoURL,
 		FileContent:    base64.StdEncoding.EncodeToString(fileData),
+		Release:        &release,
 	}
 
 	var buildRes *serviceapi.BuildServiceFromComposeSpecResult
