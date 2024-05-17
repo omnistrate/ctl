@@ -53,6 +53,13 @@ services:
         - name: e2-large
           cloudProvider: gcp
     x-omnistrate-capabilities:
+      autoscaling:
+        maxReplicas: 1
+        minReplicas: 1
+        idleMinutesBeforeScalingDown: 20
+        idleThreshold: 1
+        overUtilizedMinutesBeforeScalingUp: 3
+        overUtilizedThreshold: 80
       serverlessConfiguration:
         targetPort: 3306
         enableAutoStop: true

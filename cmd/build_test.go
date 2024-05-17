@@ -61,7 +61,7 @@ func Test_build_update_service(t *testing.T) {
 
 	// PASS: create mysql cluster service
 	serviceName := "mysql cluster" + uuid.NewString()
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png", "--release"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 
@@ -70,22 +70,22 @@ func Test_build_update_service(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: update mysql cluster service
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_variation_apiparam_image_infra_capability.yaml", "--name", serviceName})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_variation_apiparam_image_infra_capability.yaml", "--name", serviceName, "--release-as-preferred"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 
 	// PASS: update back to original mysql cluster service
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--release-as-preferred"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 
 	// PASS: update mysql cluster service
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_variation_account_integration_resource.yaml", "--name", serviceName})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_variation_account_integration_resource.yaml", "--name", serviceName, "--release-as-preferred"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 
 	// PASS: update back to original mysql cluster service
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--release-as-preferred"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 
@@ -95,7 +95,7 @@ func Test_build_update_service(t *testing.T) {
 
 	// PASS: create postgres cluster service
 	serviceName = "postgres cluster" + uuid.NewString()
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/postgrescluster_original.yaml", "--name", serviceName, "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/postgrescluster_original.yaml", "--name", serviceName, "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png", "--release"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 
@@ -104,17 +104,17 @@ func Test_build_update_service(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: update postgres cluster service
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/postgrescluster_variation_load_balancer.yaml", "--name", serviceName})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/postgrescluster_variation_load_balancer.yaml", "--name", serviceName, "--release-as-preferred"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 
 	// PASS: update back to original postgres cluster service
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/postgrescluster_original.yaml", "--name", serviceName})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/postgrescluster_original.yaml", "--name", serviceName, "--release-as-preferred"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 
 	// PASS: add new service plan to postgres cluster service
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/postgrescluster_variation_new_tier.yaml", "--name", serviceName})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/postgrescluster_variation_new_tier.yaml", "--name", serviceName, "--release-as-preferred"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 
