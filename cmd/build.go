@@ -65,12 +65,10 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user is currently logged in
-	fmt.Println("Retrieving authentication credentials...")
 	token, err := utils.GetToken()
 	if err != nil {
 		return fmt.Errorf("unable to retrieve authentication credentials, %s", err.Error())
 	}
-	fmt.Println("Authentication credentials retrieved")
 
 	// Build service
 	serviceLogoURLPtr := &serviceLogoURL
@@ -131,4 +129,6 @@ func resetBuild() {
 	name = ""
 	description = ""
 	serviceLogoURL = ""
+	release = false
+	releaseAsPreferred = false
 }
