@@ -129,8 +129,6 @@ func resetBuild() {
 	name = ""
 	description = ""
 	serviceLogoURL = ""
-	serviceID = ""
-	productTierID = ""
 	release = false
 	releaseAsPreferred = false
 }
