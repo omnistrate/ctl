@@ -24,21 +24,17 @@ func init() {
 
 func runList(cmd *cobra.Command, args []string) error {
 	// Validate user is currently logged in
-	fmt.Println("Retrieving authentication credentials...")
 	token, err := utils.GetToken()
 	if err != nil {
 		return fmt.Errorf("unable to retrieve authentication credentials, %s", err.Error())
 	}
-	fmt.Println("Authentication credentials retrieved")
 
 	// List service
-	fmt.Println("Retrieving services...")
 	res, err := listServices(token)
 	if err != nil {
 		fmt.Println("Error listing services:", err.Error())
 		return err
 	}
-	fmt.Println("Service retrieved successfully")
 
 	// Print service details
 	fmt.Println("Total Services:", len(res.Services))

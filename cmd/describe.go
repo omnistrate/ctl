@@ -37,21 +37,17 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user is currently logged in
-	fmt.Println("Retrieving authentication credentials...")
 	token, err := utils.GetToken()
 	if err != nil {
 		return fmt.Errorf("unable to retrieve authentication credentials, %s", err.Error())
 	}
-	fmt.Println("Authentication credentials retrieved")
 
 	// Describe service
-	fmt.Println("Retrieving service...")
 	res, err := describeService(describeServiceID, token)
 	if err != nil {
 		fmt.Println("Error describing service:", err.Error())
 		return err
 	}
-	fmt.Println("Service retrieved successfully")
 
 	// Print service details
 	fmt.Println("Service ID:", res.ID)
