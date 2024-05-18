@@ -1,4 +1,4 @@
-# omnistrate-cli instructions
+# omnistrate-cli Build Service Instructions
 
 1. Login to your omnistrate account
 
