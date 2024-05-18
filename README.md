@@ -27,11 +27,9 @@ services:
 ```
 ./omnistrate-cli build --file docker-compose.yaml --name "Your Service Name"
 ```
+If you want to release the service after building it, you can use the `--release-as-preferred` or `--release` flag in the build command.
 
 4. To update the service, use the same command as above with the updated compose spec file.
-
-## Note
-- If you want to release the service after building it, you can use the `--release-as-preferred` or `--release` flag in the build command.
 
 # Examples
 ## Example 1: Create a postgres service with 3 different service plans
