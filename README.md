@@ -202,7 +202,7 @@ services:
       - scope: CLUSTER
         type: INIT
         commandTemplate: >
-          echo "Initializing the cluster - NEW ACTION HOOK"
+          echo "Initializing the cluster"
     volumes:
       - ./data:/var/lib/postgresql/data
 ```
