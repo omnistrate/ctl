@@ -38,9 +38,11 @@ services:
             instanceStorageSizeGi: 200
             instanceStorageIOPS: 6000
             instanceStorageThroughputMiBps: 800
+            disableBackup: true
           gcp:
             instanceStorageType: GCP::PD_SSD
             instanceStorageSizeGi: 200
+            disableBackup: true
       - type: cluster
         x-omnistrate-storage:
           aws:
@@ -174,6 +176,10 @@ services:
     x-omnistrate-mode-internal: true
   cluster:
     image: omnistrate/noop
+    x-omnistrate-capabilities:
+      backupConfiguration:
+        backupRetentionInDays: 1
+        backupPeriodInHours: 6
     x-omnistrate-api-params:
       - key: instanceType2
         description: Instance Type2

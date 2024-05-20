@@ -170,6 +170,10 @@ services:
     x-omnistrate-mode-internal: true
   cluster:
     image: omnistrate/noop
+    x-omnistrate-capabilities:
+      backupConfiguration:
+        backupRetentionInDays: 7
+        backupPeriodInHours: 6
     x-omnistrate-api-params:
       - key: instanceType
         description: Instance Type
