@@ -8,7 +8,7 @@ import (
 )
 
 func Test_LookupAuthConfig_WithNoConfigFile(t *testing.T) {
-	configDir, err := os.MkdirTemp("", "omnistrate-cli-file-test")
+	configDir, err := os.MkdirTemp("", "omnistrate-ctl-file-test")
 	if err != nil {
 		t.Fatalf("can not create test config directory: %s", err)
 	}
@@ -32,7 +32,7 @@ func Test_LookupAuthConfig_WithNoConfigFile(t *testing.T) {
 }
 
 func Test_UpdateAuthConfig_Insert(t *testing.T) {
-	configDir, err := os.MkdirTemp("", "omnistrate-cli-file-test")
+	configDir, err := os.MkdirTemp("", "omnistrate-ctl-file-test")
 	if err != nil {
 		t.Fatalf("can not create test config directory: %s", err)
 	}
@@ -63,7 +63,7 @@ func Test_UpdateAuthConfig_Insert(t *testing.T) {
 }
 
 func Test_UpdateAuthConfig_Update(t *testing.T) {
-	configDir, err := os.MkdirTemp("", "omnistrate-cli-file-test")
+	configDir, err := os.MkdirTemp("", "omnistrate-ctl-file-test")
 	if err != nil {
 		t.Fatalf("can not create test config directory: %s", err)
 	}
@@ -120,7 +120,7 @@ func Test_New_NoFile(t *testing.T) {
 }
 
 func Test_EnsureFile(t *testing.T) {
-	configDir, err := os.MkdirTemp("", "omnistrate-cli-file-test")
+	configDir, err := os.MkdirTemp("", "omnistrate-ctl-file-test")
 	if err != nil {
 		t.Fatalf("can not create test config directory: %s", err)
 	}
@@ -139,7 +139,7 @@ func Test_EnsureFile(t *testing.T) {
 }
 
 func Test_RemoveAuthConfig(t *testing.T) {
-	configDir, err := os.MkdirTemp("", "omnistrate-cli-file-test")
+	configDir, err := os.MkdirTemp("", "omnistrate-ctl-file-test")
 	if err != nil {
 		t.Fatalf("can not create test config directory: %s", err)
 	}
@@ -174,7 +174,7 @@ func Test_RemoveAuthConfig(t *testing.T) {
 }
 
 func Test_RemoveAuthConfig_WithNoConfigFile(t *testing.T) {
-	configDir, err := os.MkdirTemp("", "omnistrate-cli-file-test")
+	configDir, err := os.MkdirTemp("", "omnistrate-ctl-file-test")
 	if err != nil {
 		t.Fatalf("can not create test config directory: %s", err)
 	}

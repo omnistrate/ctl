@@ -25,7 +25,7 @@ env:
   # default platform of the runners, used to mitigate time of building on x arch during PRs
   PR_PLATFORMS: linux/amd64
   # name of the package 
-  PACKAGE_NAME: omnistrate-cli
+  PACKAGE_NAME: omnistrate-ctl
   
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/omnistrate/ctl/config"
 	"github.com/spf13/cobra"
 )
@@ -11,7 +12,7 @@ var logoutCmd = &cobra.Command{
 	Use:     "logout",
 	Short:   "Logout from Omnistrate platform",
 	Long:    `Logout from Omnistrate platform.`,
-	Example: `  ./omnistrate-cli logout`,
+	Example: `  ./omnistrate-ctl logout`,
 	RunE:    runLogout,
 }
 

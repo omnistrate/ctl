@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/ctl/utils"
@@ -18,7 +19,7 @@ var describeCmd = &cobra.Command{
 	Use:     "describe [--service-id SERVICE_ID]",
 	Short:   "Describe service",
 	Long:    `Describe service for a given service id.`,
-	Example: `  ./omnistrate-cli describe --service-id SERVICE_ID`,
+	Example: `  ./omnistrate-ctl describe --service-id SERVICE_ID`,
 	RunE:    runDescribe,
 }
 

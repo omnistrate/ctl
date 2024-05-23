@@ -22,7 +22,7 @@ const (
 	JWTAuthType = "jwt_auth"
 
 	// ConfigLocationEnv is the name of the env variable used
-	// to configure the location of the omnistrate-cli config folder.
+	// to configure the location of the omnistrate-ctl config folder.
 	// When not set, DefaultDir location is used.
 	ConfigLocationEnv string = "OMNISTRATE_CONFIG"
 
@@ -86,7 +86,7 @@ func New(filePath string) (*ConfigFile, error) {
 	return conf, nil
 }
 
-// ConfigDir returns the path to the omnistrate-cli config directory.
+// ConfigDir returns the path to the omnistrate-ctl config directory.
 // When
 // 1. CI = "true" and OMNISTRATE_CONFIG="", then it will return `.omnistrate`, which is located in the current working directory.
 // 2. CI = "true" and OMNISTRATE_CONFIG="<path>", then it will return the path value in  OMNISTRATE_CONFIG

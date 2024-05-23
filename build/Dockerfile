@@ -33,7 +33,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 RUN echo Building and installing Monitoring Service
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
-    GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /go/bin/omnistrate-cli main.go
+    GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /go/bin/omnistrate-ctl main.go
 
 RUN echo Short testing to validate the build
 RUN --mount=type=cache,target=/go/pkg/mod \
@@ -45,6 +45,6 @@ FROM alpine:latest AS app
 
 RUN apk update && apk add --no-cache ca-certificates curl
 
-COPY --from=builder /go/bin/omnistrate-cli /usr/local/bin/omnistrate-cli
+COPY --from=builder /go/bin/omnistrate-ctl /usr/local/bin/omnistrate-ctl
 WORKDIR /omnistrate
-ENTRYPOINT [ "/usr/local/bin/omnistrate-cli" ]
+ENTRYPOINT [ "/usr/local/bin/omnistrate-ctl" ]
