@@ -122,4 +122,21 @@ jobs:
         timeout-minutes: 10
         run: |
           cat coverage-report.txt | grep total | awk '{print $$3}' | sed 's/[%]//g' | awk '{if ($$1 < $TESTCOVERAGE_THRESHOLD) {print "Test coverage is below threshold"; exit 1} else {print "Test coverage is above threshold"}}'
+  
+  publish:
+    if: github.event_name == 'push'
+    needs: [build, lint]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: Publish-'${{ github.workflow }}'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
