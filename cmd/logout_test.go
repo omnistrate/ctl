@@ -2,18 +2,20 @@ package cmd
 
 import (
 	"fmt"
+	"testing"
+
+	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/testutils"
 	"github.com/stretchr/testify/require"
-	"os"
-	"testing"
 )
 
 func Test_logout(t *testing.T) {
+	utils.SmokeTest(t)
+
 	require := require.New(t)
 	defer testutils.Cleanup()
 
-	err := os.Setenv("ROOT_DOMAIN", "omnistrate.dev")
-	require.NoError(err)
+	var err error
 
 	// FAIL: logout without login
 	rootCmd.SetArgs([]string{"logout"})
