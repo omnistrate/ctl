@@ -14,8 +14,7 @@ func Test_LookupAuthConfig_WithNoConfigFile(t *testing.T) {
 	}
 	defer os.RemoveAll(configDir)
 
-	os.Setenv(ConfigLocationEnv, configDir)
-	defer os.Unsetenv(ConfigLocationEnv)
+	t.Setenv(ConfigLocationEnv, configDir)
 
 	_, err = LookupAuthConfig()
 	if err == nil {
@@ -39,8 +38,7 @@ func Test_UpdateAuthConfig_Insert(t *testing.T) {
 	}
 	defer os.RemoveAll(configDir)
 
-	os.Setenv(ConfigLocationEnv, configDir)
-	defer os.Unsetenv(ConfigLocationEnv)
+	t.Setenv(ConfigLocationEnv, configDir)
 
 	email := "test@abcd.com"
 	token := "token"
@@ -71,8 +69,7 @@ func Test_UpdateAuthConfig_Update(t *testing.T) {
 	}
 	defer os.RemoveAll(configDir)
 
-	os.Setenv(ConfigLocationEnv, configDir)
-	defer os.Unsetenv(ConfigLocationEnv)
+	t.Setenv(ConfigLocationEnv, configDir)
 
 	email := "test@abcd.com"
 	token := "token"
@@ -129,8 +126,7 @@ func Test_EnsureFile(t *testing.T) {
 	}
 	defer os.RemoveAll(configDir)
 
-	os.Setenv(ConfigLocationEnv, configDir)
-	defer os.Unsetenv(ConfigLocationEnv)
+	t.Setenv(ConfigLocationEnv, configDir)
 
 	cfg, err := EnsureFile()
 	if err != nil {
@@ -149,8 +145,7 @@ func Test_RemoveAuthConfig(t *testing.T) {
 	}
 	defer os.RemoveAll(configDir)
 
-	os.Setenv(ConfigLocationEnv, configDir)
-	defer os.Unsetenv(ConfigLocationEnv)
+	t.Setenv(ConfigLocationEnv, configDir)
 
 	email := "test@abcd.com"
 	token := "token"
