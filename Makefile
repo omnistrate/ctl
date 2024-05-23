@@ -88,6 +88,10 @@ docker: docker-build
 docker-build:
 	docker build --platform=${DOCKER_PLATFORM} --build-arg GIT_USER=${GIT_USER} --build-arg GIT_TOKEN=${GIT_TOKEN} -f ./build/Dockerfile  -t ${PROJECT_NAME}:latest .
 
+.PHONY: docker-run
+docker-run:
+	docker run --platform=${DOCKER_PLATFORM} -t ${PROJECT_NAME}:latest
+
 # Other
 .PHONY: clean
 clean:
