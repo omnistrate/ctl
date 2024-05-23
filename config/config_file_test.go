@@ -185,8 +185,7 @@ func Test_RemoveAuthConfig_WithNoConfigFile(t *testing.T) {
 	}
 	defer os.RemoveAll(configDir)
 
-	os.Setenv(ConfigLocationEnv, configDir)
-	defer os.Unsetenv(ConfigLocationEnv)
+	t.Setenv(ConfigLocationEnv, configDir)
 
 	err = RemoveAuthConfig()
 	if err == nil {
@@ -257,8 +256,7 @@ func Test_ConfigDir(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 
 			for name, value := range tc.env {
-				os.Setenv(name, value)
-				defer os.Unsetenv(name)
+				t.Setenv(name, value)
 			}
 
 			path := ConfigDir()
