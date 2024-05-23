@@ -2,18 +2,20 @@ package cmd
 
 import (
 	"fmt"
+	"testing"
+
+	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/testutils"
 	"github.com/stretchr/testify/require"
-	"os"
-	"testing"
 )
 
 func Test_logout(t *testing.T) {
+	utils.SmokeTest(t)
+
 	require := require.New(t)
 	defer testutils.Cleanup()
 
-	err := os.Setenv("ROOT_DOMAIN", "omnistrate.dev")
-	require.NoError(err)
+	var err error
 
 	// FAIL: logout without login
 	rootCmd.SetArgs([]string{"logout"})
@@ -22,7 +24,9 @@ func Test_logout(t *testing.T) {
 	require.Contains(err.Error(), "config file not found")
 
 	// PASS: logout after login
-	testEmail, testPassword := testutils.GetTestAccount()
+	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	require.NoError(err)
+
 	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = rootCmd.Execute()
 	require.NoError(err)

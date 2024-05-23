@@ -2,22 +2,26 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/omnistrate/ctl/testutils"
-	"github.com/stretchr/testify/require"
 	"os"
 	"testing"
+
+	"github.com/google/uuid"
+	"github.com/omnistrate/commons/pkg/utils"
+	"github.com/omnistrate/ctl/testutils"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_build_basic(t *testing.T) {
+	utils.SmokeTest(t)
+
 	require := require.New(t)
 	defer testutils.Cleanup()
 
-	err := os.Setenv("ROOT_DOMAIN", "omnistrate.dev")
-	require.NoError(err)
+	var err error
 
 	// Step 1: login
-	testEmail, testPassword := testutils.GetTestAccount()
+	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	require.NoError(err)
 	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = rootCmd.Execute()
 	require.NoError(err)
@@ -47,14 +51,16 @@ func Test_build_basic(t *testing.T) {
 }
 
 func Test_build_update_service(t *testing.T) {
+	utils.SmokeTest(t)
+
 	require := require.New(t)
 	defer testutils.Cleanup()
 
-	err := os.Setenv("ROOT_DOMAIN", "omnistrate.dev")
-	require.NoError(err)
+	var err error
 
 	// PASS: login
-	testEmail, testPassword := testutils.GetTestAccount()
+	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	require.NoError(err)
 	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = rootCmd.Execute()
 	require.NoError(err)
@@ -124,13 +130,15 @@ func Test_build_update_service(t *testing.T) {
 }
 
 func Test_build_invalid_file(t *testing.T) {
+	utils.SmokeTest(t)
+
 	require := require.New(t)
 	defer testutils.Cleanup()
 
-	err := os.Setenv("ROOT_DOMAIN", "omnistrate.dev")
-	require.NoError(err)
+	var err error
 
-	testEmail, testPassword := testutils.GetTestAccount()
+	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	require.NoError(err)
 	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = rootCmd.Execute()
 	require.NoError(err)
@@ -142,13 +150,15 @@ func Test_build_invalid_file(t *testing.T) {
 }
 
 func Test_build_no_file(t *testing.T) {
+	utils.SmokeTest(t)
+
 	require := require.New(t)
 	defer testutils.Cleanup()
 
-	err := os.Setenv("ROOT_DOMAIN", "omnistrate.dev")
-	require.NoError(err)
+	var err error
 
-	testEmail, testPassword := testutils.GetTestAccount()
+	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	require.NoError(err)
 	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = rootCmd.Execute()
 	require.NoError(err)
@@ -160,13 +170,15 @@ func Test_build_no_file(t *testing.T) {
 }
 
 func Test_build_invalid_file_format(t *testing.T) {
+	utils.SmokeTest(t)
+
 	require := require.New(t)
 	defer testutils.Cleanup()
 
-	err := os.Setenv("ROOT_DOMAIN", "omnistrate.dev")
-	require.NoError(err)
+	var err error
 
-	testEmail, testPassword := testutils.GetTestAccount()
+	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	require.NoError(err)
 	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = rootCmd.Execute()
 	require.NoError(err)
@@ -178,13 +190,15 @@ func Test_build_invalid_file_format(t *testing.T) {
 }
 
 func Test_build_create_no_name(t *testing.T) {
+	utils.SmokeTest(t)
+
 	require := require.New(t)
 	defer testutils.Cleanup()
 
-	err := os.Setenv("ROOT_DOMAIN", "omnistrate.dev")
-	require.NoError(err)
+	var err error
 
-	testEmail, testPassword := testutils.GetTestAccount()
+	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	require.NoError(err)
 	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = rootCmd.Execute()
 	require.NoError(err)
@@ -196,13 +210,15 @@ func Test_build_create_no_name(t *testing.T) {
 }
 
 func Test_build_create_no_description(t *testing.T) {
+	utils.SmokeTest(t)
+
 	require := require.New(t)
 	defer testutils.Cleanup()
 
-	err := os.Setenv("ROOT_DOMAIN", "omnistrate.dev")
-	require.NoError(err)
+	var err error
 
-	testEmail, testPassword := testutils.GetTestAccount()
+	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	require.NoError(err)
 	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = rootCmd.Execute()
 	require.NoError(err)
@@ -217,13 +233,15 @@ func Test_build_create_no_description(t *testing.T) {
 }
 
 func Test_build_create_no_service_logo_url(t *testing.T) {
+	utils.SmokeTest(t)
+
 	require := require.New(t)
 	defer testutils.Cleanup()
 
-	err := os.Setenv("ROOT_DOMAIN", "omnistrate.dev")
-	require.NoError(err)
+	var err error
 
-	testEmail, testPassword := testutils.GetTestAccount()
+	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	require.NoError(err)
 	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = rootCmd.Execute()
 	require.NoError(err)

@@ -39,9 +39,20 @@ tidy:
 .PHONY: unit-test
 unit-test:
 	echo "Running unit tests for service"
-	go clean -testcache
 	go test ./... -skip ./test/... $(ARGS) -cover -coverprofile coverage.out -covermode count
 	go tool cover -func=coverage.out | grep total | awk '{print $$3}' | sed 's/[%]//g' | awk 'current=$$1; {if (current < ${TESTCOVERAGE_THRESHOLD}) {print "\033[31mTest coverage is " current " which is below threshold\033[0m"; exit 1} else {print "\033[32mTest coverage is above threshold\033[0m"}}'
+
+.PHONY: smoke-test
+smoke-test:
+	echo "Running smoke tests for service"
+	export ENABLE_SMOKE_TEST=true && \
+	export ROOT_DOMAIN=omnistrate.dev && \
+	export LOG_LEVEL=debug && \
+	export LOG_FORMAT=pretty && \
+	export SMOKE_TEST_EMAIL=xzhang+customer-hosted@omnistrate.com && \
+	export SMOKE_TEST_PASSWORD=Test@1234 && \
+	go clean -testcache && \
+	go test ./... -skip ./test/... $(ARGS) 
 
 .PHONY: build
 build:

@@ -1,9 +1,11 @@
 package testutils
 
 import (
+	"errors"
+	"os"
+
 	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/config"
-	"os"
 )
 
 func Cleanup() {
@@ -19,12 +21,14 @@ func Contains(arr []string, s string) bool {
 	return false
 }
 
-// GetTestAccount returns the test account email and password for the test environment
-func GetTestAccount() (string, string) {
-	switch utils.GetEnv("ROOT_DOMAIN", "omnistrate.cloud") {
-	case "omnistrate.dev":
-		return "xzhang+customer-hosted@omnistrate.com", "Test@1234"
-	default:
-		return "", ""
+func GetSmokeTestAccount() (string, string, error) {
+	email := utils.GetEnv("SMOKE_TEST_EMAIL", "not-set")
+	password := utils.GetEnv("SMOKE_TEST_PASSWORD", "")
+	if email == "not-set" {
+		return "", "", errors.New("TEST_EMAIL is not set")
 	}
+	if password == "" {
+		return "", "", errors.New("TEST_PASSWORD is not set")
+	}
+	return email, password, nil
 }
