@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/ctl/utils"
@@ -14,7 +15,7 @@ var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List service",
 	Long:    `List service. The service must be created before it can be listed.`,
-	Example: `  ./omnistrate-cli list`,
+	Example: `  ./omnistrate-ctl list`,
 	RunE:    runList,
 }
 

@@ -3,10 +3,11 @@ module github.com/omnistrate/ctl
 go 1.22.0
 
 require (
+	github.com/google/uuid v1.6.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/omnistrate/api-design v0.6.340
-	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240517211554-b94cc1ca13f4
-	github.com/omnistrate/commons/pkg/utils v0.0.0-20240517213243-c60c9f9cb4c9
+	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240522175513-1b939f4da885
+	github.com/omnistrate/commons/pkg/utils v0.0.0-20240522202038-51149ab5eb3b
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0
 	goa.design/goa/v3 v3.16.1
@@ -18,7 +19,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/go-chi/chi/v5 v5.0.12 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

@@ -5,12 +5,14 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
-	"os"
-	"strings"
 )
 
 var (
@@ -29,7 +31,7 @@ var buildCmd = &cobra.Command{
 	Use:     "build [--file FILE] [--name NAME] [--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] [--release]",
 	Short:   "Build service from a docker-compose file",
 	Long:    `Build service from a docker-compose file. The file must be in .yaml or .yml format. Name is required. Description and service logo URL are optional. If release flag is set, the service will be released after building it.`,
-	Example: `  ./omnistrate-cli build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png" --release-as-preferred`,
+	Example: `  ./omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png" --release-as-preferred`,
 	RunE:    runBuild,
 }
 
@@ -101,7 +103,7 @@ func buildService(file, token, name string, description, serviceLogoURL *string,
 		return "", "", fmt.Errorf("unable to build service, %s", err.Error())
 	}
 
-	fileData, err := os.ReadFile(file)
+	fileData, err := os.ReadFile(filepath.Clean(file))
 	if err != nil {
 		return "", "", fmt.Errorf("unable to read file, %s", err.Error())
 	}

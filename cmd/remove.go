@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/ctl/utils"
@@ -18,7 +19,7 @@ var removeCmd = &cobra.Command{
 	Use:     "remove [--service-id SERVICE_ID]",
 	Short:   "Remove service from Omnistrate platform",
 	Long:    `Remove service from Omnistrate platform by providing the service id.`,
-	Example: `  ./omnistrate-cli remove --service-id SERVICE_ID`,
+	Example: `  ./omnistrate-ctl remove --service-id SERVICE_ID`,
 	RunE:    runRemove,
 }
 

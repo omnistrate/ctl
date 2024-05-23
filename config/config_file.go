@@ -3,13 +3,15 @@ package config
 import (
 	"bytes"
 	"errors"
+
 	"github.com/mitchellh/go-homedir"
 
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"os"
 	"path"
 	"path/filepath"
+
+	"gopkg.in/yaml.v3"
 )
 
 // AuthType auth type
@@ -20,11 +22,11 @@ const (
 	JWTAuthType = "jwt_auth"
 
 	// ConfigLocationEnv is the name of the env variable used
-	// to configure the location of the omnistrate-cli config folder.
+	// to configure the location of the omnistrate-ctl config folder.
 	// When not set, DefaultDir location is used.
 	ConfigLocationEnv string = "OMNISTRATE_CONFIG"
 
-	DefaultDir         string      = "./.omnistrate"
+	DefaultDir         string      = ".omnistrate"
 	DefaultFile        string      = "config.yml"
 	DefaultPermissions os.FileMode = 0700
 
@@ -84,7 +86,7 @@ func New(filePath string) (*ConfigFile, error) {
 	return conf, nil
 }
 
-// ConfigDir returns the path to the omnistrate-cli config directory.
+// ConfigDir returns the path to the omnistrate-ctl config directory.
 // When
 // 1. CI = "true" and OMNISTRATE_CONFIG="", then it will return `.omnistrate`, which is located in the current working directory.
 // 2. CI = "true" and OMNISTRATE_CONFIG="<path>", then it will return the path value in  OMNISTRATE_CONFIG
@@ -135,7 +137,7 @@ func EnsureFile() (string, error) {
 
 	if _, err = os.Stat(filePath); os.IsNotExist(err) {
 		var file *os.File
-		file, err = os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+		file, err = os.OpenFile(filepath.Clean(filePath), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 		if err != nil {
 			return "", err
 		}

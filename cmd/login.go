@@ -4,6 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"os"
+	"strings"
+
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	signinapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/signin_api"
 	"github.com/omnistrate/commons/pkg/utils"
@@ -11,9 +15,6 @@ import (
 	utils2 "github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 	goa "goa.design/goa/v3/pkg"
-	"io"
-	"os"
-	"strings"
 )
 
 var (
@@ -27,8 +28,8 @@ var loginCmd = &cobra.Command{
 	Use:   `login [--email EMAIL] [--password PASSWORD]`,
 	Short: "Log in to Omnistrate platform",
 	Long:  "Log in to Omnistrate platform",
-	Example: `  cat ~/omnistrate_pass.txt | ./omnistrate-cli login -e email --password-stdin
-	  echo $OMNISTRATE_PASSWORD | ./omnistrate-cli login -e email --password-stdin`,
+	Example: `  cat ~/omnistrate_pass.txt | ./omnistrate-ctl login -e email --password-stdin
+	  echo $OMNISTRATE_PASSWORD | ./omnistrate-ctl login -e email --password-stdin`,
 	RunE: runLogin,
 }
 
@@ -48,7 +49,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(password) > 0 {
-		fmt.Println("WARNING! Using --password is insecure, consider using: cat ~/omnistrate_pass.txt | ./omnistrate-cli login -e email --password-stdin echo $PASSWORD")
+		fmt.Println("WARNING! Using --password is insecure, consider using: cat ~/omnistrate_pass.txt | ./omnistrate-ctl login -e email --password-stdin echo $PASSWORD")
 		if passwordStdin {
 			return fmt.Errorf("--password and --password-stdin are mutually exclusive")
 		}

@@ -1,0 +1,17 @@
+# Options for analysis running.
+run:
+  concurrency: 2
+  timeout: 10m
+  tests: true
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - bodyclose
+    - predeclared
+    - errorlint
+    - unparam 

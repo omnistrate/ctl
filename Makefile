@@ -11,6 +11,7 @@ endif
 export GOFLAGS=-mod=vendor
 GIT_USER?=$(shell gh api user -q ".login") # gets current user using github cli if the variable is not already set
 GIT_TOKEN?=$(shell gh config get -h github.com oauth_token) # gets current user using github cli if the variable is not already set
+PROJECT_NAME=omnistrate-ctl
 DOCKER_PLATFORM=linux/arm64
 TESTCOVERAGE_THRESHOLD=0
 REPO_ROOT=$(shell git rev-parse --show-toplevel)
@@ -26,10 +27,14 @@ GOPRIVATE=github.com/omnistrate
 
 export ROOT_DOMAIN=omnistrate.dev
 
+.PHONY: all
+all: tidy build unit-test lint sec
+
 .PHONY: tidy
 tidy:
 	echo "Tidy dependency modules"
 	go mod tidy
+	go mod vendor
 
 .PHONY: unit-test
 unit-test:
@@ -41,7 +46,7 @@ unit-test:
 .PHONY: build
 build:
 	echo "Building go binaries for omnistrate cli"
-	go build -mod=mod ${BUILD_FLAGS} -o omnistrate-cli main.go
+	go build -mod=mod ${BUILD_FLAGS} -o omnistrate-ctl main.go
 
 .PHONY: test-coverage-report
 test-coverage-report:
@@ -76,3 +81,25 @@ update-dependencies:
 	echo "Updating dependencies"
 	go get -t -u ./...
 	go mod tidy
+
+.PHONY: docker
+docker: docker-build
+.PHONY: docker-build
+docker-build:
+	docker build --platform=${DOCKER_PLATFORM} --build-arg GIT_USER=${GIT_USER} --build-arg GIT_TOKEN=${GIT_TOKEN} -f ./build/Dockerfile  -t ${PROJECT_NAME}:latest .
+
+.PHONY: docker-run
+docker-run:
+	docker run --platform=${DOCKER_PLATFORM} -t ${PROJECT_NAME}:latest
+
+# Other
+.PHONY: clean
+clean:
+	echo "Cleaning up"
+	rm ./omnistrate-cli
+	rm ./omnistrate-ctl
+	rm ./coverage.out
+	rm ./coverage-report.html
+	rm ./coverage-report.txt
+	rm ./test-report.json
+	rm ./security-report.html

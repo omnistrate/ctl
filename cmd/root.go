@@ -2,13 +2,14 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/spf13/cobra"
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "omnistrate-cli",
+	Use:   "omnistrate-ctl",
 	Short: "Omnistrate cli in Go.",
 	Long: `Omnistrate cli is a command line tool for creating,
 deploying, and managing your Omnistrate SaaS. `,

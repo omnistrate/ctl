@@ -8,14 +8,13 @@ import (
 )
 
 func Test_LookupAuthConfig_WithNoConfigFile(t *testing.T) {
-	configDir, err := os.MkdirTemp("", "omnistrate-cli-file-test")
+	configDir, err := os.MkdirTemp("", "omnistrate-ctl-file-test")
 	if err != nil {
 		t.Fatalf("can not create test config directory: %s", err)
 	}
 	defer os.RemoveAll(configDir)
 
-	os.Setenv(ConfigLocationEnv, configDir)
-	defer os.Unsetenv(ConfigLocationEnv)
+	t.Setenv(ConfigLocationEnv, configDir)
 
 	_, err = LookupAuthConfig()
 	if err == nil {
@@ -33,14 +32,13 @@ func Test_LookupAuthConfig_WithNoConfigFile(t *testing.T) {
 }
 
 func Test_UpdateAuthConfig_Insert(t *testing.T) {
-	configDir, err := os.MkdirTemp("", "omnistrate-cli-file-test")
+	configDir, err := os.MkdirTemp("", "omnistrate-ctl-file-test")
 	if err != nil {
 		t.Fatalf("can not create test config directory: %s", err)
 	}
 	defer os.RemoveAll(configDir)
 
-	os.Setenv(ConfigLocationEnv, configDir)
-	defer os.Unsetenv(ConfigLocationEnv)
+	t.Setenv(ConfigLocationEnv, configDir)
 
 	email := "test@abcd.com"
 	token := "token"
@@ -65,14 +63,13 @@ func Test_UpdateAuthConfig_Insert(t *testing.T) {
 }
 
 func Test_UpdateAuthConfig_Update(t *testing.T) {
-	configDir, err := os.MkdirTemp("", "omnistrate-cli-file-test")
+	configDir, err := os.MkdirTemp("", "omnistrate-ctl-file-test")
 	if err != nil {
 		t.Fatalf("can not create test config directory: %s", err)
 	}
 	defer os.RemoveAll(configDir)
 
-	os.Setenv(ConfigLocationEnv, configDir)
-	defer os.Unsetenv(ConfigLocationEnv)
+	t.Setenv(ConfigLocationEnv, configDir)
 
 	email := "test@abcd.com"
 	token := "token"
@@ -123,14 +120,13 @@ func Test_New_NoFile(t *testing.T) {
 }
 
 func Test_EnsureFile(t *testing.T) {
-	configDir, err := os.MkdirTemp("", "omnistrate-cli-file-test")
+	configDir, err := os.MkdirTemp("", "omnistrate-ctl-file-test")
 	if err != nil {
 		t.Fatalf("can not create test config directory: %s", err)
 	}
 	defer os.RemoveAll(configDir)
 
-	os.Setenv(ConfigLocationEnv, configDir)
-	defer os.Unsetenv(ConfigLocationEnv)
+	t.Setenv(ConfigLocationEnv, configDir)
 
 	cfg, err := EnsureFile()
 	if err != nil {
@@ -143,14 +139,13 @@ func Test_EnsureFile(t *testing.T) {
 }
 
 func Test_RemoveAuthConfig(t *testing.T) {
-	configDir, err := os.MkdirTemp("", "omnistrate-cli-file-test")
+	configDir, err := os.MkdirTemp("", "omnistrate-ctl-file-test")
 	if err != nil {
 		t.Fatalf("can not create test config directory: %s", err)
 	}
 	defer os.RemoveAll(configDir)
 
-	os.Setenv(ConfigLocationEnv, configDir)
-	defer os.Unsetenv(ConfigLocationEnv)
+	t.Setenv(ConfigLocationEnv, configDir)
 
 	email := "test@abcd.com"
 	token := "token"
@@ -179,14 +174,13 @@ func Test_RemoveAuthConfig(t *testing.T) {
 }
 
 func Test_RemoveAuthConfig_WithNoConfigFile(t *testing.T) {
-	configDir, err := os.MkdirTemp("", "omnistrate-cli-file-test")
+	configDir, err := os.MkdirTemp("", "omnistrate-ctl-file-test")
 	if err != nil {
 		t.Fatalf("can not create test config directory: %s", err)
 	}
 	defer os.RemoveAll(configDir)
 
-	os.Setenv(ConfigLocationEnv, configDir)
-	defer os.Unsetenv(ConfigLocationEnv)
+	t.Setenv(ConfigLocationEnv, configDir)
 
 	err = RemoveAuthConfig()
 	if err == nil {
@@ -257,8 +251,7 @@ func Test_ConfigDir(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 
 			for name, value := range tc.env {
-				os.Setenv(name, value)
-				defer os.Unsetenv(name)
+				t.Setenv(name, value)
 			}
 
 			path := ConfigDir()
