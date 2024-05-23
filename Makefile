@@ -34,6 +34,7 @@ all: tidy build unit-test lint sec
 tidy:
 	echo "Tidy dependency modules"
 	go mod tidy
+	go mod vendor
 
 .PHONY: unit-test
 unit-test:
