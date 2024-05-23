@@ -11,18 +11,36 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
+    groups: 
+      github-actions:
+        dependency-type: "production"
+        update-types:
+        - "minor"
+        - "patch"
 
   - package-ecosystem: "gomod" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
       interval: "monthly"
+    groups: 
+      gomod-updates:
+        dependency-type: "production"
+        update-types:
+        - "minor"
+        - "patch"
 
   - package-ecosystem: "gomod" # See documentation for possible values
     directory: "/test/integration_test" # Location of package manifests
     schedule:
       interval: "monthly"
+    groups: 
+      gomod-updates:
+        dependency-type: "production"
+        update-types:
+        - "minor"
+        - "patch"
 
   - package-ecosystem: "docker" # See documentation for possible values
-    directory: "/v1/cmd/server/build/" # Location of package manifests
+    directory: "/build/" # Location of package manifests
     schedule:
       interval: "monthly"
