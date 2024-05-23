@@ -27,6 +27,9 @@ RUN echo Fetching project dependencies
 RUN --mount=type=cache,target=/go/pkg/mod \
     GOOS=${TARGETOS} GOARCH=${TARGETARCH} go mod tidy
 
+RUN --mount=type=cache,target=/go/pkg/mod \
+    GOOS=${TARGETOS} GOARCH=${TARGETARCH} go mod vendor
+
 RUN echo Building and installing Monitoring Service
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
