@@ -26,7 +26,7 @@ const (
 	// When not set, DefaultDir location is used.
 	ConfigLocationEnv string = "OMNISTRATE_CONFIG"
 
-	DefaultDir         string      = "./.omnistrate"
+	DefaultDir         string      = ".omnistrate"
 	DefaultFile        string      = "config.yml"
 	DefaultPermissions os.FileMode = 0700
 
