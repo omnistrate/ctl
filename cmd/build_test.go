@@ -20,7 +20,8 @@ func Test_build_basic(t *testing.T) {
 	var err error
 
 	// Step 1: login
-	testEmail, testPassword := testutils.GetTestAccount()
+	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	require.NoError(err)
 	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = rootCmd.Execute()
 	require.NoError(err)
@@ -58,7 +59,8 @@ func Test_build_update_service(t *testing.T) {
 	var err error
 
 	// PASS: login
-	testEmail, testPassword := testutils.GetTestAccount()
+	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	require.NoError(err)
 	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = rootCmd.Execute()
 	require.NoError(err)
@@ -135,7 +137,8 @@ func Test_build_invalid_file(t *testing.T) {
 
 	var err error
 
-	testEmail, testPassword := testutils.GetTestAccount()
+	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	require.NoError(err)
 	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = rootCmd.Execute()
 	require.NoError(err)
@@ -154,7 +157,8 @@ func Test_build_no_file(t *testing.T) {
 
 	var err error
 
-	testEmail, testPassword := testutils.GetTestAccount()
+	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	require.NoError(err)
 	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = rootCmd.Execute()
 	require.NoError(err)
@@ -173,7 +177,8 @@ func Test_build_invalid_file_format(t *testing.T) {
 
 	var err error
 
-	testEmail, testPassword := testutils.GetTestAccount()
+	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	require.NoError(err)
 	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = rootCmd.Execute()
 	require.NoError(err)
@@ -192,7 +197,8 @@ func Test_build_create_no_name(t *testing.T) {
 
 	var err error
 
-	testEmail, testPassword := testutils.GetTestAccount()
+	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	require.NoError(err)
 	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = rootCmd.Execute()
 	require.NoError(err)
@@ -211,7 +217,8 @@ func Test_build_create_no_description(t *testing.T) {
 
 	var err error
 
-	testEmail, testPassword := testutils.GetTestAccount()
+	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	require.NoError(err)
 	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = rootCmd.Execute()
 	require.NoError(err)
@@ -233,7 +240,8 @@ func Test_build_create_no_service_logo_url(t *testing.T) {
 
 	var err error
 
-	testEmail, testPassword := testutils.GetTestAccount()
+	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	require.NoError(err)
 	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = rootCmd.Execute()
 	require.NoError(err)

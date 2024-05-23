@@ -178,6 +178,8 @@ jobs:
         timeout-minutes: 20
         env: 
           ENABLE_SMOKE_TEST: true
+          SMOKE_TEST_EMAIL: xzhang+customer-hosted@omnistrate.com
+          SMOKE_TEST_PASSWORD: Test@1234
           ROOT_DOMAIN: omnistrate.dev
           LOG_LEVEL: debug
           LOG_FORMAT: pretty
