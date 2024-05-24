@@ -136,6 +136,10 @@ jobs:
     permissions:
       contents: read
 
+    concurrency:
+      group: ${{ github.workflow }}-Dev-us-west-2
+      cancel-in-progress: false
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -180,7 +184,7 @@ jobs:
         env: 
           ENABLE_SMOKE_TEST: true
           SMOKE_TEST_EMAIL: ${{ secrets.SMOKE_TEST_EMAIL }}
-          SMOKE_TEST_PASSWORD: ${{ secrets.SMOKE_TEST_PASSWORD}}
+          SMOKE_TEST_PASSWORD: ${{ secrets.SMOKE_TEST_PASSWORD}} Test@1234
           ROOT_DOMAIN: omnistrate.dev
           LOG_LEVEL: debug
           LOG_FORMAT: pretty
