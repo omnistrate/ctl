@@ -129,6 +129,7 @@ jobs:
           cat coverage-report.txt | grep total | awk '{print $$3}' | sed 's/[%]//g' | awk '{if ($$1 < $TESTCOVERAGE_THRESHOLD) {print "Test coverage is below threshold"; exit 1} else {print "Test coverage is above threshold"}}'
   
   smoke-tests:
+    environment: Dev-us-west-2
     if: github.event_name != 'push'
     needs: [build, lint]
     runs-on: ubuntu-latest
@@ -178,8 +179,8 @@ jobs:
         timeout-minutes: 20
         env: 
           ENABLE_SMOKE_TEST: true
-          SMOKE_TEST_EMAIL: xzhang+customer-hosted@omnistrate.com
-          SMOKE_TEST_PASSWORD: Test@1234
+          SMOKE_TEST_EMAIL: ${{ secrets.SMOKE_TEST_EMAIL }}
+          SMOKE_TEST_PASSWORD: ${{ secrets.SMOKE_TEST_PASSWORD}}
           ROOT_DOMAIN: omnistrate.dev
           LOG_LEVEL: debug
           LOG_FORMAT: pretty
