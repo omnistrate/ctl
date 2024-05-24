@@ -50,7 +50,7 @@ smoke-test:
 	export LOG_LEVEL=debug && \
 	export LOG_FORMAT=pretty && \
 	export SMOKE_TEST_EMAIL=xzhang+customer-hosted@omnistrate.com && \
-	export SMOKE_TEST_PASSWORD=Test@1234 && \
+	export SMOKE_TEST_PASSWORD= && \
 	go clean -testcache && \
 	go test ./... -skip ./test/... $(ARGS) 
 
