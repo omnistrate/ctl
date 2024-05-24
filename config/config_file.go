@@ -38,7 +38,7 @@ const (
 	DefaultCIPermissions os.FileMode = 0744
 )
 
-// ConfigFile for Omnistrate CLI exclusively.
+// ConfigFile for Omnistrate CTL exclusively.
 type ConfigFile struct {
 	AuthConfigs []AuthConfig `yaml:"auths"`
 	FilePath    string       `yaml:"-"`

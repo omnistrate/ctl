@@ -55,7 +55,7 @@ smoke-test:
 
 .PHONY: build
 build:
-	echo "Building go binaries for omnistrate cli"
+	echo "Building go binaries for omnistrate ctl"
 	go build -mod=mod ${BUILD_FLAGS} -o omnistrate-ctl main.go
 
 .PHONY: test-coverage-report
