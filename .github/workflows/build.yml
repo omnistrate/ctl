@@ -184,7 +184,7 @@ jobs:
         env: 
           ENABLE_SMOKE_TEST: true
           SMOKE_TEST_EMAIL: ${{ secrets.SMOKE_TEST_EMAIL }}
-          SMOKE_TEST_PASSWORD: ${{ secrets.SMOKE_TEST_PASSWORD}} Test@1234
+          SMOKE_TEST_PASSWORD: ${{ secrets.SMOKE_TEST_PASSWORD}}
           ROOT_DOMAIN: omnistrate.dev
           LOG_LEVEL: debug
           LOG_FORMAT: pretty
