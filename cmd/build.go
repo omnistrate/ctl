@@ -16,22 +16,22 @@ import (
 )
 
 var (
-	file               string
-	name               string
-	description        string
-	serviceLogoURL     string
-	serviceID          string
-	productTierID      string
-	release            bool
-	releaseAsPreferred bool
+	file           string
+	name           string
+	description    string
+	serviceLogoURL string
+	serviceID      string
+	productTierID  string
+	release        bool
+	preferred      bool
 )
 
 // buildCmd represents the build command
 var buildCmd = &cobra.Command{
-	Use:     "build [--file FILE] [--name NAME] [--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] [--release]",
+	Use:     "build [--file FILE] [--name NAME] [--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] [--release][--preferred]]",
 	Short:   "Build service from a docker-compose file",
 	Long:    `Build service from a docker-compose file. The file must be in .yaml or .yml format. Name is required. Description and service logo URL are optional. If release flag is set, the service will be released after building it.`,
-	Example: `  ./omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png" --release-as-preferred`,
+	Example: `  ./omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png" --release --preferred`,
 	RunE:    runBuild,
 }
 
@@ -43,7 +43,7 @@ func init() {
 	buildCmd.Flags().StringVarP(&description, "description", "", "", "Description of the service")
 	buildCmd.Flags().StringVarP(&serviceLogoURL, "service-logo-url", "", "", "URL to the service logo")
 	buildCmd.Flags().BoolVarP(&release, "release", "", false, "Release the service after building it")
-	buildCmd.Flags().BoolVarP(&releaseAsPreferred, "release-as-preferred", "", false, "Release the service as preferred after building it")
+	buildCmd.Flags().BoolVarP(&preferred, "preferred", "", false, "Whether to mark the version as preferred after releasing it. Needs --release flag to be set")
 
 	// Set Bash completion options
 	validYAMLFilenames := []string{"yaml", "yml"}
@@ -83,7 +83,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		descriptionPtr = nil
 	}
 
-	serviceID, productTierID, err = buildService(file, token, name, descriptionPtr, serviceLogoURLPtr, release, releaseAsPreferred)
+	serviceID, productTierID, err = buildService(file, token, name, descriptionPtr, serviceLogoURLPtr, release, preferred)
 	if err != nil {
 		return err
 	}
@@ -93,9 +93,13 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func buildService(file, token, name string, description, serviceLogoURL *string, release, releaseAsPreferred bool) (serviceID string, productTierID string, err error) {
+func buildService(file, token, name string, description, serviceLogoURL *string, release, preferred bool) (serviceID string, productTierID string, err error) {
 	if name == "" {
 		return "", "", errors.New("name is required")
+	}
+
+	if preferred && !release {
+		return "", "", errors.New("preferred flag can only be set if release flag is also set")
 	}
 
 	service, err := httpclientwrapper.NewService("https", utils.GetHost())
@@ -115,7 +119,7 @@ func buildService(file, token, name string, description, serviceLogoURL *string,
 		ServiceLogoURL:     serviceLogoURL,
 		FileContent:        base64.StdEncoding.EncodeToString(fileData),
 		Release:            &release,
-		ReleaseAsPreferred: &releaseAsPreferred,
+		ReleaseAsPreferred: &preferred,
 	}
 
 	var buildRes *serviceapi.BuildServiceFromComposeSpecResult
@@ -132,5 +136,5 @@ func resetBuild() {
 	description = ""
 	serviceLogoURL = ""
 	release = false
-	releaseAsPreferred = false
+	preferred = false
 }
