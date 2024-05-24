@@ -1,4 +1,13 @@
-# omnistrate-ctl Build Service Instructions
+# Using omnistrate-ctl with docker
+
+The latest version of the API is packaged and released in a docker container. 
+The container can be use to execute omnistrate-ctl
+
+```
+docker run -t ghcr.io/omnistrate/ctl:latest 
+```
+
+# Instructions: Build Service Instructions using omnistrate-ctl
 
 1. Login to your omnistrate account
 
