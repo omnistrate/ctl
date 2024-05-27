@@ -7,6 +7,18 @@ The container can be use to execute omnistrate-ctl
 docker run -t ghcr.io/omnistrate/ctl:latest 
 ```
 
+To log into the container and execute a series of commands
+
+```
+docker run -it --entrypoint /bin/sh -t ghcr.io/omnistrate/ctl:latest
+```
+
+To persist the credentials across multiple container runs 
+
+```
+docker run -it -v ~/omnistrate-ctl:/omnistrate/ -t ghcr.io/omnistrate/ctl:latest
+```
+
 # Instructions: Build Service Instructions using omnistrate-ctl
 
 1. Login to your omnistrate account
