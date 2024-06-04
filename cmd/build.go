@@ -22,6 +22,7 @@ var (
 	serviceLogoURL     string
 	environment        string
 	serviceID          string
+	environmentID      string
 	productTierID      string
 	release            bool
 	releaseAsPreferred bool
@@ -90,29 +91,30 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		environmentPtr = nil
 	}
 
-	serviceID, productTierID, err = buildService(file, token, name, descriptionPtr, serviceLogoURLPtr, environmentPtr, release, releaseAsPreferred)
+	serviceID, productTierID, environmentID, err = buildService(file, token, name, descriptionPtr, serviceLogoURLPtr, environmentPtr, release, releaseAsPreferred)
 	if err != nil {
 		return err
 	}
 	fmt.Println("Service built successfully")
-	fmt.Printf("Check the service plan at https://%s/product-tier/build?serviceId=%s&productTierId=%s\n", utils.GetRootDomain(), serviceID, productTierID)
+	fmt.Printf("Check the service plan result at https://%s/product-tier/build?serviceId=%s&productTierId=%s\n", utils.GetRootDomain(), serviceID, productTierID)
+	fmt.Printf("Consume it at https://%s/access?serviceId=%s&environmentId=%s\n", utils.GetRootDomain(), serviceID, environmentID)
 
 	return nil
 }
 
-func buildService(file, token, name string, description, serviceLogoURL, environment *string, release, releaseAsPreferred bool) (serviceID string, productTierID string, err error) {
+func buildService(file, token, name string, description, serviceLogoURL, environment *string, release, releaseAsPreferred bool) (serviceID string, environmentID string, productTierID string, err error) {
 	if name == "" {
-		return "", "", errors.New("name is required")
+		return "", "", "", errors.New("name is required")
 	}
 
 	service, err := httpclientwrapper.NewService("https", utils.GetHost())
 	if err != nil {
-		return "", "", fmt.Errorf("unable to build service, %s", err.Error())
+		return "", "", "", fmt.Errorf("unable to build service, %s", err.Error())
 	}
 
 	fileData, err := os.ReadFile(filepath.Clean(file))
 	if err != nil {
-		return "", "", fmt.Errorf("unable to read file, %s", err.Error())
+		return "", "", "", fmt.Errorf("unable to read file, %s", err.Error())
 	}
 
 	request := serviceapi.BuildServiceFromComposeSpecRequest{
@@ -129,9 +131,9 @@ func buildService(file, token, name string, description, serviceLogoURL, environ
 	var buildRes *serviceapi.BuildServiceFromComposeSpecResult
 	buildRes, err = service.BuildServiceFromComposeSpec(context.Background(), &request)
 	if err != nil {
-		return "", "", fmt.Errorf("unable to build service, %s", err.Error())
+		return "", "", "", fmt.Errorf("unable to build service, %s", err.Error())
 	}
-	return string(buildRes.ServiceID), string(buildRes.ProductTierID), nil
+	return string(buildRes.ServiceID), string(buildRes.ServiceEnvironmentID), string(buildRes.ProductTierID), nil
 }
 
 func resetBuild() {
