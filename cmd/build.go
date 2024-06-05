@@ -91,7 +91,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		environmentPtr = nil
 	}
 
-	serviceID, productTierID, environmentID, err = buildService(file, token, name, descriptionPtr, serviceLogoURLPtr, environmentPtr, release, releaseAsPreferred)
+	serviceID, environmentID, productTierID, err = buildService(file, token, name, descriptionPtr, serviceLogoURLPtr, environmentPtr, release, releaseAsPreferred)
 	if err != nil {
 		return err
 	}
