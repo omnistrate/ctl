@@ -58,6 +58,39 @@ build:
 	echo "Building go binaries for omnistrate ctl"
 	go build -mod=mod ${BUILD_FLAGS} -o omnistrate-ctl main.go
 
+.PHONY: ctl-linux-amd64
+ctl-linux-amd64: main.go
+	echo "Building CTL for linux amd64"
+	GOOS=linux GOARCH=amd64 go build ${BUILD_FLAGS} -o build/omnistrate-linux-amd64 github.com/omnistrate/ctl
+
+.PHONY: ctl-linux-arm64
+ctl-linux-arm64: main.go
+	echo "Building CTL for linux arm64"
+	GOOS=linux GOARCH=arm64 go build ${BUILD_FLAGS} -o v1/cmd/client/build/omnistrate-linux-arm64 github.com/omnistrate/ctl
+
+.PHONY: ctl-darwin-amd64
+ctl-darwin-amd64: main.go
+	echo "Building CTL for darwin amd64"
+	GOOS=darwin GOARCH=amd64 go build ${BUILD_FLAGS} -o v1/cmd/client/build/omnistrate-darwin-amd64 github.com/omnistrate/ctl
+
+.PHONY: ctl-darwin-arm64
+ctl-darwin-arm64: main.go
+	echo "Building CTL for darwin arm64"
+	GOOS=darwin GOARCH=arm64 go build ${BUILD_FLAGS} -o v1/cmd/client/build/omnistrate-darwin-arm64 github.com/omnistrate/ctl
+
+.PHONY: ctl-windows-amd64
+ctl-windows-amd64: main.go
+	echo "Building CTL for windows amd64"
+	GOOS=windows GOARCH=amd64 go build ${BUILD_FLAGS} -o v1/cmd/client/build/omnistrate-windows-amd64.exe github.com/omnistrate/ctl
+
+.PHONY: ctl-windows-arm64
+ctl-windows-arm64: main.go
+	echo "Building CTL for windows arm64"
+	GOOS=windows GOARCH=arm64 go build ${BUILD_FLAGS} -o v1/cmd/client/build/omnistrate-windows-arm64.exe github.com/omnistrate/ctl
+
+.PHONY: ctl
+ctl: ctl-linux-amd64 ctl-linux-arm64 ctl-darwin-amd64 ctl-darwin-arm64 ctl-windows-amd64 ctl-windows-arm64
+
 .PHONY: test-coverage-report
 test-coverage-report:
 	go test ./... -skip ./test/... -cover -coverprofile coverage.out -covermode count
@@ -106,7 +139,6 @@ docker-run:
 .PHONY: clean
 clean:
 	echo "Cleaning up"
-	rm ./omnistrate-cli
 	rm ./omnistrate-ctl
 	rm ./coverage.out
 	rm ./coverage-report.html
