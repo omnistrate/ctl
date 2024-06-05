@@ -44,7 +44,7 @@ func init() {
 	buildCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the service")
 	buildCmd.Flags().StringVarP(&description, "description", "", "", "Description of the service")
 	buildCmd.Flags().StringVarP(&serviceLogoURL, "service-logo-url", "", "", "URL to the service logo")
-	buildCmd.Flags().StringVarP(&environment, "environment", "", "Dev", "Environment to build the service in. Default is 'Dev'")
+	buildCmd.Flags().StringVarP(&environment, "environment", "", "Dev", "Environment to build the service in")
 	buildCmd.Flags().BoolVarP(&release, "release", "", false, "Release the service after building it")
 	buildCmd.Flags().BoolVarP(&releaseAsPreferred, "release-as-preferred", "", false, "Release the service as preferred after building it")
 
