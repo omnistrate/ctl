@@ -160,8 +160,8 @@ func Test_build_duplicate_service_plan_name(t *testing.T) {
 	require.NoError(err)
 	prodEnvironmentID := environmentID
 	prodProductTierID := productTierID
-	require.NotEmpty(devEnvironmentID)
-	require.NotEmpty(devProductTierID)
+	require.NotEmpty(prodEnvironmentID)
+	require.NotEmpty(prodEnvironmentID)
 	require.NotEqual(devEnvironmentID, prodEnvironmentID)
 	require.NotEqual(devProductTierID, prodProductTierID)
 
