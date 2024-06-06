@@ -5,15 +5,13 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	goa "goa.design/goa/v3/pkg"
-	"os"
-	"path/filepath"
-	"strings"
-
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
+	goa "goa.design/goa/v3/pkg"
+	"os"
+	"path/filepath"
 )
 
 var (
@@ -33,7 +31,7 @@ var (
 var buildCmd = &cobra.Command{
 	Use:          "build [--file FILE] [--name NAME] [--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] [--environment ENVIRONMENT] [--release] [--release-as-preferred]",
 	Short:        "Build service from a docker-compose file",
-	Long:         `Build service from a docker-compose file. The file must be in .yaml or .yml format. Name is required. Description and service logo URL are optional. If release flag is set, the service will be released after building it.`,
+	Long:         `Build service from a docker-compose file. Name is required. Description and service logo URL are optional. If release flag is set, the service will be released after building it.`,
 	Example:      `  ./omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png" --environment "dev" --release-as-preferred`,
 	RunE:         runBuild,
 	SilenceUsage: true,
@@ -42,17 +40,13 @@ var buildCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(buildCmd)
 
-	buildCmd.Flags().StringVarP(&file, "file", "f", "", "Path to the docker compose yaml file")
+	buildCmd.Flags().StringVarP(&file, "file", "f", "", "Path to the docker compose file")
 	buildCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the service")
 	buildCmd.Flags().StringVarP(&description, "description", "", "", "Description of the service")
 	buildCmd.Flags().StringVarP(&serviceLogoURL, "service-logo-url", "", "", "URL to the service logo")
 	buildCmd.Flags().StringVarP(&environment, "environment", "", "Dev", "Environment to build the service in")
 	buildCmd.Flags().BoolVarP(&release, "release", "", false, "Release the service after building it")
 	buildCmd.Flags().BoolVarP(&releaseAsPreferred, "release-as-preferred", "", false, "Release the service as preferred after building it")
-
-	// Set Bash completion options
-	validYAMLFilenames := []string{"yaml", "yml"}
-	_ = buildCmd.Flags().SetAnnotation("yaml", cobra.BashCompFilenameExt, validYAMLFilenames)
 }
 
 func runBuild(cmd *cobra.Command, args []string) error {
@@ -61,10 +55,6 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	// Validate input arguments
 	if len(file) == 0 {
 		return fmt.Errorf("must provide --file or -f")
-	}
-
-	if !strings.HasSuffix(file, ".yaml") && !strings.HasSuffix(file, ".yml") {
-		return fmt.Errorf("file must be a valid docker-compose file in .yaml or .yml format, got %s", file)
 	}
 
 	if _, err := os.Stat(file); os.IsNotExist(err) {
