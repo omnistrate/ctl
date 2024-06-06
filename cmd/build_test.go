@@ -129,8 +129,8 @@ func Test_build_update_service(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: create Falkor Free service
-	serviceName = "Falkor Free" + uuid.NewString()
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/falkor_free.yaml", "--name", serviceName, "--release-as-preferred"})
+	serviceName1 := "Falkor Free" + uuid.NewString()
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/falkor_free.yaml", "--name", serviceName1, "--release-as-preferred"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 	serviceID1 := serviceID
@@ -138,8 +138,8 @@ func Test_build_update_service(t *testing.T) {
 	productTierID1 := productTierID
 
 	// PASS: create Falkor Pro service
-	serviceName = "Falkor Pro" + uuid.NewString()
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/falkor_pro.yaml", "--name", serviceName, "--release-as-preferred"})
+	serviceName2 := "Falkor Pro" + uuid.NewString()
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/falkor_pro.yaml", "--name", serviceName2, "--release-as-preferred"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 	serviceID2 := serviceID
@@ -147,14 +147,14 @@ func Test_build_update_service(t *testing.T) {
 	productTierID2 := productTierID
 
 	// PASS: update Falkor Free service with the same compose file
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/falkor_free.yaml", "--name", serviceName, "--release-as-preferred"})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/falkor_free.yaml", "--name", serviceName1, "--release-as-preferred"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 	require.Equal(environmentID1, environmentID)
 	require.Equal(productTierID1, productTierID)
 
 	// PASS: update Falkor Pro service with the same compose file
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/falkor_pro.yaml", "--name", serviceName, "--release-as-preferred"})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/falkor_pro.yaml", "--name", serviceName2, "--release-as-preferred"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 	require.Equal(environmentID2, environmentID)
