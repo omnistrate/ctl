@@ -96,8 +96,7 @@ test-coverage-report:
 
 lint-install:
 	echo "Installing golangci-lint"
-	brew install golangci-lint
-	brew upgrade golangci-lint
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.56.2
 
 .PHONY: lint
 lint:
