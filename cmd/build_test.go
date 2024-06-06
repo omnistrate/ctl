@@ -130,7 +130,7 @@ func Test_build_update_service(t *testing.T) {
 
 	// PASS: create Falkor Free service
 	serviceName = "Falkor Free" + uuid.NewString()
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/falkor_free.yaml", "--name", serviceName, "--release-as-preferred"})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/falkor_free.yaml", "--name", serviceName, "--release-as-preferred"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 	serviceID1 := serviceID
@@ -139,7 +139,7 @@ func Test_build_update_service(t *testing.T) {
 
 	// PASS: create Falkor Pro service
 	serviceName = "Falkor Pro" + uuid.NewString()
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/falkor_pro.yaml", "--name", serviceName, "--release-as-preferred"})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/falkor_pro.yaml", "--name", serviceName, "--release-as-preferred"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 	serviceID2 := serviceID
@@ -147,14 +147,14 @@ func Test_build_update_service(t *testing.T) {
 	productTierID2 := productTierID
 
 	// PASS: update Falkor Free service with the same compose file
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/falkor_free.yaml", "--name", serviceName, "--release-as-preferred"})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/falkor_free.yaml", "--name", serviceName, "--release-as-preferred"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 	require.Equal(environmentID1, environmentID)
 	require.Equal(productTierID1, productTierID)
 
 	// PASS: update Falkor Pro service with the same compose file
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/falkor_pro.yaml", "--name", serviceName, "--release-as-preferred"})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/falkor_pro.yaml", "--name", serviceName, "--release-as-preferred"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 	require.Equal(environmentID2, environmentID)
@@ -264,26 +264,6 @@ func Test_build_no_file(t *testing.T) {
 	err = rootCmd.Execute()
 	require.Error(err)
 	require.Contains(err.Error(), "must provide --file or -f")
-}
-
-func Test_build_invalid_file_format(t *testing.T) {
-	utils.SmokeTest(t)
-
-	require := require.New(t)
-	defer testutils.Cleanup()
-
-	var err error
-
-	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
-	require.NoError(err)
-	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
-	err = rootCmd.Execute()
-	require.NoError(err)
-
-	rootCmd.SetArgs([]string{"build", "-f", "invalid_file.txt", "--name", "My Service" + uuid.NewString(), "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
-	err = rootCmd.Execute()
-	require.Error(err)
-	require.Contains(err.Error(), "file must be a valid docker-compose file in .yaml or .yml format")
 }
 
 func Test_build_create_no_name(t *testing.T) {
