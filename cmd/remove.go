@@ -57,7 +57,7 @@ func runRemove(cmd *cobra.Command, args []string) error {
 }
 
 func removeService(serviceId, token string) error {
-	service, err := httpclientwrapper.NewService("https", utils.GetHost())
+	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return fmt.Errorf("unable to remove service, %s", err.Error())
 	}
