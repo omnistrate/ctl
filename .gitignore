@@ -4,6 +4,12 @@
 *.dylib
 omnistrate-cli
 omnistrate-ctl
+build/omnistrate-ctl-darwin-amd64
+build/omnistrate-ctl-darwin-arm64
+build/omnistrate-ctl-linux-amd64
+build/omnistrate-ctl-linux-arm64
+build/omnistrate-ctl-windows-amd64.exe
+build/omnistrate-ctl-windows-arm64.exe
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
