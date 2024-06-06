@@ -8,7 +8,6 @@ ifneq ($(.GIT_UNTRACKEDCHANGES),)
 	.GIT_COMMIT := $(.GIT_COMMIT)-dirty
 endif
 
-export GOFLAGS=-mod=vendor
 GIT_USER?=$(shell gh api user -q ".login") # gets current user using github cli if the variable is not already set
 GIT_TOKEN?=$(shell gh config get -h github.com oauth_token) # gets current user using github cli if the variable is not already set
 PROJECT_NAME=omnistrate-ctl
@@ -34,7 +33,6 @@ all: tidy build unit-test lint sec
 tidy:
 	echo "Tidy dependency modules"
 	go mod tidy
-	go mod vendor
 
 .PHONY: unit-test
 unit-test:
