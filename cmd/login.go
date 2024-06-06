@@ -28,9 +28,10 @@ var loginCmd = &cobra.Command{
 	Use:   `login [--email EMAIL] [--password PASSWORD]`,
 	Short: "Log in to Omnistrate platform",
 	Long:  "Log in to Omnistrate platform",
-	Example: `  cat ~/omnistrate_pass.txt | ./omnistrate-ctl login -e email --password-stdin
-	  echo $OMNISTRATE_PASSWORD | ./omnistrate-ctl login -e email --password-stdin`,
-	RunE: runLogin,
+	Example: `  cat ~/omnistrate_pass.txt | ./omnistrate-ctl login --email email --password-stdin
+	  echo $OMNISTRATE_PASSWORD | ./omnistrate-ctl login --email email --password-stdin`,
+	RunE:         runLogin,
+	SilenceUsage: true,
 }
 
 func init() {
@@ -102,7 +103,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func validateLogin(email string, pass string) (string, error) {
+func validateLogin(email string, pass string) (token string, err error) {
 	signin, err := httpclientwrapper.NewSignin(ctlutils.GetHostScheme(), ctlutils.GetHost())
 	if err != nil {
 		return "", fmt.Errorf("unable to login, %s", err.Error())
@@ -118,16 +119,14 @@ func validateLogin(email string, pass string) (string, error) {
 		var serviceErr *goa.ServiceError
 		ok := errors.As(err, &serviceErr)
 		if !ok {
-			return "", fmt.Errorf("unable to login, %s", err.Error())
+			return
 		}
 
-		if serviceErr.Name == "auth_failure" || serviceErr.Name == "bad_request" {
-			return "", fmt.Errorf("unable to login, either email or password is incorrect")
-		}
-
-		return "", fmt.Errorf("unable to login, %s", serviceErr.Name)
+		return "", fmt.Errorf("%s\nDetail: %s", serviceErr.Name, serviceErr.Message)
 	}
-	return res.JWTToken, nil
+
+	token = res.JWTToken
+	return
 }
 
 func resetLogin() {
