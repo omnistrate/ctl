@@ -109,7 +109,7 @@ func buildService(file, token, name string, description, serviceLogoURL, environ
 		return "", "", "", errors.New("name is required")
 	}
 
-	service, err := httpclientwrapper.NewService("https", utils.GetHost())
+	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return "", "", "", fmt.Errorf("unable to build service, %s", err.Error())
 	}

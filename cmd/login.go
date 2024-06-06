@@ -12,7 +12,7 @@ import (
 	signinapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/signin_api"
 	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/config"
-	utils2 "github.com/omnistrate/ctl/utils"
+	ctlutils "github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 	goa "goa.design/goa/v3/pkg"
 )
@@ -103,7 +103,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 }
 
 func validateLogin(email string, pass string) (string, error) {
-	signin, err := httpclientwrapper.NewSignin("https", utils2.GetHost())
+	signin, err := httpclientwrapper.NewSignin(ctlutils.GetHostScheme(), ctlutils.GetHost())
 	if err != nil {
 		return "", fmt.Errorf("unable to login, %s", err.Error())
 	}

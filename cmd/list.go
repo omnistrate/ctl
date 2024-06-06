@@ -51,7 +51,7 @@ func runList(cmd *cobra.Command, args []string) error {
 }
 
 func listServices(token string) (*serviceapi.ListServiceResult, error) {
-	service, err := httpclientwrapper.NewService("https", utils.GetHost())
+	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return nil, fmt.Errorf("unable to list services, %s", err.Error())
 	}

@@ -18,7 +18,7 @@ import (
 type AuthType string
 
 const (
-	//JWTAuthType jwt authentication type
+	// JWTAuthType jwt authentication type
 	JWTAuthType = "jwt_auth"
 
 	// ConfigLocationEnv is the name of the env variable used

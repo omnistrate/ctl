@@ -66,7 +66,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 }
 
 func describeService(serviceId, token string) (*serviceapi.DescribeServiceResult, error) {
-	service, err := httpclientwrapper.NewService("https", utils.GetHost())
+	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return nil, fmt.Errorf("unable to describe service, %s", err.Error())
 	}
