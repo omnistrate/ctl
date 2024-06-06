@@ -137,7 +137,13 @@ func buildService(file, token, name string, description, serviceLogoURL, environ
 		if errors.As(err, &serviceError) {
 			return "", "", "", fmt.Errorf("%s\nDetail: %s", serviceError.Name, serviceError.Message)
 		}
+		return
 	}
+
+	if buildRes == nil {
+		return "", "", "", errors.New("empty response from server")
+	}
+
 	return string(buildRes.ServiceID), string(buildRes.ServiceEnvironmentID), string(buildRes.ProductTierID), nil
 }
 
