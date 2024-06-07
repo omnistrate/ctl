@@ -86,8 +86,7 @@ case $(uname -m) in
         ;;
 esac
 
-VERSION="0.8"
-BASE_URL="https://github.com/omnistrate/cli/releases/download/v${VERSION}/omnistrate-ctl-${OS}-${ARCH}"
+BASE_URL="https://github.com/omnistrate/cli/releases/download/v0.8/omnistrate-ctl-${OS}-${ARCH}"
 if [ "$OS" = "windows" ]; then
     BASE_URL="${BASE_URL}.exe"
 fi
@@ -103,14 +102,14 @@ if [ -d "${OMNISTRATE_CTL}" ]; then
     say_red "error: ${OMNISTRATE_CTL} already exists and is a directory, refusing to proceed."
     exit 1
 elif [ ! -f "${OMNISTRATE_CTL}" ]; then
-    say_blue "=== Installing Omnistrate CTL v${VERSION} ==="
+    say_blue "=== Installing Omnistrate CTL ==="
 else
-    say_blue "=== Upgrading Omnistrate CTL to v${VERSION} ==="
+    say_blue "=== Upgrading Omnistrate CTL ==="
 fi
 
 mkdir -p "${OMNISTRATE_INSTALL_ROOT}/bin"
 
-say_blue "=== Downloading Omnistrate CTL v${VERSION} for ${OS}-${ARCH} ==="
+say_blue "=== Downloading Omnistrate CTL for ${OS}-${ARCH} ==="
 curl -L -o "${OMNISTRATE_CTL}" ${BASE_URL}
 
 if [ "$OS" = "windows" ]; then
