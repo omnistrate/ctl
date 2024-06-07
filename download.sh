@@ -46,6 +46,24 @@ at_exit() {
 
 trap at_exit EXIT
 
+INSTALL_ROOT=""
+NO_EDIT_PATH=""
+SILENT=""
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --silent)
+            SILENT="--silent"
+            ;;
+        --install-root)
+            INSTALL_ROOT=$2
+            ;;
+        --no-edit-path)
+            NO_EDIT_PATH="true"
+            ;;
+     esac
+     shift
+done
+
 OS=""
 case $(uname) in
     "Linux"*) OS="linux";;
@@ -103,34 +121,52 @@ fi
 chmod +x "${OMNISTRATE_CTL}"
 say_green "Omnistrate CTL downloaded to ${OMNISTRATE_CTL}"
 
-PROFILE_FILE=""
-SHELL_NAME=$(basename "${SHELL}")
-case "${SHELL_NAME}" in
-    "bash")
-        if [ "$(uname)" != "Darwin" ]; then
-            PROFILE_FILE="${HOME}/.bashrc"
-            [ ! -e "${PROFILE_FILE}" ] && PROFILE_FILE="${HOME}/.bash_profile"
-        else
-            PROFILE_FILE="${HOME}/.bash_profile"
-            [ ! -e "${PROFILE_FILE}" ] && PROFILE_FILE="${HOME}/.bashrc"
+# Now that we have installed Omnistrate, if it is not already on the path, let's add a line to the
+# user's profile to add the folder to the PATH for future sessions.
+if [ "${NO_EDIT_PATH}" != "true" ]; then
+    # If we can, we'll add a line to the user's .profile adding ${OMNISTRATE_INSTALL_ROOT}/bin to the PATH
+    SHELL_NAME=$(basename "${SHELL}")
+    PROFILE_FILE=""
+
+    case "${SHELL_NAME}" in
+        "bash")
+            # Terminal.app on macOS prefers .bash_profile to .bashrc, so we prefer that
+            # file when trying to put our export into a profile. On *NIX, .bashrc is
+            # preferred as it is sourced for new interactive shells.
+            if [ "$(uname)" != "Darwin" ]; then
+                if [ -e "${HOME}/.bashrc" ]; then
+                    PROFILE_FILE="${HOME}/.bashrc"
+                elif [ -e "${HOME}/.bash_profile" ]; then
+                    PROFILE_FILE="${HOME}/.bash_profile"
+                fi
+            else
+                if [ -e "${HOME}/.bash_profile" ]; then
+                    PROFILE_FILE="${HOME}/.bash_profile"
+                elif [ -e "${HOME}/.bashrc" ]; then
+                    PROFILE_FILE="${HOME}/.bashrc"
+                fi
+            fi
+            ;;
+        "zsh")
+            if [ -e "${ZDOTDIR:-$HOME}/.zshrc" ]; then
+                PROFILE_FILE="${ZDOTDIR:-$HOME}/.zshrc"
+            fi
+            ;;
+    esac
+
+    if [ -n "${PROFILE_FILE}" ]; then
+        LINE_TO_ADD="export PATH=\$PATH:${OMNISTRATE_INSTALL_ROOT}/bin"
+        if ! grep -q "# add Omnistrate CTL to the PATH" "${PROFILE_FILE}"; then
+            say_white "+ Adding ${OMNISTRATE_INSTALL_ROOT}/bin to \$PATH in ${PROFILE_FILE}"
+            printf "\\n# add Omnistrate CTL to the PATH\\n%s\\n" "${LINE_TO_ADD}" >> "${PROFILE_FILE}"
         fi
-        ;;
-    "zsh")
-        PROFILE_FILE="${ZDOTDIR:-$HOME}/.zshrc"
-        ;;
-esac
 
-if [ -n "${PROFILE_FILE}" ]; then
-    LINE_TO_ADD="export PATH=\$PATH:${OMNISTRATE_INSTALL_ROOT}/bin"
-    if ! grep -q "# add Omnistrate to the PATH" "${PROFILE_FILE}"; then
-        say_white "+ Adding ${OMNISTRATE_INSTALL_ROOT}/bin to \$PATH in ${PROFILE_FILE}"
-        printf "\\n# add Omnistrate to the PATH\\n%s\\n" "${LINE_TO_ADD}" >> "${PROFILE_FILE}"
+        EXTRA_INSTALL_STEP="+ Please restart your shell or add ${OMNISTRATE_INSTALL_ROOT}/bin to your \$PATH"
+    else
+        EXTRA_INSTALL_STEP="+ Please add ${OMNISTRATE_INSTALL_ROOT}/bin to your \$PATH"
     fi
-    EXTRA_INSTALL_STEP="+ Please restart your shell or add ${OMNISTRATE_INSTALL_ROOT}/bin to your \$PATH"
-else
-    EXTRA_INSTALL_STEP="+ Please add ${OMNISTRATE_INSTALL_ROOT}/bin to your \$PATH"
 fi
-
+say_blue
 say_blue "=== Omnistrate CTL is now installed! ==="
 if [ -n "${EXTRA_INSTALL_STEP}" ]; then
     say_white "${EXTRA_INSTALL_STEP}"
