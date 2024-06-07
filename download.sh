@@ -39,7 +39,7 @@ say_white()
 
 print_unsupported_platform()
 {
-    >&2 say_red "error: We're sorry, but it looks like Omnistrate CLI is not supported on your platform"
+    >&2 say_red "error: We're sorry, but it looks like Omnistrate CTL is not supported on your platform"
     >&2 say_red "       We support 64-bit versions of Linux, macOS, and Windows."
 }
 
@@ -86,29 +86,29 @@ INSTALL_ROOT=""
 if [ -z "${INSTALL_ROOT}" ]; then
     INSTALL_ROOT="${HOME}/.omnistrate"
 fi
-CLI_PATH="${INSTALL_ROOT}/bin/omnistrate-ctl"
+CTL_PATH="${INSTALL_ROOT}/bin/omnistrate-ctl"
 
-if [ -d "${CLI_PATH}" ]; then
-    say_red "error: ${CLI_PATH} already exists and is a directory, refusing to proceed."
+if [ -d "${CTL_PATH}" ]; then
+    say_red "error: ${CTL_PATH} already exists and is a directory, refusing to proceed."
     exit 1
-elif [ ! -f "${CLI_PATH}" ]; then
-    say_blue "=== Installing Omnistrate CLI v${VERSION} ==="
+elif [ ! -f "${CTL_PATH}" ]; then
+    say_blue "=== Installing Omnistrate CTL v${VERSION} ==="
 else
-    say_blue "=== Upgrading Omnistrate CLI to v${VERSION} ==="
+    say_blue "=== Upgrading Omnistrate CTL to v${VERSION} ==="
 fi
 
 mkdir -p "${INSTALL_ROOT}/bin"
 
-say_blue "=== Downloading Omnistrate CLI v${VERSION} for ${OS}-${ARCH} ==="
-curl -L -o "${CLI_PATH}" ${BASE_URL}
+say_blue "=== Downloading Omnistrate CTL v${VERSION} for ${OS}-${ARCH} ==="
+curl -L -o "${CTL_PATH}" ${BASE_URL}
 
 if [ "$OS" = "windows" ]; then
-    mv "${CLI_PATH}" "${INSTALL_ROOT}/bin/omnistrate-ctl.exe"
-    CLI_PATH="${INSTALL_ROOT}/bin/omnistrate-ctl.exe"
+    mv "${CTL_PATH}" "${INSTALL_ROOT}/bin/omnistrate-ctl.exe"
+    CTL_PATH="${INSTALL_ROOT}/bin/omnistrate-ctl.exe"
 fi
 
-chmod +x "${CLI_PATH}"
-say_green "Omnistrate CLI downloaded to ${CLI_PATH}"
+chmod +x "${CTL_PATH}"
+say_green "Omnistrate CTL downloaded to ${CTL_PATH}"
 
 # Add to PATH if not already added
 PROFILE_FILE=""
@@ -147,8 +147,8 @@ else
     EXTRA_INSTALL_STEP="+ Please add ${INSTALL_ROOT}/bin to your \$PATH"
 fi
 
-say_blue "=== Omnistrate CLI is now installed! ==="
+say_blue "=== Omnistrate CTL is now installed! ==="
 if [ -n "${EXTRA_INSTALL_STEP}" ]; then
     say_white "${EXTRA_INSTALL_STEP}"
 fi
-say_green "+ Get started with Omnistrate: https://docs.omnistrate.com/getting-started/ctl-reference/#getting-started"
+say_green "+ Get started with Omnistrate CTL: https://docs.omnistrate.com/getting-started/ctl-reference/#getting-started"
