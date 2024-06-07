@@ -8,56 +8,48 @@ YELLOW="\\033[33;1m"
 BLUE="\\033[34;1m"
 WHITE="\\033[37;1m"
 
-say_green()
-{
+say_green() {
     [ -z "${SILENT}" ] && printf "%b%s%b\\n" "${GREEN}" "$1" "${RESET}"
     return 0
 }
 
-say_red()
-{
+say_red() {
     printf "%b%s%b\\n" "${RED}" "$1" "${RESET}"
 }
 
-say_yellow()
-{
+say_yellow() {
     [ -z "${SILENT}" ] && printf "%b%s%b\\n" "${YELLOW}" "$1" "${RESET}"
     return 0
 }
 
-say_blue()
-{
+say_blue() {
     [ -z "${SILENT}" ] && printf "%b%s%b\\n" "${BLUE}" "$1" "${RESET}"
     return 0
 }
 
-say_white()
-{
+say_white() {
     [ -z "${SILENT}" ] && printf "%b%s%b\\n" "${WHITE}" "$1" "${RESET}"
     return 0
 }
 
-print_unsupported_platform()
-{
+print_unsupported_platform() {
     >&2 say_red "error: We're sorry, but it looks like Omnistrate CTL is not supported on your platform"
     >&2 say_red "       We support 64-bit versions of Linux, macOS, and Windows."
 }
 
-at_exit()
-{
+at_exit() {
     if [ "$?" -ne 0 ]; then
         >&2 say_red "We're sorry, but it looks like something might have gone wrong during installation."
-        >&2 say_red "If you need help, please join us on our support channels."
+        >&2 say_red "If you need help, please check https://omnistrate.com/support."
     fi
 }
 
 trap at_exit EXIT
 
 OS=""
-ARCH=""
 case $(uname) in
-    "Linux") OS="linux";;
-    "Darwin") OS="darwin";;
+    "Linux"*) OS="linux";;
+    "Darwin"*) OS="darwin";;
     "MINGW"*) OS="windows";;
     "MSYS"*) OS="windows";;
     *)
@@ -66,10 +58,10 @@ case $(uname) in
         ;;
 esac
 
+ARCH=""
 case $(uname -m) in
-    "x86_64") ARCH="amd64";;
-    "arm64") ARCH="arm64";;
-    "aarch64") ARCH="arm64";;
+    x86_64|amd64) ARCH="amd64";;
+    arm64|aarch64) ARCH="arm64";;
     *)
         print_unsupported_platform
         exit 1
@@ -82,69 +74,61 @@ if [ "$OS" = "windows" ]; then
     BASE_URL="${BASE_URL}.exe"
 fi
 
-INSTALL_ROOT=""
-if [ -z "${INSTALL_ROOT}" ]; then
-    INSTALL_ROOT="${HOME}/.omnistrate"
+OMNISTRATE_INSTALL_ROOT=${INSTALL_ROOT}
+if [ "$OMNISTRATE_INSTALL_ROOT" = "" ]; then
+    # Default to ~/.omnistrate
+    OMNISTRATE_INSTALL_ROOT="${HOME}/.omnistrate"
 fi
-CTL_PATH="${INSTALL_ROOT}/bin/omnistrate-ctl"
+OMNISTRATE_CTL="${OMNISTRATE_INSTALL_ROOT}/bin/omnistrate-ctl"
 
-if [ -d "${CTL_PATH}" ]; then
-    say_red "error: ${CTL_PATH} already exists and is a directory, refusing to proceed."
+if [ -d "${OMNISTRATE_CTL}" ]; then
+    say_red "error: ${OMNISTRATE_CTL} already exists and is a directory, refusing to proceed."
     exit 1
-elif [ ! -f "${CTL_PATH}" ]; then
+elif [ ! -f "${OMNISTRATE_CTL}" ]; then
     say_blue "=== Installing Omnistrate CTL v${VERSION} ==="
 else
     say_blue "=== Upgrading Omnistrate CTL to v${VERSION} ==="
 fi
 
-mkdir -p "${INSTALL_ROOT}/bin"
+mkdir -p "${OMNISTRATE_INSTALL_ROOT}/bin"
 
 say_blue "=== Downloading Omnistrate CTL v${VERSION} for ${OS}-${ARCH} ==="
-curl -L -o "${CTL_PATH}" ${BASE_URL}
+curl -L -o "${OMNISTRATE_CTL}" ${BASE_URL}
 
 if [ "$OS" = "windows" ]; then
-    mv "${CTL_PATH}" "${INSTALL_ROOT}/bin/omnistrate-ctl.exe"
-    CTL_PATH="${INSTALL_ROOT}/bin/omnistrate-ctl.exe"
+    mv "${OMNISTRATE_CTL}" "${OMNISTRATE_INSTALL_ROOT}/bin/omnistrate-ctl.exe"
+    OMNISTRATE_CTL="${OMNISTRATE_INSTALL_ROOT}/bin/omnistrate-ctl.exe"
 fi
 
-chmod +x "${CTL_PATH}"
-say_green "Omnistrate CTL downloaded to ${CTL_PATH}"
+chmod +x "${OMNISTRATE_CTL}"
+say_green "Omnistrate CTL downloaded to ${OMNISTRATE_CTL}"
 
-# Add to PATH if not already added
 PROFILE_FILE=""
 SHELL_NAME=$(basename "${SHELL}")
 case "${SHELL_NAME}" in
     "bash")
         if [ "$(uname)" != "Darwin" ]; then
-            if [ -e "${HOME}/.bashrc" ]; then
-                PROFILE_FILE="${HOME}/.bashrc"
-            elif [ -e "${HOME}/.bash_profile" ]; then
-                PROFILE_FILE="${HOME}/.bash_profile"
-            fi
+            PROFILE_FILE="${HOME}/.bashrc"
+            [ ! -e "${PROFILE_FILE}" ] && PROFILE_FILE="${HOME}/.bash_profile"
         else
-            if [ -e "${HOME}/.bash_profile" ]; then
-                PROFILE_FILE="${HOME}/.bash_profile"
-            elif [ -e "${HOME}/.bashrc" ]; then
-                PROFILE_FILE="${HOME}/.bashrc"
-            fi
+            PROFILE_FILE="${HOME}/.bash_profile"
+            [ ! -e "${PROFILE_FILE}" ] && PROFILE_FILE="${HOME}/.bashrc"
         fi
         ;;
     "zsh")
-        if [ -e "${ZDOTDIR:-$HOME}/.zshrc" ]; then
-            PROFILE_FILE="${ZDOTDIR:-$HOME}/.zshrc"
-        fi
+        PROFILE_FILE="${ZDOTDIR:-$HOME}/.zshrc"
         ;;
 esac
 
 if [ -n "${PROFILE_FILE}" ]; then
-    LINE_TO_ADD="export PATH=\$PATH:${INSTALL_ROOT}/bin"
+    LINE_TO_ADD="export PATH=\$PATH:${OMNISTRATE_INSTALL_ROOT}/bin"
     if ! grep -q "# add Omnistrate to the PATH" "${PROFILE_FILE}"; then
-        say_white "+ Adding ${INSTALL_ROOT}/bin to \$PATH in ${PROFILE_FILE}"
+        say_white "+ Adding ${OMNISTRATE_INSTALL_ROOT}/bin to \$PATH in ${PROFILE_FILE}"
         printf "\\n# add Omnistrate to the PATH\\n%s\\n" "${LINE_TO_ADD}" >> "${PROFILE_FILE}"
     fi
-    EXTRA_INSTALL_STEP="+ Please restart your shell or add ${INSTALL_ROOT}/bin to your \$PATH"
+    EXTRA_INSTALL_STEP="+ Please restart your shell or add ${OMNISTRATE_INSTALL_ROOT}/bin to your \$PATH"
 else
-    EXTRA_INSTALL_STEP="+ Please add ${INSTALL_ROOT}/bin to your \$PATH"
+    EXTRA_INSTALL_STEP="+ Please add ${OMNISTRATE_INSTALL_ROOT}/bin to your \$PATH"
 fi
 
 say_blue "=== Omnistrate CTL is now installed! ==="
