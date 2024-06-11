@@ -3,6 +3,10 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/fatih/color"
+	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/jedib0t/go-pretty/v6/text"
+	"os"
 
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
@@ -44,22 +48,52 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Describe service
-	res, err := describeService(describeServiceID, token)
+	service, err := describeService(describeServiceID, token)
 	if err != nil {
 		fmt.Println("Error describing service:", err.Error())
 		return err
 	}
 
 	// Print service details
-	fmt.Println("Service ID:", res.ID)
-	fmt.Println("Service Name:", res.Name)
-	fmt.Println("Service Created At:", res.CreatedAt)
-	fmt.Println("Service Description:", res.Description)
-	fmt.Println("Service Provider Name:", res.ServiceProviderName)
-	fmt.Println("Service Provider ID:", res.ServiceProviderID)
-	if res.ServiceLogoURL != nil {
-		fmt.Println("Service Logo URL:", *res.ServiceLogoURL)
-		return nil
+	green := color.New(color.FgGreen).SprintFunc()
+	bold := color.New(color.Bold).SprintFunc()
+
+	fmt.Println(bold("Service Details:"))
+	fmt.Printf("%s %s\n", green("Service ID:"), service.ID)
+	fmt.Printf("%s %s\n", green("Service Name:"), service.Name)
+	fmt.Printf("%s %s\n", green("Service Created At:"), service.CreatedAt)
+	fmt.Printf("%s %s\n", green("Service Description:"), service.Description)
+	if service.ServiceLogoURL != nil {
+		fmt.Printf("%s %s\n", green("Service Logo URL:"), *service.ServiceLogoURL)
+	}
+
+	fmt.Println(bold("\nEnvironments:"))
+
+	for _, env := range service.ServiceEnvironments {
+		fmt.Printf("\n%s %s\n", green("Environment ID:"), env.ID)
+		fmt.Printf("%s %s\n", green("Environment Name:"), env.Name)
+		fmt.Printf("%s %s\n", green("Environment Visibility:"), env.Visibility)
+
+		t := table.NewWriter()
+		t.SetOutputMirror(os.Stdout)
+		t.SetStyle(table.StyleLight)
+		t.Style().Options.SeparateRows = true
+
+		t.AppendHeader(table.Row{bold("Product Tier ID"), bold("Name"), bold("Description"), bold("Tenancy Type"), bold("Deployment Type")})
+
+		for _, plan := range env.ServicePlans {
+			t.AppendRow(table.Row{green(plan.ProductTierID), plan.Name, plan.Description, plan.TierType, plan.ModelType})
+		}
+
+		t.SetColumnConfigs([]table.ColumnConfig{
+			{Number: 1, Align: text.AlignLeft, WidthMax: 30},
+			{Number: 2, Align: text.AlignLeft, WidthMax: 30},
+			{Number: 3, Align: text.AlignLeft, WidthMax: 50},
+			{Number: 4, Align: text.AlignLeft, WidthMax: 30},
+			{Number: 5, Align: text.AlignLeft, WidthMax: 30},
+		})
+
+		t.Render()
 	}
 
 	return nil
