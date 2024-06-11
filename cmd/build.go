@@ -54,17 +54,21 @@ func runBuild(cmd *cobra.Command, args []string) error {
 
 	// Validate input arguments
 	if len(file) == 0 {
-		return fmt.Errorf("must provide --file or -f")
+		err := errors.New("must provide --file")
+		utils.PrintError(err)
+		return err
 	}
 
 	if _, err := os.Stat(file); os.IsNotExist(err) {
-		return fmt.Errorf("file does not exist: %s", file)
+		utils.PrintError(err)
+		return err
 	}
 
 	// Validate user is currently logged in
 	token, err := utils.GetToken()
 	if err != nil {
-		return fmt.Errorf("unable to retrieve authentication credentials, %s", err.Error())
+		utils.PrintError(err)
+		return err
 	}
 
 	// Build service
@@ -85,11 +89,13 @@ func runBuild(cmd *cobra.Command, args []string) error {
 
 	serviceID, environmentID, productTierID, err = buildService(file, token, name, descriptionPtr, serviceLogoURLPtr, environmentPtr, release, releaseAsPreferred)
 	if err != nil {
+		utils.PrintError(err)
 		return err
 	}
-	fmt.Println("Service built successfully")
-	fmt.Printf("Check the service plan result at https://%s/product-tier/build?serviceId=%s&productTierId=%s\n", utils.GetRootDomain(), serviceID, productTierID)
-	fmt.Printf("Consume it at https://%s/access?serviceId=%s&environmentId=%s\n", utils.GetRootDomain(), serviceID, environmentID)
+
+	utils.PrintSuccess("Service built successfully")
+	utils.PrintURL("Check the service plan result at", fmt.Sprintf("https://%s/product-tier/build?serviceId=%s&productTierId=%s", utils.GetRootDomain(), serviceID, productTierID))
+	utils.PrintURL("Consume it at", fmt.Sprintf("https://%s/access?serviceId=%s&environmentId=%s", utils.GetRootDomain(), serviceID, environmentID))
 
 	return nil
 }
@@ -101,12 +107,12 @@ func buildService(file, token, name string, description, serviceLogoURL, environ
 
 	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
-		return "", "", "", fmt.Errorf("unable to build service, %s", err.Error())
+		return "", "", "", err
 	}
 
 	fileData, err := os.ReadFile(filepath.Clean(file))
 	if err != nil {
-		return "", "", "", fmt.Errorf("unable to read file, %s", err.Error())
+		return "", "", "", err
 	}
 
 	request := serviceapi.BuildServiceFromComposeSpecRequest{

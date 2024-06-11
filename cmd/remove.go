@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
@@ -16,11 +17,12 @@ var (
 
 // removeCmd represents the remove command
 var removeCmd = &cobra.Command{
-	Use:     "remove [--service-id SERVICE_ID]",
-	Short:   "Remove service from Omnistrate platform",
-	Long:    `Remove service from Omnistrate platform by providing the service id.`,
-	Example: `  ./omnistrate-ctl remove --service-id SERVICE_ID`,
-	RunE:    runRemove,
+	Use:          "remove [--service-id SERVICE_ID]",
+	Short:        "Remove service from Omnistrate platform",
+	Long:         `Remove service from Omnistrate platform by providing the service id.`,
+	Example:      `  ./omnistrate-ctl remove --service-id SERVICE_ID`,
+	RunE:         runRemove,
+	SilenceUsage: true,
 }
 
 func init() {
@@ -34,24 +36,25 @@ func runRemove(cmd *cobra.Command, args []string) error {
 
 	// Validate input arguments
 	if len(removeServiceID) == 0 {
-		return fmt.Errorf("must provide --service-id")
+		err := errors.New("must provide --service-id")
+		utils.PrintError(err)
+		return err
 	}
 
 	// Validate user is currently logged in
 	token, err := utils.GetToken()
 	if err != nil {
-		return fmt.Errorf("unable to retrieve authentication credentials, %s", err.Error())
+		utils.PrintError(err)
+		return err
 	}
 
 	// Remove service
 	err = removeService(removeServiceID, token)
 	if err != nil {
-		fmt.Println("Error removing service:", err.Error())
+		utils.PrintError(err)
 		return err
 	}
-	fmt.Println("Service removed successfully")
-
-	fmt.Printf("Service %s has been removed successfully\n", removeServiceID)
+	utils.PrintSuccess(fmt.Sprintf("Service %s has been removed successfully", removeServiceID))
 
 	return nil
 }
@@ -59,7 +62,7 @@ func runRemove(cmd *cobra.Command, args []string) error {
 func removeService(serviceId, token string) error {
 	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
-		return fmt.Errorf("unable to remove service, %s", err.Error())
+		return err
 	}
 
 	request := serviceapi.DeleteServiceRequest{
@@ -69,7 +72,7 @@ func removeService(serviceId, token string) error {
 
 	err = service.DeleteService(context.Background(), &request)
 	if err != nil {
-		return fmt.Errorf("unable to remove service, %s", err.Error())
+		return err
 	}
 	return nil
 }

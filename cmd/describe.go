@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -20,11 +21,12 @@ var (
 
 // describeCmd represents the describe command
 var describeCmd = &cobra.Command{
-	Use:     "describe [--service-id SERVICE_ID]",
-	Short:   "Describe service",
-	Long:    `Describe service for a given service id.`,
-	Example: `  ./omnistrate-ctl describe --service-id SERVICE_ID`,
-	RunE:    runDescribe,
+	Use:          "describe [--service-id SERVICE_ID]",
+	Short:        "Describe service",
+	Long:         `Describe service for a given service id.`,
+	Example:      `  ./omnistrate-ctl describe --service-id SERVICE_ID`,
+	RunE:         runDescribe,
+	SilenceUsage: true,
 }
 
 func init() {
@@ -38,19 +40,22 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 
 	// Validate input arguments
 	if len(describeServiceID) == 0 {
-		return fmt.Errorf("must provide --service-id")
+		err := errors.New("must provide --service-id")
+		utils.PrintError(err)
+		return err
 	}
 
 	// Validate user is currently logged in
 	token, err := utils.GetToken()
 	if err != nil {
-		return fmt.Errorf("unable to retrieve authentication credentials, %s", err.Error())
+		utils.PrintError(err)
+		return err
 	}
 
 	// Describe service
 	service, err := describeService(describeServiceID, token)
 	if err != nil {
-		fmt.Println("Error describing service:", err.Error())
+		utils.PrintError(err)
 		return err
 	}
 
@@ -102,7 +107,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 func describeService(serviceId, token string) (*serviceapi.DescribeServiceResult, error) {
 	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
-		return nil, fmt.Errorf("unable to describe service, %s", err.Error())
+		return nil, err
 	}
 
 	request := serviceapi.DescribeServiceRequest{
@@ -112,7 +117,7 @@ func describeService(serviceId, token string) (*serviceapi.DescribeServiceResult
 
 	res, err := service.DescribeService(context.Background(), &request)
 	if err != nil {
-		return nil, fmt.Errorf("unable to describe service, %s", err.Error())
+		return nil, err
 	}
 	return res, nil
 }

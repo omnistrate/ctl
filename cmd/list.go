@@ -18,11 +18,12 @@ import (
 
 // listCmd represents the list command
 var listCmd = &cobra.Command{
-	Use:     "list",
-	Short:   "List service",
-	Long:    `List service. The service must be created before it can be listed.`,
-	Example: `  ./omnistrate-ctl list`,
-	RunE:    runList,
+	Use:          "list",
+	Short:        "List service",
+	Long:         `List service. The service must be created before it can be listed.`,
+	Example:      `  ./omnistrate-ctl list`,
+	RunE:         runList,
+	SilenceUsage: true,
 }
 
 func init() {
@@ -33,13 +34,14 @@ func runList(cmd *cobra.Command, args []string) error {
 	// Validate user is currently logged in
 	token, err := utils.GetToken()
 	if err != nil {
-		return fmt.Errorf("unable to retrieve authentication credentials, %s", err.Error())
+		utils.PrintError(err)
+		return err
 	}
 
 	// List service
 	res, err := listServices(token)
 	if err != nil {
-		fmt.Println("Error listing services:", err.Error())
+		utils.PrintError(err)
 		return err
 	}
 
@@ -83,7 +85,7 @@ func runList(cmd *cobra.Command, args []string) error {
 func listServices(token string) (*serviceapi.ListServiceResult, error) {
 	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
-		return nil, fmt.Errorf("unable to list services, %s", err.Error())
+		return nil, err
 	}
 
 	request := serviceapi.List{
@@ -92,7 +94,7 @@ func listServices(token string) (*serviceapi.ListServiceResult, error) {
 
 	res, err := service.ListService(context.Background(), &request)
 	if err != nil {
-		return nil, fmt.Errorf("unable to list services, %s", err.Error())
+		return nil, err
 	}
 	return res, nil
 }
