@@ -34,8 +34,3 @@ func PrintURL(label, url string) {
 	urlMsg := color.New(color.FgCyan).SprintFunc()
 	fmt.Printf("%s: %s\n", label, urlMsg(url))
 }
-
-func PrintBold(msg string) {
-	bold := color.New(color.Bold).SprintFunc()
-	fmt.Println(bold(msg))
-}
