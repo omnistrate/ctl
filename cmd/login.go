@@ -26,10 +26,10 @@ var (
 // loginCmd represents the login command
 var loginCmd = &cobra.Command{
 	Use:   `login [--email EMAIL] [--password PASSWORD]`,
-	Short: "Log in to Omnistrate platform",
-	Long:  "Log in to Omnistrate platform",
-	Example: `  cat ~/omnistrate_pass.txt | ./omnistrate-ctl login --email email --password-stdin
-	  echo $OMNISTRATE_PASSWORD | ./omnistrate-ctl login --email email --password-stdin`,
+	Short: "Log in to the Omnistrate platform",
+	Long:  `The login command is used to authenticate and log in to the Omnistrate platform.`,
+	Example: `  cat ~/omnistrate_pass.txt | omnistrate-ctl login --email email --password-stdin
+	  echo $OMNISTRATE_PASSWORD | omnistrate-ctl login --email email --password-stdin`,
 	RunE:         runLogin,
 	SilenceUsage: true,
 }
@@ -46,27 +46,36 @@ func runLogin(cmd *cobra.Command, args []string) error {
 	defer resetLogin()
 
 	if len(email) == 0 {
-		return fmt.Errorf("must provide --email or -e")
+		err := errors.New("must provide --email")
+		ctlutils.PrintError(err)
+		return err
 	}
 
 	if len(password) > 0 {
-		fmt.Println("WARNING! Using --password is insecure, consider using: cat ~/omnistrate_pass.txt | ./omnistrate-ctl login -e email --password-stdin echo $PASSWORD")
+		ctlutils.PrintWarning("WARNING! Using --password is insecure, consider using: cat ~/omnistrate_pass.txt | ./omnistrate-ctl login -e email --password-stdin echo $PASSWORD")
 		if passwordStdin {
-			return fmt.Errorf("--password and --password-stdin are mutually exclusive")
+			err := fmt.Errorf("--password and --password-stdin are mutually exclusive")
+			ctlutils.PrintError(err)
+			return err
 		}
 
 		if len(email) == 0 {
-			return fmt.Errorf("must provide --email with --password")
+			err := errors.New("must provide --email with --password")
+			ctlutils.PrintError(err)
+			return err
 		}
 	}
 
 	if passwordStdin {
 		if len(email) == 0 {
-			return fmt.Errorf("must provide --email with --password-stdin")
+			err := errors.New("must provide --email with --password-stdin")
+			ctlutils.PrintError(err)
+			return err
 		}
 
 		passwordFromStdin, err := io.ReadAll(os.Stdin)
 		if err != nil {
+			ctlutils.PrintError(err)
 			return err
 		}
 		password = strings.TrimSpace(string(passwordFromStdin))
@@ -74,13 +83,16 @@ func runLogin(cmd *cobra.Command, args []string) error {
 
 	password = strings.TrimSpace(password)
 	if len(password) == 0 {
-		return fmt.Errorf("must provide a non-empty password via --password or --password-stdin")
+		err := errors.New("must provide a non-empty password via --password or --password-stdin")
+		ctlutils.PrintError(err)
+		return err
 	}
 
-	fmt.Println("Calling the Omnistrate server to validate the credentials...")
+	ctlutils.PrintInfo("Calling the Omnistrate server to validate the credentials...")
 
 	token, err := validateLogin(email, password)
 	if err != nil {
+		ctlutils.PrintError(err)
 		return err
 	}
 
@@ -90,15 +102,17 @@ func runLogin(cmd *cobra.Command, args []string) error {
 		Auth:  config.JWTAuthType,
 	}
 	if err = config.UpdateAuthConfig(authConfig); err != nil {
+		ctlutils.PrintError(err)
 		return err
 	}
 
 	authConfig, err = config.LookupAuthConfig()
 	if err != nil {
+		ctlutils.PrintError(err)
 		return err
 	}
 
-	fmt.Println("credential saved for", authConfig.Email)
+	ctlutils.PrintSuccess(fmt.Sprintf("Credential saved for %s", authConfig.Email))
 
 	return nil
 }
@@ -106,7 +120,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 func validateLogin(email string, pass string) (token string, err error) {
 	signin, err := httpclientwrapper.NewSignin(ctlutils.GetHostScheme(), ctlutils.GetHost())
 	if err != nil {
-		return "", fmt.Errorf("unable to login, %s", err.Error())
+		return "", err
 	}
 
 	request := signinapi.SigninRequest{

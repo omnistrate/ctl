@@ -30,9 +30,9 @@ var (
 // buildCmd represents the build command
 var buildCmd = &cobra.Command{
 	Use:          "build [--file FILE] [--name NAME] [--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] [--environment ENVIRONMENT] [--release] [--release-as-preferred]",
-	Short:        "Build service from a docker-compose file",
-	Long:         `Build service from a docker-compose file. Name is required. Description and service logo URL are optional. If release flag is set, the service will be released after building it.`,
-	Example:      `  ./omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png" --environment "dev" --release-as-preferred`,
+	Short:        "Build a service from a Docker Compose file",
+	Long:         `Builds a new service using a Docker Compose file. The --name flag is required to specify the service name. Optionally, you can provide a description and a URL for the service's logo. Use the --environment flag to specify the target environment. Use --release or --release-as-preferred to release the service after building.`,
+	Example:      `  omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png" --environment "dev" --release-as-preferred`,
 	RunE:         runBuild,
 	SilenceUsage: true,
 }
@@ -54,17 +54,21 @@ func runBuild(cmd *cobra.Command, args []string) error {
 
 	// Validate input arguments
 	if len(file) == 0 {
-		return fmt.Errorf("must provide --file or -f")
+		err := errors.New("must provide --file or -f")
+		utils.PrintError(err)
+		return err
 	}
 
 	if _, err := os.Stat(file); os.IsNotExist(err) {
-		return fmt.Errorf("file does not exist: %s", file)
+		utils.PrintError(err)
+		return err
 	}
 
 	// Validate user is currently logged in
 	token, err := utils.GetToken()
 	if err != nil {
-		return fmt.Errorf("unable to retrieve authentication credentials, %s", err.Error())
+		utils.PrintError(err)
+		return err
 	}
 
 	// Build service
@@ -85,11 +89,13 @@ func runBuild(cmd *cobra.Command, args []string) error {
 
 	serviceID, environmentID, productTierID, err = buildService(file, token, name, descriptionPtr, serviceLogoURLPtr, environmentPtr, release, releaseAsPreferred)
 	if err != nil {
+		utils.PrintError(err)
 		return err
 	}
-	fmt.Println("Service built successfully")
-	fmt.Printf("Check the service plan result at https://%s/product-tier/build?serviceId=%s&productTierId=%s\n", utils.GetRootDomain(), serviceID, productTierID)
-	fmt.Printf("Consume it at https://%s/access?serviceId=%s&environmentId=%s\n", utils.GetRootDomain(), serviceID, environmentID)
+
+	utils.PrintSuccess("Service built successfully")
+	utils.PrintURL("Check the service plan result at", fmt.Sprintf("https://%s/product-tier/build?serviceId=%s&productTierId=%s", utils.GetRootDomain(), serviceID, productTierID))
+	utils.PrintURL("Consume it at", fmt.Sprintf("https://%s/access?serviceId=%s&environmentId=%s", utils.GetRootDomain(), serviceID, environmentID))
 
 	return nil
 }
@@ -101,12 +107,12 @@ func buildService(file, token, name string, description, serviceLogoURL, environ
 
 	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
-		return "", "", "", fmt.Errorf("unable to build service, %s", err.Error())
+		return "", "", "", err
 	}
 
 	fileData, err := os.ReadFile(filepath.Clean(file))
 	if err != nil {
-		return "", "", "", fmt.Errorf("unable to read file, %s", err.Error())
+		return "", "", "", err
 	}
 
 	request := serviceapi.BuildServiceFromComposeSpecRequest{

@@ -22,7 +22,7 @@ func Test_login(t *testing.T) {
 		ExpectedErrMsg string
 	}{
 		{[]string{"login", "--email=xzhang+cli@omnistrate.com", "--password=Test@1234"}, false, ""},
-		{[]string{"login"}, true, "must provide --email or -e"},
+		{[]string{"login"}, true, "must provide --email"},
 		{[]string{"login", "--email=xzhang+cli@omnistrate.com"}, true, "must provide a non-empty password via --password or --password-stdin"},
 		{[]string{"login", "--email=xzhang+cli@omnistrate.com", "--password=wrong_password"}, true, "wrong user email or password"},
 	}

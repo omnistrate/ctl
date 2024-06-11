@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"fmt"
+	"github.com/omnistrate/ctl/utils"
 
 	"github.com/omnistrate/ctl/config"
 	"github.com/spf13/cobra"
@@ -9,11 +9,12 @@ import (
 
 // logoutCmd represents the logout command
 var logoutCmd = &cobra.Command{
-	Use:     "logout",
-	Short:   "Logout from Omnistrate platform",
-	Long:    `Logout from Omnistrate platform.`,
-	Example: `  ./omnistrate-ctl logout`,
-	RunE:    runLogout,
+	Use:          "logout",
+	Short:        "Logout from the Omnistrate platform",
+	Long:         `The logout command is used to log out from the Omnistrate platform.`,
+	Example:      `  omnistrate-ctl logout`,
+	RunE:         runLogout,
+	SilenceUsage: true,
 }
 
 func init() {
@@ -23,9 +24,10 @@ func init() {
 func runLogout(cmd *cobra.Command, args []string) error {
 	err := config.RemoveAuthConfig()
 	if err != nil {
+		utils.PrintError(err)
 		return err
 	}
-	fmt.Println("credentials removed")
+	utils.PrintSuccess("Credentials removed")
 
 	return nil
 }

@@ -1,10 +1,17 @@
+Omnistrate ctl is a command line tool designed to streamline the creation, deployment, and management of your Omnistrate SaaS. Use it to build services from docker-compose files, manage service plans, and interact with the Omnistrate platform efficiently.
 
 ## Obtaining CTL
 
 We provide CTL in the following formats:
 ### CTL Binaries
-To run the CLI in your local environment, you can use the CTL binaries.
-To obtain the latest version of CTL binaries, please refer to the [Release](https://github.com/omnistrate/cli/releases/tag/v0.8) page.
+To run the CTL in your local environment, you can use the CTL binaries.
+To obtain the latest version of the CTL binaries, execute the following command in your terminal:
+
+```sh
+curl -fsSL https://cli.omnistrate.com | sh
+```
+
+This command will automatically download and install the latest version of the CTL binaries onto your system.
 
 ### Docker Image
 To integrate CTL into your CI/CD pipeline, you can use the CTL docker image.
@@ -18,19 +25,18 @@ Usage:
   omnistrate-ctl [command]
 
 Available Commands:
-  build       Build service from a docker-compose file
+  build       Build a service from a Docker Compose file
   completion  Generate the autocompletion script for the specified shell
-  describe    Describe service
+  describe    Get detailed information about a service
   help        Help about any command
-  list        List service
-  login       Log in to Omnistrate platform
-  logout      Logout from Omnistrate platform
-  remove      Remove service from Omnistrate platform
+  list        List all available services
+  login       Log in to the Omnistrate platform
+  logout      Logout from the Omnistrate platform
+  remove      Remove a service from the Omnistrate platform
 
 Flags:
   -h, --help   help for omnistrate-ctl
 
-Use "omnistrate-ctl [command] --help" for more information about a command.
 ```
 
 ## Using CTL with Docker
@@ -82,7 +88,7 @@ x-omnistrate-service-plan:
       AwsAccountId: '0123456789'
       AwsBootstrapRoleAccountArn: 'arn:aws:iam::0123456789:role/YOUR_AWS_BOOTSTRAP_ROLE'
 services:
-    ...
+  ...
 ```
 
 To build a service from a docker-compose file, use the `build` command:
