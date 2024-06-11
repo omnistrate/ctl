@@ -2,17 +2,18 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-
+	"github.com/fatih/color"
+	"github.com/mitchellh/go-wordwrap"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "omnistrate-ctl",
-	Short: "Omnistrate ctl in Go.",
-	Long: `Omnistrate ctl is a command line tool for creating,
-deploying, and managing your Omnistrate SaaS. `,
+	Short: "Manage your Omnistrate SaaS from the command line.",
+	Long: wordwrap.WrapString(`
+Omnistrate ctl is a command line tool designed to streamline the creation, deployment, and management of your Omnistrate SaaS. Use it to build services from docker-compose files, manage service plans, and interact with the Omnistrate platform efficiently.`, 80),
 	Run: runRoot,
 }
 
@@ -26,7 +27,13 @@ func runRoot(cmd *cobra.Command, args []string) {
 
 // printLogo prints an ASCII logo, which was generated with figlet
 func printLogo() {
-	fmt.Print(figletStr)
+	fmt.Println()
+	colors := []color.Attribute{
+		color.FgRed, color.FgYellow, color.FgGreen, color.FgCyan, color.FgBlue, color.FgMagenta,
+	}
+	for i, r := range figletStr {
+		fmt.Printf("%s", color.New(colors[i%len(colors)]).SprintFunc()(string(r)))
+	}
 }
 
 const figletStr = `                  _     __           __     

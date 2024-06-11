@@ -37,6 +37,8 @@ github.com/mattn/go-runewidth v0.0.15 h1:UNAjwbU9l54TA3KzvqLGxwWjHmMgBUVhBiTjelZ
 github.com/mattn/go-runewidth v0.0.15/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh153qUoGf23w=
 github.com/mitchellh/go-homedir v1.1.0 h1:lukF9ziXFxDFPkA1vsr5zpc1XuPDn/wFntq5mG+4E0Y=
 github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
+github.com/mitchellh/go-wordwrap v1.0.1 h1:TLuKupo69TCn6TQSyGxwI1EblZZEsQ0vMlAFQflz0v0=
+github.com/mitchellh/go-wordwrap v1.0.1/go.mod h1:R62XHJLzvMFRBbcrT7m7WgmE1eOyTSsCt+hzestvNj0=
 github.com/omnistrate/api-design v0.6.374 h1:CEAxBnLn3VQW4ocztVLmtyFBt9RagNekLHjVlGRqEW4=
 github.com/omnistrate/api-design v0.6.374/go.mod h1:yJqwAU2dG9yEQOXvyZ8iRMyme4fQAmVQFST7I0HKktI=
 github.com/omnistrate/api-design v0.6.383 h1:PADQGQ2QQZeGcUi9QFq+soSB0wVdyH+ApW1zervEaoQ=

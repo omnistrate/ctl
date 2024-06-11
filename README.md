@@ -3,8 +3,14 @@
 
 We provide CTL in the following formats:
 ### CTL Binaries
-To run the CLI in your local environment, you can use the CTL binaries.
-To obtain the latest version of CTL binaries, please refer to the [Release](https://github.com/omnistrate/cli/releases/tag/v0.8) page.
+To run the CTL in your local environment, you can use the CTL binaries.
+To obtain the latest version of the CTL binaries, execute the following command in your terminal:
+
+```sh
+curl -fsSL https://cli.omnistrate.com | sh
+```
+
+This command will automatically download and install the latest version of the CTL binaries onto your system.
 
 ### Docker Image
 To integrate CTL into your CI/CD pipeline, you can use the CTL docker image.

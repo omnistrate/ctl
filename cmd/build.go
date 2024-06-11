@@ -30,9 +30,9 @@ var (
 // buildCmd represents the build command
 var buildCmd = &cobra.Command{
 	Use:          "build [--file FILE] [--name NAME] [--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] [--environment ENVIRONMENT] [--release] [--release-as-preferred]",
-	Short:        "Build service from a docker-compose file",
-	Long:         `Build service from a docker-compose file. Name is required. Description and service logo URL are optional. If release flag is set, the service will be released after building it.`,
-	Example:      `  ./omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png" --environment "dev" --release-as-preferred`,
+	Short:        "Build a service from a Docker Compose file",
+	Long:         `Builds a new service using a Docker Compose file. The --name flag is required to specify the service name. Optionally, you can provide a description and a URL for the service's logo. Use the --environment flag to specify the target environment. Use --release or --release-as-preferred to release the service after building.`,
+	Example:      `  omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png" --environment "dev" --release-as-preferred`,
 	RunE:         runBuild,
 	SilenceUsage: true,
 }

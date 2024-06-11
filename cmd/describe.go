@@ -22,9 +22,9 @@ var (
 // describeCmd represents the describe command
 var describeCmd = &cobra.Command{
 	Use:          "describe [--service-id SERVICE_ID]",
-	Short:        "Describe service",
-	Long:         `Describe service for a given service id.`,
-	Example:      `  ./omnistrate-ctl describe --service-id SERVICE_ID`,
+	Short:        "Get detailed information about a service",
+	Long:         `The describe command retrieves detailed information about a service identified by its service ID.`,
+	Example:      `  omnistrate-ctl describe --service-id SERVICE_ID`,
 	RunE:         runDescribe,
 	SilenceUsage: true,
 }

@@ -7,6 +7,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jedib0t/go-pretty/v6 v6.5.9
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/mitchellh/go-wordwrap v1.0.1
 	github.com/omnistrate/api-design v0.6.383
 	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240610225732-68f73366e7db
 	github.com/omnistrate/commons/pkg/utils v0.0.0-20240604174540-fe671f90cd9c
