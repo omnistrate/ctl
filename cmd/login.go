@@ -46,7 +46,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 	defer resetLogin()
 
 	if len(email) == 0 {
-		err := errors.New("must provide --email or -e")
+		err := errors.New("must provide --email")
 		ctlutils.PrintError(err)
 		return err
 	}

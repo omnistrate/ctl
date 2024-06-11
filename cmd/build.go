@@ -54,7 +54,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 
 	// Validate input arguments
 	if len(file) == 0 {
-		err := errors.New("must provide --file")
+		err := errors.New("must provide --file or -f")
 		utils.PrintError(err)
 		return err
 	}
