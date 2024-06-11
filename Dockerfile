@@ -7,7 +7,7 @@ RUN apk add --no-cache socat
 RUN mkdir -p /usr/local/scripts
 
 # Copy the script into the image
-COPY script.sh /usr/local/scripts/script.sh
+COPY download.sh /usr/local/scripts/script.sh
 
 # Expose port 8080 for the HTTP server
 EXPOSE 8080
