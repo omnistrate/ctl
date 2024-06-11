@@ -188,6 +188,7 @@ jobs:
           ROOT_DOMAIN: omnistrate.dev
           LOG_LEVEL: debug
           LOG_FORMAT: pretty
+          DRY_RUN: true
         run: gotestsum --format github-actions -- ./... -timeout 600s -p 1 -p 1 -v
 
   publish:
