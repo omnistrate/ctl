@@ -3,11 +3,16 @@ package utils
 import (
 	"fmt"
 	"github.com/fatih/color"
+	"github.com/omnistrate/commons/pkg/utils"
+	"os"
 )
 
 func PrintError(err error) {
 	errorMsg := color.New(color.FgRed, color.Bold).SprintFunc()
 	fmt.Println(errorMsg("Error: "), err)
+	if !utils.IsDryRun() {
+		os.Exit(1)
+	}
 }
 
 func PrintSuccess(msg string) {
