@@ -25,7 +25,7 @@ var (
 
 // loginCmd represents the login command
 var loginCmd = &cobra.Command{
-	Use:   `login [--email EMAIL] [--password PASSWORD]`,
+	Use:   ` login [--email EMAIL] [--password PASSWORD]`,
 	Short: "Log in to the Omnistrate platform",
 	Long:  `The login command is used to authenticate and log in to the Omnistrate platform.`,
 	Example: `  cat ~/omnistrate_pass.txt | omnistrate-ctl login --email email --password-stdin
@@ -52,7 +52,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(password) > 0 {
-		ctlutils.PrintWarning("WARNING! Using --password is insecure, consider using: cat ~/omnistrate_pass.txt | ./omnistrate-ctl login -e email --password-stdin echo $PASSWORD")
+		ctlutils.PrintWarning("WARNING! Using --password is insecure, consider using: cat ~/omnistrate_pass.txt | omnistrate-ctl login -e email --password-stdin echo $PASSWORD")
 		if passwordStdin {
 			err := fmt.Errorf("--password and --password-stdin are mutually exclusive")
 			ctlutils.PrintError(err)

@@ -66,11 +66,11 @@ To start using CTL, you first need to log in to the Omnistrate platform. You can
 
 ```bash
 # Option 1: provide email and password as arguments
-omnistrate-ctl login --email email --password password
+ omnistrate-ctl login --email email --password password
 # Option 2: store password in a file
-cat ~/omnistrate_pass.txt | ./omnistrate-ctl login --email email --password-stdin
+cat ~/omnistrate_pass.txt | omnistrate-ctl login --email email --password-stdin
 # Option 3: store password in an environment variable
-echo $OMNISTRATE_PASSWORD | ./omnistrate-ctl login --email email --password-stdin
+echo $OMNISTRATE_PASSWORD | omnistrate-ctl login --email email --password-stdin
 ```
 Once you are logged in, you can use CTL to create, update, and manage your services. Here are some common commands:
 
@@ -94,7 +94,7 @@ services:
 To build a service from a docker-compose file, use the `build` command:
 
 ```bash
-./omnistrate-ctl build --file docker-compose.yaml --name "Your Service Name"
+omnistrate-ctl build --file docker-compose.yaml --name "Your Service Name"
 ```
 
 This command will create a new service named "Your Service Name" using the docker-compose file `docker-compose.yaml`.
@@ -145,7 +145,7 @@ Replace `<service-id>` with the ID of the service you want to remove. This comma
 
 1. Create a postgres service with 1 service plan - Omnistrate-Hosted Postgres.
 ```bash
-./omnistrate-ctl build --file postgres-omnistrate-hosted.yaml --name "Postgres" --release-as-preferred
+omnistrate-ctl build --file postgres-omnistrate-hosted.yaml --name "Postgres" --release-as-preferred
 ```
 postgres-omnistrate-hosted.yaml:
 ```yaml
@@ -172,7 +172,7 @@ services:
 
 2. Add a new service plan - Hosted Postgres
 ```bash
-./omnistrate-ctl build --file postgres-hosted.yaml --name "Postgres" --release
+omnistrate-ctl build --file postgres-hosted.yaml --name "Postgres" --release
 ```
 postgres-hosted.yaml:
 ```yaml
@@ -203,7 +203,7 @@ services:
 
 3. Add another new service plan - BYOA Postgres
 ```bash
-./omnistrate-ctl build --file postgres-byoa.yaml --name "Postgres" --release
+omnistrate-ctl build --file postgres-byoa.yaml --name "Postgres" --release
 ```
 postgres-byoa.yaml:
 ```yaml
@@ -235,7 +235,7 @@ services:
 ### Example 2: Update the service with a new compose spec
 1. Create a postgres service with 1 service plan - Hosted Postgres.
 ```bash
-./omnistrate-ctl build --file postgres-hosted.yaml --name "Postgres" --release
+omnistrate-ctl build --file postgres-hosted.yaml --name "Postgres" --release
 ```
 postgres-hosted.yaml:
 ```yaml
@@ -264,7 +264,7 @@ services:
 
 2. Update the service with a new compose spec
 ```bash
-./omnistrate-ctl build --file postgres-hosted-updated.yaml --name "Postgres" --release
+omnistrate-ctl build --file postgres-hosted-updated.yaml --name "Postgres" --release
 ```
 postgres-hosted-updated.yaml:
 ```yaml
