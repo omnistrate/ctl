@@ -68,9 +68,9 @@ To start using CTL, you first need to log in to the Omnistrate platform. You can
 # Option 1: provide email and password as arguments
  omnistrate-ctl login --email email --password password
 # Option 2: store password in a file
- cat ~/omnistrate_pass.txt | omnistrate-ctl login --email email --password-stdin
+cat ~/omnistrate_pass.txt | omnistrate-ctl login --email email --password-stdin
 # Option 3: store password in an environment variable
- echo $OMNISTRATE_PASSWORD | omnistrate-ctl login --email email --password-stdin
+echo $OMNISTRATE_PASSWORD | omnistrate-ctl login --email email --password-stdin
 ```
 Once you are logged in, you can use CTL to create, update, and manage your services. Here are some common commands:
 
