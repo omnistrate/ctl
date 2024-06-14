@@ -52,7 +52,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(password) > 0 {
-		ctlutils.PrintWarning("WARNING! Using --password is insecure, consider using: cat ~/omnistrate_pass.txt | ./omnistrate-ctl login -e email --password-stdin echo $PASSWORD")
+		ctlutils.PrintWarning("WARNING! Using --password is insecure, consider using: cat ~/omnistrate_pass.txt | omnistrate-ctl login -e email --password-stdin echo $PASSWORD")
 		if passwordStdin {
 			err := fmt.Errorf("--password and --password-stdin are mutually exclusive")
 			ctlutils.PrintError(err)
