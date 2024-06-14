@@ -18,7 +18,7 @@ env:
   IAM_ROLE_ARN: arn:aws:iam::469745361314:role/github-actions-s3-store-test-role
   IAM_ROLE_SESSION_DURATION: 900
   AWS_REGION: us-west-2
-  ROOT_DOMAIN: omnistrate.dev
+  OMNISTRATE_ROOT_DOMAIN: omnistrate.dev
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -185,7 +185,7 @@ jobs:
           ENABLE_SMOKE_TEST: true
           SMOKE_TEST_EMAIL: ${{ secrets.SMOKE_TEST_EMAIL }}
           SMOKE_TEST_PASSWORD: ${{ secrets.SMOKE_TEST_PASSWORD}}
-          ROOT_DOMAIN: omnistrate.dev
+          OMNISTRATE_ROOT_DOMAIN: omnistrate.dev
           LOG_LEVEL: debug
           LOG_FORMAT: pretty
           DRY_RUN: true
