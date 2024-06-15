@@ -1,7 +1,7 @@
 package config
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"os"
 	"regexp"
 	"testing"

@@ -3,11 +3,13 @@ package cmd
 import (
 	"context"
 	"encoding/base64"
-	"errors"
 	"fmt"
+	"github.com/compose-spec/compose-go/loader"
+	"github.com/compose-spec/compose-go/types"
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/ctl/utils"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	goa "goa.design/goa/v3/pkg"
 	"os"
@@ -124,6 +126,60 @@ func buildService(file, token, name string, description, serviceLogoURL, environ
 		FileContent:        base64.StdEncoding.EncodeToString(fileData),
 		Release:            &release,
 		ReleaseAsPreferred: &releaseAsPreferred,
+	}
+
+	// Load the YAML content
+	parsedYaml, err := loader.ParseYAML(fileData)
+	if err != nil {
+		err = errors.Wrap(err, "failed to parse YAML content")
+		return
+	}
+
+	// Decode spec YAML into a compose project
+	var project *types.Project
+	if project, err = loader.LoadWithContext(context.Background(), types.ConfigDetails{
+		ConfigFiles: []types.ConfigFile{
+			{
+				Config: parsedYaml,
+			},
+		},
+	}); err != nil {
+		err = errors.Wrap(err, "invalid compose")
+		return
+	}
+
+	// Get the configs from the project
+	if project.Configs != nil {
+		request.Configs = make(map[string]*serviceapi.File)
+		for _, config := range project.Configs {
+			var fileContent []byte
+			fileContent, err = os.ReadFile(filepath.Clean(config.File))
+			if err != nil {
+				return "", "", "", err
+			}
+
+			request.Configs[config.Name] = &serviceapi.File{
+				Name:    filepath.Base(config.File),
+				Content: base64.StdEncoding.EncodeToString(fileContent),
+			}
+		}
+	}
+
+	// Get the secrets from the project
+	if project.Secrets != nil {
+		request.Secrets = make(map[string]*serviceapi.File)
+		for _, secret := range project.Secrets {
+			var fileContent []byte
+			fileContent, err = os.ReadFile(filepath.Clean(secret.File))
+			if err != nil {
+				return "", "", "", err
+			}
+
+			request.Secrets[secret.Name] = &serviceapi.File{
+				Name:    filepath.Base(secret.File),
+				Content: base64.StdEncoding.EncodeToString(fileContent),
+			}
+		}
 	}
 
 	var buildRes *serviceapi.BuildServiceFromComposeSpecResult
