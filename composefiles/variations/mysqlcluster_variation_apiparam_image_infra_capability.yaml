@@ -26,6 +26,12 @@ x-internal-integrations:
 services:
   writer:
     image: docker.io/bitnami/mysql:8.1.1
+    configs:
+      - source: my_config
+        target: /etc/config/conf.yaml
+    secrets:
+      - source: my_secret
+        target: /etc/config/secret_updated.yaml
     ports:
       - '3306'
     volumes:
@@ -243,6 +249,14 @@ services:
       - writer
       - reader
     x-omnistrate-mode-internal: false
+
+configs:
+  my_config:
+    file: ../configfiles/conf_updated.yaml
+
+secrets:
+  my_secret:
+    file: ../configfiles/secret_updated.yaml
 
 volumes:
   mysql_master_data:
