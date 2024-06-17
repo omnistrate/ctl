@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"io"
 	"os"
 	"strings"

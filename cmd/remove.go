@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"

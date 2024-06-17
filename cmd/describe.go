@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
+	"github.com/pkg/errors"
 	"os"
 
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"

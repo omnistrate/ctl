@@ -2,7 +2,7 @@ package config
 
 import (
 	"bytes"
-	"errors"
+	"github.com/pkg/errors"
 
 	"github.com/mitchellh/go-homedir"
 
