@@ -9,8 +9,8 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.5.9
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-wordwrap v1.0.1
-	github.com/omnistrate/api-design v0.6.395
-	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240615051636-057ebb070ab5
+	github.com/omnistrate/api-design v0.6.398
+	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240618044904-9edbcb2a3292
 	github.com/omnistrate/commons/pkg/utils v0.0.0-20240604174540-fe671f90cd9c
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.0
@@ -26,7 +26,7 @@ require (
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
-	github.com/go-chi/chi/v5 v5.0.12 // indirect
+	github.com/go-chi/chi/v5 v5.0.13 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
