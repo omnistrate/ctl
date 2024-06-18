@@ -8,6 +8,8 @@ import (
 	"os"
 )
 
+const version = "0.0.9"
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "omnistrate-ctl",
@@ -20,8 +22,15 @@ For additional support, please refer to the CTL reference documentation at https
 }
 
 func runRoot(cmd *cobra.Command, args []string) {
+	// Check if the version flag is set
+	versionFlag, err := cmd.Flags().GetBool("version")
+	if err == nil && versionFlag {
+		fmt.Println(version)
+		return
+	}
+
 	printLogo()
-	err := cmd.Help()
+	err = cmd.Help()
 	if err != nil {
 		return
 	}
@@ -55,12 +64,5 @@ func Execute() {
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.ctl.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
+	rootCmd.PersistentFlags().BoolP("version", "v", false, "Print the version number of omnistrate-ctl")
 }
