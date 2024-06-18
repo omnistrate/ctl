@@ -150,7 +150,7 @@ func buildService(file, token, name string, description, serviceLogoURL, environ
 
 	// Get the configs from the project
 	if project.Configs != nil {
-		request.Configs = make(map[string]*serviceapi.File)
+		request.Configs = make(map[string]string)
 		for configName, config := range project.Configs {
 			var fileContent []byte
 			fileContent, err = os.ReadFile(filepath.Clean(config.File))
@@ -158,16 +158,13 @@ func buildService(file, token, name string, description, serviceLogoURL, environ
 				return "", "", "", err
 			}
 
-			request.Configs[configName] = &serviceapi.File{
-				Name:    filepath.Base(config.File),
-				Content: base64.StdEncoding.EncodeToString(fileContent),
-			}
+			request.Configs[configName] = base64.StdEncoding.EncodeToString(fileContent)
 		}
 	}
 
 	// Get the secrets from the project
 	if project.Secrets != nil {
-		request.Secrets = make(map[string]*serviceapi.File)
+		request.Secrets = make(map[string]string)
 		for secretName, secret := range project.Secrets {
 			var fileContent []byte
 			fileContent, err = os.ReadFile(filepath.Clean(secret.File))
@@ -175,10 +172,7 @@ func buildService(file, token, name string, description, serviceLogoURL, environ
 				return "", "", "", err
 			}
 
-			request.Secrets[secretName] = &serviceapi.File{
-				Name:    filepath.Base(secret.File),
-				Content: base64.StdEncoding.EncodeToString(fileContent),
-			}
+			request.Secrets[secretName] = base64.StdEncoding.EncodeToString(fileContent)
 		}
 	}
 
