@@ -314,3 +314,72 @@ services:
     volumes:
       - ./data:/var/lib/postgresql/data
 ```
+
+### Example 3: Create a postgres service with configuration files and secrets files
+The CTL allows users to define and manage configuration files and secret files required by their services. These files can be specified in the compose specification and will be automatically mounted to the specified paths in the service containers.
+
+You can create a service with configs and secrets by adding the `configs` and `secrets` sections to the docker-compose file and attaching them to the corresponding services.
+
+The format to define configs in the docker-compose file is as follows:
+
+```yaml
+services:
+  service:
+    configs:
+      - source: my_config # The name of the config
+        target: /etc/config/my_config.txt # The target path in the container
+configs:
+  my_config: # The name of the config
+    file: ./my_config.txt # The path to the config file in your local filesystem
+```
+
+Similarly, you can define secrets in the docker-compose file as follows:
+
+```yaml
+services:
+  service:
+    secrets:
+      - source: server-certificate # The name of the secret
+        target: /etc/ssl/certs/server.cert # The target path in the container
+secrets:
+  server-certificate: # The name of the secret
+    file: ./server.cert # The path to the secret file in your local filesystem
+```
+
+Here is an example of a postgres docker-compose file with configs and secrets:
+
+```bash
+version: "3.9"
+x-omnistrate-service-plan:
+  name: 'Hosted Postgres'
+  tenancyType: 'OMNISTRATE_DEDICATED_TENANCY'
+services:
+  postgres:
+    image: postgres
+    configs:
+        - source: postgres-config
+          target: /etc/postgresql/postgresql.conf
+    secrets:
+        - source: postgres-secret
+          target: /run/secrets/postgres.secret
+    ports:
+      - '5432:5432'
+    environment:
+      - SECURITY_CONTEXT_USER_ID=999
+      - SECURITY_CONTEXT_GROUP_ID=999
+      - POSTGRES_USER=username
+      - POSTGRES_PASSWORD=password
+      - PGDATA=/var/lib/postgresql/data/dbdata
+    volumes:
+      - ./data:/var/lib/postgresql/data
+
+configs:
+    postgres-config:
+        file: ./config/postgres.conf
+    db-config:
+        file: ./config/db.conf
+
+secrets:
+    postgres-secret:
+        file: ./secrets/postgres.secret
+```
