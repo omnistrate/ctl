@@ -175,6 +175,9 @@ services:
           cpus: '0.25'
           memory: 20M
     x-omnistrate-capabilities:
+      autoscaling:
+        minReplicas: 1
+        maxReplicas: 5
       serverlessConfiguration:
         enableAutoStop: true
         minimumNodesInPool: 1
@@ -204,6 +207,10 @@ services:
       - PGDATA=/var/lib/postgresql/data/dbdata
     volumes:
       - ./data:/var/lib/postgresql/data
+    x-omnistrate-capabilities:
+      autoscaling:
+        minReplicas: 1
+        maxReplicas: 5
 ```
 
 ### Example 2: Updating the Service with a New Compose Spec
@@ -244,8 +251,8 @@ services:
           memory: 20M
     x-omnistrate-capabilities:
       autoscaling:
-        maxReplicas: 1
-        minReplicas: 5
+        minReplicas: 1
+        maxReplicas: 5
       serverlessConfiguration:
         enableAutoStop: true
         minimumNodesInPool: 1
@@ -289,7 +296,7 @@ Here is a comprehensive example of a docker-compose file for a Postgres service 
 ```yaml
 version: "3.9"
 x-omnistrate-service-plan:
-  name: 'Postgres Free'
+  name: 'Postgres Premium'
   tenancyType: 'OMNISTRATE_DEDICATED_TENANCY'
 services:
   postgres:
@@ -310,6 +317,10 @@ services:
       - PGDATA=/var/lib/postgresql/data/dbdata
     volumes:
       - ./data:/var/lib/postgresql/data
+    x-omnistrate-capabilities:
+      autoscaling:
+        minReplicas: 1
+        maxReplicas: 5
 
 configs:
     postgres-config:
@@ -322,7 +333,7 @@ secrets:
 
 In this example, the postgres service uses a configuration file for Postgres settings and a secret file for sensitive information. These files are specified in the configs and secrets sections and mounted to the appropriate paths within the container.
 
-Name the above file as `postgres-free-v3.yaml` and run the following command to build the service. Make sure the paths to the configuration and secret files are correct and accessible from the location where you run the CTL command.
+Name the above file as `postgres-premium-v2.yaml` and run the following command to build the service. Make sure the paths to the configuration and secret files are correct and accessible from the location where you run the CTL command.
 ```bash
-omnistrate-ctl build --file postgres-free-v3.yaml --name "Postgres" --release-as-preferred
+omnistrate-ctl build --file postgres-premium-v2.yaml --name "Postgres" --release-as-preferred
 ```
