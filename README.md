@@ -141,17 +141,55 @@ omnistrate-ctl remove --service-id <service-id>
 Replace `<service-id>` with the ID of the service you want to remove. This command will remove the specified service from the platform.
 
 ## Examples
-### Example 1: Create a postgres service with 3 different service plans
+### Example 1: Creating a Service with Multiple Plans
 
-1. Create a postgres service with 1 service plan - Omnistrate-Hosted Postgres.
+To start, create a free tier plan for the Postgres service. This plan is designed to be cost-effective by leveraging multitenancy and serverless configuration, which includes auto-stop to minimize costs when the service is not in use. Run the following command:
 ```bash
-omnistrate-ctl build --file postgres-omnistrate-hosted.yaml --name "Postgres" --release-as-preferred
+omnistrate-ctl build --file postgres-free-v1.yaml --name "Postgres" --release-as-preferred
 ```
-postgres-omnistrate-hosted.yaml:
+Contents of `postgres-free-v1.yaml`:
 ```yaml
-version: "3"
+version: "3.9"
 x-omnistrate-service-plan:
-  name: 'Omnistrate-Hosted Postgres'
+  name: 'Postgres Free'
+  tenancyType: 'OMNISTRATE_MULTI_TENANCY'
+services:
+  postgres:
+    image: postgres
+    ports:
+      - '5432:5432'
+    environment:
+      - SECURITY_CONTEXT_USER_ID=999
+      - SECURITY_CONTEXT_GROUP_ID=999
+      - POSTGRES_USER=default
+      - POSTGRES_PASSWORD=default
+      - PGDATA=/var/lib/postgresql/data/dbdata
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 50M
+        reservations:
+          cpus: '0.25'
+          memory: 20M
+    x-omnistrate-capabilities:
+      serverlessConfiguration:
+        enableAutoStop: true
+        minimumNodesInPool: 1
+        targetPort: 5432
+```
+
+Next, enhance the Postgres service by adding a premium plan. This plan offers dedicated tenancy with enhanced performance and resource allocation for users who require more robust features and higher limits. Execute the following command:
+```bash
+omnistrate-ctl build --file postgres-premium-v1.yaml --name "Postgres" --release-as-preferred
+```
+Contents of `postgres-premium-v1.yaml`:
+```yaml
+version: "3.9"
+x-omnistrate-service-plan:
+  name: 'Postgres Premium'
   tenancyType: 'OMNISTRATE_DEDICATED_TENANCY'
 services:
   postgres:
@@ -161,122 +199,25 @@ services:
     environment:
       - SECURITY_CONTEXT_USER_ID=999
       - SECURITY_CONTEXT_GROUP_ID=999
-      - POSTGRES_USER=username
-      - POSTGRES_PASSWORD=password
-      - PGDATA=/var/lib/postgresql/data/dbdata
-    x-omnistrate-compute:
-      rootVolumeSizeGi: 20
-    volumes:
-      - ./data:/var/lib/postgresql/data
-```
-
-2. Add a new service plan - Hosted Postgres
-```bash
-omnistrate-ctl build --file postgres-hosted.yaml --name "Postgres" --release
-```
-postgres-hosted.yaml:
-```yaml
-version: "3"
-x-omnistrate-service-plan:
-  name: 'Hosted Postgres'
-  tenancyType: 'OMNISTRATE_DEDICATED_TENANCY'
-  deployment:
-    hostedDeployment:
-      AwsAccountId: '0123456789'
-      AwsBootstrapRoleAccountArn: 'arn:aws:iam::0123456789:role/YOUR_AWS_BOOTSTRAP_ROLE'
-services:
-  postgres:
-    image: postgres
-    ports:
-      - '5432:5432'
-    environment:
-      - SECURITY_CONTEXT_USER_ID=999
-      - SECURITY_CONTEXT_GROUP_ID=999
-      - POSTGRES_USER=username
-      - POSTGRES_PASSWORD=password
-      - PGDATA=/var/lib/postgresql/data/dbdata
-    x-omnistrate-compute:
-      rootVolumeSizeGi: 20
-    volumes:
-      - ./data:/var/lib/postgresql/data
-```
-
-3. Add another new service plan - BYOA Postgres
-```bash
-omnistrate-ctl build --file postgres-byoa.yaml --name "Postgres" --release
-```
-postgres-byoa.yaml:
-```yaml
-version: "3"
-x-omnistrate-service-plan:
-  name: 'Omnistrate-Hosted Postgres'
-  tenancyType: 'OMNISTRATE_DEDICATED_TENANCY'
-  deployment:
-    byoaDeployment:
-      AwsAccountId: '0123456789'
-      AwsBootstrapRoleAccountArn: 'arn:aws:iam::0123456789:role/YOUR_AWS_BOOTSTRAP_ROLE'
-services:
-  postgres:
-    image: postgres
-    ports:
-      - '5432:5432'
-    environment:
-      - SECURITY_CONTEXT_USER_ID=999
-      - SECURITY_CONTEXT_GROUP_ID=999
-      - POSTGRES_USER=username
-      - POSTGRES_PASSWORD=password
-      - PGDATA=/var/lib/postgresql/data/dbdata
-    x-omnistrate-compute:
-      rootVolumeSizeGi: 20
-    volumes:
-      - ./data:/var/lib/postgresql/data
-```
-
-### Example 2: Update the service with a new compose spec
-1. Create a postgres service with 1 service plan - Hosted Postgres.
-```bash
-omnistrate-ctl build --file postgres-hosted.yaml --name "Postgres" --release
-```
-postgres-hosted.yaml:
-```yaml
-version: "3"
-x-omnistrate-service-plan:
-  name: 'Hosted Postgres'
-  tenancyType: 'OMNISTRATE_DEDICATED_TENANCY'
-  deployment:
-    hostedDeployment:
-      AwsAccountId: '0123456789'
-      AwsBootstrapRoleAccountArn: 'arn:aws:iam::0123456789:role/YOUR_AWS_BOOTSTRAP_ROLE'
-services:
-  postgres:
-    image: postgres
-    ports:
-      - '5432:5432'
-    environment:
-      - SECURITY_CONTEXT_USER_ID=999
-      - SECURITY_CONTEXT_GROUP_ID=999
-      - POSTGRES_USER=username
-      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=default
+      - POSTGRES_PASSWORD=default
       - PGDATA=/var/lib/postgresql/data/dbdata
     volumes:
       - ./data:/var/lib/postgresql/data
 ```
 
-2. Update the service with a new compose spec
+### Example 2: Updating the Service with a New Compose Spec
+Based on the previous example, update the Postgres service's free tier plan to include logs and metrics integration and enable autoscaling. This enhancement provides better monitoring and scalability to handle varying workloads. Run the following command:
 ```bash
-omnistrate-ctl build --file postgres-hosted-updated.yaml --name "Postgres" --release
+omnistrate-ctl build --file postgres-free-v2.yaml --name "Postgres" --release-as-preferred
 ```
-postgres-hosted-updated.yaml:
+
+Contents of `postgres-free-v2.yaml`:
 ```yaml
-version: "3"
+version: "3.9"
 x-omnistrate-service-plan:
-  name: 'Hosted Postgres'
-  tenancyType: 'OMNISTRATE_DEDICATED_TENANCY'
-  deployment:
-    hostedDeployment:
-      GcpProjectId: 'YOUR_GCP_PROJECT_ID'
-      GcpProjectNumber: '0123456789'
-      GcpServiceAccountEmail: 'YOUR_GCP_SERVICE_ACCOUNT_EMAIL'
+  name: 'Postgres Free'
+  tenancyType: 'OMNISTRATE_MULTI_TENANCY'
 x-omnistrate-integrations:
   - omnistrateMetrics
   - omnistrateLogging
@@ -288,39 +229,34 @@ services:
     environment:
       - SECURITY_CONTEXT_USER_ID=999
       - SECURITY_CONTEXT_GROUP_ID=999
-      - POSTGRES_USER=username
-      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=default
+      - POSTGRES_PASSWORD=default
       - PGDATA=/var/lib/postgresql/data/dbdata
-    x-omnistrate-compute:
-      rootVolumeSizeGi: 20
-      instanceTypes:
-        - name: t4g.small
-          cloudProvider: aws
-        - name: e2-large
-          cloudProvider: gcp
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 50M
+        reservations:
+          cpus: '0.25'
+          memory: 20M
     x-omnistrate-capabilities:
       autoscaling:
         maxReplicas: 1
-        minReplicas: 1
-        idleMinutesBeforeScalingDown: 20
-        idleThreshold: 1
-        overUtilizedMinutesBeforeScalingUp: 3
-        overUtilizedThreshold: 80
-    x-omnistrate-actionhooks:
-      - scope: CLUSTER
-        type: INIT
-        commandTemplate: >
-          echo "Initializing the cluster"
-    volumes:
-      - ./data:/var/lib/postgresql/data
+        minReplicas: 5
+      serverlessConfiguration:
+        enableAutoStop: true
+        minimumNodesInPool: 1
+        targetPort: 5432
 ```
 
-### Example 3: Create a postgres service with configuration files and secrets files
+### Example 3: Creating a Postgres Service with Configuration and Secret Files
 The CTL allows users to define and manage configuration files and secret files required by their services. These files can be specified in the compose specification and will be automatically mounted to the specified paths in the service containers.
 
-You can create a service with configs and secrets by adding the `configs` and `secrets` sections to the docker-compose file and attaching them to the corresponding services.
-
-The format to define configs in the docker-compose file is as follows:
+#### Configuration Files
+To specify configuration files in the docker-compose file, use the following format:
 
 ```yaml
 services:
@@ -332,8 +268,10 @@ configs:
   my_config: # The name of the config
     file: ./my_config.txt # The path to the config file in your local filesystem
 ```
+This example shows how to define a config named `my_config` and mount it to the path `/etc/config/my_config.txt` within the service container.
 
-Similarly, you can define secrets in the docker-compose file as follows:
+#### Secret Files
+Similarly, you can specify secret files as follows:
 
 ```yaml
 services:
@@ -346,12 +284,12 @@ secrets:
     file: ./server.cert # The path to the secret file in your local filesystem
 ```
 
-Here is an example of a postgres docker-compose file with configs and secrets:
+Here is a comprehensive example of a docker-compose file for a Postgres service that includes both configuration and secret files:
 
-```bash
+```yaml
 version: "3.9"
 x-omnistrate-service-plan:
-  name: 'Hosted Postgres'
+  name: 'Postgres Free'
   tenancyType: 'OMNISTRATE_DEDICATED_TENANCY'
 services:
   postgres:
@@ -367,8 +305,8 @@ services:
     environment:
       - SECURITY_CONTEXT_USER_ID=999
       - SECURITY_CONTEXT_GROUP_ID=999
-      - POSTGRES_USER=username
-      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=default
+      - POSTGRES_PASSWORD=default
       - PGDATA=/var/lib/postgresql/data/dbdata
     volumes:
       - ./data:/var/lib/postgresql/data
@@ -376,10 +314,15 @@ services:
 configs:
     postgres-config:
         file: ./config/postgres.conf
-    db-config:
-        file: ./config/db.conf
 
 secrets:
     postgres-secret:
         file: ./secrets/postgres.secret
+```
+
+In this example, the postgres service uses a configuration file for Postgres settings and a secret file for sensitive information. These files are specified in the configs and secrets sections and mounted to the appropriate paths within the container.
+
+Name the above file as `postgres-free-v3.yaml` and run the following command to build the service. Make sure the paths to the configuration and secret files are correct and accessible from the location where you run the CTL command.
+```bash
+omnistrate-ctl build --file postgres-free-v3.yaml --name "Postgres" --release-as-preferred
 ```
