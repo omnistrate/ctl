@@ -9,11 +9,11 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.5.9
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-wordwrap v1.0.1
-	github.com/omnistrate/api-design v0.6.398
+	github.com/omnistrate/api-design v0.6.428
 	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240618044904-9edbcb2a3292
 	github.com/omnistrate/commons/pkg/utils v0.0.0-20240604174540-fe671f90cd9c
 	github.com/pkg/errors v0.9.1
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
 	goa.design/goa/v3 v3.16.2
 	gopkg.in/yaml.v3 v3.0.1
@@ -35,7 +35,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/mattn/go-shellwords v1.0.12 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
-	github.com/omnistrate/commons/pkg/constants v0.0.0-20240604174540-fe671f90cd9c // indirect
+	github.com/omnistrate/commons/pkg/constants v0.0.0-20240628205440-d09d4209f933 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.19.1 // indirect

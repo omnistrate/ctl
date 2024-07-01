@@ -5,7 +5,7 @@ github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XL
 github.com/compose-spec/compose-go v1.20.2 h1:u/yfZHn4EaHGdidrZycWpxXgFffjYULlTbRfJ51ykjQ=
 github.com/compose-spec/compose-go v1.20.2/go.mod h1:+MdqXV4RA7wdFsahh/Kb8U0pAJqkg7mr4PM9tFKU8RM=
 github.com/coreos/go-systemd/v22 v22.5.0/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSVTIJ3seZv2GcEnc=
-github.com/cpuguy83/go-md2man/v2 v2.0.3/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
+github.com/cpuguy83/go-md2man/v2 v2.0.4/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
@@ -53,12 +53,12 @@ github.com/mitchellh/go-wordwrap v1.0.1 h1:TLuKupo69TCn6TQSyGxwI1EblZZEsQ0vMlAFQ
 github.com/mitchellh/go-wordwrap v1.0.1/go.mod h1:R62XHJLzvMFRBbcrT7m7WgmE1eOyTSsCt+hzestvNj0=
 github.com/mitchellh/mapstructure v1.5.0 h1:jeMsZIYE/09sWLaz43PL7Gy6RuMjD2eJVyuac5Z2hdY=
 github.com/mitchellh/mapstructure v1.5.0/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
-github.com/omnistrate/api-design v0.6.398 h1:stxzEDur58VQMphELErFtslOoYSE1dpT/asHuRyhhMw=
-github.com/omnistrate/api-design v0.6.398/go.mod h1:yLKvbv+8uz4szosyGKr+hQgKG2nav2tuo5pFbbA1oTw=
+github.com/omnistrate/api-design v0.6.428 h1:6a+XtpVkcvPna10ZtY5S4+eS9Ek7rb4OobyJpnKqt7g=
+github.com/omnistrate/api-design v0.6.428/go.mod h1:3NWYOHDKb7yCqxqZx8EjrYmvKEZfwsDKxxwxzDHqmXE=
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240618044904-9edbcb2a3292 h1:EXWoPNwOKSEW8auiRIQpZCyNFslwQrq8niRSr09secA=
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240618044904-9edbcb2a3292/go.mod h1:1ZsUysYbSu9aWA0M8Svh1tqJfZN2oA1SuDsbFsthrhc=
-github.com/omnistrate/commons/pkg/constants v0.0.0-20240604174540-fe671f90cd9c h1:993gx5uGuP7adUPI6mSGP+qncy1OhBP3qpFvzVuyQvc=
-github.com/omnistrate/commons/pkg/constants v0.0.0-20240604174540-fe671f90cd9c/go.mod h1:okYQlNYHtWts036uSo4UprIiYXWFu/pAo49v9oDLnG4=
+github.com/omnistrate/commons/pkg/constants v0.0.0-20240628205440-d09d4209f933 h1:RTH6/U5QLRTyV9vHNo5dizkojieoETQ6CFdTsflRwjY=
+github.com/omnistrate/commons/pkg/constants v0.0.0-20240628205440-d09d4209f933/go.mod h1:WpCLWNGrnoJCsFRFvstNf67RWK4XPn3/WVOFCYRky0s=
 github.com/omnistrate/commons/pkg/utils v0.0.0-20240604174540-fe671f90cd9c h1:X8p/ULJQtzrcZ5mZ0iTEgDT2mrU/JFaurslM8d7jdHw=
 github.com/omnistrate/commons/pkg/utils v0.0.0-20240604174540-fe671f90cd9c/go.mod h1:AaRRZsVC15Yt8+H98mULai0kXthapOwuFAun7nLeFRA=
 github.com/opencontainers/go-digest v1.0.0 h1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=
@@ -86,8 +86,8 @@ github.com/rs/zerolog v1.33.0/go.mod h1:/7mN4D5sKwJLZQ2b/znpjC3/GQWY/xaDXUM0kKWR
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/sirupsen/logrus v1.9.3 h1:dueUQJ1C2q9oE3F7wvmSGAaVtTmUizReu6fjN8uqzbQ=
 github.com/sirupsen/logrus v1.9.3/go.mod h1:naHLuLoDiP4jHNo9R0sCBMtWGeIprob74mVsIT4qYEQ=
-github.com/spf13/cobra v1.8.0 h1:7aJaZx1B85qltLMc546zn58BxxfZdR/W22ej9CFoEf0=
-github.com/spf13/cobra v1.8.0/go.mod h1:WXLWApfZ71AjXPya3WOlMsY9yMs7YeiHhFVlvLyhcho=
+github.com/spf13/cobra v1.8.1 h1:e5/vxKd/rZsfSJMUX1agtjeTDf+qv1/JdBF8gg5k9ZM=
+github.com/spf13/cobra v1.8.1/go.mod h1:wHxEcudfqmLYa8iTfL+OuZPbBZkmvliBWKIezN3kD9Y=
 github.com/spf13/pflag v1.0.5 h1:iy+VFUOCP1a+8yFto/drg2CJ5u0yRoB7fZw3DKv/JXA=
 github.com/spf13/pflag v1.0.5/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An2Bg=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
