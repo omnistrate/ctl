@@ -25,10 +25,10 @@ func GetSmokeTestAccount() (string, string, error) {
 	email := utils.GetEnv("SMOKE_TEST_EMAIL", "not-set")
 	password := utils.GetEnv("SMOKE_TEST_PASSWORD", "")
 	if email == "not-set" {
-		return "", "", errors.New("TEST_EMAIL environment variable is not set. Set the environment variable to run the smoke test")
+		return "", "", errors.New("SMOKE_TEST_EMAIL environment variable is not set. Set the environment variable to run the smoke test")
 	}
 	if password == "" {
-		return "", "", errors.New("TEST_PASSWORD environment variable is not set. Set the environment variable to run the smoke test")
+		return "", "", errors.New("SMOKE_TEST_PASSWORD environment variable is not set. Set the environment variable to run the smoke test")
 	}
 	return email, password, nil
 }
