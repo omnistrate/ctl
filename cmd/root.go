@@ -2,13 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/fatih/color"
 	"github.com/mitchellh/go-wordwrap"
 	"github.com/spf13/cobra"
-	"os"
 )
-
-const version = "0.9"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -25,7 +24,7 @@ func runRoot(cmd *cobra.Command, args []string) {
 	// Check if the version flag is set
 	versionFlag, err := cmd.Flags().GetBool("version")
 	if err == nil && versionFlag {
-		fmt.Println(version)
+		fmt.Println(Version)
 		return
 	}
 

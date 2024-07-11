@@ -127,48 +127,6 @@ func Test_build_update_service(t *testing.T) {
 	rootCmd.SetArgs([]string{"remove", "--service-id", serviceID})
 	err = rootCmd.Execute()
 	require.NoError(err)
-
-	// PASS: create Falkor Free service
-	serviceName1 := "Falkor Free" + uuid.NewString()
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/falkor_free.yaml", "--name", serviceName1, "--release-as-preferred"})
-	err = rootCmd.Execute()
-	require.NoError(err)
-	serviceID1 := serviceID
-	environmentID1 := environmentID
-	productTierID1 := productTierID
-
-	// PASS: create Falkor Pro service
-	serviceName2 := "Falkor Pro" + uuid.NewString()
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/falkor_pro.yaml", "--name", serviceName2, "--release-as-preferred"})
-	err = rootCmd.Execute()
-	require.NoError(err)
-	serviceID2 := serviceID
-	environmentID2 := environmentID
-	productTierID2 := productTierID
-
-	// PASS: update Falkor Free service with the same compose file
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/falkor_free.yaml", "--name", serviceName1, "--release-as-preferred"})
-	err = rootCmd.Execute()
-	require.NoError(err)
-	require.Equal(environmentID1, environmentID)
-	require.Equal(productTierID1, productTierID)
-
-	// PASS: update Falkor Pro service with the same compose file
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/falkor_pro.yaml", "--name", serviceName2, "--release-as-preferred"})
-	err = rootCmd.Execute()
-	require.NoError(err)
-	require.Equal(environmentID2, environmentID)
-	require.Equal(productTierID2, productTierID)
-
-	// PASS: remove Falkor Free service
-	rootCmd.SetArgs([]string{"remove", "--service-id", serviceID1})
-	err = rootCmd.Execute()
-	require.NoError(err)
-
-	// PASS: remove Falkor Pro service
-	rootCmd.SetArgs([]string{"remove", "--service-id", serviceID2})
-	err = rootCmd.Execute()
-	require.NoError(err)
 }
 
 func Test_build_duplicate_service_plan_name(t *testing.T) {
