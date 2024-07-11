@@ -1,0 +1,67 @@
+name: Release
+
+on:
+  release:
+    types: [ "published" ]
+  workflow_dispatch:
+
+env:
+  GOPRIVATE: "github.com/omnistrate/*"
+  GOPROXY: ${{ secrets.GOPROXY }}
+  GOSUMDB: ${{ secrets.GOSUMDB }}
+  
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    strategy:
+      matrix:
+        goos: [linux, darwin, windows]
+        goarch: [amd64, arm64]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a
+        with:
+          app_id: ${{ secrets.CI_APP_ID }}
+          private_key: ${{ secrets.CI_APP_PRIVATE_KEY }}
+
+      - name: Configure git for private repo access
+        env:
+          GH_ACCESS_TOKEN: ${{ steps.generate_token.outputs.token }}
+        run: |
+          echo "machine github.com login api password ${GH_ACCESS_TOKEN}" > ~/.netrc
+
+      - name: Set up go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          token: ${{ steps.generate_token.outputs.token }}
+          cache-dependency-path: '**/go.sum'
+
+      - name: Get dependencies
+        timeout-minutes: 10
+        run: |
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} make tidy
+
+      - name: Build
+        timeout-minutes: 20
+        run: |
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} make build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: omnistrate-ctl-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/omnistrate-ctl-${{ matrix.goos }}-${{ matrix.goarch }}
