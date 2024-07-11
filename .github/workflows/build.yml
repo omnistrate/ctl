@@ -78,6 +78,11 @@ jobs:
     permissions:
       contents: read
 
+    strategy:
+      matrix:
+        goos: [linux, darwin, windows]
+        goarch: [amd64, arm64]
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -105,12 +110,12 @@ jobs:
       - name: Get dependencies
         timeout-minutes: 10
         run: |
-          make tidy
+         GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} make tidy
 
       - name: Build
         timeout-minutes: 20
         run: |
-          make build
+         GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} make build
 
       - name: Gotestsum installer
         uses: autero1/action-gotestsum@v2.0.0
