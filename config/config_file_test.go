@@ -140,4 +140,7 @@ func TestLoadInvalidYaml(t *testing.T) {
 
 	err = cfg.load()
 	assert.Error(t, err)
+
+	err = os.Remove(filePath)
+	assert.NoError(t, err)
 }
