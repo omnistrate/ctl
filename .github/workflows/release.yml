@@ -155,6 +155,8 @@ jobs:
           path: dist
           
       - name: Check if the binary is executable
+        if: matrix.os != 'windows-latest'
         run: |
+          chmod +x dist/${{ steps.calc_binary_name.outputs.binary_name }}
           ctl_version = $(dist/${{ steps.calc_binary_name.outputs.binary_name }} --version)
           echo "ctl_version=$ctl_version" >> "$GITHUB_OUTPUT"
