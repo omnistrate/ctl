@@ -109,7 +109,6 @@ jobs:
         timeout-minutes: 5
         uses: actions/download-artifact@v4
         with:
-          name: ${{ steps.calc_binary_name.outputs.binary_name }}
           path: dist
           
       - name: Generate token to create the release
@@ -143,28 +142,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps: 
-      - name: Calculate binary name
-        timeout-minutes: 1
-        id: calc_binary_name
-        run: |
-          if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            set GOOS=windows
-          elif [ "${{ matrix.os }}" == "macos-latest" ]; then
-            export GOOS=darwin
-          else
-            export GOOS=linux
-          fi
-          binary_name="omnistrate-ctl-${GOOS}-${{ matrix.goarch }}"
-          if [ "${GOOS}" == "windows" ]; then
-            binary_name="${binary_name}.exe"
-          fi
-          echo "binary_name=$binary_name" >> "$GITHUB_OUTPUT"
-
       - name: Download build artifacts
         timeout-minutes: 5
         uses: actions/download-artifact@v4
         with:
-          name: ${{ steps.calc_binary_name.outputs.binary_name }}
           path: dist
           
       - name: Run the binary (linux and macos only)
@@ -172,8 +153,13 @@ jobs:
         timeout-minutes: 1
         if: matrix.os != 'windows-latest'
         run: |
-          chmod +x dist/${{ steps.calc_binary_name.outputs.binary_name }}
-          ctl_version=$(dist/${{ steps.calc_binary_name.outputs.binary_name }} --version)
+          if [ "${{ matrix.os }}" == "macos-latest" ]; then
+            export GOOS=darwin
+          else
+            export GOOS=linux
+          fi
+          chmod +x dist/omnistrate-ctl-${GOOS}-${{ matrix.goarch }}
+          ctl_version=$(dist/omnistrate-ctl-${GOOS}-${{ matrix.goarch }} --version)
           echo "ctl_version=$ctl_version" >> "$GITHUB_OUTPUT"
 
       - name: Run the binary (windows only)
@@ -181,6 +167,6 @@ jobs:
         timeout-minutes: 1
         if: matrix.os == 'windows-latest'
         run: |
-          dist/${{ steps.calc_binary_name.outputs.binary_name }} --version
+          dist/omnistrate-ctl-windows-${{ matrix.goarch }}.exe --version
           echo "ctl_version=$ctl_version" >> "$GITHUB_OUTPUT"
       
