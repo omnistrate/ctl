@@ -59,17 +59,26 @@ jobs:
         timeout-minutes: 20
         run: |
           GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} make build
+      
+      - name: Calculate binary name
+        id: calc_binary_name
+        run: |
+          binary_name="omnistrate-ctl-${{ matrix.os }}-${{ matrix.goarch }}"
+          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+            binary_name="${binary_name}.exe"
+          fi
+          echo "binary_name=$binary_name" >> "$GITHUB_OUTPUT"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: omnistrate-ctl-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: dist/omnistrate-ctl-${{ matrix.goos }}-${{ matrix.goarch }}
+          name: ${{ steps.calc_binary_name.outputs.binary_name }}
+          path: dist/${{ steps.calc_binary_name.outputs.binary_name }}
 
       - name: upload binaries to release
         uses: softprops/action-gh-release@v1
         if: ${{startsWith(github.ref, 'refs/tags/') }}
         with:
             files: | 
-              dist/omnistrate-ctl-${{ matrix.goos }}-${{ matrix.goarch }}
+              dist/${{ steps.calc_binary_name.outputs.binary_name }}
               

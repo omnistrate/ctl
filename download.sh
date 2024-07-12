@@ -86,7 +86,7 @@ case $(uname -m) in
         ;;
 esac
 
-BASE_URL="https://github.com/omnistrate/cli/releases/latest/download/omnistrate-ctl-${OS}-${ARCH}"
+BASE_URL="https://github.com/omnistrate/ctl/releases/latest/download/omnistrate-ctl-${OS}-${ARCH}"
 if [ "$OS" = "windows" ]; then
     BASE_URL="${BASE_URL}.exe"
 fi
