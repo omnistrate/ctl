@@ -3,7 +3,7 @@
 ## Build
 FROM golang:1.22-alpine AS builder
 
-RUN apk update && apk add git
+RUN apk update && apk add git make
 
 WORKDIR /go/src/ctl
 COPY ./ .
@@ -30,16 +30,14 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 RUN --mount=type=cache,target=/go/pkg/mod \
     GOOS=${TARGETOS} GOARCH=${TARGETARCH} go mod vendor
 
-RUN echo Building Omnistrate CTL
+RUN echo Building and installing Monitoring Service
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     make build
-
 RUN echo Short testing to validate the build
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     GOOS=${TARGETOS} GOARCH=${TARGETARCH} go test ./... -short
-
 ## Deploy
 FROM alpine:latest AS app
 
@@ -48,6 +46,6 @@ ARG TARGETARCH
 
 RUN apk update && apk add --no-cache ca-certificates curl
 
-COPY --from=builder /go/bin/omnistrate-ctl-$(TARGETOS)-$(TARGETARCH) /usr/local/bin/omnistrate-ctl
+COPY --from=builder /go/src/ctl/dist/omnistrate-ctl-${TARGETOS}-${TARGETARCH} /usr/local/bin/omnistrate-ctl
 WORKDIR /omnistrate
 ENTRYPOINT [ "/usr/local/bin/omnistrate-ctl" ]
