@@ -157,7 +157,7 @@ func Test_build_duplicate_service_plan_name(t *testing.T) {
 	require.NotEmpty(devProductTierID)
 
 	// PASS: create mysql cluster service in prod environment
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--environment", "prod", "--release"})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--environment", "prod", "--environment-type", "prod", "--release"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 	prodEnvironmentID := environmentID
@@ -175,7 +175,7 @@ func Test_build_duplicate_service_plan_name(t *testing.T) {
 	require.Equal(devProductTierID, productTierID)
 
 	// PASS: update prod mysql cluster service
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_variation_apiparam_image_infra_capability.yaml", "--name", serviceName, "--environment", "prod", "--release-as-preferred"})
+	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_variation_apiparam_image_infra_capability.yaml", "--name", serviceName, "--environment", "prod", "--environment-type", "prod", "--release-as-preferred"})
 	err = rootCmd.Execute()
 	require.NoError(err)
 	require.Equal(prodEnvironmentID, environmentID)
