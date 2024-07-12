@@ -102,7 +102,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ steps.calc_binary_name.outputs.binary_name }}
-          path: dist/${{ steps.calc_binary_name.outputs.binary_name }}
+          path: dist
           
       - name: Generate token to create the release
         id: generate_token_cli
@@ -152,13 +152,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ steps.calc_binary_name.outputs.binary_name }}
-          path: dist/${{ steps.calc_binary_name.outputs.binary_name }}
+          path: dist
           
       - name: Check if the binary is executable
-        if: ${{ matrix.os != 'windows-latest' }}
         run: |
-          if [ ! -x dist/${{ steps.calc_binary_name.outputs.binary_name }} ]; then
-            sudo chmod +x dist/${{ steps.calc_binary_name.outputs.binary_name }}
-          fi
-          ctl_version = $(dist/${{ steps.calc_binary_name.outputs.binary_name }} --version)
+          ctl_version = $(${{ steps.calc_binary_name.outputs.binary_name }} --version)
           echo "ctl_version=$ctl_version" >> "$GITHUB_OUTPUT"
