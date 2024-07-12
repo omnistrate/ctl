@@ -99,9 +99,8 @@ func runLogin(cmd *cobra.Command, args []string) error {
 	authConfig := config.AuthConfig{
 		Email: email,
 		Token: token,
-		Auth:  config.JWTAuthType,
 	}
-	if err = config.UpdateAuthConfig(authConfig); err != nil {
+	if err = config.CreateOrUpdateAuthConfig(authConfig); err != nil {
 		ctlutils.PrintError(err)
 		return err
 	}

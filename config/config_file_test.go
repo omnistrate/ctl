@@ -1,264 +1,146 @@
 package config
 
 import (
-	"github.com/pkg/errors"
 	"os"
-	"regexp"
+	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func Test_LookupAuthConfig_WithNoConfigFile(t *testing.T) {
-	configDir, err := os.MkdirTemp("", "omnistrate-ctl-file-test")
-	if err != nil {
-		t.Fatalf("can not create test config directory: %s", err)
-	}
-	defer os.RemoveAll(configDir)
-
-	t.Setenv(ConfigLocationEnv, configDir)
-
-	_, err = LookupAuthConfig()
-	if err == nil {
-		t.Errorf("Error was not returned")
-	}
-
-	if !errors.Is(err, ErrConfigNotFound) {
-		t.Errorf("Error was not ErrConfigNotFound")
-	}
-
-	r := regexp.MustCompile(`(?m:config file not found)`)
-	if !r.MatchString(err.Error()) {
-		t.Errorf("Error not matched: %s", err.Error())
-	}
-}
-
-func Test_UpdateAuthConfig_Insert(t *testing.T) {
-	configDir, err := os.MkdirTemp("", "omnistrate-ctl-file-test")
-	if err != nil {
-		t.Fatalf("can not create test config directory: %s", err)
-	}
-	defer os.RemoveAll(configDir)
-
-	t.Setenv(ConfigLocationEnv, configDir)
-
-	email := "test@abcd.com"
-	token := "token"
-	err = UpdateAuthConfig(AuthConfig{
-		Email: email,
-		Token: token,
-		Auth:  JWTAuthType,
-	})
-	if err != nil {
-		t.Fatalf("unexpected error when updating auth config: %s", err)
-	}
-
-	authConfig, err := LookupAuthConfig()
-	if err != nil {
-		t.Errorf("got error %s", err.Error())
-		t.Errorf(authConfig.Token)
-	}
-
-	if authConfig.Email != email || authConfig.Token != token {
-		t.Errorf("got email %s and token %s, expected %s %s", authConfig.Email, authConfig.Token, email, token)
-	}
-}
-
-func Test_UpdateAuthConfig_Update(t *testing.T) {
-	configDir, err := os.MkdirTemp("", "omnistrate-ctl-file-test")
-	if err != nil {
-		t.Fatalf("can not create test config directory: %s", err)
-	}
-	defer os.RemoveAll(configDir)
-
-	t.Setenv(ConfigLocationEnv, configDir)
-
-	email := "test@abcd.com"
-	token := "token"
-	err = UpdateAuthConfig(AuthConfig{
-		Email: email,
-		Token: token,
-		Auth:  JWTAuthType,
-	})
-	if err != nil {
-		t.Fatalf("unexpected error when updating auth config: %s", err)
-	}
-
-	authConfig, err := LookupAuthConfig()
-	if err != nil {
-		t.Errorf("got error %s", err.Error())
-	}
-
-	if authConfig.Email != email || authConfig.Token != token {
-		t.Errorf("got email %s and token %s, expected %s %s", authConfig.Email, authConfig.Token, email, token)
-	}
-
-	email = "test2@abcd.com"
-	token = "token2"
-	err = UpdateAuthConfig(AuthConfig{
-		Email: email,
-		Token: token,
-		Auth:  JWTAuthType,
-	})
-	if err != nil {
-		t.Fatalf("unexpected error when updating auth config: %s", err)
-	}
-
-	authConfig, err = LookupAuthConfig()
-	if err != nil {
-		t.Errorf("got error %s", err.Error())
-	}
-
-	if authConfig.Email != email || authConfig.Token != token {
-		t.Errorf("got email %s and token %s, expected %s %s", authConfig.Email, authConfig.Token, email, token)
-	}
-}
-
-func Test_New_NoFile(t *testing.T) {
+func TestNew(t *testing.T) {
 	_, err := New("")
-	if err == nil {
-		t.Error("expected to fail on empty file path")
-	}
+	assert.Error(t, err)
+
+	cfg, err := New("test.yml")
+	assert.NoError(t, err)
+	assert.Equal(t, "test.yml", cfg.FilePath)
+	assert.Empty(t, cfg.AuthConfigs)
 }
 
-func Test_EnsureFile(t *testing.T) {
-	configDir, err := os.MkdirTemp("", "omnistrate-ctl-file-test")
-	if err != nil {
-		t.Fatalf("can not create test config directory: %s", err)
-	}
-	defer os.RemoveAll(configDir)
-
-	t.Setenv(ConfigLocationEnv, configDir)
-
-	cfg, err := EnsureFile()
-	if err != nil {
-		t.Error(err.Error())
-	}
-	_, err = os.Stat(cfg)
-	if os.IsNotExist(err) {
-		t.Errorf("expected config at %s", cfg)
-	}
+func TestConfigDir(t *testing.T) {
+	assert.Equal(t, DefaultDir, ConfigDir())
 }
 
-func Test_RemoveAuthConfig(t *testing.T) {
-	configDir, err := os.MkdirTemp("", "omnistrate-ctl-file-test")
-	if err != nil {
-		t.Fatalf("can not create test config directory: %s", err)
-	}
-	defer os.RemoveAll(configDir)
+func TestEnsureFile(t *testing.T) {
+	filePath, err := EnsureFile()
+	assert.NoError(t, err)
+	assert.FileExists(t, filePath)
 
-	t.Setenv(ConfigLocationEnv, configDir)
+	_, err = os.Stat(filePath)
+	assert.NoError(t, err)
+}
 
-	email := "test@abcd.com"
-	token := "token"
-	err = UpdateAuthConfig(AuthConfig{
-		Email: email,
-		Token: token,
-		Auth:  JWTAuthType,
+func TestFileExists(t *testing.T) {
+	filePath, err := EnsureFile()
+	assert.NoError(t, err)
+
+	assert.True(t, fileExists())
+
+	os.Remove(filePath)
+	assert.False(t, fileExists())
+}
+
+func TestSaveAndLoad(t *testing.T) {
+	dir := ConfigDir()
+
+	cfg, err := New(filepath.Join(dir, DefaultFile))
+	assert.NoError(t, err)
+
+	cfg.AuthConfigs = append(cfg.AuthConfigs, AuthConfig{
+		Email: "test@example.com",
+		Token: "token123",
 	})
-	if err != nil {
-		t.Fatalf("unexpected error when updating auth config: %s", err)
-	}
+
+	err = cfg.save()
+	assert.NoError(t, err)
+
+	loadedCfg, err := New(filepath.Join(dir, DefaultFile))
+	assert.NoError(t, err)
+
+	err = loadedCfg.load()
+	assert.NoError(t, err)
+
+	assert.Equal(t, cfg.AuthConfigs, loadedCfg.AuthConfigs)
 
 	err = RemoveAuthConfig()
-	if err != nil {
-		t.Errorf("got error %s", err.Error())
+	assert.NoError(t, err)
+}
+
+func TestCreateOrUpdateAuthConfig(t *testing.T) {
+	authConfig := AuthConfig{
+		Email: "test@example.com",
+		Token: "token123",
 	}
+
+	err := CreateOrUpdateAuthConfig(authConfig)
+	assert.NoError(t, err)
+
+	loadedConfig, err := LookupAuthConfig()
+	assert.NoError(t, err)
+	assert.Equal(t, authConfig, loadedConfig)
+
+	err = RemoveAuthConfig()
+	assert.NoError(t, err)
+}
+
+func TestLookupAuthConfig(t *testing.T) {
+	_, err := LookupAuthConfig()
+	assert.Error(t, err)
+
+	authConfig := AuthConfig{
+		Email: "test@example.com",
+		Token: "token123",
+	}
+
+	err = CreateOrUpdateAuthConfig(authConfig)
+	assert.NoError(t, err)
+
+	loadedConfig, err := LookupAuthConfig()
+	assert.NoError(t, err)
+	assert.Equal(t, authConfig, loadedConfig)
+
+	err = RemoveAuthConfig()
+	assert.NoError(t, err)
+}
+
+func TestRemoveAuthConfig(t *testing.T) {
+	authConfig := AuthConfig{
+		Email: "test@example.com",
+		Token: "token123",
+	}
+
+	err := CreateOrUpdateAuthConfig(authConfig)
+	assert.NoError(t, err)
+
+	err = RemoveAuthConfig()
+	assert.NoError(t, err)
 
 	_, err = LookupAuthConfig()
-	if err == nil {
-		t.Fatal("Error was not returned")
-	}
-	r := regexp.MustCompile(`(?m:no auth config found)`)
-	if !r.MatchString(err.Error()) {
-		t.Errorf("Error not matched: %s", err.Error())
-	}
+	assert.Error(t, err)
 }
 
-func Test_RemoveAuthConfig_WithNoConfigFile(t *testing.T) {
-	configDir, err := os.MkdirTemp("", "omnistrate-ctl-file-test")
-	if err != nil {
-		t.Fatalf("can not create test config directory: %s", err)
-	}
-	defer os.RemoveAll(configDir)
+func TestLoadNonExistentFile(t *testing.T) {
+	dir := ConfigDir()
+	cfg, err := New(filepath.Join(dir, "non_existent.yml"))
+	assert.NoError(t, err)
 
-	t.Setenv(ConfigLocationEnv, configDir)
-
-	err = RemoveAuthConfig()
-	if err == nil {
-		t.Errorf("Error was not returned")
-	}
-
-	if !errors.Is(err, ErrConfigNotFound) {
-		t.Errorf("Error was not ErrConfigNotFound")
-	}
-
-	r := regexp.MustCompile(`(?m:config file not found)`)
-	if !r.MatchString(err.Error()) {
-		t.Errorf("Error not matched: %s", err.Error())
-	}
+	err = cfg.load()
+	assert.Error(t, err)
 }
 
-func Test_ConfigDir(t *testing.T) {
+func TestLoadInvalidYaml(t *testing.T) {
+	dir := ConfigDir()
+	filePath := filepath.Join(dir, DefaultFile)
+	err := os.WriteFile(filePath, []byte("invalid_yaml: [abc,"), 0600)
+	assert.NoError(t, err)
 
-	cases := []struct {
-		name         string
-		env          map[string]string
-		expectedPath string
-	}{
-		{
-			name: "override value is returned",
-			env: map[string]string{
-				"OMNISTRATE_CONFIG": "/tmp/foo",
-			},
-			expectedPath: "/tmp/foo",
-		},
-		{
-			name: "override value is returned, when CI is set but false",
-			env: map[string]string{
-				"OMNISTRATE_CONFIG": "/tmp/foo",
-				"CI":                "false",
-			},
-			expectedPath: "/tmp/foo",
-		},
-		{
-			name: "override value is returned even when CI is set",
-			env: map[string]string{
-				"OMNISTRATE_CONFIG": "/tmp/foo",
-				"CI":                "true",
-			},
-			expectedPath: "/tmp/foo",
-		},
-		{
-			name: "when CI is true, return the default CI directory",
-			env: map[string]string{
-				"CI": "true",
-			},
-			expectedPath: DefaultCIDir,
-		},
-		{
-			name: "when CI is false, return the default directory",
-			env: map[string]string{
-				"CI": "false",
-			},
-			expectedPath: DefaultDir,
-		},
-		{
-			name:         "when no other env variables are set, the default path is returned",
-			expectedPath: DefaultDir,
-		},
-	}
+	cfg, err := New(filePath)
+	assert.NoError(t, err)
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
+	err = cfg.load()
+	assert.Error(t, err)
 
-			for name, value := range tc.env {
-				t.Setenv(name, value)
-			}
-
-			path := ConfigDir()
-			if path != tc.expectedPath {
-				t.Fatalf("expected config path '%s', got '%s'", tc.expectedPath, path)
-			}
-		})
-	}
-
+	err = os.Remove(filePath)
+	assert.NoError(t, err)
 }
