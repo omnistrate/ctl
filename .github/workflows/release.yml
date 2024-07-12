@@ -4,6 +4,8 @@ on:
   release:
     types: [ "published" ]
   workflow_dispatch:
+  pull_request:
+    branches: [ "master" ]
 
 env:
   GOPRIVATE: "github.com/omnistrate/*"
@@ -63,8 +65,8 @@ jobs:
       - name: Calculate binary name
         id: calc_binary_name
         run: |
-          binary_name="omnistrate-ctl-${{ matrix.os }}-${{ matrix.goarch }}"
-          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          binary_name="omnistrate-ctl-${{ matrix.goos }}-${{ matrix.goarch }}"
+          if [ "${{ matrix.goos }}" == "windows-latest" ]; then
             binary_name="${binary_name}.exe"
           fi
           echo "binary_name=$binary_name" >> "$GITHUB_OUTPUT"
@@ -75,13 +77,39 @@ jobs:
           name: ${{ steps.calc_binary_name.outputs.binary_name }}
           path: dist/${{ steps.calc_binary_name.outputs.binary_name }}
 
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    strategy:
+      matrix:
+        goos: [linux, darwin, windows]
+        goarch: [amd64, arm64]
+
+    steps: 
+      - name: Calculate binary name
+        id: calc_binary_name
+        run: |
+          binary_name="omnistrate-ctl-${{ matrix.goos }}-${{ matrix.goarch }}"
+          if [ "${{ matrix.goos }}" == "windows-latest" ]; then
+            binary_name="${binary_name}.exe"
+          fi
+          echo "binary_name=$binary_name" >> "$GITHUB_OUTPUT"
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ steps.calc_binary_name.outputs.binary_name }}
+          path: dist/${{ steps.calc_binary_name.outputs.binary_name }}
+          
       - name: Generate token to create the release
         id: generate_token_cli
         uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a
         with:
           app_id: ${{ secrets.CLI_APP_ID }}
           private_key: ${{ secrets.CLI_APP_PRIVATE_KEY }}
-          
+
       - name: Upload binaries on a new release
         uses: softprops/action-gh-release@v1
         with:
@@ -89,3 +117,5 @@ jobs:
               dist/${{ steps.calc_binary_name.outputs.binary_name }}
             repository: omnistrate/cli
             token: ${{ steps.generate_token_cli.outputs.token }}
+            draft: true
+          
