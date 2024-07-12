@@ -131,8 +131,10 @@ jobs:
         timeout-minutes: 1
         if: matrix.os == 'windows-latest'
         run: |
-          omnistrate-ctl-windows-amd64/omnistrate-ctl-windows-amd64.exe --version
-          echo "ctl_version=$ctl_version" >> "$GITHUB_OUTPUT"
+          cd omnistrate-ctl-windows-amd64
+          $ctl_version=omnistrate-ctl-windows-amd64.exe --version
+          echo "Version: $ctl_version"
+          echo "ctl_version=$ctl_version" >> $env:GITHUB_OUTPUT
     
   release:
     runs-on: ubuntu-latest
