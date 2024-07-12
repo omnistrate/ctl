@@ -168,6 +168,7 @@ jobs:
           path: dist
           
       - name: Run the binary (linux and macos only)
+        id: run_binary_linux_macos
         timeout-minutes: 1
         if: matrix.os != 'windows-latest'
         run: |
@@ -176,6 +177,7 @@ jobs:
           echo "ctl_version=$ctl_version" >> "$GITHUB_OUTPUT"
 
       - name: Run the binary (windows only)
+        id: run_binary_windows
         timeout-minutes: 1
         if: matrix.os == 'windows-latest'
         run: |
