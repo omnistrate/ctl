@@ -8,6 +8,7 @@ import (
 	"github.com/compose-spec/compose-go/types"
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
+	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
 	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
@@ -108,6 +109,16 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	utils.PrintURL("Check the service plan result at", fmt.Sprintf("https://%s/product-tier/build?serviceId=%s&productTierId=%s", utils.GetRootDomain(), serviceID, productTierID))
 	utils.PrintURL("Consume it at", fmt.Sprintf("https://%s/access?serviceId=%s&environmentId=%s", utils.GetRootDomain(), serviceID, environmentID))
 
+	serviceEnvironment, err := describeServiceEnvironment(serviceID, environmentID, token)
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	if serviceEnvironment.SaasPortalURL != nil {
+		utils.PrintURL("Find your SaaS Portal at", *serviceEnvironment.SaasPortalURL)
+	}
+
 	return nil
 }
 
@@ -201,6 +212,25 @@ func buildService(file, token, name string, description, serviceLogoURL, environ
 	}
 
 	return string(buildRes.ServiceID), string(buildRes.ServiceEnvironmentID), string(buildRes.ProductTierID), nil
+}
+
+func describeServiceEnvironment(serviceId, serviceEnvironmentId, token string) (*serviceenvironmentapi.DescribeServiceEnvironmentResult, error) {
+	service, err := httpclientwrapper.NewServiceEnvironment(utils.GetHostScheme(), utils.GetHost())
+	if err != nil {
+		return nil, err
+	}
+
+	request := serviceenvironmentapi.DescribeServiceEnvironmentRequest{
+		Token:     token,
+		ServiceID: serviceenvironmentapi.ServiceID(serviceId),
+		ID:        serviceenvironmentapi.ServiceEnvironmentID(serviceEnvironmentId),
+	}
+
+	res, err := service.DescribeServiceEnvironment(context.Background(), &request)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func resetBuild() {
