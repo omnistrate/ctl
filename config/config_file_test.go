@@ -37,7 +37,8 @@ func TestFileExists(t *testing.T) {
 
 	assert.True(t, fileExists())
 
-	os.Remove(filePath)
+	err = os.Remove(filePath)
+	assert.NoError(t, err)
 	assert.False(t, fileExists())
 }
 

@@ -1,11 +1,10 @@
-GO_FILES?=$$(find . -name '*.go' |grep -v vendor)
 GOOS?=$(shell go env GOOS)
 GOARCH?=$(shell go env GOARCH)
 TAG?=latest
 
 GIT_COMMIT=$(shell git rev-parse HEAD)
 GIT_VERSION=$(shell git describe --tags 2>/dev/null || echo "$(GIT_COMMIT)")
-GIT_UNTRACKEDCHANGES := $(shell git status --porcelain --untracked-files=no)
+GIT_UNTRACKEDCHANGES := $(shell git status --porcelain --untracked-files=no -- go.sum)
 ifneq ($(GIT_UNTRACKEDCHANGES),)
 	GIT_VERSION := $(GIT_VERSION)-dirty
 	GIT_COMMIT := $(GIT_COMMIT)-dirty
@@ -33,6 +32,7 @@ all: tidy build unit-test lint sec
 tidy:
 	echo "Tidy dependency modules"
 	go mod tidy
+	go mod vendor
 
 .PHONY: unit-test
 unit-test:

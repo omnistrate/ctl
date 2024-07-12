@@ -19,7 +19,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
 
     strategy:
       matrix:
@@ -75,10 +75,17 @@ jobs:
           name: ${{ steps.calc_binary_name.outputs.binary_name }}
           path: dist/${{ steps.calc_binary_name.outputs.binary_name }}
 
-      - name: upload binaries to release
+      - name: Generate token to create the release
+        id: generate_token_cli
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a
+        with:
+          app_id: ${{ secrets.CLI_APP_ID }}
+          private_key: ${{ secrets.CLI_APP_PRIVATE_KEY }}
+          
+      - name: Upload binaries on a new release
         uses: softprops/action-gh-release@v1
-        if: ${{startsWith(github.ref, 'refs/tags/') }}
         with:
             files: | 
               dist/${{ steps.calc_binary_name.outputs.binary_name }}
-              
+            repository: omnistrate/cli
+            token: ${{ steps.generate_token_cli.outputs.token }}
