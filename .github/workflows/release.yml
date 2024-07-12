@@ -156,5 +156,5 @@ jobs:
           
       - name: Check if the binary is executable
         run: |
-          ctl_version = $(${{ steps.calc_binary_name.outputs.binary_name }} --version)
+          ctl_version = $(dist/${{ steps.calc_binary_name.outputs.binary_name }} --version)
           echo "ctl_version=$ctl_version" >> "$GITHUB_OUTPUT"
