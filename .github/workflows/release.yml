@@ -108,10 +108,9 @@ jobs:
       - name: Download build artifacts
         timeout-minutes: 5
         uses: actions/download-artifact@v4
-        with:
-          path: dist
 
       - name: Display structure of downloaded files
+        timeout-minutes: 1
         run: ls -R
           
       - name: Generate token to create the release
@@ -127,7 +126,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
             files: | 
-              dist/${{ steps.calc_binary_name.outputs.binary_name }}
+              ${{ steps.calc_binary_name.outputs.binary_name }}/${{ steps.calc_binary_name.outputs.binary_name }}
             repository: omnistrate/cli
             token: ${{ steps.generate_token_cli.outputs.token }}
             fail_on_unmatched_files: true
@@ -149,6 +148,10 @@ jobs:
       - name: Download build artifacts
         timeout-minutes: 5
         uses: actions/download-artifact@v4
+
+      - name: Display structure of downloaded files
+        timeout-minutes: 1
+        run: ls -R
           
       - name: Run the binary (linux and macos only)
         id: run_binary_linux_macos
@@ -160,8 +163,10 @@ jobs:
           else
             export GOOS=linux
           fi
-          chmod +x omnistrate-ctl-${GOOS}-${{ matrix.goarch }}
-          ctl_version=$(omnistrate-ctl-${GOOS}-${{ matrix.goarch }} --version)
+          binary_name="omnistrate-ctl-${GOOS}-${{ matrix.goarch }}"
+          cd $binary_name
+          chmod +x $binary_name
+          ctl_version=$($binary_name --version)
           echo "ctl_version=$ctl_version" >> "$GITHUB_OUTPUT"
 
       - name: Run the binary (windows only)
