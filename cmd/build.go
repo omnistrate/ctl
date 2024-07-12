@@ -8,12 +8,14 @@ import (
 	"github.com/compose-spec/compose-go/types"
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
+	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	goa "goa.design/goa/v3/pkg"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 var (
@@ -22,6 +24,7 @@ var (
 	description        string
 	serviceLogoURL     string
 	environment        string
+	environmentType    string
 	serviceID          string
 	environmentID      string
 	productTierID      string
@@ -31,10 +34,10 @@ var (
 
 // buildCmd represents the build command
 var buildCmd = &cobra.Command{
-	Use:          "build [--file FILE] [--name NAME] [--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] [--environment ENVIRONMENT] [--release] [--release-as-preferred]",
+	Use:          "build [--file FILE] [--name NAME] [--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] [--environment ENVIRONMENT] [--environment ENVIRONMENT_TYPE] [--release] [--release-as-preferred]",
 	Short:        "Build a service from a Docker Compose file",
-	Long:         `Builds a new service using a Docker Compose file. The --name flag is required to specify the service name. Optionally, you can provide a description and a URL for the service's logo. Use the --environment flag to specify the target environment. Use --release or --release-as-preferred to release the service after building.`,
-	Example:      `  omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png" --environment "dev" --release-as-preferred`,
+	Long:         `Builds a new service using a Docker Compose file. The --name flag is required to specify the service name. Optionally, you can provide a description and a URL for the service's logo. Use the --environment and --environment-type flag to specify the target environment. Use --release or --release-as-preferred to release the service after building.`,
+	Example:      `  omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png" --environment "dev" --environment-type "DEV" --release-as-preferred`,
 	RunE:         runBuild,
 	SilenceUsage: true,
 }
@@ -47,6 +50,7 @@ func init() {
 	buildCmd.Flags().StringVarP(&description, "description", "", "", "Description of the service")
 	buildCmd.Flags().StringVarP(&serviceLogoURL, "service-logo-url", "", "", "URL to the service logo")
 	buildCmd.Flags().StringVarP(&environment, "environment", "", "Dev", "Environment to build the service in")
+	buildCmd.Flags().StringVarP(&environmentType, "environment-type", "", "dev", "Type of environment. Valid options include: 'prod', 'canary', 'staging', 'qa', 'dev'")
 	buildCmd.Flags().BoolVarP(&release, "release", "", false, "Release the service after building it")
 	buildCmd.Flags().BoolVarP(&releaseAsPreferred, "release-as-preferred", "", false, "Release the service as preferred after building it")
 }
@@ -89,7 +93,12 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		environmentPtr = nil
 	}
 
-	serviceID, environmentID, productTierID, err = buildService(file, token, name, descriptionPtr, serviceLogoURLPtr, environmentPtr, release, releaseAsPreferred)
+	environmentTypePtr := commonutils.ToPtr(strings.ToUpper(environmentType))
+	if environmentType == "" {
+		environmentTypePtr = nil
+	}
+
+	serviceID, environmentID, productTierID, err = buildService(file, token, name, descriptionPtr, serviceLogoURLPtr, environmentPtr, environmentTypePtr, release, releaseAsPreferred)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -102,7 +111,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func buildService(file, token, name string, description, serviceLogoURL, environment *string, release, releaseAsPreferred bool) (serviceID string, environmentID string, productTierID string, err error) {
+func buildService(file, token, name string, description, serviceLogoURL, environment, environmentType *string, release, releaseAsPreferred bool) (serviceID string, environmentID string, productTierID string, err error) {
 	if name == "" {
 		return "", "", "", errors.New("name is required")
 	}
@@ -123,6 +132,7 @@ func buildService(file, token, name string, description, serviceLogoURL, environ
 		Description:        description,
 		ServiceLogoURL:     serviceLogoURL,
 		Environment:        environment,
+		EnvironmentType:    (*serviceapi.EnvironmentType)(environmentType),
 		FileContent:        base64.StdEncoding.EncodeToString(fileData),
 		Release:            &release,
 		ReleaseAsPreferred: &releaseAsPreferred,
@@ -199,6 +209,7 @@ func resetBuild() {
 	description = ""
 	serviceLogoURL = ""
 	environment = ""
+	environmentType = ""
 	release = false
 	releaseAsPreferred = false
 }
