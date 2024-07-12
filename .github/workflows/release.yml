@@ -132,7 +132,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           cd omnistrate-ctl-windows-amd64.exe
-          $ctl_version=omnistrate-ctl-windows-amd64.exe --version
+          $ctl_version=.\omnistrate-ctl-windows-amd64.exe --version
           echo "Omnistrate CTL version: $ctl_version"
           echo "ctl_version=$ctl_version" >> $env:GITHUB_OUTPUT
     
