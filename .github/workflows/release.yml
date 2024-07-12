@@ -72,4 +72,4 @@ jobs:
         with:
             files: | 
               dist/omnistrate-ctl-${{ matrix.goos }}-${{ matrix.goarch }}
-              LICENSE
+              
