@@ -140,7 +140,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest, ubic]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         goarch: [amd64, arm64]
     
     runs-on: ${{ matrix.os }}
