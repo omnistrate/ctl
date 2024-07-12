@@ -110,7 +110,7 @@ jobs:
         run: |
           if [ "${{ matrix.os }}" == "macos-latest" ]; then
             export GOOS=darwin
-            export GOARCH=amd64
+            export GOARCH=arm64
           elif [ "${{ matrix.os }}" == "ubic-cloud-standard-2-arm" ]; then
             export GOOS=linux
             export GOARCH=arm64
@@ -122,7 +122,7 @@ jobs:
           binary_name="omnistrate-ctl-${GOOS}-${GOARCH}"
           cd $binary_name
           chmod +x $binary_name
-          ctl_version=$($binary_name --version)
+          ctl_version=$(./$binary_name --version)
           echo "Version: $ctl_version"
           echo "ctl_version=$ctl_version" >> "$GITHUB_OUTPUT"
 
