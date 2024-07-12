@@ -61,8 +61,12 @@ github.com/omnistrate/api-design v0.6.398 h1:stxzEDur58VQMphELErFtslOoYSE1dpT/as
 github.com/omnistrate/api-design v0.6.398/go.mod h1:yLKvbv+8uz4szosyGKr+hQgKG2nav2tuo5pFbbA1oTw=
 github.com/omnistrate/api-design v0.6.455 h1:wR3gIve1MjlVkfClH6JDDdrQXfbWsktMfDcdtLMo/tA=
 github.com/omnistrate/api-design v0.6.455/go.mod h1:yf0PbTiNT/mhqVlch0aO62KO7YZg2fmwoRLyoExIGDo=
+github.com/omnistrate/api-design v0.6.456 h1:RjKm588/m7gqRFGaAsIfwNeMTyMai95uMxnAwkMDh5c=
+github.com/omnistrate/api-design v0.6.456/go.mod h1:yf0PbTiNT/mhqVlch0aO62KO7YZg2fmwoRLyoExIGDo=
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240618044904-9edbcb2a3292 h1:EXWoPNwOKSEW8auiRIQpZCyNFslwQrq8niRSr09secA=
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240618044904-9edbcb2a3292/go.mod h1:1ZsUysYbSu9aWA0M8Svh1tqJfZN2oA1SuDsbFsthrhc=
+github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240712000308-381ef0f2d1fd h1:eGUwg4ULQV2eqLrrlkXeM8vz46ut6ASBV4IQeuzPHi4=
+github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240712000308-381ef0f2d1fd/go.mod h1:HWRdwqwHEWT/I38jWrCdkydGjsxdSigrjX0ZMjVABBw=
 github.com/omnistrate/commons/pkg/constants v0.0.0-20240604174540-fe671f90cd9c h1:993gx5uGuP7adUPI6mSGP+qncy1OhBP3qpFvzVuyQvc=
 github.com/omnistrate/commons/pkg/constants v0.0.0-20240604174540-fe671f90cd9c/go.mod h1:okYQlNYHtWts036uSo4UprIiYXWFu/pAo49v9oDLnG4=
 github.com/omnistrate/commons/pkg/constants v0.0.0-20240711170400-71b8de5fbd07 h1:CojNhL/Y0W99EyJt4Ez1S0w+F5yFpxKy6zZrOBlyhlw=
