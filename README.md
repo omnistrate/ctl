@@ -8,7 +8,7 @@ To run the CTL in your local environment, you can use the CTL binaries.
 To obtain the latest version of the CTL binaries, execute the following command in your terminal:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/master/download.sh | sh
+curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/master/install.sh | sh
 ```
 
 This command will automatically download and install the latest version of the CTL binaries onto your system.
