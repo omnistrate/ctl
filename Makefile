@@ -54,7 +54,11 @@ smoke-test:
 .PHONY: build
 build:
 	echo "Building CTL for $(GOOS)-$(GOARCH)"
-	go build -mod=mod ${BUILD_FLAGS} -o dist/omnistrate-ctl-$(GOOS)-$(GOARCH) github.com/omnistrate/ctl
+	@binary_name="omnistrate-ctl-$(GOOS)-$(GOARCH)"; \
+	if [ "$(GOOS)" = "windows" ]; then \
+		binary_name="$$binary_name.exe"; \
+	fi; \
+	go build -mod=mod ${BUILD_FLAGS} -o dist/$$binary_name github.com/omnistrate/ctl
 
 .PHONY: ctl-linux-amd64
 ctl-linux-amd64: main.go
