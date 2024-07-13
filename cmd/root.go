@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/get"
 	"os"
 
 	"github.com/fatih/color"
@@ -9,8 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
+// RootCmd represents the base command when called without any subcommands
+var RootCmd = &cobra.Command{
 	Use:   "omnistrate-ctl",
 	Short: "Manage your Omnistrate SaaS from the command line.",
 	Long: wordwrap.WrapString(`
@@ -54,14 +55,16 @@ const figletStr = `                  _     __           __
 `
 
 // Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
+// This is called by main.main(). It only needs to happen once to the RootCmd.
 func Execute() {
-	err := rootCmd.Execute()
+	err := RootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
 	}
 }
 
 func init() {
-	rootCmd.PersistentFlags().BoolP("version", "v", false, "Print the version number of omnistrate-ctl")
+	RootCmd.PersistentFlags().BoolP("version", "v", false, "Print the version number of omnistrate-ctl")
+
+	RootCmd.AddCommand(get.GetCmd)
 }

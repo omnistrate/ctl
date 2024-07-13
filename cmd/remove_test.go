@@ -20,16 +20,16 @@ func Test_remove_basic(t *testing.T) {
 
 	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
 	require.NoError(err)
-	
-	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
-	err = rootCmd.Execute()
+
+	RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
+	err = RootCmd.Execute()
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"build", "-f", "../composefiles/postgresql.yaml", "--name", "postgresql" + uuid.NewString(), "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
-	err = rootCmd.Execute()
+	RootCmd.SetArgs([]string{"build", "-f", "../composefiles/postgresql.yaml", "--name", "postgresql" + uuid.NewString(), "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
+	err = RootCmd.Execute()
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"remove", "--service-id", serviceID})
-	err = rootCmd.Execute()
+	RootCmd.SetArgs([]string{"remove", "--service-id", serviceID})
+	err = RootCmd.Execute()
 	require.NoError(err)
 }

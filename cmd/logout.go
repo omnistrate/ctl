@@ -18,7 +18,7 @@ var logoutCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(logoutCmd)
+	RootCmd.AddCommand(logoutCmd)
 }
 
 func runLogout(cmd *cobra.Command, args []string) error {

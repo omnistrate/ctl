@@ -26,7 +26,7 @@ var removeCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(removeCmd)
+	RootCmd.AddCommand(removeCmd)
 
 	removeCmd.Flags().StringVarP(&removeServiceID, "service-id", "", "", "service id")
 }

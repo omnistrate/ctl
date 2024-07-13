@@ -18,8 +18,8 @@ func Test_logout(t *testing.T) {
 	var err error
 
 	// FAIL: logout without login
-	rootCmd.SetArgs([]string{"logout"})
-	err = rootCmd.Execute()
+	RootCmd.SetArgs([]string{"logout"})
+	err = RootCmd.Execute()
 	require.Error(err)
 	require.Contains(err.Error(), "config file not found")
 
@@ -27,11 +27,11 @@ func Test_logout(t *testing.T) {
 	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
-	err = rootCmd.Execute()
+	RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
+	err = RootCmd.Execute()
 	require.NoError(err)
 
-	rootCmd.SetArgs([]string{"logout"})
-	err = rootCmd.Execute()
+	RootCmd.SetArgs([]string{"logout"})
+	err = RootCmd.Execute()
 	require.NoError(err)
 }

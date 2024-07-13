@@ -44,7 +44,7 @@ var buildCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(buildCmd)
+	RootCmd.AddCommand(buildCmd)
 
 	buildCmd.Flags().StringVarP(&file, "file", "f", "", "Path to the docker compose file")
 	buildCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the service")
@@ -54,6 +54,15 @@ func init() {
 	buildCmd.Flags().StringVarP(&environmentType, "environment-type", "", "dev", "Type of environment. Valid options include: 'prod', 'canary', 'staging', 'qa', 'dev'")
 	buildCmd.Flags().BoolVarP(&release, "release", "", false, "Release the service after building it")
 	buildCmd.Flags().BoolVarP(&releaseAsPreferred, "release-as-preferred", "", false, "Release the service as preferred after building it")
+
+	err := buildCmd.MarkFlagRequired("file")
+	if err != nil {
+		return
+	}
+	err = buildCmd.MarkFlagRequired("name")
+	if err != nil {
+		return
+	}
 }
 
 func runBuild(cmd *cobra.Command, args []string) error {

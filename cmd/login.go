@@ -35,7 +35,7 @@ var loginCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(loginCmd)
+	RootCmd.AddCommand(loginCmd)
 
 	loginCmd.Flags().StringVarP(&email, "email", "", "", "email")
 	loginCmd.Flags().StringVarP(&password, "password", "", "", "password")

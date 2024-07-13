@@ -28,8 +28,8 @@ func Test_login(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		rootCmd.SetArgs(tt.Args)
-		err = rootCmd.Execute()
+		RootCmd.SetArgs(tt.Args)
+		err = RootCmd.Execute()
 		if tt.WantErr {
 			require.Error(err, tt.ExpectedErrMsg)
 			require.Contains(err.Error(), tt.ExpectedErrMsg)
