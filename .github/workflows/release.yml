@@ -4,8 +4,6 @@ on:
   release:
     types: [ "published" ]
   workflow_dispatch:
-  pull_request:
-    branches: [ "master" ]
 
 env:
   GOPRIVATE: "github.com/omnistrate/*"
@@ -183,4 +181,4 @@ jobs:
             repository: omnistrate/cli
             token: ${{ steps.generate_token_cli.outputs.token }}
             fail_on_unmatched_files: true
-            draft: true
+            draft: false
