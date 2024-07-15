@@ -38,22 +38,34 @@ func Run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// List accounts
-	listRes, err := listAccounts(token)
+	// List aws accounts
+	awsAccounts, err := listAccounts(token, "aws")
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
+	// List gcp accounts
+	gcpAccounts, err := listAccounts(token, "gcp")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	allAccounts := append(awsAccounts.AccountConfigs, gcpAccounts.AccountConfigs...)
+
 	// Print accounts table if no account name is provided
 	if len(args) == 0 {
-		printTable(listRes.AccountConfigs)
+		utils.PrintSuccess(fmt.Sprintf("Found %d accounts", len(allAccounts)))
+		if len(allAccounts) > 0 {
+			printTable(allAccounts)
+		}
 		return nil
 	}
 
 	// Format listRes.Accounts into a map
 	accountMap := make(map[string]*accountconfigapi.DescribeAccountConfigResult)
-	for _, account := range listRes.AccountConfigs {
+	for _, account := range allAccounts {
 		accountMap[account.Name] = account
 	}
 
@@ -74,14 +86,15 @@ func Run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func listAccounts(token string) (*accountconfigapi.ListAccountConfigResult, error) {
+func listAccounts(token string, cloudProvider string) (*accountconfigapi.ListAccountConfigResult, error) {
 	account, err := httpclientwrapper.NewAccountConfig(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return nil, err
 	}
 
 	request := accountconfigapi.ListAccountConfigRequest{
-		Token: token,
+		Token:             token,
+		CloudProviderName: accountconfigapi.CloudProvider(cloudProvider),
 	}
 
 	res, err := account.ListAccountConfig(context.Background(), &request)
