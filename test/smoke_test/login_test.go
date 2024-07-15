@@ -1,10 +1,11 @@
-package cmd
+package smoke
 
 import (
+	"github.com/omnistrate/ctl/cmd"
+	"github.com/omnistrate/ctl/test/testutils"
 	"testing"
 
 	"github.com/omnistrate/commons/pkg/utils"
-	"github.com/omnistrate/ctl/testutils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -28,8 +29,8 @@ func Test_login(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		RootCmd.SetArgs(tt.Args)
-		err = RootCmd.Execute()
+		cmd.RootCmd.SetArgs(tt.Args)
+		err = cmd.RootCmd.Execute()
 		if tt.WantErr {
 			require.Error(err, tt.ExpectedErrMsg)
 			require.Contains(err.Error(), tt.ExpectedErrMsg)

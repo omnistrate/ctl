@@ -20,15 +20,15 @@ import (
 )
 
 var (
+	ServiceID          string
+	EnvironmentID      string
+	ProductTierID      string
 	file               string
 	name               string
 	description        string
 	serviceLogoURL     string
 	environment        string
 	environmentType    string
-	serviceID          string
-	environmentID      string
-	productTierID      string
 	release            bool
 	releaseAsPreferred bool
 )
@@ -108,17 +108,17 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		environmentTypePtr = nil
 	}
 
-	serviceID, environmentID, productTierID, err = buildService(file, token, name, descriptionPtr, serviceLogoURLPtr, environmentPtr, environmentTypePtr, release, releaseAsPreferred)
+	ServiceID, EnvironmentID, ProductTierID, err = buildService(file, token, name, descriptionPtr, serviceLogoURLPtr, environmentPtr, environmentTypePtr, release, releaseAsPreferred)
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
 	utils.PrintSuccess("Service built successfully")
-	utils.PrintURL("Check the service plan result at", fmt.Sprintf("https://%s/product-tier/build?serviceId=%s&productTierId=%s", utils.GetRootDomain(), serviceID, productTierID))
-	utils.PrintURL("Consume it at", fmt.Sprintf("https://%s/access?serviceId=%s&environmentId=%s", utils.GetRootDomain(), serviceID, environmentID))
+	utils.PrintURL("Check the service plan result at", fmt.Sprintf("https://%s/product-tier/build?serviceId=%s&productTierId=%s", utils.GetRootDomain(), ServiceID, ProductTierID))
+	utils.PrintURL("Consume it at", fmt.Sprintf("https://%s/access?serviceId=%s&environmentId=%s", utils.GetRootDomain(), ServiceID, EnvironmentID))
 
-	serviceEnvironment, err := describeServiceEnvironment(serviceID, environmentID, token)
+	serviceEnvironment, err := describeServiceEnvironment(ServiceID, EnvironmentID, token)
 	if err != nil {
 		utils.PrintError(err)
 		return err

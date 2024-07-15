@@ -1,11 +1,12 @@
-package cmd
+package smoke
 
 import (
 	"fmt"
+	"github.com/omnistrate/ctl/cmd"
+	"github.com/omnistrate/ctl/test/testutils"
 	"testing"
 
 	"github.com/omnistrate/commons/pkg/utils"
-	"github.com/omnistrate/ctl/testutils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -18,8 +19,8 @@ func Test_logout(t *testing.T) {
 	var err error
 
 	// FAIL: logout without login
-	RootCmd.SetArgs([]string{"logout"})
-	err = RootCmd.Execute()
+	cmd.RootCmd.SetArgs([]string{"logout"})
+	err = cmd.RootCmd.Execute()
 	require.Error(err)
 	require.Contains(err.Error(), "config file not found")
 
@@ -27,11 +28,11 @@ func Test_logout(t *testing.T) {
 	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
 	require.NoError(err)
 
-	RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
-	err = RootCmd.Execute()
+	cmd.RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
+	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	RootCmd.SetArgs([]string{"logout"})
-	err = RootCmd.Execute()
+	cmd.RootCmd.SetArgs([]string{"logout"})
+	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 }
