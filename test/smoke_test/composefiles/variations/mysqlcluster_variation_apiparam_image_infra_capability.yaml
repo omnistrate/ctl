@@ -252,11 +252,11 @@ services:
 
 configs:
   my_config:
-    file: ../configfiles/conf_updated.yaml
+    file: configfiles/conf_updated.yaml
 
 secrets:
   my_secret:
-    file: ../configfiles/secret_updated.yaml
+    file: configfiles/secret_updated.yaml
 
 volumes:
   mysql_master_data:
