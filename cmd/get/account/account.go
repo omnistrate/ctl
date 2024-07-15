@@ -39,20 +39,12 @@ func Run(cmd *cobra.Command, args []string) error {
 	}
 
 	// List aws accounts
-	awsAccounts, err := listAccounts(token, "aws")
+	listRes, err := listAccounts(token, "all")
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
-
-	// List gcp accounts
-	gcpAccounts, err := listAccounts(token, "gcp")
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
-	allAccounts := append(awsAccounts.AccountConfigs, gcpAccounts.AccountConfigs...)
+	allAccounts := listRes.AccountConfigs
 
 	// Print accounts table if no account name is provided
 	if len(args) == 0 {
