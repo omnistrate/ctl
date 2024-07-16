@@ -55,7 +55,7 @@ func run(cmd *cobra.Command, args []string) error {
 
 	accountIDs := make([]string, 0)
 	if ID {
-		accountIDs = args[:]
+		accountIDs = args
 	} else {
 		// List accounts
 		listRes, err := dataaccess.ListAccounts(token, "all")

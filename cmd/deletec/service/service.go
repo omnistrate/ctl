@@ -56,7 +56,7 @@ func run(cmd *cobra.Command, args []string) error {
 
 	var serviceIDs []string
 	if ID {
-		serviceIDs = args[:]
+		serviceIDs = args
 	} else {
 		// List services
 		listRes, err := dataaccess.ListServices(token)
