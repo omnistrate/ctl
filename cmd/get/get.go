@@ -11,7 +11,7 @@ var (
 )
 
 var GetCmd = &cobra.Command{
-	Use:          "get [object] [name] [flags]",
+	Use:          "get [type] [name] [flags]",
 	Short:        "Display one or many objects with a table, only the most important information will be displayed.",
 	Long:         getLong,
 	Run:          runGet,

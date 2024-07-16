@@ -10,8 +10,8 @@ var (
 )
 
 var CreateCmd = &cobra.Command{
-	Use:          "create [object] [name] [flags]",
-	Short:        "Create objects from stdin by providing the object type and name.",
+	Use:          "create [type] [name] [flags]",
+	Short:        "Create object from stdin by providing the object type and name.",
 	Long:         createLong,
 	Run:          run,
 	SilenceUsage: true,
