@@ -68,13 +68,13 @@ func Test_service_basic(t *testing.T) {
 	err = describeservice.ServiceCmd.Execute()
 	require.NoError(err)
 
-	// Delete services by name
-	deleteservice.ServiceCmd.SetArgs([]string{"service", serviceName1, serviceName2})
+	// Delete service by name
+	deleteservice.ServiceCmd.SetArgs([]string{"service", serviceName1})
 	err = deleteservice.ServiceCmd.Execute()
 	require.NoError(err)
 
-	// Delete services by ID
-	deleteservice.ServiceCmd.SetArgs([]string{"service", serviceID1, serviceID2, "--id"})
+	// Delete service by ID
+	deleteservice.ServiceCmd.SetArgs([]string{"service", serviceID2, "--id"})
 	err = deleteservice.ServiceCmd.Execute()
-	require.Error(err) // Should fail because services were already deleted
+	require.NoError(err)
 }
