@@ -41,7 +41,7 @@ func Test_build_basic(t *testing.T) {
 		err = cmd.RootCmd.Execute()
 		require.NoError(err, f.Name())
 
-		cmd.RootCmd.SetArgs([]string{"describe", "--service-id", cmd.ServiceID})
+		cmd.RootCmd.SetArgs([]string{"describe", "service", f.Name()})
 		err = cmd.RootCmd.Execute()
 		require.NoError(err, f.Name())
 
@@ -72,7 +72,7 @@ func Test_build_update_service(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"describe", "--service-id", cmd.ServiceID})
+	cmd.RootCmd.SetArgs([]string{"describe", "service", serviceName})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
@@ -106,7 +106,7 @@ func Test_build_update_service(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"describe", "--service-id", cmd.ServiceID})
+	cmd.RootCmd.SetArgs([]string{"describe", "service", serviceName})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
