@@ -12,8 +12,7 @@ import (
 )
 
 var (
-	describeLong = `
-		Describe detailed information about an object.`
+	describeLong = ``
 )
 
 var (

@@ -7,10 +7,7 @@ import (
 )
 
 var (
-	getLong = `
-		Display one or many objects.
-
-		Prints a table of the most important information about the specified objects.`
+	getLong = ``
 )
 
 var GetCmd = &cobra.Command{
