@@ -1,12 +1,10 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
+	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/pkg/errors"
 
-	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
-	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 )
@@ -49,31 +47,13 @@ func runRemove(cmd *cobra.Command, args []string) error {
 	}
 
 	// Remove service
-	err = removeService(removeServiceID, token)
+	err = dataaccess.DeleteService(removeServiceID, token)
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 	utils.PrintSuccess(fmt.Sprintf("Service %s has been removed successfully", removeServiceID))
 
-	return nil
-}
-
-func removeService(serviceId, token string) error {
-	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())
-	if err != nil {
-		return err
-	}
-
-	request := serviceapi.DeleteServiceRequest{
-		Token: token,
-		ID:    serviceapi.ServiceID(serviceId),
-	}
-
-	err = service.DeleteService(context.Background(), &request)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 

@@ -40,6 +40,14 @@ func init() {
 	loginCmd.Flags().StringVarP(&email, "email", "", "", "email")
 	loginCmd.Flags().StringVarP(&password, "password", "", "", "password")
 	loginCmd.Flags().BoolVarP(&passwordStdin, "password-stdin", "", false, "Reads the password from stdin")
+
+	err := loginCmd.MarkFlagRequired("email")
+	if err != nil {
+		return
+	}
+
+	loginCmd.MarkFlagsOneRequired("password", "password-stdin")
+	loginCmd.MarkFlagsMutuallyExclusive("password", "password-stdin")
 }
 
 func runLogin(cmd *cobra.Command, args []string) error {

@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/omnistrate/ctl/cmd"
-	"github.com/omnistrate/ctl/cmd/get/service"
+	deleteservice "github.com/omnistrate/ctl/cmd/delete/service"
+	getservice "github.com/omnistrate/ctl/cmd/get/service"
 	"github.com/omnistrate/ctl/test/testutils"
 	"testing"
 
@@ -12,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_get_service_basic(t *testing.T) {
+func Test_service_basic(t *testing.T) {
 	utils.SmokeTest(t)
 
 	require := require.New(t)
@@ -27,21 +28,24 @@ func Test_get_service_basic(t *testing.T) {
 	require.NoError(err)
 
 	serviceName := "postgresql" + uuid.NewString()
+
+	// Build service
 	cmd.RootCmd.SetArgs([]string{"build", "-f", "composefiles/postgresql.yaml", "--name", serviceName, "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	serviceID := cmd.ServiceID
-
-	service.ServiceCmd.SetArgs([]string{"service"})
-	err = service.ServiceCmd.Execute()
+	// Get service
+	getservice.ServiceCmd.SetArgs([]string{"service"})
+	err = getservice.ServiceCmd.Execute()
 	require.NoError(err)
 
-	service.ServiceCmd.SetArgs([]string{"service", serviceName})
-	err = service.ServiceCmd.Execute()
+	// Get service by name
+	getservice.ServiceCmd.SetArgs([]string{"service", serviceName})
+	err = getservice.ServiceCmd.Execute()
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", serviceID})
-	err = cmd.RootCmd.Execute()
+	// Delete service
+	deleteservice.ServiceCmd.SetArgs([]string{"service", serviceName})
+	err = deleteservice.ServiceCmd.Execute()
 	require.NoError(err)
 }

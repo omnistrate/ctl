@@ -1,10 +1,9 @@
 package service
 
 import (
-	"context"
 	"fmt"
-	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
+	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 	"os"
@@ -15,10 +14,10 @@ import (
 var (
 	serviceExample = `
 		# List all services
-		kubectl get services
+		omnistrate-ctl get services
 
-		# List the service with the name 'my-service'
-		kubectl get service my-service`
+		# List the service with the name
+		omnistrate-ctl get service <name>`
 )
 
 // ServiceCmd represents the describe command
@@ -40,21 +39,25 @@ func Run(cmd *cobra.Command, args []string) error {
 	}
 
 	// List services
-	listRes, err := listServices(token)
+	listRes, err := dataaccess.ListServices(token)
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
+	allServices := listRes.Services
 
 	// Print services table if no service name is provided
 	if len(args) == 0 {
-		printTable(listRes.Services)
+		utils.PrintSuccess(fmt.Sprintf("%d services found", len(allServices)))
+		if len(allServices) > 0 {
+			printTable(allServices)
+		}
 		return nil
 	}
 
-	// Format listRes.Services into a map
+	// Format allServices into a map
 	serviceMap := make(map[string]*serviceapi.DescribeServiceResult)
-	for _, service := range listRes.Services {
+	for _, service := range allServices {
 		serviceMap[service.Name] = service
 	}
 
@@ -75,37 +78,19 @@ func Run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func listServices(token string) (*serviceapi.ListServiceResult, error) {
-	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())
-	if err != nil {
-		return nil, err
-	}
-
-	request := serviceapi.List{
-		Token: token,
-	}
-
-	res, err := service.ListService(context.Background(), &request)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
 func printTable(services []*serviceapi.DescribeServiceResult) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 
-	fmt.Fprintln(w, "Service ID\tName\tCreated At\tEnvironments")
+	fmt.Fprintln(w, "ID\tName\tEnvironments")
 
 	for _, service := range services {
 		envNames := []string{}
 		for _, env := range service.ServiceEnvironments {
 			envNames = append(envNames, env.Name)
 		}
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
+		fmt.Fprintf(w, "%s\t%s\t%s\n",
 			service.ID,
 			service.Name,
-			service.CreatedAt,
 			strings.Join(envNames, ","))
 	}
 

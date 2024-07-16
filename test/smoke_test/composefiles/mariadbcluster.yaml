@@ -9,7 +9,7 @@ x-omnistrate-service-plan:
       AwsBootstrapRoleAccountArn: 'arn:aws:iam::339713121445:role/omnistrate-bootstrap-role'
       GcpProjectId: 'omnistrate-dataplane-host-dev'
       GcpProjectNumber: '61114262792'
-      GcpServiceAccountEmail: 'bootstrap.service@gcp.test.iam'
+      GcpServiceAccountEmail: 'bootstrap.getservice@gcp.test.iam'
 x-omnistrate-integrations:
   - omnistrateLogging
   - omnistrateMetrics

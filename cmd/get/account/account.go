@@ -1,10 +1,9 @@
 package account
 
 import (
-	"context"
 	"fmt"
-	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	accountconfigapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/account_config_api"
+	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 	"os"
@@ -14,10 +13,10 @@ import (
 var (
 	accountExample = `
 		# List all accounts
-		kubectl get accounts
+		omnistrate-ctl get accounts
 
-		# List the account with the name 'my-account'
-		kubectl get account my-account`
+		# List the account with the name
+		omnistrate-ctl get account <name>`
 )
 
 // AccountCmd represents the describe command
@@ -38,8 +37,8 @@ func Run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// List aws accounts
-	listRes, err := listAccounts(token, "all")
+	// List all accounts
+	listRes, err := dataaccess.ListAccounts(token, "all")
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -48,7 +47,7 @@ func Run(cmd *cobra.Command, args []string) error {
 
 	// Print accounts table if no account name is provided
 	if len(args) == 0 {
-		utils.PrintSuccess(fmt.Sprintf("Found %d accounts", len(allAccounts)))
+		utils.PrintSuccess(fmt.Sprintf("%d accounts found", len(allAccounts)))
 		if len(allAccounts) > 0 {
 			printTable(allAccounts)
 		}
@@ -78,45 +77,27 @@ func Run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func listAccounts(token string, cloudProvider string) (*accountconfigapi.ListAccountConfigResult, error) {
-	account, err := httpclientwrapper.NewAccountConfig(utils.GetHostScheme(), utils.GetHost())
-	if err != nil {
-		return nil, err
-	}
-
-	request := accountconfigapi.ListAccountConfigRequest{
-		Token:             token,
-		CloudProviderName: accountconfigapi.CloudProvider(cloudProvider),
-	}
-
-	res, err := account.ListAccountConfig(context.Background(), &request)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
 func printTable(accounts []*accountconfigapi.DescribeAccountConfigResult) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 
-	fmt.Fprintln(w, "ID\tName\tCloud Provider\tAccount ID\tStatus")
+	fmt.Fprintln(w, "ID\tName\tStatus\tCloud Provider\tTarget Account ID")
 
 	for _, account := range accounts {
-		var accountID, cloudProvider string
+		var targetAccountID, cloudProvider string
 		if account.AwsAccountID != nil {
-			accountID = *account.AwsAccountID
+			targetAccountID = *account.AwsAccountID
 			cloudProvider = "AWS"
 		} else {
-			accountID = fmt.Sprintf("%s(ProjectID: %s)", *account.GcpProjectID, *account.GcpProjectNumber)
+			targetAccountID = fmt.Sprintf("%s(ProjectID: %s)", *account.GcpProjectID, *account.GcpProjectNumber)
 			cloudProvider = "GCP"
 		}
 
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
 			account.ID,
 			account.Name,
+			account.Status,
 			cloudProvider,
-			accountID,
-			account.Status)
+			targetAccountID)
 	}
 
 	w.Flush()

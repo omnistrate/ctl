@@ -102,7 +102,7 @@ This command will create a new service named "Your Service Name" using the docke
 If the service is built successfully, you will see a message like this:
 ```bash
 Service built successfully
-Check the service plan result at https://omnistrate.cloud/product-tier/build?serviceId=s-lfuFlBuRlD&productTierId=pt-TcSiyeoXEA
+Check the getservice plan result at https://omnistrate.cloud/product-tier/build?serviceId=s-lfuFlBuRlD&productTierId=pt-TcSiyeoXEA
 Consume it at https://omnistrate.cloud/access?serviceId=s-lfuFlBuRlD&environmentId=se-hC4Z5oHUVd
 ```
 
@@ -125,7 +125,7 @@ This command will display a list of all your services, along with their status a
 To get more detailed information about a specific service, use the `describe` command:
 
 ```bash
-omnistrate-ctl describe --service-id <service-id>
+omnistrate-ctl describe --getservice-id <getservice-id>
 ```
 
 Replace `<service-id>` with the ID of the service you want to describe. This command will display detailed information about the specified service.
@@ -135,7 +135,7 @@ Replace `<service-id>` with the ID of the service you want to describe. This com
 To remove a service from the Omnistrate platform, use the `remove` command:
 
 ```bash
-omnistrate-ctl remove --service-id <service-id>
+omnistrate-ctl remove --getservice-id <getservice-id>
 ```
 
 Replace `<service-id>` with the ID of the service you want to remove. This command will remove the specified service from the platform.

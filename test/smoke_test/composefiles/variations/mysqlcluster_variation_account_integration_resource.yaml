@@ -7,7 +7,7 @@ x-omnistrate-service-plan:
     hostedDeployment:
       GcpProjectId: 'omnistrate-dataplane-host-dev'
       GcpProjectNumber: '61114262792'
-      GcpServiceAccountEmail: 'bootstrap.service@gcp.test.iam'
+      GcpServiceAccountEmail: 'bootstrap.getservice@gcp.test.iam'
 x-omnistrate-integrations:
   - omnistrateMetrics:
       additionalMetrics:

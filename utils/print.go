@@ -9,7 +9,7 @@ import (
 
 func PrintError(err error) {
 	errorMsg := color.New(color.FgRed, color.Bold).SprintFunc()
-	fmt.Println(errorMsg("Error: "), err)
+	fmt.Println(errorMsg("Error: "), err.Error())
 	if !utils.IsDryRun() {
 		os.Exit(1)
 	}

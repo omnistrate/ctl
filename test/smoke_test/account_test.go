@@ -3,7 +3,7 @@ package smoke
 import (
 	"fmt"
 	"github.com/omnistrate/ctl/cmd"
-	"github.com/omnistrate/ctl/cmd/get/account"
+	getaccount "github.com/omnistrate/ctl/cmd/get/account"
 	"github.com/omnistrate/ctl/test/testutils"
 	"testing"
 
@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_get_account_basic(t *testing.T) {
+func Test_account_basic(t *testing.T) {
 	utils.SmokeTest(t)
 
 	require := require.New(t)
@@ -25,12 +25,14 @@ func Test_get_account_basic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	account.AccountCmd.SetArgs([]string{"account"})
-	err = account.AccountCmd.Execute()
+	// PASS: get accounts
+	getaccount.AccountCmd.SetArgs([]string{"account"})
+	err = getaccount.AccountCmd.Execute()
 	require.NoError(err)
 
+	// PASS: get account with name
 	accountName := "BYOA Account"
-	account.AccountCmd.SetArgs([]string{"account", accountName})
-	err = account.AccountCmd.Execute()
+	getaccount.AccountCmd.SetArgs([]string{"account", accountName})
+	err = getaccount.AccountCmd.Execute()
 	require.NoError(err)
 }

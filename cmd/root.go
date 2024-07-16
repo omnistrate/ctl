@@ -2,6 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/create"
+	"github.com/omnistrate/ctl/cmd/delete"
+	"github.com/omnistrate/ctl/cmd/describe"
 	"github.com/omnistrate/ctl/cmd/get"
 	"os"
 
@@ -69,4 +72,7 @@ func init() {
 	RootCmd.PersistentFlags().BoolP("version", "v", false, "Print the version number of omnistrate-ctl")
 
 	RootCmd.AddCommand(get.GetCmd)
+	RootCmd.AddCommand(describe.DescribeCmd)
+	RootCmd.AddCommand(create.CreateCmd)
+	RootCmd.AddCommand(delete.DeleteCmd)
 }
