@@ -1,4 +1,4 @@
-package cmd
+package deprecated
 
 import (
 	"context"
@@ -15,18 +15,14 @@ import (
 	"time"
 )
 
-// listCmd represents the list command
-var listCmd = &cobra.Command{
+// ListCmd represents the list command
+var ListCmd = &cobra.Command{
 	Use:          "list",
 	Short:        "List all available services (deprecated)",
 	Long:         `The list command retrieves and displays a list of all available services that have been created.`,
 	Example:      `  omnistrate-ctl list`,
 	RunE:         runList,
 	SilenceUsage: true,
-}
-
-func init() {
-	RootCmd.AddCommand(listCmd)
 }
 
 func runList(cmd *cobra.Command, args []string) error {

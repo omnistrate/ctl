@@ -1,4 +1,4 @@
-package cmd
+package deprecated
 
 import (
 	"fmt"
@@ -13,8 +13,8 @@ var (
 	removeServiceID string
 )
 
-// removeCmd represents the remove command
-var removeCmd = &cobra.Command{
+// RemoveCmd represents the remove command
+var RemoveCmd = &cobra.Command{
 	Use:          "remove [--service-id SERVICE_ID]",
 	Short:        "Remove a service from the Omnistrate platform (deprecated)",
 	Long:         `The remove command is used to remove a service from the Omnistrate platform by providing the service ID.`,
@@ -24,9 +24,7 @@ var removeCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(removeCmd)
-
-	removeCmd.Flags().StringVarP(&removeServiceID, "service-id", "", "", "service id")
+	RemoveCmd.Flags().StringVarP(&removeServiceID, "service-id", "", "", "service id")
 }
 
 func runRemove(cmd *cobra.Command, args []string) error {

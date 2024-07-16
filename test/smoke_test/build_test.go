@@ -3,6 +3,7 @@ package smoke
 import (
 	"fmt"
 	"github.com/omnistrate/ctl/cmd"
+	"github.com/omnistrate/ctl/cmd/build"
 	"github.com/omnistrate/ctl/test/testutils"
 	"os"
 	"testing"
@@ -45,7 +46,7 @@ func Test_build_basic(t *testing.T) {
 		err = cmd.RootCmd.Execute()
 		require.NoError(err, f.Name())
 
-		cmd.RootCmd.SetArgs([]string{"remove", "--service-id", cmd.ServiceID})
+		cmd.RootCmd.SetArgs([]string{"remove", "--service-id", build.ServiceID})
 		err = cmd.RootCmd.Execute()
 		require.NoError(err, f.Name())
 	}
@@ -96,7 +97,7 @@ func Test_build_update_service(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", cmd.ServiceID})
+	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", build.ServiceID})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
@@ -125,7 +126,7 @@ func Test_build_update_service(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", cmd.ServiceID})
+	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", build.ServiceID})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 }
@@ -152,8 +153,8 @@ func Test_build_duplicate_service_plan_name(t *testing.T) {
 	cmd.RootCmd.SetArgs([]string{"build", "-f", "composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png", "--release"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
-	devEnvironmentID := cmd.EnvironmentID
-	devProductTierID := cmd.ProductTierID
+	devEnvironmentID := build.EnvironmentID
+	devProductTierID := build.ProductTierID
 	require.NotEmpty(devEnvironmentID)
 	require.NotEmpty(devProductTierID)
 
@@ -161,8 +162,8 @@ func Test_build_duplicate_service_plan_name(t *testing.T) {
 	cmd.RootCmd.SetArgs([]string{"build", "-f", "composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--environment", "prod", "--environment-type", "prod", "--release"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
-	prodEnvironmentID := cmd.EnvironmentID
-	prodProductTierID := cmd.ProductTierID
+	prodEnvironmentID := build.EnvironmentID
+	prodProductTierID := build.ProductTierID
 	require.NotEmpty(prodEnvironmentID)
 	require.NotEmpty(prodEnvironmentID)
 	require.NotEqual(devEnvironmentID, prodEnvironmentID)
@@ -172,17 +173,17 @@ func Test_build_duplicate_service_plan_name(t *testing.T) {
 	cmd.RootCmd.SetArgs([]string{"build", "-f", "composefiles/variations/mysqlcluster_variation_apiparam_image_infra_capability.yaml", "--name", serviceName, "--release-as-preferred"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
-	require.Equal(devEnvironmentID, cmd.EnvironmentID)
-	require.Equal(devProductTierID, cmd.ProductTierID)
+	require.Equal(devEnvironmentID, build.EnvironmentID)
+	require.Equal(devProductTierID, build.ProductTierID)
 
 	// PASS: update prod mysql cluster service
 	cmd.RootCmd.SetArgs([]string{"build", "-f", "composefiles/variations/mysqlcluster_variation_apiparam_image_infra_capability.yaml", "--name", serviceName, "--environment", "prod", "--environment-type", "prod", "--release-as-preferred"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
-	require.Equal(prodEnvironmentID, cmd.EnvironmentID)
-	require.Equal(prodProductTierID, cmd.ProductTierID)
+	require.Equal(prodEnvironmentID, build.EnvironmentID)
+	require.Equal(prodProductTierID, build.ProductTierID)
 
-	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", cmd.ServiceID})
+	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", build.ServiceID})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 }
@@ -265,7 +266,7 @@ func Test_build_create_no_description(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", cmd.ServiceID})
+	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", build.ServiceID})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 }
@@ -288,7 +289,7 @@ func Test_build_create_no_service_logo_url(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", cmd.ServiceID})
+	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", build.ServiceID})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 }

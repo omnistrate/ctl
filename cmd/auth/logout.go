@@ -1,4 +1,4 @@
-package cmd
+package auth
 
 import (
 	"github.com/omnistrate/ctl/utils"
@@ -7,18 +7,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// logoutCmd represents the logout command
-var logoutCmd = &cobra.Command{
+// LogoutCmd represents the logout command
+var LogoutCmd = &cobra.Command{
 	Use:          "logout",
 	Short:        "Logout.",
 	Long:         `The logout command is used to log out from the Omnistrate platform.`,
 	Example:      `  omnistrate-ctl logout`,
 	RunE:         runLogout,
 	SilenceUsage: true,
-}
-
-func init() {
-	RootCmd.AddCommand(logoutCmd)
 }
 
 func runLogout(cmd *cobra.Command, args []string) error {

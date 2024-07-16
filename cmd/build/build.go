@@ -1,4 +1,4 @@
-package cmd
+package build
 
 import (
 	"context"
@@ -34,8 +34,8 @@ var (
 	releaseAsPreferred bool
 )
 
-// buildCmd represents the build command
-var buildCmd = &cobra.Command{
+// BuildCmd represents the build command
+var BuildCmd = &cobra.Command{
 	Use:     "build [--file FILE] [--name NAME] [--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] [--environment ENVIRONMENT] [--environment ENVIRONMENT_TYPE] [--release] [--release-as-preferred]",
 	Short:   "Build SaaS from docker compose.",
 	Long:    `Builds a new service using a Docker Compose file. The --name flag is required to specify the service name. Optionally, you can provide a description and a URL for the service's logo. Use the --environment and --environment-type flag to specify the target environment. Use --release or --release-as-preferred to release the service after building.`,
@@ -48,22 +48,20 @@ var buildCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(buildCmd)
+	BuildCmd.Flags().StringVarP(&file, "file", "f", "", "Path to the docker compose file")
+	BuildCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the service")
+	BuildCmd.Flags().StringVarP(&description, "description", "", "", "Description of the service")
+	BuildCmd.Flags().StringVarP(&serviceLogoURL, "service-logo-url", "", "", "URL to the service logo")
+	BuildCmd.Flags().StringVarP(&environment, "environment", "", "Dev", "Environment to build the service in")
+	BuildCmd.Flags().StringVarP(&environmentType, "environment-type", "", "dev", "Type of environment. Valid options include: 'prod', 'canary', 'staging', 'qa', 'dev'")
+	BuildCmd.Flags().BoolVarP(&release, "release", "", false, "Release the service after building it")
+	BuildCmd.Flags().BoolVarP(&releaseAsPreferred, "release-as-preferred", "", false, "Release the service as preferred after building it")
 
-	buildCmd.Flags().StringVarP(&file, "file", "f", "", "Path to the docker compose file")
-	buildCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the service")
-	buildCmd.Flags().StringVarP(&description, "description", "", "", "Description of the service")
-	buildCmd.Flags().StringVarP(&serviceLogoURL, "service-logo-url", "", "", "URL to the service logo")
-	buildCmd.Flags().StringVarP(&environment, "environment", "", "Dev", "Environment to build the service in")
-	buildCmd.Flags().StringVarP(&environmentType, "environment-type", "", "dev", "Type of environment. Valid options include: 'prod', 'canary', 'staging', 'qa', 'dev'")
-	buildCmd.Flags().BoolVarP(&release, "release", "", false, "Release the service after building it")
-	buildCmd.Flags().BoolVarP(&releaseAsPreferred, "release-as-preferred", "", false, "Release the service as preferred after building it")
-
-	err := buildCmd.MarkFlagRequired("file")
+	err := BuildCmd.MarkFlagRequired("file")
 	if err != nil {
 		return
 	}
-	err = buildCmd.MarkFlagRequired("name")
+	err = BuildCmd.MarkFlagRequired("name")
 	if err != nil {
 		return
 	}

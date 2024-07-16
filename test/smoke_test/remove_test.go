@@ -3,6 +3,7 @@ package smoke
 import (
 	"fmt"
 	"github.com/omnistrate/ctl/cmd"
+	"github.com/omnistrate/ctl/cmd/build"
 	"github.com/omnistrate/ctl/test/testutils"
 	"testing"
 
@@ -30,7 +31,7 @@ func Test_remove_basic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", cmd.ServiceID})
+	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", build.ServiceID})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 }

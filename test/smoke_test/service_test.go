@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/omnistrate/ctl/cmd"
+	"github.com/omnistrate/ctl/cmd/build"
 	deleteservice "github.com/omnistrate/ctl/cmd/deletec/service"
 	describeservice "github.com/omnistrate/ctl/cmd/describe/service"
 	getservice "github.com/omnistrate/ctl/cmd/get/service"
@@ -35,12 +36,12 @@ func Test_service_basic(t *testing.T) {
 	cmd.RootCmd.SetArgs([]string{"build", "-f", "composefiles/postgresql.yaml", "--name", serviceName1, "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
-	serviceID1 := cmd.ServiceID
+	serviceID1 := build.ServiceID
 
 	cmd.RootCmd.SetArgs([]string{"build", "-f", "composefiles/postgresql.yaml", "--name", serviceName2, "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
-	serviceID2 := cmd.ServiceID
+	serviceID2 := build.ServiceID
 
 	// Get services
 	getservice.ServiceCmd.SetArgs([]string{"service"})

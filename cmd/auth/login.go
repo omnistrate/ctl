@@ -1,4 +1,4 @@
-package cmd
+package auth
 
 import (
 	"context"
@@ -23,8 +23,8 @@ var (
 	passwordStdin bool
 )
 
-// loginCmd represents the login command
-var loginCmd = &cobra.Command{
+// LoginCmd represents the login command
+var LoginCmd = &cobra.Command{
 	Use:   `login [--email EMAIL] [--password PASSWORD]`,
 	Short: "Log in to the Omnistrate platform.",
 	Long:  `The login command is used to authenticate and log in to the Omnistrate platform.`,
@@ -35,19 +35,17 @@ var loginCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(loginCmd)
+	LoginCmd.Flags().StringVarP(&email, "email", "", "", "email")
+	LoginCmd.Flags().StringVarP(&password, "password", "", "", "password")
+	LoginCmd.Flags().BoolVarP(&passwordStdin, "password-stdin", "", false, "Reads the password from stdin")
 
-	loginCmd.Flags().StringVarP(&email, "email", "", "", "email")
-	loginCmd.Flags().StringVarP(&password, "password", "", "", "password")
-	loginCmd.Flags().BoolVarP(&passwordStdin, "password-stdin", "", false, "Reads the password from stdin")
-
-	err := loginCmd.MarkFlagRequired("email")
+	err := LoginCmd.MarkFlagRequired("email")
 	if err != nil {
 		return
 	}
 
-	loginCmd.MarkFlagsOneRequired("password", "password-stdin")
-	loginCmd.MarkFlagsMutuallyExclusive("password", "password-stdin")
+	LoginCmd.MarkFlagsOneRequired("password", "password-stdin")
+	LoginCmd.MarkFlagsMutuallyExclusive("password", "password-stdin")
 }
 
 func runLogin(cmd *cobra.Command, args []string) error {
