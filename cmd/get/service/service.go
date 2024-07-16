@@ -12,19 +12,19 @@ import (
 )
 
 var (
-	serviceExample = `  # List all services
+	serviceExample = `  # Get all services
   omnistrate-ctl get service
 
-  # List service with name
+  # Get service with name
   omnistrate-ctl get service <name>
 
-  # List multiple services with names
+  # Get multiple services with names
   omnistrate-ctl get service <name1> <name2> <name3>
 
-  # List service with ID
+  # Get service with ID
   omnistrate-ctl get service <id> --id
 
-  # List multiple services with IDs
+  # Get multiple services with IDs
   omnistrate-ctl get service <id1> <id2> <id3> --id`
 )
 

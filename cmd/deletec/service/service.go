@@ -14,7 +14,7 @@ var (
 	serviceExample = `  # Delete service with name
   omnistrate-ctl delete service <name>
 
-  # Delete the service with ID
+  # Delete service with ID
   omnistrate-ctl delete service <ID> --id
 
   # Delete multiple services with names
