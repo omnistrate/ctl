@@ -39,7 +39,7 @@ func init() {
 
 func describeExample() (example string) {
 	for _, cmd := range DescribeCmd.Commands() {
-		example += cmd.Example + "\n"
+		example += cmd.Example + "\n\n"
 	}
 	return
 }

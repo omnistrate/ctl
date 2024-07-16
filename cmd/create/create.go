@@ -27,7 +27,7 @@ func init() {
 
 func createExample() (example string) {
 	for _, cmd := range CreateCmd.Commands() {
-		example += cmd.Example + "\n"
+		example += cmd.Example + "\n\n"
 	}
 	return
 }

@@ -29,7 +29,7 @@ func init() {
 
 func deleteExample() (example string) {
 	for _, cmd := range DeleteCmd.Commands() {
-		example += cmd.Example + "\n"
+		example += cmd.Example + "\n\n"
 	}
 	return
 }
