@@ -16,6 +16,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	CommitID  string
+	Version   string
+	Timestamp string
+)
+
 const versionDescription = "Omnistrate CTL %s"
 
 // RootCmd represents the base command when called without any subcommands
