@@ -9,12 +9,11 @@ import (
 )
 
 var (
-	accountExample = `
-		# Create aws account
-		create account <name> --aws-account-id <aws-account-id> --aws-bootstrap-role-arn <aws-bootstrap-role-arn>
+	accountExample = `  # Create aws account
+  create account <name> --aws-account-id <aws-account-id> --aws-bootstrap-role-arn <aws-bootstrap-role-arn>
 
-		# Create gcp account
-		omnistrate-ctl create account <name> --gcp-project-id <gcp-project-id> --gcp-project-number <gcp-project-number> --gcp-service-account-email <gcp-service-account-email>`
+  # Create gcp account
+  omnistrate-ctl create account <name> --gcp-project-id <gcp-project-id> --gcp-project-number <gcp-project-number> --gcp-service-account-email <gcp-service-account-email>`
 )
 
 var (

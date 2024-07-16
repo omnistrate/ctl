@@ -12,12 +12,11 @@ import (
 )
 
 var (
-	serviceExample = `
-		# List all services
-		omnistrate-ctl get services
+	serviceExample = `  # List all services
+  omnistrate-ctl get services
 
-		# List the service with the name
-		omnistrate-ctl get service <name>`
+  # List the service with the name
+  omnistrate-ctl get service <name>`
 )
 
 // ServiceCmd represents the describe command

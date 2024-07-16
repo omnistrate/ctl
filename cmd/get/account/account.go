@@ -11,12 +11,11 @@ import (
 )
 
 var (
-	accountExample = `
-		# List all accounts
-		omnistrate-ctl get accounts
+	accountExample = `  # List all accounts
+  omnistrate-ctl get accounts
 
-		# List the account with the name
-		omnistrate-ctl get account <name>`
+  # List the account with the name
+  omnistrate-ctl get account <name>`
 )
 
 // AccountCmd represents the describe command

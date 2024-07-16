@@ -12,7 +12,7 @@ var (
 
 var DeleteCmd = &cobra.Command{
 	Use:          "delete [object] [name] [flags]",
-	Short:        "",
+	Short:        "Delete objects by specifying the object type and name.",
 	Long:         deleteLong,
 	Run:          run,
 	SilenceUsage: true,

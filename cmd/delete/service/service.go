@@ -9,9 +9,8 @@ import (
 )
 
 var (
-	serviceExample = `
-		# Delete the service with name
-		omnistrate-ctl delete service <name>`
+	serviceExample = `  # Delete the service with name
+  omnistrate-ctl delete service <name>`
 )
 
 // ServiceCmd represents the delete command
@@ -22,6 +21,10 @@ var ServiceCmd = &cobra.Command{
 	Example:      serviceExample,
 	RunE:         run,
 	SilenceUsage: true,
+}
+
+func init() {
+	ServiceCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 }
 
 func run(cmd *cobra.Command, args []string) error {

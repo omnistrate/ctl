@@ -8,9 +8,8 @@ import (
 )
 
 var (
-	accountExample = `
-		# Delete the account with name
-		omnistrate-ctl delete account <name>`
+	accountExample = `  # Delete the account with name
+  omnistrate-ctl delete account <name>`
 )
 
 // AccountCmd represents the delete command
@@ -21,6 +20,10 @@ var AccountCmd = &cobra.Command{
 	Example:      accountExample,
 	RunE:         run,
 	SilenceUsage: true,
+}
+
+func init() {
+	AccountCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 }
 
 func run(cmd *cobra.Command, args []string) error {

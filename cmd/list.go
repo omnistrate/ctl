@@ -18,7 +18,7 @@ import (
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:          "list",
-	Short:        "List all available services",
+	Short:        "List all available services (deprecated)",
 	Long:         `The list command retrieves and displays a list of all available services that have been created.`,
 	Example:      `  omnistrate-ctl list`,
 	RunE:         runList,

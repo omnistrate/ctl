@@ -13,7 +13,7 @@ var (
 
 var DescribeCmd = &cobra.Command{
 	Use:          "describe [object] [name] [flags]",
-	Short:        "Display one or many objects",
+	Short:        "Describe detailed information about an object and output results as JSON to stdout.",
 	Long:         describeLong,
 	Run:          run,
 	SilenceUsage: true,
