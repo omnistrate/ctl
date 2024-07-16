@@ -111,7 +111,7 @@ func run(cmd *cobra.Command, args []string) error {
 		utils.PrintError(err)
 		return err
 	}
-	utils.PrintSuccess("Account created successfully")
+	utils.PrintSuccess("Account(s) created successfully")
 
 	return nil
 }

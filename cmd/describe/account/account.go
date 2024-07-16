@@ -8,18 +8,22 @@ import (
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"slices"
 )
 
 var (
-	accountExample = `  # Describe the account with the name
-  omnistrate-ctl describe account <name>`
+	accountExample = `  # Describe the account with name
+  omnistrate-ctl describe account <name>
+
+  # Describe the account with ID
+  omnistrate-ctl describe account <id> --id`
 )
 
 // AccountCmd represents the describe command
 var AccountCmd = &cobra.Command{
 	Use:     "account <name>",
-	Short:   "Describe account",
-	Long:    `The describe account command displays detailed information about the account.`,
+	Short:   "Display details for one or more accounts",
+	Long:    "Display detailed information about the account by specifying the account name or ID.",
 	Example: accountExample,
 	RunE:    Run,
 	PostRun: func(cmd *cobra.Command, args []string) {
@@ -29,47 +33,68 @@ var AccountCmd = &cobra.Command{
 }
 
 func init() {
-	AccountCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
+	AccountCmd.Args = cobra.MinimumNArgs(1) // Require at least one argument
+
+	AccountCmd.Flags().Bool("id", false, "Specify account ID instead of name")
 }
 
 func Run(cmd *cobra.Command, args []string) error {
-	// Validate user is currently logged in
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	// List all accounts
-	listRes, err := dataaccess.ListAccounts(token, "all")
+	var ID bool
+	ID, err = cmd.Flags().GetBool("id")
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	// Filter accounts by name
-	var account *accountconfigapi.DescribeAccountConfigResult
-	var found bool
-	for _, a := range listRes.AccountConfigs {
-		if a.Name == args[0] {
-			account = a
-			found = true
-			break
+	var accounts []*accountconfigapi.DescribeAccountConfigResult
+	for _, name := range args {
+		if ID {
+			account, err := dataaccess.DescribeAccount(name, token)
+			if err != nil {
+				utils.PrintError(err)
+				return err
+			}
+			accounts = append(accounts, account)
+		} else {
+			// List all accounts
+			listRes, err := dataaccess.ListAccounts(token, "all")
+			if err != nil {
+				utils.PrintError(err)
+				return err
+			}
+
+			// Filter accounts by name
+			var found bool
+			for _, a := range listRes.AccountConfigs {
+				if slices.Contains(args, a.Name) {
+					accounts = append(accounts, a)
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				utils.PrintError(errors.New("account not found: " + name))
+				return nil
+			}
 		}
 	}
 
-	if !found {
-		utils.PrintError(errors.New("account not found"))
-		return nil
-	}
-
 	// Print account details
-	data, err := json.MarshalIndent(account, "", "    ")
-	if err != nil {
-		utils.PrintError(err)
-		return err
+	for _, account := range accounts {
+		data, err := json.MarshalIndent(account, "", "    ")
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+		fmt.Println(string(data))
 	}
-	fmt.Println(string(data))
 
 	return nil
 }

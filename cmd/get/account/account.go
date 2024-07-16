@@ -12,10 +12,16 @@ import (
 
 var (
 	accountExample = `  # List all accounts
-  omnistrate-ctl get accounts
+  omnistrate-ctl get account
 
-  # List the account with the name
-  omnistrate-ctl get account <name>`
+  # List account with name
+  omnistrate-ctl get account <name>
+
+  # List multiple accounts
+  omnistrate-ctl get account <name1> <name2> <name3>
+
+  # List account with ID
+  omnistrate-ctl get account <id> --id`
 )
 
 // AccountCmd represents the describe command
@@ -31,49 +37,71 @@ var AccountCmd = &cobra.Command{
 	SilenceUsage: true,
 }
 
+func init() {
+	AccountCmd.Flags().Bool("id", false, "Specify account ID instead of name")
+}
+
 func Run(cmd *cobra.Command, args []string) error {
-	// Validate user is currently logged in
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	// List all accounts
-	listRes, err := dataaccess.ListAccounts(token, "all")
+	var ID bool
+	ID, err = cmd.Flags().GetBool("id")
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
-	allAccounts := listRes.AccountConfigs
 
-	// Print accounts table if no account name is provided
-	if len(args) == 0 {
-		utils.PrintSuccess(fmt.Sprintf("%d accounts found", len(allAccounts)))
-		if len(allAccounts) > 0 {
-			printTable(allAccounts)
-		}
-		return nil
-	}
-
-	// Format listRes.Accounts into a map
-	accountMap := make(map[string]*accountconfigapi.DescribeAccountConfigResult)
-	for _, account := range allAccounts {
-		accountMap[account.Name] = account
-	}
-
-	// Filter accounts by name
 	var accounts []*accountconfigapi.DescribeAccountConfigResult
-	for _, name := range args {
-		account, ok := accountMap[name]
-		if !ok {
-			utils.PrintError(fmt.Errorf("account '%s' not found", name))
-			continue
+	if ID {
+		for _, id := range args {
+			var account *accountconfigapi.DescribeAccountConfigResult
+			account, err = dataaccess.DescribeAccount(id, token)
+			if err != nil {
+				utils.PrintError(err)
+				return err
+			}
+			accounts = append(accounts, account)
 		}
-		accounts = append(accounts, account)
+	} else {
+		// List all accounts
+		var listRes *accountconfigapi.ListAccountConfigResult
+		listRes, err = dataaccess.ListAccounts(token, "all")
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+		allAccounts := listRes.AccountConfigs
+
+		// Print accounts table if no account name is provided
+		if len(args) == 0 {
+			utils.PrintSuccess(fmt.Sprintf("%d accounts found", len(allAccounts)))
+			if len(allAccounts) > 0 {
+				printTable(allAccounts)
+			}
+			return nil
+		}
+
+		// Format listRes.Accounts into a map
+		accountMap := make(map[string]*accountconfigapi.DescribeAccountConfigResult)
+		for _, account := range allAccounts {
+			accountMap[account.Name] = account
+		}
+
+		// Filter accounts by name
+		for _, name := range args {
+			account, ok := accountMap[name]
+			if !ok {
+				utils.PrintError(fmt.Errorf("account '%s' not found", name))
+				continue
+			}
+			accounts = append(accounts, account)
+		}
 	}
 
-	// Print accounts table if no account name is provided
 	printTable(accounts)
 
 	return nil

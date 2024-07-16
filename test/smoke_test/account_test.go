@@ -47,33 +47,18 @@ func Test_account_basic(t *testing.T) {
 	err = getaccount.AccountCmd.Execute()
 	require.NoError(err)
 
-	// PASS: get aws account
-	getaccount.AccountCmd.SetArgs([]string{"account", awsAccountName})
+	// PASS: get accounts by name
+	getaccount.AccountCmd.SetArgs([]string{"account", awsAccountName, gcpAccountName})
 	err = getaccount.AccountCmd.Execute()
 	require.NoError(err)
 
-	// PASS: get gcp account
-	getaccount.AccountCmd.SetArgs([]string{"account", gcpAccountName})
-	err = getaccount.AccountCmd.Execute()
-	require.NoError(err)
-
-	// PASS: describe aws account
-	describeaccount.AccountCmd.SetArgs([]string{"account", awsAccountName})
+	// PASS: describe accounts
+	describeaccount.AccountCmd.SetArgs([]string{"account", awsAccountName, gcpAccountName})
 	err = describeaccount.AccountCmd.Execute()
 	require.NoError(err)
 
-	// PASS: describe gcp account
-	describeaccount.AccountCmd.SetArgs([]string{"account", gcpAccountName})
-	err = describeaccount.AccountCmd.Execute()
-	require.NoError(err)
-
-	// PASS: delete aws account
-	deleteaccount.AccountCmd.SetArgs([]string{"account", awsAccountName})
-	err = deleteaccount.AccountCmd.Execute()
-	require.NoError(err)
-
-	// PASS: delete gcp account
-	deleteaccount.AccountCmd.SetArgs([]string{"account", gcpAccountName})
+	// PASS: delete accounts
+	deleteaccount.AccountCmd.SetArgs([]string{"account", awsAccountName, gcpAccountName})
 	err = deleteaccount.AccountCmd.Execute()
 	require.NoError(err)
 }

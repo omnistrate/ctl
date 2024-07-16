@@ -8,6 +8,24 @@ import (
 	"github.com/omnistrate/ctl/utils"
 )
 
+func DescribeAccount(token string, ID string) (*accountconfigapi.DescribeAccountConfigResult, error) {
+	account, err := httpclientwrapper.NewAccountConfig(utils.GetHostScheme(), utils.GetHost())
+	if err != nil {
+		return nil, err
+	}
+
+	request := accountconfigapi.DescribeAccountConfigRequest{
+		Token: token,
+		ID:    accountconfigapi.AccountConfigID(ID),
+	}
+
+	res, err := account.DescribeAccountConfig(context.Background(), &request)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 func ListAccounts(token string, cloudProvider string) (*accountconfigapi.ListAccountConfigResult, error) {
 	account, err := httpclientwrapper.NewAccountConfig(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {

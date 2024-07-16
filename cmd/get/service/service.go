@@ -13,10 +13,19 @@ import (
 
 var (
 	serviceExample = `  # List all services
-  omnistrate-ctl get services
+  omnistrate-ctl get service
 
-  # List the service with the name
-  omnistrate-ctl get service <name>`
+  # List service with name
+  omnistrate-ctl get service <name>
+
+  # List multiple services with names
+  omnistrate-ctl get service <name1> <name2> <name3>
+
+  # List service with ID
+  omnistrate-ctl get service <id> --id
+
+  # List multiple services with IDs
+  omnistrate-ctl get service <id1> <id2> <id3> --id`
 )
 
 // ServiceCmd represents the describe command
@@ -29,49 +38,71 @@ var ServiceCmd = &cobra.Command{
 	SilenceUsage: true,
 }
 
+func init() {
+	ServiceCmd.Flags().Bool("id", false, "Specify service ID instead of name")
+}
+
 func Run(cmd *cobra.Command, args []string) error {
-	// Validate user is currently logged in
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	// List services
-	listRes, err := dataaccess.ListServices(token)
+	var ID bool
+	ID, err = cmd.Flags().GetBool("id")
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
-	allServices := listRes.Services
 
-	// Print services table if no service name is provided
-	if len(args) == 0 {
-		utils.PrintSuccess(fmt.Sprintf("%d services found", len(allServices)))
-		if len(allServices) > 0 {
-			printTable(allServices)
-		}
-		return nil
-	}
-
-	// Format allServices into a map
-	serviceMap := make(map[string]*serviceapi.DescribeServiceResult)
-	for _, service := range allServices {
-		serviceMap[service.Name] = service
-	}
-
-	// Filter services by name
 	var services []*serviceapi.DescribeServiceResult
-	for _, name := range args {
-		service, ok := serviceMap[name]
-		if !ok {
-			utils.PrintError(fmt.Errorf("service '%s' not found", name))
-			continue
+	if ID {
+		for _, id := range args {
+			var service *serviceapi.DescribeServiceResult
+			service, err = dataaccess.DescribeService(id, token)
+			if err != nil {
+				utils.PrintError(err)
+				continue
+			}
+			services = append(services, service)
 		}
-		services = append(services, service)
+	} else {
+		// List services
+		var listRes *serviceapi.ListServiceResult
+		listRes, err = dataaccess.ListServices(token)
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+		allServices := listRes.Services
+
+		// Print services table if no service name is provided
+		if len(args) == 0 {
+			utils.PrintSuccess(fmt.Sprintf("%d services found", len(allServices)))
+			if len(allServices) > 0 {
+				printTable(allServices)
+			}
+			return nil
+		}
+
+		// Format allServices into a map
+		serviceMap := make(map[string]*serviceapi.DescribeServiceResult)
+		for _, service := range allServices {
+			serviceMap[service.Name] = service
+		}
+
+		// Filter services by name
+		for _, name := range args {
+			service, ok := serviceMap[name]
+			if !ok {
+				utils.PrintError(fmt.Errorf("service '%s' not found", name))
+				continue
+			}
+			services = append(services, service)
+		}
 	}
 
-	// Print service details per service if service name is provided
 	printTable(services)
 
 	return nil
