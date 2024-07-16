@@ -2,6 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/auth"
+	"github.com/omnistrate/ctl/cmd/build"
+	"github.com/omnistrate/ctl/cmd/create"
+	"github.com/omnistrate/ctl/cmd/deletec"
+	"github.com/omnistrate/ctl/cmd/deprecated"
+	"github.com/omnistrate/ctl/cmd/describe"
+	"github.com/omnistrate/ctl/cmd/get"
 	"os"
 
 	"github.com/fatih/color"
@@ -9,10 +16,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	CommitID  string
+	Version   string
+	Timestamp string
+)
+
 const versionDescription = "Omnistrate CTL %s"
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
+// RootCmd represents the base command when called without any subcommands
+var RootCmd = &cobra.Command{
 	Use:   "omnistrate-ctl",
 	Short: "Manage your Omnistrate SaaS from the command line.",
 	Long: wordwrap.WrapString(`
@@ -56,14 +69,27 @@ const figletStr = `                  _     __           __
 `
 
 // Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
+// This is called by main.main(). It only needs to happen once to the RootCmd.
 func Execute() {
-	err := rootCmd.Execute()
+	err := RootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
 	}
 }
 
 func init() {
-	rootCmd.PersistentFlags().BoolP("version", "v", false, "Print the version number of omnistrate-ctl")
+	RootCmd.PersistentFlags().BoolP("version", "v", false, "Print the version number of omnistrate-ctl")
+
+	RootCmd.AddCommand(auth.LoginCmd)
+	RootCmd.AddCommand(auth.LogoutCmd)
+
+	RootCmd.AddCommand(build.BuildCmd)
+
+	RootCmd.AddCommand(get.GetCmd)
+	RootCmd.AddCommand(describe.DescribeCmd)
+	RootCmd.AddCommand(create.CreateCmd)
+	RootCmd.AddCommand(deletec.DeleteCmd)
+
+	RootCmd.AddCommand(deprecated.ListCmd)
+	RootCmd.AddCommand(deprecated.RemoveCmd)
 }

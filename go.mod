@@ -9,9 +9,9 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.5.9
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-wordwrap v1.0.1
-	github.com/omnistrate/api-design v0.6.458
-	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240712020210-536277c18110
-	github.com/omnistrate/commons/pkg/utils v0.0.0-20240711170400-71b8de5fbd07
+	github.com/omnistrate/api-design v0.6.469
+	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240716164816-cfeea4c61d45
+	github.com/omnistrate/commons/pkg/utils v0.0.0-20240713005810-42b99387418b
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0
@@ -36,7 +36,7 @@ require (
 	github.com/mattn/go-shellwords v1.0.12 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/omnistrate/commons/pkg/constants v0.0.0-20240711170400-71b8de5fbd07 // indirect
+	github.com/omnistrate/commons/pkg/constants v0.0.0-20240713005810-42b99387418b // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.19.1 // indirect
