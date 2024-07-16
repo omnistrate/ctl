@@ -29,7 +29,7 @@ func init() {
 
 func getExample() (example string) {
 	for _, cmd := range GetCmd.Commands() {
-		example += cmd.Example + "\n"
+		example += cmd.Example + "\n\n"
 	}
 	return
 }
