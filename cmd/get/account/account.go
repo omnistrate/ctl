@@ -21,11 +21,14 @@ var (
 
 // AccountCmd represents the describe command
 var AccountCmd = &cobra.Command{
-	Use:          "account <name>",
-	Short:        "Display one or more accounts",
-	Long:         `The get account command displays basic information about one or more accounts.`,
-	Example:      accountExample,
-	RunE:         Run,
+	Use:     "account <name>",
+	Short:   "Display one or more accounts",
+	Long:    `The get account command displays basic information about one or more accounts.`,
+	Example: accountExample,
+	RunE:    Run,
+	PostRun: func(cmd *cobra.Command, args []string) {
+		dataaccess.VerifyAccount()
+	},
 	SilenceUsage: true,
 }
 

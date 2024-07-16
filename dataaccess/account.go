@@ -2,6 +2,7 @@ package dataaccess
 
 import (
 	"context"
+	"fmt"
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	accountconfigapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/account_config_api"
 	"github.com/omnistrate/ctl/utils"
@@ -54,4 +55,48 @@ func CreateAccount(accountConfig *accountconfigapi.CreateAccountConfigRequest) (
 		return "", err
 	}
 	return res, nil
+}
+
+const warningMsgTemplate = `
+WARNING! Account %s(%s) not verified. To complete the account configuration setup, follow the instructions below:
+- For AWS CloudFormation users: Please create your CloudFormation Stack using the provided template at %s. Watch the CloudFormation guide at %s for help.
+- For AWS/GCP Terraform users: Execute the Terraform scripts available at %s, by using the Account Config Identity ID below. For guidance our Terraform instructional video is at %s.`
+
+func VerifyAccount() {
+	token, err := utils.GetToken()
+	if err != nil {
+		utils.PrintError(err)
+		return
+	}
+
+	// List all accounts
+	listRes, err := ListAccounts(token, "all")
+	if err != nil {
+		utils.PrintError(err)
+		return
+	}
+
+	// Warn if any accounts are not verified
+	for _, account := range listRes.AccountConfigs {
+		if account.Status != "READY" {
+			awsCloudFormationTemplateURL := ""
+			if account.AwsCloudFormationTemplateURL != nil {
+				awsCloudFormationTemplateURL = *account.AwsCloudFormationTemplateURL
+			}
+
+			awsCloudFormationGuideURL := "https://youtu.be/Mu-4jppldwk"
+			awsGcpTerraformScriptsURL := "https://github.com/omnistrate/account-setup"
+			awsGcpTerraformGuideURL := "https://youtu.be/eKktc4QKgaA"
+
+			var targetAccountID string
+			if account.AwsAccountID != nil {
+				targetAccountID = *account.AwsAccountID
+			} else {
+				targetAccountID = *account.GcpProjectID
+			}
+
+			utils.PrintWarning(fmt.Sprintf(warningMsgTemplate, account.Name, targetAccountID, awsCloudFormationTemplateURL,
+				awsCloudFormationGuideURL, awsGcpTerraformScriptsURL, awsGcpTerraformGuideURL))
+		}
+	}
 }

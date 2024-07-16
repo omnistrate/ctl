@@ -5,6 +5,7 @@ import (
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
+	"time"
 )
 
 var (
@@ -27,11 +28,15 @@ var (
 
 // AccountCmd represents the create command
 var AccountCmd = &cobra.Command{
-	Use:          "account <name> [flags]",
-	Short:        "Create a account",
-	Long:         ``,
-	Example:      accountExample,
-	RunE:         run,
+	Use:     "account <name> [flags]",
+	Short:   "Create a account",
+	Long:    ``,
+	Example: accountExample,
+	RunE:    run,
+	PostRun: func(cmd *cobra.Command, args []string) {
+		time.Sleep(1 * time.Second)
+		dataaccess.VerifyAccount()
+	},
 	SilenceUsage: true,
 }
 

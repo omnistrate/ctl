@@ -10,6 +10,7 @@ import (
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
 	commonutils "github.com/omnistrate/commons/pkg/utils"
+	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -35,11 +36,14 @@ var (
 
 // buildCmd represents the build command
 var buildCmd = &cobra.Command{
-	Use:          "build [--file FILE] [--name NAME] [--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] [--environment ENVIRONMENT] [--environment ENVIRONMENT_TYPE] [--release] [--release-as-preferred]",
-	Short:        "Build a service from a Docker Compose file",
-	Long:         `Builds a new service using a Docker Compose file. The --name flag is required to specify the service name. Optionally, you can provide a description and a URL for the service's logo. Use the --environment and --environment-type flag to specify the target environment. Use --release or --release-as-preferred to release the service after building.`,
-	Example:      `  omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png" --environment "dev" --environment-type "DEV" --release-as-preferred`,
-	RunE:         runBuild,
+	Use:     "build [--file FILE] [--name NAME] [--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] [--environment ENVIRONMENT] [--environment ENVIRONMENT_TYPE] [--release] [--release-as-preferred]",
+	Short:   "Build a service from a Docker Compose file",
+	Long:    `Builds a new service using a Docker Compose file. The --name flag is required to specify the service name. Optionally, you can provide a description and a URL for the service's logo. Use the --environment and --environment-type flag to specify the target environment. Use --release or --release-as-preferred to release the service after building.`,
+	Example: `  omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png" --environment "dev" --environment-type "DEV" --release-as-preferred`,
+	RunE:    runBuild,
+	PostRun: func(cmd *cobra.Command, args []string) {
+		dataaccess.VerifyAccount()
+	},
 	SilenceUsage: true,
 }
 
