@@ -1,8 +1,8 @@
-package delete
+package deletec
 
 import (
-	"github.com/omnistrate/ctl/cmd/delete/account"
-	"github.com/omnistrate/ctl/cmd/delete/service"
+	"github.com/omnistrate/ctl/cmd/deletec/account"
+	"github.com/omnistrate/ctl/cmd/deletec/service"
 	"github.com/spf13/cobra"
 )
 

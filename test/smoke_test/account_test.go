@@ -5,7 +5,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/omnistrate/ctl/cmd"
 	createaccount "github.com/omnistrate/ctl/cmd/create/account"
-	deleteaccount "github.com/omnistrate/ctl/cmd/delete/account"
+	deleteaccount "github.com/omnistrate/ctl/cmd/deletec/account"
 	describeaccount "github.com/omnistrate/ctl/cmd/describe/account"
 	getaccount "github.com/omnistrate/ctl/cmd/get/account"
 	"github.com/omnistrate/ctl/test/testutils"

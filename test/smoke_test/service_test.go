@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/omnistrate/ctl/cmd"
-	deleteservice "github.com/omnistrate/ctl/cmd/delete/service"
+	deleteservice "github.com/omnistrate/ctl/cmd/deletec/service"
 	getservice "github.com/omnistrate/ctl/cmd/get/service"
 	"github.com/omnistrate/ctl/test/testutils"
 	"testing"
