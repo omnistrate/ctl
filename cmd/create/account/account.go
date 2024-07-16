@@ -34,7 +34,7 @@ var AccountCmd = &cobra.Command{
 	Example: accountExample,
 	RunE:    run,
 	PostRun: func(cmd *cobra.Command, args []string) {
-		time.Sleep(1 * time.Second)
+		time.Sleep(1 * time.Second) // Sleep for 1 second to allow for account creation to complete
 		dataaccess.VerifyAccount()
 	},
 	SilenceUsage: true,
