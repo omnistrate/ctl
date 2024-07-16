@@ -1,8 +1,13 @@
 package describe
 
 import (
+	"encoding/json"
+	"fmt"
+	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/ctl/cmd/describe/account"
 	"github.com/omnistrate/ctl/cmd/describe/service"
+	"github.com/omnistrate/ctl/dataaccess"
+	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -11,11 +16,15 @@ var (
 		Describe detailed information about an object.`
 )
 
+var (
+	describeServiceID string
+)
+
 var DescribeCmd = &cobra.Command{
 	Use:          "describe [object] [name] [flags]",
 	Short:        "Describe detailed information about an object and output results as JSON to stdout.",
 	Long:         describeLong,
-	Run:          run,
+	RunE:         run,
 	SilenceUsage: true,
 }
 
@@ -25,7 +34,8 @@ func init() {
 
 	DescribeCmd.Example = describeExample()
 
-	DescribeCmd.Args = cobra.MinimumNArgs(1)
+	// Deprecated flags. Kept for backwards compatibility.
+	DescribeCmd.Flags().StringVarP(&describeServiceID, "service-id", "", "", "this flag is deprecated.")
 }
 
 func describeExample() (example string) {
@@ -35,9 +45,42 @@ func describeExample() (example string) {
 	return
 }
 
-func run(cmd *cobra.Command, args []string) {
-	err := cmd.Help()
-	if err != nil {
-		return
+func run(cmd *cobra.Command, args []string) (err error) {
+	if describeServiceID == "" {
+		err = cmd.Help()
+		if err != nil {
+			return
+		}
+	} else {
+		defer func() {
+			describeServiceID = ""
+		}()
+
+		// Validate user is currently logged in
+		var token string
+		token, err = utils.GetToken()
+		if err != nil {
+			utils.PrintError(err)
+			return
+		}
+
+		// Describe object
+		var svc *serviceapi.DescribeServiceResult
+		svc, err = dataaccess.DescribeService(describeServiceID, token)
+		if err != nil {
+			utils.PrintError(err)
+			return
+		}
+
+		// Print service details
+		var data []byte
+		data, err = json.MarshalIndent(svc, "", "    ")
+		if err != nil {
+			utils.PrintError(err)
+			return
+		}
+		fmt.Println(string(data))
 	}
+
+	return
 }
