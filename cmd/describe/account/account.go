@@ -33,7 +33,7 @@ var AccountCmd = &cobra.Command{
 	Example: accountExample,
 	RunE:    Run,
 	PostRun: func(cmd *cobra.Command, args []string) {
-		dataaccess.VerifyAccount()
+		dataaccess.AskVerifyAccountIfAny()
 	},
 	SilenceUsage: true,
 }

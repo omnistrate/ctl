@@ -18,6 +18,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 var (
@@ -36,14 +37,11 @@ var (
 
 // BuildCmd represents the build command
 var BuildCmd = &cobra.Command{
-	Use:     "build [--file FILE] [--name NAME] [--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] [--environment ENVIRONMENT] [--environment ENVIRONMENT_TYPE] [--release] [--release-as-preferred]",
-	Short:   "Build SaaS from docker compose.",
-	Long:    `Builds a new service using a Docker Compose file. The --name flag is required to specify the service name. Optionally, you can provide a description and a URL for the service's logo. Use the --environment and --environment-type flag to specify the target environment. Use --release or --release-as-preferred to release the service after building.`,
-	Example: `  omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png" --environment "dev" --environment-type "DEV" --release-as-preferred`,
-	RunE:    runBuild,
-	PostRun: func(cmd *cobra.Command, args []string) {
-		dataaccess.VerifyAccount()
-	},
+	Use:          "build [--file FILE] [--name NAME] [--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] [--environment ENVIRONMENT] [--environment ENVIRONMENT_TYPE] [--release] [--release-as-preferred]",
+	Short:        "Build SaaS from docker compose.",
+	Long:         `Builds a new service using a Docker Compose file. The --name flag is required to specify the service name. Optionally, you can provide a description and a URL for the service's logo. Use the --environment and --environment-type flag to specify the target environment. Use --release or --release-as-preferred to release the service after building.`,
+	Example:      `  omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png" --environment "dev" --environment-type "DEV" --release-as-preferred`,
+	RunE:         runBuild,
 	SilenceUsage: true,
 }
 
@@ -119,6 +117,9 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	utils.PrintSuccess("Service built successfully")
 	utils.PrintURL("Check the service plan result at", fmt.Sprintf("https://%s/product-tier?serviceId=%s&environmentId=%s", utils.GetRootDomain(), ServiceID, EnvironmentID))
 
+	// Ask user to verify account if there are any unverified accounts
+	dataaccess.AskVerifyAccountIfAny()
+
 	serviceEnvironment, err := describeServiceEnvironment(ServiceID, EnvironmentID, token)
 	if err != nil {
 		utils.PrintError(err)
@@ -127,6 +128,35 @@ func runBuild(cmd *cobra.Command, args []string) error {
 
 	if serviceEnvironment.SaasPortalURL != nil {
 		utils.PrintURL("Find your SaaS Portal at", "https://"+*serviceEnvironment.SaasPortalURL)
+	} else {
+		// Ask the user if they want to wait for the SaaS Portal URL
+		fmt.Print("Do you want to wait to see the SaaS Portal URL? (Y/N): ")
+		var userInput string
+		fmt.Scanln(&userInput)
+		userInput = strings.TrimSpace(strings.ToUpper(userInput))
+
+		if userInput == "Y" {
+			utils.PrintInfo("Creating your SaaS Portal, please wait...")
+
+			for {
+				time.Sleep(5 * time.Second)
+
+				serviceEnvironment, err = describeServiceEnvironment(ServiceID, EnvironmentID, token)
+				if err != nil {
+					utils.PrintError(err)
+					return err
+				}
+
+				if serviceEnvironment.SaasPortalURL != nil {
+					utils.PrintURL("Your SaaS Portal is ready at", "https://"+*serviceEnvironment.SaasPortalURL)
+					break
+				} else {
+					utils.PrintInfo("Still creating your SaaS Portal, please wait...")
+				}
+			}
+		} else {
+			utils.PrintInfo("You can check the status of your SaaS Portal later.")
+		}
 	}
 
 	return nil
