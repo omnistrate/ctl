@@ -126,7 +126,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	}
 
 	if serviceEnvironment.SaasPortalURL != nil {
-		utils.PrintURL("Find your SaaS Portal at", "https://"+*serviceEnvironment.SaasPortalURL)
+		utils.PrintURL("Find your SaaS Portal at", fmt.Sprintf("https://"+*serviceEnvironment.SaasPortalURL+"/service-plans?serviceId=%s&environmentId=%s", ServiceID, EnvironmentID))
 	}
 
 	return nil
