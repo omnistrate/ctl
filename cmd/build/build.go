@@ -117,8 +117,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	}
 
 	utils.PrintSuccess("Service built successfully")
-	utils.PrintURL("Check the service plan result at", fmt.Sprintf("https://%s/product-tier/build?serviceId=%s&productTierId=%s", utils.GetRootDomain(), ServiceID, ProductTierID))
-	utils.PrintURL("Consume it at", fmt.Sprintf("https://%s/access?serviceId=%s&environmentId=%s", utils.GetRootDomain(), ServiceID, EnvironmentID))
+	utils.PrintURL("Check the service plan result at", fmt.Sprintf("https://%s/product-tier?serviceId=%s&environmentId=%s", utils.GetRootDomain(), ServiceID, EnvironmentID))
 
 	serviceEnvironment, err := describeServiceEnvironment(ServiceID, EnvironmentID, token)
 	if err != nil {
@@ -127,7 +126,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	}
 
 	if serviceEnvironment.SaasPortalURL != nil {
-		utils.PrintURL("Find your SaaS Portal at", *serviceEnvironment.SaasPortalURL)
+		utils.PrintURL("Find your SaaS Portal at", "https://"+*serviceEnvironment.SaasPortalURL)
 	}
 
 	return nil
