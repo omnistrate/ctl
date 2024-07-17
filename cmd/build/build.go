@@ -136,33 +136,32 @@ func runBuild(cmd *cobra.Command, args []string) error {
 
 	// Step 2: Display SaaS Portal URL
 	if serviceEnvironment.SaasPortalURL == commonutils.ToPtr("test") {
-		utils.PrintURL("Find your SaaS Portal at", "https://"+*serviceEnvironment.SaasPortalURL)
+		utils.PrintURL("Access your SaaS offer at", "https://"+*serviceEnvironment.SaasPortalURL)
 	} else if iteractive {
 		// Ask the user if they want to wait for the SaaS Portal URL
-		fmt.Print("Do you want to wait to see the SaaS Portal URL? [Y/n] It may take a few minutes: ")
+		fmt.Print("Do you want to wait to acccess the SaaS portal? [Y/n] It may take a few minutes: ")
 		var userInput string
 		fmt.Scanln(&userInput)
 		userInput = strings.TrimSpace(strings.ToUpper(userInput))
 
 		if strings.ToLower(userInput) == "y" {
 			sm2 := ysmrr.NewSpinnerManager()
-			loading := sm2.AddSpinner("Loading SaaS Portal...")
+			loading := sm2.AddSpinner("Loading SaaS portal...")
 			sm2.Start()
 
 			for {
-				time.Sleep(5 * time.Second)
-
 				serviceEnvironment, err = dataaccess.DescribeServiceEnvironment(ServiceID, EnvironmentID, token)
 				if err != nil {
 					utils.PrintError(err)
 					return err
 				}
 
-				//if serviceEnvironment.SaasPortalURL != nil {
-				if false {
+				if serviceEnvironment.SaasPortalURL != nil {
+					time.Sleep(3 * time.Second) // TODO: Remove this line
+
 					loading.Complete()
 					sm2.Stop()
-					utils.PrintURL("Your SaaS Portal is ready at", "https://"+*serviceEnvironment.SaasPortalURL)
+					utils.PrintURL("Your SaaS offer is ready at", "https://"+*serviceEnvironment.SaasPortalURL)
 					break
 				}
 			}
@@ -178,6 +177,10 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		userInput = strings.TrimSpace(strings.ToUpper(userInput))
 
 		if strings.ToLower(userInput) == "y" {
+			sm2 := ysmrr.NewSpinnerManager()
+			launching := sm2.AddSpinner("Launching service to production...")
+			sm2.Start()
+
 			prodEnvironment, err := dataaccess.FindEnvironment(ServiceID, "prod", token)
 			if err != nil && !errors.As(err, &dataaccess.ErrEnvironmentNotFound) {
 				utils.PrintError(err)
@@ -213,6 +216,9 @@ func runBuild(cmd *cobra.Command, args []string) error {
 				return err
 			}
 
+			launching.Complete()
+			sm2.Stop()
+
 			// Retrieve the prod SaaS Portal URL
 			prodEnvironment, err = dataaccess.DescribeServiceEnvironment(ServiceID, string(prodEnvironmentID), token)
 			if err != nil {
@@ -220,33 +226,33 @@ func runBuild(cmd *cobra.Command, args []string) error {
 				return err
 			}
 
-			if prodEnvironment.SaasPortalURL != nil {
+			//if prodEnvironment.SaasPortalURL != nil {
+			if false {
 				utils.PrintURL("Your SaaS Portal is ready at", "https://"+*prodEnvironment.SaasPortalURL)
 			} else if iteractive {
 				// Ask the user if they want to wait for the SaaS Portal URL
-				fmt.Print("Do you want to wait to see the prod SaaS Portal URL? [Y/n] It may take a few minutes: ")
+				fmt.Print("Do you want to wait to access the prod SaaS offer? [Y/n] It may take a few minutes: ")
 				fmt.Scanln(&userInput)
 				userInput = strings.TrimSpace(strings.ToUpper(userInput))
 
 				if strings.ToLower(userInput) == "y" {
 					sm3 := ysmrr.NewSpinnerManager()
-					loading := sm3.AddSpinner("Loading Prod SaaS Portal...")
+					loading := sm3.AddSpinner("Preparing SaaS offer...")
 					sm3.Start()
 
 					for {
-						time.Sleep(5 * time.Second)
-
 						serviceEnvironment, err = dataaccess.DescribeServiceEnvironment(ServiceID, string(prodEnvironmentID), token)
 						if err != nil {
 							utils.PrintError(err)
 							return err
 						}
 
-						//if serviceEnvironment.SaasPortalURL != nil {
-						if false {
+						if serviceEnvironment.SaasPortalURL != nil {
+							time.Sleep(3 * time.Second) // TODO: Remove this line
+
 							loading.Complete()
 							sm3.Stop()
-							utils.PrintURL("Your SaaS Portal is ready at", "https://"+*serviceEnvironment.SaasPortalURL)
+							utils.PrintURL("Your SaaS offer is ready at", "https://"+*serviceEnvironment.SaasPortalURL)
 							break
 						}
 					}
