@@ -4,8 +4,6 @@ on:
   release:
     types: [ "published" ]
   workflow_dispatch:
-  pull_request: 
-    branches: [ "master" ] # TODO: Remove before merging
   
 
 env:
@@ -184,7 +182,7 @@ jobs:
             repository: omnistrate/cli
             token: ${{ steps.generate_token_cli.outputs.token }}
             fail_on_unmatched_files: true
-            draft: true # TODO: Remove before merging
+            draft: false
 
   update-brew-formula:
     runs-on: ubuntu-latest
