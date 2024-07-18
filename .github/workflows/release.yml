@@ -214,7 +214,7 @@ jobs:
         uses: actions/checkout@v4
         with: 
           repository: omnistrate/homebrew-core
-          ref: main
+          ref: master
           token: ${{ steps.generate_token_cli.outputs.token }}
 
       - name: Get version from tag
@@ -224,10 +224,10 @@ jobs:
       - name: Calculate SHA256 checksums
         id: calculate_sha256
         run: |
-          sha_darwin_amd64=$(sha256sum omnistrate-ctl-darwin-amd64 | awk '{ print $1 }')
-          sha_darwin_arm64=$(sha256sum omnistrate-ctl-darwin-arm64 | awk '{ print $1 }')
-          sha_linux_amd64=$(sha256sum omnistrate-ctl-linux-amd64 | awk '{ print $1 }')
-          sha_linux_arm64=$(sha256sum omnistrate-ctl-linux-arm64 | awk '{ print $1 }')
+          sha_darwin_amd64=$(sha256sum omnistrate-ctl-darwin-amd64/omnistrate-ctl-darwin-amd64 | awk '{ print $1 }')
+          sha_darwin_arm64=$(sha256sum omnistrate-ctl-darwin-arm64/omnistrate-ctl-darwin-arm64 | awk '{ print $1 }')
+          sha_linux_amd64=$(sha256sum omnistrate-ctl-linux-amd64/omnistrate-ctl-linux-amd64 | awk '{ print $1 }')
+          sha_linux_arm64=$(sha256sum omnistrate-ctl-linux-arm64/omnistrate-ctl-linux-arm64 | awk '{ print $1 }')
           echo "sha_darwin_amd64=${sha_darwin_amd64}" >> "$GITHUB_OUTPUT"
           echo "sha_darwin_arm64=${sha_darwin_arm64}" >> "$GITHUB_OUTPUT"
           echo "sha_linux_amd64=${sha_linux_amd64}" >> "$GITHUB_OUTPUT"
