@@ -19,7 +19,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
 var (
@@ -156,9 +155,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 					return err
 				}
 
-				if serviceEnvironment.SaasPortalURL != nil {
-					time.Sleep(3 * time.Second) // TODO: Remove this line
-
+				if serviceEnvironment.SaasPortalURL != nil && serviceEnvironment.SaasPortalStatus != nil && *serviceEnvironment.SaasPortalStatus == "RUNNING" {
 					loading.Complete()
 					sm2.Stop()
 					utils.PrintURL("Your SaaS offer is ready at", "https://"+*serviceEnvironment.SaasPortalURL)
@@ -189,15 +186,23 @@ func runBuild(cmd *cobra.Command, args []string) error {
 
 			var prodEnvironmentID serviceenvironmentapi.ServiceEnvironmentID
 			if errors.As(err, &dataaccess.ErrEnvironmentNotFound) {
+				// Get default deployment config ID
+				defaultDeploymentConfigID, err := dataaccess.GetDefaultDeploymentConfigID(token)
+				if err != nil {
+					utils.PrintError(err)
+					return err
+				}
+
 				prod := serviceenvironmentapi.CreateServiceEnvironmentRequest{
-					Name:                 "Prod",
-					Description:          "Production environment",
-					ServiceID:            serviceenvironmentapi.ServiceID(ServiceID),
-					Visibility:           serviceenvironmentapi.ServiceVisibility("PUBLIC"),
-					Type:                 commonutils.ToPtr(serviceenvironmentapi.EnvironmentType("PROD")),
-					SourceEnvironmentID:  commonutils.ToPtr(serviceenvironmentapi.ServiceEnvironmentID(EnvironmentID)),
-					DeploymentConfigID:   "",                    // TODO: Get the deployment config ID
-					ServiceAuthPublicKey: commonutils.ToPtr(""), // TODO: Get the service auth public key
+					Name:                    "Production",
+					Description:             "Production environment",
+					ServiceID:               serviceenvironmentapi.ServiceID(ServiceID),
+					Visibility:              serviceenvironmentapi.ServiceVisibility("PUBLIC"),
+					Type:                    (*serviceenvironmentapi.EnvironmentType)(commonutils.ToPtr("PROD")),
+					SourceEnvironmentID:     commonutils.ToPtr(serviceenvironmentapi.ServiceEnvironmentID(EnvironmentID)),
+					DeploymentConfigID:      serviceenvironmentapi.DeploymentConfigID(defaultDeploymentConfigID),
+					ServiceAuthPublicKey:    commonutils.ToPtr("-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEA2lmruvcEDykT6KbyIJHYCGhCoPUGq+XlCfLWJXlowf4=\n-----END PUBLIC KEY-----"),
+					AutoApproveSubscription: commonutils.ToPtr(true),
 				}
 
 				prodEnvironmentID, err = dataaccess.CreateServiceEnvironment(prod, token)
@@ -226,8 +231,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 				return err
 			}
 
-			//if prodEnvironment.SaasPortalURL != nil {
-			if false {
+			if prodEnvironment.SaasPortalURL != nil {
 				utils.PrintURL("Your SaaS Portal is ready at", "https://"+*prodEnvironment.SaasPortalURL)
 			} else if iteractive {
 				// Ask the user if they want to wait for the SaaS Portal URL
@@ -247,9 +251,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 							return err
 						}
 
-						if serviceEnvironment.SaasPortalURL != nil {
-							time.Sleep(3 * time.Second) // TODO: Remove this line
-
+						if serviceEnvironment.SaasPortalURL != nil && serviceEnvironment.SaasPortalStatus != nil && *serviceEnvironment.SaasPortalStatus == "RUNNING" {
 							loading.Complete()
 							sm3.Stop()
 							utils.PrintURL("Your SaaS offer is ready at", "https://"+*serviceEnvironment.SaasPortalURL)
