@@ -237,11 +237,11 @@ jobs:
         timeout-minutes: 5
         run: |
           cd Formula
-          sed -i'' -e "s/^  version \".*\"$/  version \"${{ get_version.outputs.version }}\"/" OmnistrateCtl.rb
-          sed -i'' -e "s/^  sha_darwin_amd64 = \".*\"$/  sha_darwin_amd64 = \"${{ calculate_sha256.outputs.sha_darwin_amd64 }}\"/" OmnistrateCtl.rb
-          sed -i'' -e "s/^  sha_darwin_arm64 = \".*\"$/  sha_darwin_arm64 = \"${{ calculate_sha256.outputs.sha_darwin_arm64 }}\"/" OmnistrateCtl.rb
-          sed -i'' -e "s/^  sha_linux_amd64 = \".*\"$/  sha_linux_amd64 = \"${{ calculate_sha256.outputs.sha_linux_amd64 }}\"/" OmnistrateCtl.rb
-          sed -i'' -e "s/^  sha_linux_arm64 = \".*\"$/  sha_linux_arm64 = \"${{ calculate_sha256.outputs.sha_linux_arm64 }}\"/" OmnistrateCtl.rb
+          sed -i'' -e "s/^  version \".*\"$/  version \"${{ steps.get_version.outputs.version }}\"/" OmnistrateCtl.rb
+          sed -i'' -e "s/^  sha_darwin_amd64 = \".*\"$/  sha_darwin_amd64 = \"${{ steps.calculate_sha256.outputs.sha_darwin_amd64 }}\"/" OmnistrateCtl.rb
+          sed -i'' -e "s/^  sha_darwin_arm64 = \".*\"$/  sha_darwin_arm64 = \"${{ steps.calculate_sha256.outputs.sha_darwin_arm64 }}\"/" OmnistrateCtl.rb
+          sed -i'' -e "s/^  sha_linux_amd64 = \".*\"$/  sha_linux_amd64 = \"${{ steps.calculate_sha256.outputs.sha_linux_amd64 }}\"/" OmnistrateCtl.rb
+          sed -i'' -e "s/^  sha_linux_arm64 = \".*\"$/  sha_linux_arm64 = \"${{ steps.calculate_sha256.outputs.sha_linux_arm64 }}\"/" OmnistrateCtl.rb
 
       # - name: Commit changes
       #   timeout-minutes: 5
