@@ -195,7 +195,7 @@ jobs:
     steps:
       - name: Get version
         id: get_version
-        run: echo "version=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+        run: echo "version=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
 
       - name: Download build artifacts
         timeout-minutes: 5
@@ -241,10 +241,10 @@ jobs:
         run: |
           cd Formula
           sed -i '' 's/version "[^"]*"/version "${{ steps.get_version.outputs.version }}"/g' omnistrate-ctl.rb
-          sed -i'' -e 's/sha_darwin_amd64 = "[^"]*"/sha_darwin_amd64 = \"${{ steps.calculate_sha256.outputs.sha_darwin_amd64 }}"/g' omnistrate-ctl.rb
-          sed -i'' -e 's/sha_darwin_arm64 = "[^"]*"/sha_darwin_arm64 = \"${{ steps.calculate_sha256.outputs.sha_darwin_arm64 }}"/g' omnistrate-ctl.rb
-          sed -i'' -e 's/sha_linux_amd64 = "[^"]*"/sha_linux_amd64 = \"${{ steps.calculate_sha256.outputs.sha_linux_amd64 }}"/g' omnistrate-ctl.rb
-          sed -i'' -e 's/vsha_linux_arm64 = "[^"]*"/sha_linux_arm64 = \"${{ steps.calculate_sha256.outputs.sha_linux_arm64 }}"/g' omnistrate-ctl.rb
+          sed -i'' -e 's/sha_darwin_amd64 = "[^"]*"/sha_darwin_amd64 = "${{ steps.calculate_sha256.outputs.sha_darwin_amd64 }}"/g' omnistrate-ctl.rb
+          sed -i'' -e 's/sha_darwin_arm64 = "[^"]*"/sha_darwin_arm64 = "${{ steps.calculate_sha256.outputs.sha_darwin_arm64 }}"/g' omnistrate-ctl.rb
+          sed -i'' -e 's/sha_linux_amd64 = "[^"]*"/sha_linux_amd64 = "${{ steps.calculate_sha256.outputs.sha_linux_amd64 }}"/g' omnistrate-ctl.rb
+          sed -i'' -e 's/vsha_linux_arm64 = "[^"]*"/sha_linux_arm64 = "${{ steps.calculate_sha256.outputs.sha_linux_arm64 }}"/g' omnistrate-ctl.rb
     
       - name: Create Pull Request
         id: cpr
