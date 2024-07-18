@@ -3,6 +3,7 @@ module github.com/omnistrate/ctl
 go 1.22.0
 
 require (
+	github.com/chelnak/ysmrr v0.4.0
 	github.com/compose-spec/compose-go v1.20.2
 	github.com/fatih/color v1.17.0
 	github.com/google/uuid v1.6.0

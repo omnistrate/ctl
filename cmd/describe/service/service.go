@@ -81,7 +81,12 @@ func Run(cmd *cobra.Command, args []string) error {
 		// Filter services by name
 		for _, s := range listRes.Services {
 			if slices.Contains(args, s.Name) {
-				services = append(services, s)
+				service, err := dataaccess.DescribeService(string(s.ID), token)
+				if err != nil {
+					utils.PrintError(err)
+					return err
+				}
+				services = append(services, service)
 				found[s.Name] = true
 			}
 		}
