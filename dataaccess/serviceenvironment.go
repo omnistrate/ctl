@@ -90,21 +90,15 @@ func FindEnvironment(serviceId, environmentType, token string) (*serviceenvironm
 		return nil, err
 	}
 
-	found := false
 	for _, id := range listRes.Ids {
 		descRes, err := DescribeServiceEnvironment(serviceId, string(id), token)
 		if err != nil {
 			return nil, err
 		}
-		if strings.ToLower(string(descRes.Type)) == strings.ToLower(environmentType) {
-			found = true
+		if strings.EqualFold(string(descRes.Type), environmentType) {
 			return descRes, nil
 		}
 	}
 
-	if !found {
-		return nil, ErrEnvironmentNotFound
-	}
-
-	return nil, nil
+	return nil, ErrEnvironmentNotFound
 }
