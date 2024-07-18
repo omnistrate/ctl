@@ -4,8 +4,8 @@ on:
   release:
     types: [ "published" ]
   workflow_dispatch:
-  pull_request:
-    branches: [ "master" ]
+  pull_request: 
+    branches: [ "master" ] # TODO: Remove before merging
   
 
 env:
@@ -184,7 +184,7 @@ jobs:
             repository: omnistrate/cli
             token: ${{ steps.generate_token_cli.outputs.token }}
             fail_on_unmatched_files: true
-            draft: true
+            draft: true # TODO: Remove before merging
 
   update-brew-formula:
     runs-on: ubuntu-latest
@@ -193,6 +193,10 @@ jobs:
       contents: read
     
     steps:
+      - name: Get version
+        id: get_version
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+
       - name: Download build artifacts
         timeout-minutes: 5
         uses: actions/download-artifact@v4
@@ -200,6 +204,18 @@ jobs:
       - name: Display structure of downloaded files
         timeout-minutes: 1
         run: ls -R
+
+      - name: Calculate SHA256 checksums
+        id: calculate_sha256
+        run: |
+          sha_darwin_amd64=$(sha256sum omnistrate-ctl-darwin-amd64/omnistrate-ctl-darwin-amd64 | awk '{ print $1 }')
+          sha_darwin_arm64=$(sha256sum omnistrate-ctl-darwin-arm64/omnistrate-ctl-darwin-arm64 | awk '{ print $1 }')
+          sha_linux_amd64=$(sha256sum omnistrate-ctl-linux-amd64/omnistrate-ctl-linux-amd64 | awk '{ print $1 }')
+          sha_linux_arm64=$(sha256sum omnistrate-ctl-linux-arm64/omnistrate-ctl-linux-arm64 | awk '{ print $1 }')
+          echo "sha_darwin_amd64=${sha_darwin_amd64}" >> "$GITHUB_OUTPUT"
+          echo "sha_darwin_arm64=${sha_darwin_arm64}" >> "$GITHUB_OUTPUT"
+          echo "sha_linux_amd64=${sha_linux_amd64}" >> "$GITHUB_OUTPUT"
+          echo "sha_linux_arm64=${sha_linux_arm64}" >> "$GITHUB_OUTPUT"
 
       - name: Generate token to update the formula
         timeout-minutes: 5
@@ -214,43 +230,21 @@ jobs:
         uses: actions/checkout@v4
         with: 
           repository: omnistrate/homebrew-core
-          ref: master
           token: ${{ steps.generate_token_cli.outputs.token }}
 
-      - name: Get version from tag
-        id: get_version
-        run: echo "version=$(git describe --tags)" >> "$GITHUB_OUTPUT"
-
-      - name: Calculate SHA256 checksums
-        id: calculate_sha256
-        run: |
-          sha_darwin_amd64=$(sha256sum omnistrate-ctl-darwin-amd64/omnistrate-ctl-darwin-amd64 | awk '{ print $1 }')
-          sha_darwin_arm64=$(sha256sum omnistrate-ctl-darwin-arm64/omnistrate-ctl-darwin-arm64 | awk '{ print $1 }')
-          sha_linux_amd64=$(sha256sum omnistrate-ctl-linux-amd64/omnistrate-ctl-linux-amd64 | awk '{ print $1 }')
-          sha_linux_arm64=$(sha256sum omnistrate-ctl-linux-arm64/omnistrate-ctl-linux-arm64 | awk '{ print $1 }')
-          echo "sha_darwin_amd64=${sha_darwin_amd64}" >> "$GITHUB_OUTPUT"
-          echo "sha_darwin_arm64=${sha_darwin_arm64}" >> "$GITHUB_OUTPUT"
-          echo "sha_linux_amd64=${sha_linux_amd64}" >> "$GITHUB_OUTPUT"
-          echo "sha_linux_arm64=${sha_linux_arm64}" >> "$GITHUB_OUTPUT"
+      - name: Display structure of repository
+        timeout-minutes: 1
+        run: ls -R
 
       - name: Update Formula
         timeout-minutes: 5
         run: |
           cd Formula
-          sed -i'' -e "s/^  version \".*\"$/  version \"${{ steps.get_version.outputs.version }}\"/" OmnistrateCtl.rb
-          sed -i'' -e "s/^  sha_darwin_amd64 = \".*\"$/  sha_darwin_amd64 = \"${{ steps.calculate_sha256.outputs.sha_darwin_amd64 }}\"/" OmnistrateCtl.rb
-          sed -i'' -e "s/^  sha_darwin_arm64 = \".*\"$/  sha_darwin_arm64 = \"${{ steps.calculate_sha256.outputs.sha_darwin_arm64 }}\"/" OmnistrateCtl.rb
-          sed -i'' -e "s/^  sha_linux_amd64 = \".*\"$/  sha_linux_amd64 = \"${{ steps.calculate_sha256.outputs.sha_linux_amd64 }}\"/" OmnistrateCtl.rb
-          sed -i'' -e "s/^  sha_linux_arm64 = \".*\"$/  sha_linux_arm64 = \"${{ steps.calculate_sha256.outputs.sha_linux_arm64 }}\"/" OmnistrateCtl.rb
-
-      # - name: Commit changes
-      #   timeout-minutes: 5
-      #   run: |
-      #     git config user.name "github-actions[bot]"
-      #     git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-      #     git add .
-      #     git commit -m "generated"
-      #     git push
+          sed -i'' -e "s/^  version \".*\"$/  version \"${{ steps.get_version.outputs.version }}\"/" omnistrate-ctl.rb
+          sed -i'' -e "s/^  sha_darwin_amd64 = \".*\"$/  sha_darwin_amd64 = \"${{ steps.calculate_sha256.outputs.sha_darwin_amd64 }}\"/" omnistrate-ctl.rb
+          sed -i'' -e "s/^  sha_darwin_arm64 = \".*\"$/  sha_darwin_arm64 = \"${{ steps.calculate_sha256.outputs.sha_darwin_arm64 }}\"/" omnistrate-ctl.rb
+          sed -i'' -e "s/^  sha_linux_amd64 = \".*\"$/  sha_linux_amd64 = \"${{ steps.calculate_sha256.outputs.sha_linux_amd64 }}\"/" omnistrate-ctl.rb
+          sed -i'' -e "s/^  sha_linux_arm64 = \".*\"$/  sha_linux_arm64 = \"${{ steps.calculate_sha256.outputs.sha_linux_arm64 }}\"/" omnistrate-ctl.rb
     
       - name: Create Pull Request
         id: cpr
@@ -261,8 +255,9 @@ jobs:
           committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
           signoff: true
+          draft: true # TODO: Remove before merging
 
-      # - uses: peter-evans/enable-pull-request-automerge@v3
-      #   with:
-      #     token: ${{ steps.generate_token_cli.outputs.token }}
-      #     pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+      - uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ steps.generate_token_cli.outputs.token }}
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
