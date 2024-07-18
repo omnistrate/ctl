@@ -252,7 +252,7 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ steps.generate_token_cli.outputs.token }}
-          commit-message: Update Omnistrate CTL Formula
+          commit-message: Update Omnistrate CTL Formula to ${{ steps.get_version.outputs.version }}
           signoff: true
           draft: true # TODO: Remove before merging
 
