@@ -134,7 +134,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	}
 
 	// Step 2: Display SaaS Portal URL
-	if serviceEnvironment.SaasPortalURL == commonutils.ToPtr("test") {
+	if checkIfSaaSPortalReady(serviceEnvironment) {
 		utils.PrintURL("Access your SaaS offer at", "https://"+*serviceEnvironment.SaasPortalURL)
 	} else if iteractive {
 		// Ask the user if they want to wait for the SaaS Portal URL
@@ -155,7 +155,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 					return err
 				}
 
-				if serviceEnvironment.SaasPortalURL != nil && serviceEnvironment.SaasPortalStatus != nil && *serviceEnvironment.SaasPortalStatus == "RUNNING" {
+				if checkIfSaaSPortalReady(serviceEnvironment) {
 					loading.Complete()
 					sm2.Stop()
 					utils.PrintURL("Your SaaS offer is ready at", "https://"+*serviceEnvironment.SaasPortalURL)
@@ -231,7 +231,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 				return err
 			}
 
-			if prodEnvironment.SaasPortalURL != nil {
+			if checkIfSaaSPortalReady(prodEnvironment) {
 				utils.PrintURL("Your SaaS Portal is ready at", "https://"+*prodEnvironment.SaasPortalURL)
 			} else if iteractive {
 				// Ask the user if they want to wait for the SaaS Portal URL
@@ -251,7 +251,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 							return err
 						}
 
-						if serviceEnvironment.SaasPortalURL != nil && serviceEnvironment.SaasPortalStatus != nil && *serviceEnvironment.SaasPortalStatus == "RUNNING" {
+						if checkIfSaaSPortalReady(serviceEnvironment) {
 							loading.Complete()
 							sm3.Stop()
 							utils.PrintURL("Your SaaS offer is ready at", "https://"+*serviceEnvironment.SaasPortalURL)
@@ -368,4 +368,12 @@ func resetBuild() {
 	release = false
 	releaseAsPreferred = false
 	iteractive = false
+}
+
+func checkIfSaaSPortalReady(serviceEnvironment *serviceenvironmentapi.DescribeServiceEnvironmentResult) bool {
+	if serviceEnvironment.SaasPortalURL != nil && serviceEnvironment.SaasPortalStatus != nil && *serviceEnvironment.SaasPortalStatus == "RUNNING" {
+		return true
+	}
+
+	return false
 }
