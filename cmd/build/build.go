@@ -166,96 +166,98 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	}
 
 	// Step 3: Launch service to production if the service is in dev environment
-	if strings.ToLower(string(serviceEnvironment.Type)) == "dev" {
-		// Ask the user if they want to launch the service to production
-		fmt.Print("Do you want to launch it to production? [Y/n] You can always promote it later: ")
-		var userInput string
-		fmt.Scanln(&userInput)
-		userInput = strings.TrimSpace(strings.ToUpper(userInput))
+	if iteractive {
+		if strings.ToLower(string(serviceEnvironment.Type)) == "dev" {
+			// Ask the user if they want to launch the service to production
+			fmt.Print("Do you want to launch it to production? [Y/n] You can always promote it later: ")
+			var userInput string
+			fmt.Scanln(&userInput)
+			userInput = strings.TrimSpace(strings.ToUpper(userInput))
 
-		if strings.ToLower(userInput) == "y" {
-			sm2 := ysmrr.NewSpinnerManager()
-			launching := sm2.AddSpinner("Launching service to production...")
-			sm2.Start()
+			if strings.ToLower(userInput) == "y" {
+				sm2 := ysmrr.NewSpinnerManager()
+				launching := sm2.AddSpinner("Launching service to production...")
+				sm2.Start()
 
-			prodEnvironment, err := dataaccess.FindEnvironment(ServiceID, "prod", token)
-			if err != nil && !errors.As(err, &dataaccess.ErrEnvironmentNotFound) {
-				utils.PrintError(err)
-				return err
-			}
+				prodEnvironment, err := dataaccess.FindEnvironment(ServiceID, "prod", token)
+				if err != nil && !errors.As(err, &dataaccess.ErrEnvironmentNotFound) {
+					utils.PrintError(err)
+					return err
+				}
 
-			var prodEnvironmentID serviceenvironmentapi.ServiceEnvironmentID
-			if errors.As(err, &dataaccess.ErrEnvironmentNotFound) {
-				// Get default deployment config ID
-				defaultDeploymentConfigID, err := dataaccess.GetDefaultDeploymentConfigID(token)
+				var prodEnvironmentID serviceenvironmentapi.ServiceEnvironmentID
+				if errors.As(err, &dataaccess.ErrEnvironmentNotFound) {
+					// Get default deployment config ID
+					defaultDeploymentConfigID, err := dataaccess.GetDefaultDeploymentConfigID(token)
+					if err != nil {
+						utils.PrintError(err)
+						return err
+					}
+
+					prod := serviceenvironmentapi.CreateServiceEnvironmentRequest{
+						Name:                    "Production",
+						Description:             "Production environment",
+						ServiceID:               serviceenvironmentapi.ServiceID(ServiceID),
+						Visibility:              serviceenvironmentapi.ServiceVisibility("PUBLIC"),
+						Type:                    (*serviceenvironmentapi.EnvironmentType)(commonutils.ToPtr("PROD")),
+						SourceEnvironmentID:     commonutils.ToPtr(serviceenvironmentapi.ServiceEnvironmentID(EnvironmentID)),
+						DeploymentConfigID:      serviceenvironmentapi.DeploymentConfigID(defaultDeploymentConfigID),
+						ServiceAuthPublicKey:    commonutils.ToPtr("-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEA2lmruvcEDykT6KbyIJHYCGhCoPUGq+XlCfLWJXlowf4=\n-----END PUBLIC KEY-----"),
+						AutoApproveSubscription: commonutils.ToPtr(true),
+					}
+
+					prodEnvironmentID, err = dataaccess.CreateServiceEnvironment(prod, token)
+					if err != nil {
+						utils.PrintError(err)
+						return err
+					}
+				} else {
+					prodEnvironmentID = prodEnvironment.ID
+				}
+
+				// Promote the service to production
+				err = dataaccess.PromoteServiceEnvironment(ServiceID, EnvironmentID, token)
 				if err != nil {
 					utils.PrintError(err)
 					return err
 				}
 
-				prod := serviceenvironmentapi.CreateServiceEnvironmentRequest{
-					Name:                    "Production",
-					Description:             "Production environment",
-					ServiceID:               serviceenvironmentapi.ServiceID(ServiceID),
-					Visibility:              serviceenvironmentapi.ServiceVisibility("PUBLIC"),
-					Type:                    (*serviceenvironmentapi.EnvironmentType)(commonutils.ToPtr("PROD")),
-					SourceEnvironmentID:     commonutils.ToPtr(serviceenvironmentapi.ServiceEnvironmentID(EnvironmentID)),
-					DeploymentConfigID:      serviceenvironmentapi.DeploymentConfigID(defaultDeploymentConfigID),
-					ServiceAuthPublicKey:    commonutils.ToPtr("-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEA2lmruvcEDykT6KbyIJHYCGhCoPUGq+XlCfLWJXlowf4=\n-----END PUBLIC KEY-----"),
-					AutoApproveSubscription: commonutils.ToPtr(true),
-				}
+				launching.Complete()
+				sm2.Stop()
 
-				prodEnvironmentID, err = dataaccess.CreateServiceEnvironment(prod, token)
+				// Retrieve the prod SaaS portal URL
+				prodEnvironment, err = dataaccess.DescribeServiceEnvironment(ServiceID, string(prodEnvironmentID), token)
 				if err != nil {
 					utils.PrintError(err)
 					return err
 				}
-			} else {
-				prodEnvironmentID = prodEnvironment.ID
-			}
 
-			// Promote the service to production
-			err = dataaccess.PromoteServiceEnvironment(ServiceID, EnvironmentID, token)
-			if err != nil {
-				utils.PrintError(err)
-				return err
-			}
+				if checkIfSaaSPortalReady(prodEnvironment) {
+					utils.PrintURL("Your SaaS portal is ready at", getSaaSPortalURL(prodEnvironment, ServiceID, string(prodEnvironmentID)))
+				} else if iteractive {
+					// Ask the user if they want to wait for the SaaS portal URL
+					fmt.Print("Do you want to wait to access the prod SaaS offer? [Y/n] It may take a few minutes: ")
+					fmt.Scanln(&userInput)
+					userInput = strings.TrimSpace(strings.ToUpper(userInput))
 
-			launching.Complete()
-			sm2.Stop()
+					if strings.ToLower(userInput) == "y" {
+						sm3 := ysmrr.NewSpinnerManager()
+						loading := sm3.AddSpinner("Preparing SaaS offer...")
+						sm3.Start()
 
-			// Retrieve the prod SaaS portal URL
-			prodEnvironment, err = dataaccess.DescribeServiceEnvironment(ServiceID, string(prodEnvironmentID), token)
-			if err != nil {
-				utils.PrintError(err)
-				return err
-			}
+						for {
+							serviceEnvironment, err = dataaccess.DescribeServiceEnvironment(ServiceID, string(prodEnvironmentID), token)
+							if err != nil {
+								utils.PrintError(err)
+								return err
+							}
 
-			if checkIfSaaSPortalReady(prodEnvironment) {
-				utils.PrintURL("Your SaaS portal is ready at", getSaaSPortalURL(prodEnvironment, ServiceID, string(prodEnvironmentID)))
-			} else if iteractive {
-				// Ask the user if they want to wait for the SaaS portal URL
-				fmt.Print("Do you want to wait to access the prod SaaS offer? [Y/n] It may take a few minutes: ")
-				fmt.Scanln(&userInput)
-				userInput = strings.TrimSpace(strings.ToUpper(userInput))
-
-				if strings.ToLower(userInput) == "y" {
-					sm3 := ysmrr.NewSpinnerManager()
-					loading := sm3.AddSpinner("Preparing SaaS offer...")
-					sm3.Start()
-
-					for {
-						serviceEnvironment, err = dataaccess.DescribeServiceEnvironment(ServiceID, string(prodEnvironmentID), token)
-						if err != nil {
-							utils.PrintError(err)
-							return err
-						}
-
-						if checkIfSaaSPortalReady(serviceEnvironment) {
-							loading.Complete()
-							sm3.Stop()
-							utils.PrintURL("Your SaaS offer is ready at", getSaaSPortalURL(serviceEnvironment, ServiceID, string(prodEnvironmentID)))
-							break
+							if checkIfSaaSPortalReady(serviceEnvironment) {
+								loading.Complete()
+								sm3.Stop()
+								utils.PrintURL("Your SaaS offer is ready at", getSaaSPortalURL(serviceEnvironment, ServiceID, string(prodEnvironmentID)))
+								break
+							}
 						}
 					}
 				}
