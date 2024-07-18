@@ -135,7 +135,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 
 	// Step 2: Display SaaS Portal URL
 	if checkIfSaaSPortalReady(serviceEnvironment) {
-		utils.PrintURL("Access your SaaS offer at", "https://"+*serviceEnvironment.SaasPortalURL)
+		utils.PrintURL("Access your SaaS offer at", getSaaSPortalURL(serviceEnvironment, ServiceID, EnvironmentID))
 	} else if iteractive {
 		// Ask the user if they want to wait for the SaaS Portal URL
 		fmt.Print("Do you want to wait to acccess the SaaS portal? [Y/n] It may take a few minutes: ")
@@ -158,7 +158,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 				if checkIfSaaSPortalReady(serviceEnvironment) {
 					loading.Complete()
 					sm2.Stop()
-					utils.PrintURL("Your SaaS offer is ready at", "https://"+*serviceEnvironment.SaasPortalURL)
+					utils.PrintURL("Your SaaS offer is ready at", getSaaSPortalURL(serviceEnvironment, ServiceID, EnvironmentID))
 					break
 				}
 			}
@@ -232,7 +232,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 			}
 
 			if checkIfSaaSPortalReady(prodEnvironment) {
-				utils.PrintURL("Your SaaS Portal is ready at", "https://"+*prodEnvironment.SaasPortalURL)
+				utils.PrintURL("Your SaaS Portal is ready at", getSaaSPortalURL(prodEnvironment, ServiceID, string(prodEnvironmentID)))
 			} else if iteractive {
 				// Ask the user if they want to wait for the SaaS Portal URL
 				fmt.Print("Do you want to wait to access the prod SaaS offer? [Y/n] It may take a few minutes: ")
@@ -254,7 +254,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 						if checkIfSaaSPortalReady(serviceEnvironment) {
 							loading.Complete()
 							sm3.Stop()
-							utils.PrintURL("Your SaaS offer is ready at", "https://"+*serviceEnvironment.SaasPortalURL)
+							utils.PrintURL("Your SaaS offer is ready at", getSaaSPortalURL(serviceEnvironment, ServiceID, string(prodEnvironmentID)))
 							break
 						}
 					}
@@ -376,4 +376,12 @@ func checkIfSaaSPortalReady(serviceEnvironment *serviceenvironmentapi.DescribeSe
 	}
 
 	return false
+}
+
+func getSaaSPortalURL(serviceEnvironment *serviceenvironmentapi.DescribeServiceEnvironmentResult, serviceID, environmentID string) string {
+	if serviceEnvironment.SaasPortalURL != nil {
+		return fmt.Sprintf("https://"+*serviceEnvironment.SaasPortalURL+"/service-plans?serviceId=%s&environmentId=%s", serviceID, environmentID)
+	}
+
+	return ""
 }
