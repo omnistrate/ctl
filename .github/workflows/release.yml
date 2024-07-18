@@ -265,3 +265,4 @@ jobs:
           token: ${{ steps.generate_token_cli.outputs.token }}
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
           merge-method: squash
+          
