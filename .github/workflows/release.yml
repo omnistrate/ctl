@@ -253,8 +253,6 @@ jobs:
         with:
           token: ${{ steps.generate_token_cli.outputs.token }}
           commit-message: Update Omnistrate CTL Formula
-          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
-          author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
           signoff: true
           draft: true # TODO: Remove before merging
 
