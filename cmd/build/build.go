@@ -133,11 +133,11 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Step 2: Display SaaS Portal URL
+	// Step 2: Display SaaS portal URL
 	if checkIfSaaSPortalReady(serviceEnvironment) {
 		utils.PrintURL("Access your SaaS offer at", getSaaSPortalURL(serviceEnvironment, ServiceID, EnvironmentID))
 	} else if iteractive {
-		// Ask the user if they want to wait for the SaaS Portal URL
+		// Ask the user if they want to wait for the SaaS portal URL
 		fmt.Print("Do you want to wait to acccess the SaaS portal? [Y/n] It may take a few minutes: ")
 		var userInput string
 		fmt.Scanln(&userInput)
@@ -224,7 +224,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 			launching.Complete()
 			sm2.Stop()
 
-			// Retrieve the prod SaaS Portal URL
+			// Retrieve the prod SaaS portal URL
 			prodEnvironment, err = dataaccess.DescribeServiceEnvironment(ServiceID, string(prodEnvironmentID), token)
 			if err != nil {
 				utils.PrintError(err)
@@ -232,9 +232,9 @@ func runBuild(cmd *cobra.Command, args []string) error {
 			}
 
 			if checkIfSaaSPortalReady(prodEnvironment) {
-				utils.PrintURL("Your SaaS Portal is ready at", getSaaSPortalURL(prodEnvironment, ServiceID, string(prodEnvironmentID)))
+				utils.PrintURL("Your SaaS portal is ready at", getSaaSPortalURL(prodEnvironment, ServiceID, string(prodEnvironmentID)))
 			} else if iteractive {
-				// Ask the user if they want to wait for the SaaS Portal URL
+				// Ask the user if they want to wait for the SaaS portal URL
 				fmt.Print("Do you want to wait to access the prod SaaS offer? [Y/n] It may take a few minutes: ")
 				fmt.Scanln(&userInput)
 				userInput = strings.TrimSpace(strings.ToUpper(userInput))
