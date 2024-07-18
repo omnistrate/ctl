@@ -195,7 +195,7 @@ jobs:
     steps:
       - name: Get version
         id: get_version
-        run: echo "version=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+        run: echo "version=${{ github.ref_name }}" | sed 's/\//\\\//g' >> "$GITHUB_OUTPUT"
 
       - name: Download build artifacts
         timeout-minutes: 5
