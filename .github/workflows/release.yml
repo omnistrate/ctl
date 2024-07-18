@@ -244,7 +244,7 @@ jobs:
           sed -i'' -e 's/sha_darwin_amd64 = "[^"]*"/sha_darwin_amd64 = "${{ steps.calculate_sha256.outputs.sha_darwin_amd64 }}"/g' omnistrate-ctl.rb
           sed -i'' -e 's/sha_darwin_arm64 = "[^"]*"/sha_darwin_arm64 = "${{ steps.calculate_sha256.outputs.sha_darwin_arm64 }}"/g' omnistrate-ctl.rb
           sed -i'' -e 's/sha_linux_amd64 = "[^"]*"/sha_linux_amd64 = "${{ steps.calculate_sha256.outputs.sha_linux_amd64 }}"/g' omnistrate-ctl.rb
-          sed -i'' -e 's/vsha_linux_arm64 = "[^"]*"/sha_linux_arm64 = "${{ steps.calculate_sha256.outputs.sha_linux_arm64 }}"/g' omnistrate-ctl.rb
+          sed -i'' -e 's/sha_linux_arm64 = "[^"]*"/sha_linux_arm64 = "${{ steps.calculate_sha256.outputs.sha_linux_arm64 }}"/g' omnistrate-ctl.rb
     
       - name: Create Pull Request
         timeout-minutes: 5
@@ -252,10 +252,15 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ steps.generate_token_cli.outputs.token }}
+          title: Update Omnistrate CTL Formula to ${{ steps.get_version.outputs.version }}
+          body: |
+            This PR updates the Omnistrate CTL Formula to version ${{ steps.get_version.outputs.version }}.
+            The SHA256 checksums have been updated as well.
+            Once the PR is merged, the new version will be available in the Omnistrate Homebrew Tap.
           commit-message: Update Omnistrate CTL Formula to ${{ steps.get_version.outputs.version }}
           signoff: true
-          draft: true # TODO: Remove before merging
-
+          draft: false
+          
       - uses: peter-evans/enable-pull-request-automerge@v3
         timeout-minutes: 5
         with:
