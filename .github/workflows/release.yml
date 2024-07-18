@@ -247,6 +247,7 @@ jobs:
           sed -i'' -e 's/vsha_linux_arm64 = "[^"]*"/sha_linux_arm64 = "${{ steps.calculate_sha256.outputs.sha_linux_arm64 }}"/g' omnistrate-ctl.rb
     
       - name: Create Pull Request
+        timeout-minutes: 5
         id: cpr
         uses: peter-evans/create-pull-request@v6
         with:
@@ -258,6 +259,7 @@ jobs:
           draft: true # TODO: Remove before merging
 
       - uses: peter-evans/enable-pull-request-automerge@v3
+        timeout-minutes: 5
         with:
           token: ${{ steps.generate_token_cli.outputs.token }}
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
