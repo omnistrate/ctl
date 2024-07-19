@@ -13,6 +13,17 @@ curl -fsSL https://raw.githubusercontent.com/omnistrate/cli/master/install-ctl.s
 
 This command will automatically download and install the latest version of the CTL binaries onto your system.
 
+### Homebrew Tap
+CTL can be installed using Homebrew. Homebrew can be installed on MacOS or Linux. It can be installed following the instructions in https://docs.brew.sh/Installation
+To install the latest version of CTL using Homebrew, execute the following command in your terminal:
+
+```
+brew tap omnistrate/core
+brew install omnistrate-ctl
+```
+
+Homebrew will automatically download and install the latest version of the CTL binaries onto your system.
+
 ### Docker Image
 To integrate CTL into your CI/CD pipeline, you can use the CTL docker image.
 The latest version of the CTL can be found in the docker image `ghcr.io/omnistrate/ctl:latest`.
