@@ -182,3 +182,87 @@ jobs:
             token: ${{ steps.generate_token_cli.outputs.token }}
             fail_on_unmatched_files: true
             draft: false
+
+  update-brew-formula:
+    runs-on: ubuntu-latest
+    needs: release
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Get version
+        id: get_version
+        run: echo "version=${{ github.ref_name }}" | sed 's/\//\\\//g' >> "$GITHUB_OUTPUT"
+
+      - name: Download build artifacts
+        timeout-minutes: 5
+        uses: actions/download-artifact@v4
+
+      - name: Display structure of downloaded files
+        timeout-minutes: 1
+        run: ls -R
+
+      - name: Calculate SHA256 checksums
+        id: calculate_sha256
+        run: |
+          sha_darwin_amd64=$(sha256sum omnistrate-ctl-darwin-amd64/omnistrate-ctl-darwin-amd64 | awk '{ print $1 }')
+          sha_darwin_arm64=$(sha256sum omnistrate-ctl-darwin-arm64/omnistrate-ctl-darwin-arm64 | awk '{ print $1 }')
+          sha_linux_amd64=$(sha256sum omnistrate-ctl-linux-amd64/omnistrate-ctl-linux-amd64 | awk '{ print $1 }')
+          sha_linux_arm64=$(sha256sum omnistrate-ctl-linux-arm64/omnistrate-ctl-linux-arm64 | awk '{ print $1 }')
+          echo "sha_darwin_amd64=${sha_darwin_amd64}" >> "$GITHUB_OUTPUT"
+          echo "sha_darwin_arm64=${sha_darwin_arm64}" >> "$GITHUB_OUTPUT"
+          echo "sha_linux_amd64=${sha_linux_amd64}" >> "$GITHUB_OUTPUT"
+          echo "sha_linux_arm64=${sha_linux_arm64}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate token to update the formula
+        timeout-minutes: 5
+        id: generate_token_cli
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a
+        with:
+          app_id: ${{ secrets.CLI_APP_ID }}
+          private_key: ${{ secrets.CLI_APP_PRIVATE_KEY }}
+
+      - name: Checkout Homebrew Tap repository
+        timeout-minutes: 5
+        uses: actions/checkout@v4
+        with: 
+          repository: omnistrate/homebrew-core
+          token: ${{ steps.generate_token_cli.outputs.token }}
+
+      - name: Display structure of repository
+        timeout-minutes: 1
+        run: ls -R
+
+      - name: Update Formula
+        timeout-minutes: 5
+        run: |
+          cd Formula
+          sed -i'' -e 's/version "[^"]*"/version "${{ steps.get_version.outputs.version }}"/g' omnistrate-ctl.rb
+          sed -i'' -e 's/sha_darwin_amd64 = "[^"]*"/sha_darwin_amd64 = "${{ steps.calculate_sha256.outputs.sha_darwin_amd64 }}"/g' omnistrate-ctl.rb
+          sed -i'' -e 's/sha_darwin_arm64 = "[^"]*"/sha_darwin_arm64 = "${{ steps.calculate_sha256.outputs.sha_darwin_arm64 }}"/g' omnistrate-ctl.rb
+          sed -i'' -e 's/sha_linux_amd64 = "[^"]*"/sha_linux_amd64 = "${{ steps.calculate_sha256.outputs.sha_linux_amd64 }}"/g' omnistrate-ctl.rb
+          sed -i'' -e 's/sha_linux_arm64 = "[^"]*"/sha_linux_arm64 = "${{ steps.calculate_sha256.outputs.sha_linux_arm64 }}"/g' omnistrate-ctl.rb
+    
+      - name: Create Pull Request
+        timeout-minutes: 5
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ steps.generate_token_cli.outputs.token }}
+          title: Update Omnistrate CTL Formula to ${{ steps.get_version.outputs.version }}
+          body: |
+            This PR updates the Omnistrate CTL Formula to version ${{ steps.get_version.outputs.version }}.
+            The SHA256 checksums have been updated as well.
+            Once the PR is merged, the new version will be available in the Omnistrate Homebrew Tap.
+          commit-message: Update Omnistrate CTL Formula to ${{ steps.get_version.outputs.version }}
+          signoff: true
+          draft: false
+          
+      - uses: peter-evans/enable-pull-request-automerge@v3
+        timeout-minutes: 5
+        with:
+          repository: omnistrate/homebrew-core
+          token: ${{ steps.generate_token_cli.outputs.token }}
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+          merge-method: squash
+          
