@@ -2,6 +2,7 @@ package get
 
 import (
 	getaccount "github.com/omnistrate/ctl/cmd/get/account"
+	getdomain "github.com/omnistrate/ctl/cmd/get/domain"
 	getservice "github.com/omnistrate/ctl/cmd/get/service"
 	"github.com/spf13/cobra"
 )
@@ -21,6 +22,7 @@ var GetCmd = &cobra.Command{
 func init() {
 	GetCmd.AddCommand(getservice.ServiceCmd)
 	GetCmd.AddCommand(getaccount.AccountCmd)
+	GetCmd.AddCommand(getdomain.DomainCmd)
 
 	GetCmd.Example = getExample()
 

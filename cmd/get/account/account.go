@@ -81,7 +81,7 @@ func Run(cmd *cobra.Command, args []string) error {
 
 		// Print accounts table if no account name is provided
 		if len(args) == 0 {
-			utils.PrintSuccess(fmt.Sprintf("%d accounts found", len(allAccounts)))
+			utils.PrintSuccess(fmt.Sprintf("%d account(s) found", len(allAccounts)))
 			if len(allAccounts) > 0 {
 				printTable(allAccounts)
 			}

@@ -54,7 +54,7 @@ func Run(cmd *cobra.Command, args []string) error {
 
 	// Print domains table if no domain name is provided
 	if len(args) == 0 {
-		utils.PrintSuccess(fmt.Sprintf("%d domains found", len(allDomains)))
+		utils.PrintSuccess(fmt.Sprintf("%d domain(s) found", len(allDomains)))
 		if len(allDomains) > 0 {
 			printTable(allDomains)
 		}

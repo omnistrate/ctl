@@ -1,12 +1,13 @@
 package domain
 
 import (
+	"fmt"
 	saasportalapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/saas_portal_api"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"strings"
-	"time"
 )
 
 var (
@@ -54,6 +55,35 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	domains, err := dataaccess.ListDomains(token)
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	for _, d := range domains.CustomDomains {
+		// Check if domain with the same name already exists
+		if d.Name == args[0] {
+			err = errors.New("domain with the same name already exists, please choose a different name. You can use 'omnistrate-ctl get domain' to list all existing domains.")
+			utils.PrintError(err)
+			return err
+		}
+
+		// Check if domain is registered
+		if d.CustomDomain == domain {
+			err = errors.New(fmt.Sprintf("%s is already registered with another domain, please choose a different domain. You can use 'omnistrate-ctl get domain' to list all existing domains.", domain))
+			utils.PrintError(err)
+			return err
+		}
+
+		// Check if domain of the same environment type already exists
+		if d.EnvironmentType == saasportalapi.EnvironmentType(strings.ToUpper(env)) {
+			err = errors.New("domain with the same environment type already exists, please choose a different environment type. You can use 'omnistrate-ctl get domain' to list all existing domains.")
+			utils.PrintError(err)
+			return err
+		}
+	}
+
 	// Create domain
 	request := &saasportalapi.CreateSaaSPortalCustomDomainRequest{
 		Token:           token,
@@ -68,9 +98,9 @@ func run(cmd *cobra.Command, args []string) error {
 		utils.PrintError(err)
 		return err
 	}
-	utils.PrintSuccess("Domain created successfully\n")
+	utils.PrintSuccess("Domain created successfully")
 
-	domains, err := dataaccess.ListDomains(token)
+	domains, err = dataaccess.ListDomains(token)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -84,13 +114,7 @@ func run(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	for {
-		if customDomain != nil {
-			dataaccess.PrintNextStepVerifyDomainMsg(customDomain.ClusterEndpoint)
-			break
-		}
-		time.Sleep(1 * time.Second)
-	}
+	dataaccess.PrintNextStepVerifyDomainMsg(customDomain.ClusterEndpoint)
 
 	return nil
 }

@@ -2,6 +2,7 @@ package deletec
 
 import (
 	"github.com/omnistrate/ctl/cmd/deletec/account"
+	"github.com/omnistrate/ctl/cmd/deletec/domain"
 	"github.com/omnistrate/ctl/cmd/deletec/service"
 	"github.com/spf13/cobra"
 )
@@ -21,6 +22,7 @@ var DeleteCmd = &cobra.Command{
 func init() {
 	DeleteCmd.AddCommand(service.ServiceCmd)
 	DeleteCmd.AddCommand(account.AccountCmd)
+	DeleteCmd.AddCommand(domain.DomainCmd)
 
 	DeleteCmd.Example = deleteExample()
 

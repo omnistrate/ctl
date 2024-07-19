@@ -97,7 +97,7 @@ func run(cmd *cobra.Command, args []string) error {
 		utils.PrintError(err)
 		return err
 	}
-	utils.PrintSuccess("Account created successfully\n")
+	utils.PrintSuccess("Account created successfully")
 
 	account, err := dataaccess.DescribeAccount(token, string(accountConfigId))
 	if err != nil {
