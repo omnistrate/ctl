@@ -99,7 +99,7 @@ func PrintNextStepVerifyAccountMsg(account *accountconfigapi.DescribeAccountConf
 		awsCloudFormationTemplateURL = *account.AwsCloudFormationTemplateURL
 	}
 
-	utils.PrintSuccess(fmt.Sprintf(NextStepVerifyAccountMsgTemplate, awsCloudFormationTemplateURL,
+	fmt.Println(fmt.Sprintf(NextStepVerifyAccountMsgTemplate, awsCloudFormationTemplateURL,
 		AwsCloudFormationGuideURL, AwsGcpTerraformScriptsURL, AwsGcpTerraformGuideURL))
 }
 

@@ -2,10 +2,22 @@ package dataaccess
 
 import (
 	"context"
+	"fmt"
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/ctl/utils"
 )
+
+const (
+	NextStepsAfterBuildMsgTemplate = `
+Next steps:
+- Customize domain name for SaaS offer by running 'omnistrate-ctl create domain' command
+- Update the service configuration by running 'omnistrate-ctl build' command`
+)
+
+func PrintNextStepsAfterBuildMsg() {
+	fmt.Println(NextStepsAfterBuildMsgTemplate)
+}
 
 func ListServices(token string) (*serviceapi.ListServiceResult, error) {
 	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())

@@ -265,6 +265,9 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	// Step 4: Next steps
+	dataaccess.PrintNextStepsAfterBuildMsg()
+
 	return nil
 }
 
