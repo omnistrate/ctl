@@ -59,7 +59,7 @@ func CreateDomain(request *saasportalapi.CreateSaaSPortalCustomDomainRequest) er
 
 const (
 	DomainNotVerifiedWarningMsgTemplate = `
-WARNING! Domain %s not verified. Need to verify ownership before use.
+WARNING! Domain %s is not verified. Need to verify ownership before use.
 
 Please create the following DNS section for your domain and add two CNAME records as follows.
 

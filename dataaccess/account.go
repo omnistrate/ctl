@@ -77,7 +77,7 @@ func CreateAccount(accountConfig *accountconfigapi.CreateAccountConfigRequest) (
 
 const (
 	AccountNotVerifiedWarningMsgTemplate = `
-WARNING! Account %s(%s) not verified. To complete the account configuration setup, follow the instructions below:
+WARNING! Account %s(%s) is not verified. To complete the account configuration setup, follow the instructions below:
 - For AWS CloudFormation users: Please create your CloudFormation Stack using the provided template at %s. Watch the CloudFormation guide at %s for help.
 - For AWS/GCP Terraform users: Execute the Terraform scripts available at %s, by using the Account Config Identity ID below. For guidance our Terraform instructional video is at %s.`
 
