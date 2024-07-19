@@ -11,8 +11,8 @@ import (
 const (
 	NextStepsAfterBuildMsgTemplate = `
 Next steps:
-- Customize domain name for SaaS offer by running 'omnistrate-ctl create domain' command
-- Update the service configuration by running 'omnistrate-ctl build' command`
+- Customize domain name for SaaS offer: check 'omnistrate-ctl create domain' command
+- Update the service configuration: check 'omnistrate-ctl build' command`
 )
 
 func PrintNextStepsAfterBuildMsg() {
