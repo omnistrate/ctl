@@ -1,6 +1,7 @@
 package account
 
 import (
+	"fmt"
 	accountconfigapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/account_config_api"
 	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/dataaccess"
@@ -74,7 +75,12 @@ func run(cmd *cobra.Command, args []string) error {
 		request.AwsBootstrapRoleARN = commonutils.ToPtr("arn:aws:iam::" + awsAccountID + ":role/omnistrate-bootstrap-role")
 		request.Description = "AWS Account" + awsAccountID
 	} else {
-		// TODO: Get organization id
+		// Get organization id
+		user, err := dataaccess.DescribeUser(token)
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
 
 		// Get gcp cloud provider id
 		cloudProviderID, err := dataaccess.GetCloudProviderByName(token, "gcp")
@@ -86,7 +92,7 @@ func run(cmd *cobra.Command, args []string) error {
 		request.CloudProviderID = accountconfigapi.CloudProviderID(cloudProviderID)
 		request.GcpProjectID = &gcpProjectID
 		request.GcpProjectNumber = &gcpProjectNumber
-		request.GcpServiceAccountEmail = commonutils.ToPtr("bootstrap-org-GGhKF5VHWI@" + gcpProjectID + ".iam.gserviceaccount.com")
+		request.GcpServiceAccountEmail = commonutils.ToPtr(fmt.Sprintf("bootstrap-%s@%s.iam.gserviceaccount.com", user.OrgID, gcpProjectID))
 		request.Description = "GCP Account" + gcpProjectID
 	}
 
