@@ -5,7 +5,6 @@ import (
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
-	"time"
 )
 
 var (
@@ -16,38 +15,23 @@ var (
   omnistrate-ctl create account <name> --gcp-project-id <gcp-project-id> --gcp-project-number <gcp-project-number> --gcp-service-account-email <gcp-service-account-email>`
 )
 
-var (
-	description            string
-	awsAccountID           string
-	awsBootstrapRoleARN    string
-	gcpProjectID           string
-	gcpProjectNumber       string
-	gcpServiceAccountEmail string
-)
-
-// AccountCmd represents the create command
 var AccountCmd = &cobra.Command{
-	Use:     "account <name> [flags]",
-	Short:   "Create a account",
-	Long:    ``,
-	Example: accountExample,
-	RunE:    run,
-	PostRun: func(cmd *cobra.Command, args []string) {
-		time.Sleep(1 * time.Second) // Sleep for 1 second to allow for account creation to complete
-		dataaccess.AskVerifyAccountIfAny()
-	},
+	Use:          "account <name> [flags]",
+	Short:        "Create a account",
+	Long:         ``,
+	Example:      accountExample,
+	RunE:         run,
 	SilenceUsage: true,
 }
 
 func init() {
 	AccountCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 
-	AccountCmd.Flags().StringVarP(&description, "description", "", "", "Provide a description for the account")
-	AccountCmd.Flags().StringVarP(&awsAccountID, "aws-account-id", "", "", "AWS account ID")
-	AccountCmd.Flags().StringVarP(&awsBootstrapRoleARN, "aws-bootstrap-role-arn", "", "", "AWS bootstrap role ARN")
-	AccountCmd.Flags().StringVarP(&gcpProjectID, "gcp-project-id", "", "", "GCP project ID")
-	AccountCmd.Flags().StringVarP(&gcpProjectNumber, "gcp-project-number", "", "", "GCP project number")
-	AccountCmd.Flags().StringVarP(&gcpServiceAccountEmail, "gcp-service-account-email", "", "", "GCP service account email")
+	AccountCmd.Flags().String("aws-account-id", "", "AWS account ID")
+	AccountCmd.Flags().String("aws-bootstrap-role-arn", "", "AWS bootstrap role ARN")
+	AccountCmd.Flags().String("gcp-project-id", "", "GCP project ID")
+	AccountCmd.Flags().String("gcp-project-number", "", "GCP project number")
+	AccountCmd.Flags().String("gcp-service-account-email", "", "GCP service account email")
 
 	err := AccountCmd.MarkFlagRequired("name")
 	if err != nil {
@@ -61,6 +45,13 @@ func init() {
 }
 
 func run(cmd *cobra.Command, args []string) error {
+	// Get flags
+	awsAccountID, _ := cmd.Flags().GetString("aws-account-id")
+	awsBootstrapRoleARN, _ := cmd.Flags().GetString("aws-bootstrap-role-arn")
+	gcpProjectID, _ := cmd.Flags().GetString("gcp-project-id")
+	gcpProjectNumber, _ := cmd.Flags().GetString("gcp-project-number")
+	gcpServiceAccountEmail, _ := cmd.Flags().GetString("gcp-service-account-email")
+
 	// Validate user is currently logged in
 	token, err := utils.GetToken()
 	if err != nil {
@@ -74,12 +65,6 @@ func run(cmd *cobra.Command, args []string) error {
 		Name:  args[0],
 	}
 
-	if description != "" {
-		request.Description = description
-	} else {
-		request.Description = args[0]
-	}
-
 	if awsAccountID != "" {
 		// Get aws cloud provider id
 		cloudProviderID, err := dataaccess.GetCloudProviderByName(token, "aws")
@@ -91,6 +76,7 @@ func run(cmd *cobra.Command, args []string) error {
 		request.CloudProviderID = accountconfigapi.CloudProviderID(cloudProviderID)
 		request.AwsAccountID = &awsAccountID
 		request.AwsBootstrapRoleARN = &awsBootstrapRoleARN
+		request.Description = "AWS Account" + awsAccountID
 	} else {
 		// Get gcp cloud provider id
 		cloudProviderID, err := dataaccess.GetCloudProviderByName(token, "gcp")
@@ -103,15 +89,22 @@ func run(cmd *cobra.Command, args []string) error {
 		request.GcpProjectID = &gcpProjectID
 		request.GcpProjectNumber = &gcpProjectNumber
 		request.GcpServiceAccountEmail = &gcpServiceAccountEmail
+		request.Description = "GCP Account" + gcpProjectID
 	}
 
-	_, err = dataaccess.CreateAccount(request)
-
+	accountConfigId, err := dataaccess.CreateAccount(request)
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
-	utils.PrintSuccess("Account(s) created successfully")
+	utils.PrintSuccess("Account created successfully\n")
+
+	account, err := dataaccess.DescribeAccount(token, string(accountConfigId))
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+	dataaccess.PrintNextStepVerifyAccountMsg(account)
 
 	return nil
 }

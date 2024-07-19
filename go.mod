@@ -2,6 +2,8 @@ module github.com/omnistrate/ctl
 
 go 1.22.0
 
+replace github.com/omnistrate/api-design/pkg/httpclientwrapper => ../api-design/pkg/httpclientwrapper
+
 require (
 	github.com/chelnak/ysmrr v0.4.0
 	github.com/compose-spec/compose-go v1.20.2

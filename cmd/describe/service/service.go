@@ -25,7 +25,6 @@ var (
   omnistrate-ctl describe service <id1> <id2> <id3> --id`
 )
 
-// ServiceCmd represents the describe command
 var ServiceCmd = &cobra.Command{
 	Use:          "service <name>",
 	Short:        "Display details for one or more services",

@@ -25,7 +25,6 @@ var (
   omnistrate-ctl describe account <id1> <id2> <id3> --id`
 )
 
-// AccountCmd represents the describe command
 var AccountCmd = &cobra.Command{
 	Use:     "account <name>",
 	Short:   "Display details for one or more accounts",

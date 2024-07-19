@@ -75,10 +75,50 @@ func CreateAccount(accountConfig *accountconfigapi.CreateAccountConfigRequest) (
 	return res, nil
 }
 
-const warningMsgTemplate = `
+const (
+	AccountNotVerifiedWarningMsgTemplate = `
 WARNING! Account %s(%s) not verified. To complete the account configuration setup, follow the instructions below:
 - For AWS CloudFormation users: Please create your CloudFormation Stack using the provided template at %s. Watch the CloudFormation guide at %s for help.
 - For AWS/GCP Terraform users: Execute the Terraform scripts available at %s, by using the Account Config Identity ID below. For guidance our Terraform instructional video is at %s.`
+
+	NextStepVerifyAccountMsgTemplate = `
+Next step:
+Verify your account.
+
+- For AWS CloudFormation users: Please create your CloudFormation Stack using the provided template at %s. Watch the CloudFormation guide at %s for help.
+- For AWS/GCP Terraform users: Execute the Terraform scripts available at %s, by using the Account Config Identity ID below. For guidance our Terraform instructional video is at %s.`
+
+	AwsCloudFormationGuideURL = "https://youtu.be/Mu-4jppldwk"
+	AwsGcpTerraformScriptsURL = "https://github.com/omnistrate/account-setup"
+	AwsGcpTerraformGuideURL   = "https://youtu.be/eKktc4QKgaA"
+)
+
+func PrintNextStepVerifyAccountMsg(account *accountconfigapi.DescribeAccountConfigResult) {
+	awsCloudFormationTemplateURL := ""
+	if account.AwsCloudFormationTemplateURL != nil {
+		awsCloudFormationTemplateURL = *account.AwsCloudFormationTemplateURL
+	}
+
+	utils.PrintSuccess(fmt.Sprintf(NextStepVerifyAccountMsgTemplate, awsCloudFormationTemplateURL,
+		AwsCloudFormationGuideURL, AwsGcpTerraformScriptsURL, AwsGcpTerraformGuideURL))
+}
+
+func PrintAccountNotVerifiedWarning(account *accountconfigapi.DescribeAccountConfigResult) {
+	awsCloudFormationTemplateURL := ""
+	if account.AwsCloudFormationTemplateURL != nil {
+		awsCloudFormationTemplateURL = *account.AwsCloudFormationTemplateURL
+	}
+
+	var targetAccountID string
+	if account.AwsAccountID != nil {
+		targetAccountID = *account.AwsAccountID
+	} else {
+		targetAccountID = *account.GcpProjectID
+	}
+
+	utils.PrintWarning(fmt.Sprintf(AccountNotVerifiedWarningMsgTemplate, account.Name, targetAccountID, awsCloudFormationTemplateURL,
+		AwsCloudFormationGuideURL, AwsGcpTerraformScriptsURL, AwsGcpTerraformGuideURL))
+}
 
 func AskVerifyAccountIfAny() {
 	token, err := utils.GetToken()
@@ -97,24 +137,7 @@ func AskVerifyAccountIfAny() {
 	// Warn if any accounts are not verified
 	for _, account := range listRes.AccountConfigs {
 		if account.Status != "READY" {
-			awsCloudFormationTemplateURL := ""
-			if account.AwsCloudFormationTemplateURL != nil {
-				awsCloudFormationTemplateURL = *account.AwsCloudFormationTemplateURL
-			}
-
-			awsCloudFormationGuideURL := "https://youtu.be/Mu-4jppldwk"
-			awsGcpTerraformScriptsURL := "https://github.com/omnistrate/account-setup"
-			awsGcpTerraformGuideURL := "https://youtu.be/eKktc4QKgaA"
-
-			var targetAccountID string
-			if account.AwsAccountID != nil {
-				targetAccountID = *account.AwsAccountID
-			} else {
-				targetAccountID = *account.GcpProjectID
-			}
-
-			utils.PrintWarning(fmt.Sprintf(warningMsgTemplate, account.Name, targetAccountID, awsCloudFormationTemplateURL,
-				awsCloudFormationGuideURL, awsGcpTerraformScriptsURL, awsGcpTerraformGuideURL))
+			PrintAccountNotVerifiedWarning(account)
 		}
 	}
 }
