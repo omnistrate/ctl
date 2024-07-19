@@ -24,7 +24,6 @@ var (
   omnistrate-ctl delete service <ID1> <ID2> <ID3> --id`
 )
 
-// ServiceCmd represents the delete command
 var ServiceCmd = &cobra.Command{
 	Use:          "service <name>",
 	Short:        "Delete one or more services",

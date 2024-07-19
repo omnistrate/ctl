@@ -2,6 +2,7 @@ package create
 
 import (
 	"github.com/omnistrate/ctl/cmd/create/account"
+	"github.com/omnistrate/ctl/cmd/create/domain"
 	"github.com/spf13/cobra"
 )
 
@@ -19,6 +20,7 @@ var CreateCmd = &cobra.Command{
 
 func init() {
 	CreateCmd.AddCommand(account.AccountCmd)
+	CreateCmd.AddCommand(domain.DomainCmd)
 
 	CreateCmd.Example = createExample()
 

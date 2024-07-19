@@ -33,12 +33,12 @@ var (
 	environmentType    string
 	release            bool
 	releaseAsPreferred bool
-	iteractive         bool
+	interactive        bool
 )
 
 // BuildCmd represents the build command
 var BuildCmd = &cobra.Command{
-	Use:          "build [--file FILE] [--name NAME] [--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] [--environment ENVIRONMENT] [--environment ENVIRONMENT_TYPE] [--release] [--release-as-preferred]",
+	Use:          "build [--file FILE] [--name NAME] [--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] [--environment ENVIRONMENT] [--environment ENVIRONMENT_TYPE] [--release] [--release-as-preferred][--interactive]",
 	Short:        "Build SaaS from docker compose.",
 	Long:         `Builds a new service using a Docker Compose file. The --name flag is required to specify the service name. Optionally, you can provide a description and a URL for the service's logo. Use the --environment and --environment-type flag to specify the target environment. Use --release or --release-as-preferred to release the service after building.`,
 	Example:      `  omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png" --environment "dev" --environment-type "DEV" --release-as-preferred`,
@@ -55,7 +55,7 @@ func init() {
 	BuildCmd.Flags().StringVarP(&environmentType, "environment-type", "", "dev", "Type of environment. Valid options include: 'prod', 'canary', 'staging', 'qa', 'dev'")
 	BuildCmd.Flags().BoolVarP(&release, "release", "", false, "Release the service after building it")
 	BuildCmd.Flags().BoolVarP(&releaseAsPreferred, "release-as-preferred", "", false, "Release the service as preferred after building it")
-	BuildCmd.Flags().BoolVarP(&iteractive, "interactive", "i", false, "Interactive mode")
+	BuildCmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "Interactive mode")
 
 	err := BuildCmd.MarkFlagRequired("file")
 	if err != nil {
@@ -136,7 +136,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	// Step 2: Display SaaS portal URL
 	if checkIfSaaSPortalReady(serviceEnvironment) {
 		utils.PrintURL("Access your SaaS offer at", getSaaSPortalURL(serviceEnvironment, ServiceID, EnvironmentID))
-	} else if iteractive {
+	} else if interactive {
 		// Ask the user if they want to wait for the SaaS portal URL
 		fmt.Print("Do you want to wait to acccess the SaaS portal? [Y/n] It may take a few minutes: ")
 		var userInput string
@@ -166,7 +166,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	}
 
 	// Step 3: Launch service to production if the service is in dev environment
-	if iteractive {
+	if interactive {
 		if strings.ToLower(string(serviceEnvironment.Type)) == "dev" {
 			// Ask the user if they want to launch the service to production
 			fmt.Print("Do you want to launch it to production? [Y/n] You can always promote it later: ")
@@ -234,7 +234,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 
 				if checkIfSaaSPortalReady(prodEnvironment) {
 					utils.PrintURL("Your SaaS portal is ready at", getSaaSPortalURL(prodEnvironment, ServiceID, string(prodEnvironmentID)))
-				} else if iteractive {
+				} else if interactive {
 					// Ask the user if they want to wait for the SaaS portal URL
 					fmt.Print("Do you want to wait to access the prod SaaS offer? [Y/n] It may take a few minutes: ")
 					fmt.Scanln(&userInput)
@@ -263,6 +263,11 @@ func runBuild(cmd *cobra.Command, args []string) error {
 				}
 			}
 		}
+	}
+
+	// Step 4: Next steps
+	if interactive {
+		dataaccess.PrintNextStepsAfterBuildMsg()
 	}
 
 	return nil
@@ -369,7 +374,7 @@ func resetBuild() {
 	environmentType = ""
 	release = false
 	releaseAsPreferred = false
-	iteractive = false
+	interactive = false
 }
 
 func checkIfSaaSPortalReady(serviceEnvironment *serviceenvironmentapi.DescribeServiceEnvironmentResult) bool {

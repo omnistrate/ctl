@@ -23,7 +23,6 @@ var (
   omnistrate-ctl delete account <id1> <id2> <id3> --id`
 )
 
-// AccountCmd represents the delete command
 var AccountCmd = &cobra.Command{
 	Use:          "account <name>",
 	Short:        "Delete one or more accounts",

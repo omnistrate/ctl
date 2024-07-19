@@ -79,7 +79,7 @@ func Run(cmd *cobra.Command, args []string) error {
 
 		// Print services table if no service name is provided
 		if len(args) == 0 {
-			utils.PrintSuccess(fmt.Sprintf("%d services found", len(allServices)))
+			utils.PrintSuccess(fmt.Sprintf("%d service(s) found", len(allServices)))
 			if len(allServices) > 0 {
 				printTable(allServices)
 			}
