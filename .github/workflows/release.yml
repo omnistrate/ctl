@@ -226,7 +226,7 @@ jobs:
         timeout-minutes: 5
         uses: actions/checkout@v4
         with: 
-          repository: omnistrate/homebrew-core
+          repository: omnistrate/homebrew-tap
           token: ${{ steps.generate_token_cli.outputs.token }}
 
       - name: Display structure of repository
@@ -261,7 +261,7 @@ jobs:
       - uses: peter-evans/enable-pull-request-automerge@v3
         timeout-minutes: 5
         with:
-          repository: omnistrate/homebrew-core
+          repository: omnistrate/homebrew-tap
           token: ${{ steps.generate_token_cli.outputs.token }}
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
           merge-method: squash

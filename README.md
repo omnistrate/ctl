@@ -18,7 +18,7 @@ CTL can be installed using Homebrew. Homebrew can be installed on MacOS or Linux
 To install the latest version of CTL using Homebrew, execute the following command in your terminal:
 
 ```
-brew tap omnistrate/core
+brew tap omnistrate/tap
 brew install omnistrate-ctl
 ```
 
