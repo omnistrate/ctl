@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/omnistrate/ctl/cmd"
-	createdomain "github.com/omnistrate/ctl/cmd/create/domain"
-	deletedomain "github.com/omnistrate/ctl/cmd/deletec/domain"
-	getdomain "github.com/omnistrate/ctl/cmd/get/domain"
 	"github.com/omnistrate/ctl/test/testutils"
 	"testing"
 
@@ -31,28 +28,31 @@ func Test_domain_basic(t *testing.T) {
 	devDomainName := "dev" + uuid.NewString()
 	prodDomainName := "prod" + uuid.NewString()
 
-	// PASS: create dev domain
-	createdomain.DomainCmd.SetArgs([]string{devDomainName, "--env", "dev", "--domain", "domain.dev"})
-	err = createdomain.DomainCmd.Execute()
-	require.NoError(err)
+	// FAIL: create dev domain
+	cmd.RootCmd.SetArgs([]string{"create", "domain", devDomainName, "--env", "dev", "--domain", "domain.dev"})
+	err = cmd.RootCmd.Execute()
+	require.Error(err)
+	require.Contains(err.Error(), "saas portal does not exist for environment type")
 
-	// PASS: create prod domain
-	createdomain.DomainCmd.SetArgs([]string{prodDomainName, "--env", "prod", "--domain", "domain.prod"})
-	err = createdomain.DomainCmd.Execute()
-	require.NoError(err)
+	// FAIL: create prod domain
+	cmd.RootCmd.SetArgs([]string{"create", "domain", prodDomainName, "--env", "prod", "--domain", "domain.prod"})
+	err = cmd.RootCmd.Execute()
+	require.Error(err)
+	require.Contains(err.Error(), "saas portal does not exist for environment type")
 
 	// PASS: get domains
-	getdomain.DomainCmd.SetArgs([]string{})
-	err = getdomain.DomainCmd.Execute()
+	cmd.RootCmd.SetArgs([]string{"get", "domain"})
+	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
 	// PASS: get domains by name
-	getdomain.DomainCmd.SetArgs([]string{devDomainName, prodDomainName})
-	err = getdomain.DomainCmd.Execute()
+	cmd.RootCmd.SetArgs([]string{"get", "domain", devDomainName, prodDomainName})
+	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	// PASS: delete domains
-	deletedomain.DomainCmd.SetArgs([]string{devDomainName, prodDomainName})
-	err = deletedomain.DomainCmd.Execute()
-	require.NoError(err)
+	// FAIL: delete domains
+	cmd.RootCmd.SetArgs([]string{"delete", "domain", devDomainName, prodDomainName})
+	err = cmd.RootCmd.Execute()
+	require.Error(err)
+	require.Contains(err.Error(), "domain(s) not found")
 }

@@ -34,14 +34,47 @@ var (
 	release            bool
 	releaseAsPreferred bool
 	interactive        bool
+
+	buildExample = `  # Build in dev environment
+  omnistrate-ctl build --file docker-compose.yml --name "My Service"
+
+  # Build in prod environment
+  omnistrate-ctl build --file docker-compose.yml --name "My Service" --environment prod --environment-type prod
+
+  # Build and release the service
+  omnistrate-ctl build --file docker-compose.yml --name "My Service" --release
+
+  # Build and release the service as preferred
+  omnistrate-ctl build --file docker-compose.yml --name "My Service" --release-as-preferred
+
+  # Build interactively
+  omnistrate-ctl build --file docker-compose.yml --name "My Service" --interactive
+
+  # Build with service description and service logo
+  omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png"
+`
+
+	buildLong = `Build command can be used to build one service plan from docker compose. 
+It has two main modes of operation:
+  - Create a new service plan
+  - Update an existing service plan
+
+Below info served as service plan identifiers:
+  - service name (--name, required)
+  - environment name (--environment, optional, default: Dev)
+  - environment type (--environment-type, optional, default: dev)
+  - service plan name (the name field of x-omnistrate-service-plan tag in compose spec file, required)
+If the identifiers match an existing service plan, it will update that plan. Otherwise, it'll create a new service plan. 
+
+This command has an interactive mode. In this mode, you can choose to promote the service plan to production by interacting with the prompts.`
 )
 
 // BuildCmd represents the build command
 var BuildCmd = &cobra.Command{
-	Use:          "build [--file FILE] [--name NAME] [--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] [--environment ENVIRONMENT] [--environment ENVIRONMENT_TYPE] [--release] [--release-as-preferred][--interactive]",
-	Short:        "Build SaaS from docker compose.",
-	Long:         `Builds a new service using a Docker Compose file. The --name flag is required to specify the service name. Optionally, you can provide a description and a URL for the service's logo. Use the --environment and --environment-type flag to specify the target environment. Use --release or --release-as-preferred to release the service after building.`,
-	Example:      `  omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png" --environment "dev" --environment-type "DEV" --release-as-preferred`,
+	Use:          "build [--file FILE] [--name NAME] [--environment ENVIRONMENT] [--environment ENVIRONMENT_TYPE] [--release] [--release-as-preferred][--interactive][--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] ",
+	Short:        "Build one service plan from docker compose.",
+	Long:         buildLong,
+	Example:      buildExample,
 	RunE:         runBuild,
 	SilenceUsage: true,
 }
@@ -51,7 +84,7 @@ func init() {
 	BuildCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the service")
 	BuildCmd.Flags().StringVarP(&description, "description", "", "", "Description of the service")
 	BuildCmd.Flags().StringVarP(&serviceLogoURL, "service-logo-url", "", "", "URL to the service logo")
-	BuildCmd.Flags().StringVarP(&environment, "environment", "", "Dev", "Environment to build the service in")
+	BuildCmd.Flags().StringVarP(&environment, "environment", "", "Dev", "Name of the environment to build the service in.")
 	BuildCmd.Flags().StringVarP(&environmentType, "environment-type", "", "dev", "Type of environment. Valid options include: 'prod', 'canary', 'staging', 'qa', 'dev'")
 	BuildCmd.Flags().BoolVarP(&release, "release", "", false, "Release the service after building it")
 	BuildCmd.Flags().BoolVarP(&releaseAsPreferred, "release-as-preferred", "", false, "Release the service as preferred after building it")
@@ -65,6 +98,8 @@ func init() {
 	if err != nil {
 		return
 	}
+
+	BuildCmd.MarkFlagsRequiredTogether("environment", "environment-type")
 }
 
 func runBuild(cmd *cobra.Command, args []string) error {

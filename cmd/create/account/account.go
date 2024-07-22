@@ -1,7 +1,9 @@
 package account
 
 import (
+	"fmt"
 	accountconfigapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/account_config_api"
+	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
@@ -9,10 +11,10 @@ import (
 
 var (
 	accountExample = `  # Create aws account
-  create account <name> --aws-account-id <aws-account-id> --aws-bootstrap-role-arn <aws-bootstrap-role-arn>
+  create account <name> --aws-account-id <aws-account-id>
 
   # Create gcp account
-  omnistrate-ctl create account <name> --gcp-project-id <gcp-project-id> --gcp-project-number <gcp-project-number> --gcp-service-account-email <gcp-service-account-email>`
+  omnistrate-ctl create account <name> --gcp-project-id <gcp-project-id> --gcp-project-number <gcp-project-number>`
 )
 
 var AccountCmd = &cobra.Command{
@@ -28,10 +30,8 @@ func init() {
 	AccountCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 
 	AccountCmd.Flags().String("aws-account-id", "", "AWS account ID")
-	AccountCmd.Flags().String("aws-bootstrap-role-arn", "", "AWS bootstrap role ARN")
 	AccountCmd.Flags().String("gcp-project-id", "", "GCP project ID")
 	AccountCmd.Flags().String("gcp-project-number", "", "GCP project number")
-	AccountCmd.Flags().String("gcp-service-account-email", "", "GCP service account email")
 
 	err := AccountCmd.MarkFlagRequired("name")
 	if err != nil {
@@ -40,17 +40,14 @@ func init() {
 
 	AccountCmd.MarkFlagsMutuallyExclusive("aws-account-id", "gcp-project-id")
 	AccountCmd.MarkFlagsOneRequired("aws-account-id", "gcp-project-id")
-	AccountCmd.MarkFlagsRequiredTogether("aws-account-id", "aws-bootstrap-role-arn")
-	AccountCmd.MarkFlagsRequiredTogether("gcp-project-id", "gcp-project-number", "gcp-service-account-email")
+	AccountCmd.MarkFlagsRequiredTogether("gcp-project-id", "gcp-project-number")
 }
 
 func run(cmd *cobra.Command, args []string) error {
 	// Get flags
 	awsAccountID, _ := cmd.Flags().GetString("aws-account-id")
-	awsBootstrapRoleARN, _ := cmd.Flags().GetString("aws-bootstrap-role-arn")
 	gcpProjectID, _ := cmd.Flags().GetString("gcp-project-id")
 	gcpProjectNumber, _ := cmd.Flags().GetString("gcp-project-number")
-	gcpServiceAccountEmail, _ := cmd.Flags().GetString("gcp-service-account-email")
 
 	// Validate user is currently logged in
 	token, err := utils.GetToken()
@@ -75,9 +72,16 @@ func run(cmd *cobra.Command, args []string) error {
 
 		request.CloudProviderID = accountconfigapi.CloudProviderID(cloudProviderID)
 		request.AwsAccountID = &awsAccountID
-		request.AwsBootstrapRoleARN = &awsBootstrapRoleARN
+		request.AwsBootstrapRoleARN = commonutils.ToPtr("arn:aws:iam::" + awsAccountID + ":role/omnistrate-bootstrap-role")
 		request.Description = "AWS Account" + awsAccountID
 	} else {
+		// Get organization id
+		user, err := dataaccess.DescribeUser(token)
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+
 		// Get gcp cloud provider id
 		cloudProviderID, err := dataaccess.GetCloudProviderByName(token, "gcp")
 		if err != nil {
@@ -88,7 +92,7 @@ func run(cmd *cobra.Command, args []string) error {
 		request.CloudProviderID = accountconfigapi.CloudProviderID(cloudProviderID)
 		request.GcpProjectID = &gcpProjectID
 		request.GcpProjectNumber = &gcpProjectNumber
-		request.GcpServiceAccountEmail = &gcpServiceAccountEmail
+		request.GcpServiceAccountEmail = commonutils.ToPtr(fmt.Sprintf("bootstrap-%s@%s.iam.gserviceaccount.com", user.OrgID, gcpProjectID))
 		request.Description = "GCP Account" + gcpProjectID
 	}
 
