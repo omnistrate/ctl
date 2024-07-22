@@ -28,13 +28,13 @@ func Test_account_basic(t *testing.T) {
 	awsAccountName := "aws" + uuid.NewString()
 	gcpAccountName := "gcp" + uuid.NewString()
 
-	// PASS: create aws account
+	// FAIL: create aws account
 	cmd.RootCmd.SetArgs([]string{"create", "account", awsAccountName, "--aws-account-id", "123456789012"})
 	err = cmd.RootCmd.Execute()
 	require.Error(err)
 	require.Contains(err.Error(), "unauthorized: only root users can onboard accounts")
 
-	// PASS: create gcp account
+	// FAIL: create gcp account
 	cmd.RootCmd.SetArgs([]string{"create", "account", gcpAccountName, "--gcp-project-id", "project-id", "--gcp-project-number", "project-number"})
 	err = cmd.RootCmd.Execute()
 	require.Error(err)
@@ -55,7 +55,7 @@ func Test_account_basic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	// PASS: delete accounts
+	// FAIL: delete accounts
 	cmd.RootCmd.SetArgs([]string{"delete", "account", awsAccountName, gcpAccountName})
 	err = cmd.RootCmd.Execute()
 	require.Error(err)
