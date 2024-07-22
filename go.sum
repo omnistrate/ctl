@@ -57,12 +57,8 @@ github.com/mitchellh/mapstructure v1.5.0 h1:jeMsZIYE/09sWLaz43PL7Gy6RuMjD2eJVyua
 github.com/mitchellh/mapstructure v1.5.0/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
-github.com/omnistrate/api-design v0.6.472 h1:0r7xxqoAZS9nSRmgjJ48J+Zy287hhNGDCXRkGRWyC48=
-github.com/omnistrate/api-design v0.6.472/go.mod h1:r4u9GirBjdH2hbwzC0YPRk9QY73Gpr8877r7krfK8yY=
 github.com/omnistrate/api-design v0.6.474 h1:zx7oVzq9UUdzUhx6SPpkFEt5RSzjtXB4BRuEERQyofU=
 github.com/omnistrate/api-design v0.6.474/go.mod h1:r4u9GirBjdH2hbwzC0YPRk9QY73Gpr8877r7krfK8yY=
-github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240719040015-da647dc4c416 h1:NMtTdbsS4zrydv+VgxfzXqvkgV7hiBb/dKbVRihsCrw=
-github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240719040015-da647dc4c416/go.mod h1:HWRdwqwHEWT/I38jWrCdkydGjsxdSigrjX0ZMjVABBw=
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240719210911-321bb2ffbf78 h1:5KeCtGppwlRc75eZXUuuDesc+z98Et8FXnhrA/AGU9U=
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240719210911-321bb2ffbf78/go.mod h1:HWRdwqwHEWT/I38jWrCdkydGjsxdSigrjX0ZMjVABBw=
 github.com/omnistrate/commons/pkg/constants v0.0.0-20240713005810-42b99387418b h1:hIiV4F5da0tnK8b7X77+m42bXUoM0UrzmARgMnVZUTs=
