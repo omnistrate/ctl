@@ -82,6 +82,7 @@ func init() {
 
 	RootCmd.AddCommand(auth.LoginCmd)
 	RootCmd.AddCommand(auth.LogoutCmd)
+	RootCmd.AddCommand(auth.SsoCmd)
 
 	RootCmd.AddCommand(build.BuildCmd)
 
