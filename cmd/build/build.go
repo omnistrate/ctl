@@ -56,17 +56,17 @@ var (
 
 	buildLong = `Build command can be used to build one service plan from docker compose. 
 It has two main modes of operation:
-1. Build a new service plan:
-  - The command will build a new service plan in the specified environment and environment type.
-  - The service plan will be automatically released as preferred to the specified environment no matter whether --release or --release-as-preferred flag is provided.
-  - The command will display the SaaS portal URL once the service plan is built.
-  - The command will also ask the user if they want to launch the service plan to production if the service plan is built in the dev environment. The command will display the prod SaaS portal URL if the service plan is launched to production. The command will also display the next steps after building the service plan.
-2. Update an existing service plan: 
-  - The command will update an existing service plan in the specified environment and environment type. 
-  - The command will also release the service plan if the --release flag is provided. 
-  - The command will release the service plan as preferred if the --release-as-preferred flag is provided. 
-  - The command will display the SaaS portal URL once the service plan is built. 
-  - In interactive mode, you can choose to promote the service plan to production by interacting with the prompts.`
+  - Create a new service plan
+  - Update an existing service plan
+
+Below info served as service plan identifiers:
+  - service name (--name, required)
+  - environment name (--environment, optional, default: Dev)
+  - environment type (--environment-type, optional, default: dev)
+  - service plan name (the name field of x-omnistrate-service-plan tag in compose spec file, required)
+If the identifiers match an existing service plan, it will update that plan. Otherwise, it'll create a new service plan. 
+
+This command has an interactive mode. In this mode, you can choose to promote the service plan to production by interacting with the prompts.`
 )
 
 // BuildCmd represents the build command
@@ -100,7 +100,6 @@ func init() {
 	}
 
 	BuildCmd.MarkFlagsRequiredTogether("environment", "environment-type")
-	BuildCmd.MarkFlagsMutuallyExclusive("release", "release-as-preferred")
 }
 
 func runBuild(cmd *cobra.Command, args []string) error {
