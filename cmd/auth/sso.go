@@ -129,14 +129,19 @@ type AccessTokenResponse struct {
 
 // GitHub client credentials
 const (
-	devClientID = "Ov23ctpQGrpGvsIIJxFv"
-	scope       = "user"
+	devClientID  = "Ov23ctpQGrpGvsIIJxFv"
+	prodClientID = "Ov23li2nyhdelepEtjcg"
+	scope        = "user"
 )
 
 // requestDeviceCode requests a device and user verification code from GitHub
 func requestDeviceCode() (*DeviceCodeResponse, error) {
+	clientID := devClientID
+	if utils.IsProd() {
+		clientID = prodClientID
+	}
 	data := map[string]string{
-		"client_id": devClientID,
+		"client_id": clientID,
 		"scope":     scope,
 	}
 
@@ -181,8 +186,12 @@ func requestDeviceCode() (*DeviceCodeResponse, error) {
 
 // pollForAccessToken polls GitHub for an access token
 func pollForAccessToken(deviceCode string, interval int) (*AccessTokenResponse, error) {
+	clientID := devClientID
+	if utils.IsProd() {
+		clientID = prodClientID
+	}
 	data := map[string]string{
-		"client_id":   devClientID,
+		"client_id":   clientID,
 		"device_code": deviceCode,
 		"grant_type":  "urn:ietf:params:oauth:grant-type:device_code",
 	}
