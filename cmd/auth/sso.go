@@ -16,6 +16,7 @@ import (
 	"github.com/spf13/cobra"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -42,6 +43,12 @@ func init() {
 }
 
 func run(cmd *cobra.Command, args []string) error {
+	if strings.ToLower(args[0]) != "github" {
+		err := errors.New(fmt.Sprintf("Unsupported SSO provider: %s\n", args[0]))
+		utils.PrintError(err)
+		return err
+	}
+
 	// Step 1: Request device and user verification codes from GitHub
 	deviceCodeResponse, err := requestDeviceCode()
 	if err != nil {
