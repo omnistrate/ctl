@@ -76,6 +76,8 @@ func run(cmd *cobra.Command, args []string) error {
 		utils.PrintError(err)
 		return err
 	}
+	println(accessTokenResponse.TokenType)
+	println(accessTokenResponse.Scope)
 	println(accessTokenResponse.AccessToken)
 
 	// Step 4: Use the access token to authenticate with the Omnistrate platform
@@ -133,7 +135,7 @@ type AccessTokenResponse struct {
 // GitHub client credentials
 const (
 	devClientID = "Ov23ctpQGrpGvsIIJxFv"
-	scope       = "user:email"
+	scope       = "user"
 )
 
 // requestDeviceCode requests a device and user verification code from GitHub
@@ -154,6 +156,8 @@ func requestDeviceCode() (*DeviceCodeResponse, error) {
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
+	req.Header.Set("X-OAuth-Scopes", "user")
+	req.Header.Set("X-Accepted-OAuth-Scopes", "user")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -202,6 +206,8 @@ func pollForAccessToken(deviceCode string, interval int) (*AccessTokenResponse, 
 		}
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Accept", "application/json")
+		req.Header.Set("X-OAuth-Scopes", "user")
+		req.Header.Set("X-Accepted-OAuth-Scopes", "user")
 
 		client := &http.Client{}
 		resp, err := client.Do(req)
