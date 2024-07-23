@@ -119,12 +119,6 @@ func runLogin(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	authConfig, err = config.LookupAuthConfig()
-	if err != nil {
-		ctlutils.PrintError(err)
-		return err
-	}
-
 	ctlutils.PrintSuccess(fmt.Sprintf("Credential saved for %s", authConfig.Email))
 
 	return nil

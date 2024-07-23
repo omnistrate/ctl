@@ -2,6 +2,7 @@ package auth
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/atotto/clipboard"
@@ -13,7 +14,7 @@ import (
 	"github.com/pkg/browser"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 )
@@ -105,12 +106,6 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	authConfig, err = config.LookupAuthConfig()
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
 	utils.PrintSuccess("Successfully logged in.")
 
 	return nil
@@ -150,7 +145,7 @@ func requestDeviceCode() (*DeviceCodeResponse, error) {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", "https://github.com/login/device/code", bytes.NewBuffer(dataBytes))
+	req, err := http.NewRequestWithContext(context.Background(), "POST", "https://github.com/login/device/code", bytes.NewBuffer(dataBytes))
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +161,7 @@ func requestDeviceCode() (*DeviceCodeResponse, error) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -200,7 +195,7 @@ func pollForAccessToken(deviceCode string, interval int) (*AccessTokenResponse, 
 			return nil, err
 		}
 
-		req, err := http.NewRequest("POST", "https://github.com/login/oauth/access_token", bytes.NewBuffer(dataBytes))
+		req, err := http.NewRequestWithContext(context.Background(), "POST", "https://github.com/login/oauth/access_token", bytes.NewBuffer(dataBytes))
 		if err != nil {
 			return nil, err
 		}
@@ -216,7 +211,7 @@ func pollForAccessToken(deviceCode string, interval int) (*AccessTokenResponse, 
 		}
 		defer resp.Body.Close()
 
-		body, err := ioutil.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, err
 		}
