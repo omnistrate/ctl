@@ -16,21 +16,17 @@ import (
 	"github.com/spf13/cobra"
 	"io"
 	"net/http"
-	"strings"
 	"time"
 )
 
 var (
-	ssoExample = `  # Login with github
-  omnistrate-ctl sso github
-
-  # Login with google
-  omnistrate-ctl sso google`
+	ssoExample = `  # Login using a single sign-on provider
+  omnistrate-ctl sso`
 )
 
 // SsoCmd represents the login command
 var SsoCmd = &cobra.Command{
-	Use:          `sso [github|google]`,
+	Use:          `sso`,
 	Short:        "Log in using a single sign-on provider.",
 	Long:         `The sso command is used to authenticate and log in to the Omnistrate platform.`,
 	Example:      ssoExample,
@@ -38,17 +34,7 @@ var SsoCmd = &cobra.Command{
 	SilenceUsage: true,
 }
 
-func init() {
-	SsoCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
-}
-
 func run(cmd *cobra.Command, args []string) error {
-	if strings.ToLower(args[0]) != "github" {
-		err := errors.New(fmt.Sprintf("Unsupported SSO provider: %s\n", args[0]))
-		utils.PrintError(err)
-		return err
-	}
-
 	// Step 1: Request device and user verification codes from GitHub
 	deviceCodeResponse, err := requestDeviceCode()
 	if err != nil {
@@ -67,15 +53,18 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	// Automatically open the verification URI in the default browser
-	fmt.Println("Attempting to automatically open the browser...")
+	fmt.Println("Attempting to automatically open the SSO authentication page in your default browser.")
 	err = browser.OpenURL(deviceCodeResponse.VerificationURI)
 	if err != nil {
 		err = errors.New(fmt.Sprintf("Error opening browser: %v\n", err))
 		utils.PrintError(err)
 		return err
 	}
-	fmt.Printf("The authorization code is %s, which has been copied to your clipboard. Please paste it in the browser.\n", deviceCodeResponse.UserCode)
-	fmt.Printf("If the browser does not open, please open the link %s manually.\n", deviceCodeResponse.VerificationURI)
+	fmt.Print("If the browser does not open or you wish to use a different device to authorize this request, open the following URL:\n\n")
+	fmt.Printf("%s\n\n", deviceCodeResponse.VerificationURI)
+	fmt.Print("The code has been copied to your clipboard. Paste it in the browser when prompted.\n")
+	fmt.Print("You can also manually type in the code:\n\n")
+	fmt.Printf("%s\n\n", deviceCodeResponse.UserCode)
 
 	// Step 3: Poll GitHub to check if the user authorized the device
 	accessTokenResponse, err := pollForAccessToken(deviceCodeResponse.DeviceCode, deviceCodeResponse.Interval)
@@ -84,9 +73,6 @@ func run(cmd *cobra.Command, args []string) error {
 		utils.PrintError(err)
 		return err
 	}
-	println(accessTokenResponse.TokenType)
-	println(accessTokenResponse.Scope)
-	println(accessTokenResponse.AccessToken)
 
 	// Step 4: Use the access token to authenticate with the Omnistrate platform
 	request := signinapi.LoginWithIdentityProviderRequest{
