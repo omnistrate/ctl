@@ -3,9 +3,6 @@ run:
   concurrency: 4
   timeout: 10m
   tests: true
-issues:
-  exclude-dirs:
-    - gen
 linters:
   enable:
     - errcheck
