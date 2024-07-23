@@ -26,17 +26,19 @@ func Test_domain_basic(t *testing.T) {
 	require.NoError(err)
 
 	devDomainName := "dev" + uuid.NewString()
+	devDomain := "domain" + uuid.NewString() + ".dev"
 	prodDomainName := "prod" + uuid.NewString()
+	prodDomain := "domain" + uuid.NewString() + ".prod"
 
 	// create dev domain
-	cmd.RootCmd.SetArgs([]string{"create", "domain", devDomainName, "--env", "dev", "--domain", "domain.dev"})
+	cmd.RootCmd.SetArgs([]string{"create", "domain", devDomainName, "--env", "dev", "--domain", devDomain})
 	err = cmd.RootCmd.Execute()
 	if err != nil {
 		require.Contains(err.Error(), "saas portal does not exist for environment type")
 	}
 
 	// create prod domain
-	cmd.RootCmd.SetArgs([]string{"create", "domain", prodDomainName, "--env", "prod", "--domain", "domain.prod"})
+	cmd.RootCmd.SetArgs([]string{"create", "domain", prodDomainName, "--env", "prod", "--domain", prodDomain})
 	err = cmd.RootCmd.Execute()
 	if err != nil {
 		require.Contains(err.Error(), "saas portal does not exist for environment type")
