@@ -13,6 +13,8 @@ func Test_sso(t *testing.T) {
 	utils.SmokeTest(t)
 	require := require.New(t)
 
+	// TODO: Add test for the sso cmd
+
 	request := signinapi.LoginWithIdentityProviderRequest{
 		AuthorizationCode:    "e2b2c1626a7ae532ce90",
 		IdentityProviderName: signinapi.IdentityProviderName("GitHub"),
