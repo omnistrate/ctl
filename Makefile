@@ -20,7 +20,7 @@ REPO_ROOT=$(shell git rev-parse --show-toplevel)
 # Build info
 BUILD_INFO_PKG=github.com/omnistrate/ctl/cmd
 BUILD_TIMESTAMP=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
-BUILD_FLAGS=-ldflags "-X $(BUILD_INFO_PKG).CommitID=$(GIT_COMMIT) -X $(BUILD_INFO_PKG).Timestamp=$(BUILD_TIMESTAMP) -X $(BUILD_INFO_PKG).Version=$(GIT_VERSION)"
+BUILD_FLAGS=-trimpath -ldflags "-X $(BUILD_INFO_PKG).CommitID=$(GIT_COMMIT) -X $(BUILD_INFO_PKG).Timestamp=$(BUILD_TIMESTAMP) -X $(BUILD_INFO_PKG).Version=$(GIT_VERSION)"
 
 CGO_ENABLED=0
 GOPRIVATE=github.com/omnistrate
