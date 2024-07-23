@@ -2,7 +2,13 @@ module github.com/omnistrate/ctl
 
 go 1.22.0
 
+replace github.com/omnistrate/api-design/pkg/httpclientwrapper => ../api-design/pkg/httpclientwrapper
+replace (
+	github.com/omnistrate/api-design => ../api-design
+)
+
 require (
+	github.com/atotto/clipboard v0.1.4
 	github.com/chelnak/ysmrr v0.4.0
 	github.com/compose-spec/compose-go v1.20.2
 	github.com/fatih/color v1.17.0
@@ -13,6 +19,7 @@ require (
 	github.com/omnistrate/api-design v0.6.474
 	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240719210911-321bb2ffbf78
 	github.com/omnistrate/commons/pkg/utils v0.0.0-20240713005810-42b99387418b
+	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0

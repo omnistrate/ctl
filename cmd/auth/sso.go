@@ -4,7 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/atotto/clipboard"
+	signinapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/signin_api"
+	commonutils "github.com/omnistrate/commons/pkg/utils"
+	"github.com/omnistrate/ctl/config"
+	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
+	"github.com/pkg/browser"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"io/ioutil"
@@ -44,7 +50,24 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	// Step 2: Prompt the user to enter the user code in a browser
-	fmt.Printf("Please enter the code %s at %s\n", deviceCodeResponse.UserCode, deviceCodeResponse.VerificationURI)
+	// Copy the user code to the clipboard
+	err = clipboard.WriteAll(deviceCodeResponse.UserCode)
+	if err != nil {
+		err = errors.New(fmt.Sprintf("Error copying user code to clipboard: %v\n", err))
+		utils.PrintError(err)
+		return err
+	}
+
+	// Automatically open the verification URI in the default browser
+	fmt.Println("Attempting to automatically open the browser...")
+	err = browser.OpenURL(deviceCodeResponse.VerificationURI)
+	if err != nil {
+		err = errors.New(fmt.Sprintf("Error opening browser: %v\n", err))
+		utils.PrintError(err)
+		return err
+	}
+	fmt.Printf("The authorization code is %s, which has been copied to your clipboard. Please paste it in the browser.\n", deviceCodeResponse.UserCode)
+	fmt.Printf("If the browser does not open, please open the link %s manually.\n", deviceCodeResponse.VerificationURI)
 
 	// Step 3: Poll GitHub to check if the user authorized the device
 	accessTokenResponse, err := pollForAccessToken(deviceCodeResponse.DeviceCode, deviceCodeResponse.Interval)
@@ -53,8 +76,40 @@ func run(cmd *cobra.Command, args []string) error {
 		utils.PrintError(err)
 		return err
 	}
+	println(accessTokenResponse.AccessToken)
 
-	fmt.Printf("Access token: %s\n", accessTokenResponse.AccessToken)
+	// Step 4: Use the access token to authenticate with the Omnistrate platform
+	request := signinapi.LoginWithIdentityProviderRequest{
+		AuthorizationCode:    accessTokenResponse.AccessToken,
+		IdentityProviderName: signinapi.IdentityProviderName("GitHub"),
+		RedirectURI:          commonutils.ToPtr("https://omnistrate.dev/idp-auth"),
+	}
+
+	res, err := dataaccess.LoginWithIdentityProvider(request)
+	if err != nil {
+		err = errors.New(fmt.Sprintf("Error logging in with identity provider: %v\n", err))
+		utils.PrintError(err)
+		return err
+	}
+
+	token := res.JWTToken
+
+	authConfig := config.AuthConfig{
+		Email: email,
+		Token: token,
+	}
+	if err = config.CreateOrUpdateAuthConfig(authConfig); err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	authConfig, err = config.LookupAuthConfig()
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	utils.PrintSuccess("Successfully logged in.")
 
 	return nil
 }
@@ -78,12 +133,14 @@ type AccessTokenResponse struct {
 // GitHub client credentials
 const (
 	devClientID = "Ov23ctpQGrpGvsIIJxFv"
+	scope       = "user:email"
 )
 
 // requestDeviceCode requests a device and user verification code from GitHub
 func requestDeviceCode() (*DeviceCodeResponse, error) {
 	data := map[string]string{
 		"client_id": devClientID,
+		"scope":     scope,
 	}
 
 	dataBytes, err := json.Marshal(data)
