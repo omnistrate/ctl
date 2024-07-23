@@ -67,7 +67,7 @@ func run(cmd *cobra.Command, args []string) error {
 	fmt.Printf("%s\n\n", deviceCodeResponse.UserCode)
 
 	// Step 3: Poll GitHub to check if the user authorized the device
-	accessTokenResponse, err := pollForAccessToken(deviceCodeResponse.DeviceCode, deviceCodeResponse.Interval)
+	_, err = pollForAccessToken(deviceCodeResponse.DeviceCode, deviceCodeResponse.Interval)
 	if err != nil {
 		err = errors.New(fmt.Sprintf("Error polling for access token: %v\n", err))
 		utils.PrintError(err)
@@ -76,7 +76,7 @@ func run(cmd *cobra.Command, args []string) error {
 
 	// Step 4: Use the access token to authenticate with the Omnistrate platform
 	request := signinapi.LoginWithIdentityProviderRequest{
-		AuthorizationCode:    accessTokenResponse.AccessToken,
+		AuthorizationCode:    deviceCodeResponse.DeviceCode,
 		IdentityProviderName: signinapi.IdentityProviderName("GitHub"),
 		RedirectURI:          commonutils.ToPtr("https://omnistrate.dev/idp-auth"),
 	}
@@ -149,8 +149,6 @@ func requestDeviceCode() (*DeviceCodeResponse, error) {
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("X-OAuth-Scopes", "user")
-	req.Header.Set("X-Accepted-OAuth-Scopes", "user")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -203,8 +201,6 @@ func pollForAccessToken(deviceCode string, interval int) (*AccessTokenResponse, 
 		}
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Accept", "application/json")
-		req.Header.Set("X-OAuth-Scopes", "user")
-		req.Header.Set("X-Accepted-OAuth-Scopes", "user")
 
 		client := &http.Client{}
 		resp, err := client.Do(req)
@@ -239,6 +235,9 @@ func pollForAccessToken(deviceCode string, interval int) (*AccessTokenResponse, 
 			return nil, err
 		}
 
+		//println(accessTokenResponse.AccessToken)
+		//println(accessTokenResponse.TokenType)
+		//println(accessTokenResponse.Scope)
 		return &accessTokenResponse, nil
 	}
 }
