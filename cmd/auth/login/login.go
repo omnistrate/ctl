@@ -56,7 +56,8 @@ func runLogin(cmd *cobra.Command, args []string) error {
 	// Login interactively
 	var identityProvider string
 	inquire.Query().
-		Menu(&identityProvider, "How would you like to log in? [Use arrows to move, enter to select]", func(w *widget.Menu) {
+		Menu(&identityProvider, "How would you like to log in", func(w *widget.Menu) {
+			w.Hint("Use arrows to move, enter to select")
 			w.Item("Password", "Login with email and password")
 			w.Item("Google", "Login with Google")
 			w.Item("GitHub", "Login with GitHub")
