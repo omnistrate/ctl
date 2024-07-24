@@ -6,8 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/atotto/clipboard"
-	signinapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/signin_api"
-	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
@@ -60,14 +58,8 @@ func SSOLogin(cmd *cobra.Command, args []string) error {
 	}
 
 	// Step 4: Use the access token to authenticate with the Omnistrate platform
-	request := signinapi.LoginWithIdentityProviderRequest{
-		AccessToken:          commonutils.ToPtr(accessTokenResponse.TokenType + " " + accessTokenResponse.AccessToken),
-		IdentityProviderName: signinapi.IdentityProviderName("GitHub"),
-	}
-
-	res, err := dataaccess.LoginWithIdentityProvider(request)
+	res, err := dataaccess.LoginWithIdentityProvider(accessTokenResponse.AccessToken, accessTokenResponse.TokenType, "GitHub")
 	if err != nil {
-		err = errors.New(fmt.Sprintf("Error logging in with identity provider: %v\n", err))
 		utils.PrintError(err)
 		return err
 	}
