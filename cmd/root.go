@@ -2,7 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/omnistrate/ctl/cmd/auth"
+	"github.com/omnistrate/ctl/cmd/auth/login"
+	"github.com/omnistrate/ctl/cmd/auth/logout"
 	"github.com/omnistrate/ctl/cmd/build"
 	"github.com/omnistrate/ctl/cmd/create"
 	"github.com/omnistrate/ctl/cmd/deletec"
@@ -80,9 +81,8 @@ func Execute() {
 func init() {
 	RootCmd.PersistentFlags().BoolP("version", "v", false, "Print the version number of omnistrate-ctl")
 
-	RootCmd.AddCommand(auth.LoginCmd)
-	RootCmd.AddCommand(auth.LogoutCmd)
-	RootCmd.AddCommand(auth.SsoCmd)
+	RootCmd.AddCommand(login.LoginCmd)
+	RootCmd.AddCommand(logout.LogoutCmd)
 
 	RootCmd.AddCommand(build.BuildCmd)
 

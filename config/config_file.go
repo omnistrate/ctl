@@ -26,7 +26,6 @@ type ConfigFile struct {
 
 // AuthConfig represents the authentication configuration.
 type AuthConfig struct {
-	Email string `yaml:"email,omitempty"`
 	Token string `yaml:"token,omitempty"`
 }
 

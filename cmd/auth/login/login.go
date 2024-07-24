@@ -1,4 +1,4 @@
-package auth
+package login
 
 import (
 	"context"
@@ -17,12 +17,11 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-var (
-	email         string
-	password      string
-	passwordStdin bool
+const (
+	loginExample = `  # Login interactively with a single sign-on provider
+  omnistrate-ctl login
 
-	loginExample = `  # Login with email and password
+  # Login with email and password
   omnistrate-ctl login --email email --password password
 
   # Login with email and password from stdin. Save the password in a file and use cat to read it
@@ -34,7 +33,7 @@ var (
 
 // LoginCmd represents the login command
 var LoginCmd = &cobra.Command{
-	Use:          `login [--email EMAIL] [--password PASSWORD]`,
+	Use:          `login`,
 	Short:        "Log in to the Omnistrate platform.",
 	Long:         `The login command is used to authenticate and log in to the Omnistrate platform.`,
 	Example:      loginExample,
@@ -43,28 +42,23 @@ var LoginCmd = &cobra.Command{
 }
 
 func init() {
-	LoginCmd.Flags().StringVarP(&email, "email", "", "", "email")
-	LoginCmd.Flags().StringVarP(&password, "password", "", "", "password")
-	LoginCmd.Flags().BoolVarP(&passwordStdin, "password-stdin", "", false, "Reads the password from stdin")
-
-	err := LoginCmd.MarkFlagRequired("email")
-	if err != nil {
-		return
-	}
-
-	LoginCmd.MarkFlagsOneRequired("password", "password-stdin")
-	LoginCmd.MarkFlagsMutuallyExclusive("password", "password-stdin")
+	LoginCmd.Flags().String("email", "", "email")
+	LoginCmd.Flags().String("password", "", "password")
+	LoginCmd.Flags().Bool("password-stdin", false, "Reads the password from stdin")
 }
 
 func runLogin(cmd *cobra.Command, args []string) error {
-	defer resetLogin()
+	// Get flags
+	email, _ := cmd.Flags().GetString("email")
+	password, _ := cmd.Flags().GetString("password")
+	passwordStdin, _ := cmd.Flags().GetBool("password-stdin")
 
-	if len(email) == 0 {
-		err := errors.New("must provide --email")
-		ctlutils.PrintError(err)
-		return err
+	// SSO login if no email and password provided
+	if len(email) == 0 && len(password) == 0 && !passwordStdin {
+		return SsoLogin(cmd, args)
 	}
 
+	// Otherwise, login with email and password
 	if len(password) > 0 {
 		ctlutils.PrintWarning("WARNING! Using --password is insecure, consider using the --password-stdin flag. Check the help for examples.")
 		if passwordStdin {
@@ -111,7 +105,6 @@ func runLogin(cmd *cobra.Command, args []string) error {
 	}
 
 	authConfig := config.AuthConfig{
-		Email: email,
 		Token: token,
 	}
 	if err = config.CreateOrUpdateAuthConfig(authConfig); err != nil {
@@ -119,7 +112,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	ctlutils.PrintSuccess(fmt.Sprintf("Credential saved for %s", authConfig.Email))
+	ctlutils.PrintSuccess(fmt.Sprintf("Credential saved for %s", email))
 
 	return nil
 }
@@ -148,10 +141,4 @@ func validateLogin(email string, pass string) (token string, err error) {
 
 	token = res.JWTToken
 	return
-}
-
-func resetLogin() {
-	email = ""
-	password = ""
-	passwordStdin = false
 }

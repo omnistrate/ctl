@@ -1,4 +1,4 @@
-package auth
+package login
 
 import (
 	"bytes"
@@ -19,22 +19,7 @@ import (
 	"time"
 )
 
-var (
-	ssoExample = `  # Login using a single sign-on provider
-  omnistrate-ctl sso`
-)
-
-// SsoCmd represents the login command
-var SsoCmd = &cobra.Command{
-	Use:          `sso`,
-	Short:        "Log in using a single sign-on provider.",
-	Long:         `The sso command is used to authenticate and log in to the Omnistrate platform.`,
-	Example:      ssoExample,
-	RunE:         run,
-	SilenceUsage: true,
-}
-
-func run(cmd *cobra.Command, args []string) error {
+func SsoLogin(cmd *cobra.Command, args []string) error {
 	// Step 1: Request device and user verification codes from GitHub
 	deviceCodeResponse, err := requestDeviceCode()
 	if err != nil {
@@ -67,7 +52,7 @@ func run(cmd *cobra.Command, args []string) error {
 	fmt.Printf("%s\n\n", deviceCodeResponse.UserCode)
 
 	// Step 3: Poll GitHub to check if the user authorized the device
-	_, err = pollForAccessToken(deviceCodeResponse.DeviceCode, deviceCodeResponse.Interval)
+	accessTokenResponse, err := pollForAccessToken(deviceCodeResponse.DeviceCode, deviceCodeResponse.Interval)
 	if err != nil {
 		err = errors.New(fmt.Sprintf("Error polling for access token: %v\n", err))
 		utils.PrintError(err)
@@ -76,9 +61,8 @@ func run(cmd *cobra.Command, args []string) error {
 
 	// Step 4: Use the access token to authenticate with the Omnistrate platform
 	request := signinapi.LoginWithIdentityProviderRequest{
-		AuthorizationCode:    deviceCodeResponse.DeviceCode,
+		AccessToken:          commonutils.ToPtr(accessTokenResponse.TokenType + " " + accessTokenResponse.AccessToken),
 		IdentityProviderName: signinapi.IdentityProviderName("GitHub"),
-		RedirectURI:          commonutils.ToPtr("https://omnistrate.dev/idp-auth"),
 	}
 
 	res, err := dataaccess.LoginWithIdentityProvider(request)
@@ -91,7 +75,6 @@ func run(cmd *cobra.Command, args []string) error {
 	token := res.JWTToken
 
 	authConfig := config.AuthConfig{
-		Email: email,
 		Token: token,
 	}
 	if err = config.CreateOrUpdateAuthConfig(authConfig); err != nil {
@@ -124,7 +107,7 @@ type AccessTokenResponse struct {
 const (
 	devClientID  = "Ov23ctpQGrpGvsIIJxFv"
 	prodClientID = "Ov23li2nyhdelepEtjcg"
-	scope        = "user"
+	scope        = "user:email"
 )
 
 // requestDeviceCode requests a device and user verification code from GitHub
@@ -235,9 +218,6 @@ func pollForAccessToken(deviceCode string, interval int) (*AccessTokenResponse, 
 			return nil, err
 		}
 
-		//println(accessTokenResponse.AccessToken)
-		//println(accessTokenResponse.TokenType)
-		//println(accessTokenResponse.Scope)
 		return &accessTokenResponse, nil
 	}
 }
