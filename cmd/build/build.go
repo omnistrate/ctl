@@ -175,7 +175,12 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		// Ask the user if they want to wait for the SaaS portal URL
 		fmt.Print("Do you want to wait to acccess the SaaS portal? [Y/n] It may take a few minutes: ")
 		var userInput string
-		fmt.Scanln(&userInput)
+		_, err = fmt.Scanln(&userInput)
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+
 		userInput = strings.TrimSpace(strings.ToUpper(userInput))
 
 		if strings.ToLower(userInput) == "y" {
@@ -206,7 +211,11 @@ func runBuild(cmd *cobra.Command, args []string) error {
 			// Ask the user if they want to launch the service to production
 			fmt.Print("Do you want to launch it to production? [Y/n] You can always promote it later: ")
 			var userInput string
-			fmt.Scanln(&userInput)
+			_, err = fmt.Scanln(&userInput)
+			if err != nil {
+				utils.PrintError(err)
+				return err
+			}
 			userInput = strings.TrimSpace(strings.ToUpper(userInput))
 
 			if strings.ToLower(userInput) == "y" {
@@ -272,7 +281,11 @@ func runBuild(cmd *cobra.Command, args []string) error {
 				} else if interactive {
 					// Ask the user if they want to wait for the SaaS portal URL
 					fmt.Print("Do you want to wait to access the prod SaaS offer? [Y/n] It may take a few minutes: ")
-					fmt.Scanln(&userInput)
+					_, err = fmt.Scanln(&userInput)
+					if err != nil {
+						utils.PrintError(err)
+						return err
+					}
 					userInput = strings.TrimSpace(strings.ToUpper(userInput))
 
 					if strings.ToLower(userInput) == "y" {

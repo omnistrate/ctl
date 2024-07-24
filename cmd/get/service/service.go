@@ -124,5 +124,8 @@ func printTable(services []*serviceapi.DescribeServiceResult) {
 			strings.Join(envNames, ","))
 	}
 
-	w.Flush()
+	err := w.Flush()
+	if err != nil {
+		utils.PrintError(err)
+	}
 }

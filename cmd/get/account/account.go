@@ -133,5 +133,8 @@ func printTable(accounts []*accountconfigapi.DescribeAccountConfigResult) {
 			targetAccountID)
 	}
 
-	w.Flush()
+	err := w.Flush()
+	if err != nil {
+		utils.PrintError(err)
+	}
 }

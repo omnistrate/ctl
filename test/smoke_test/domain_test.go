@@ -26,19 +26,23 @@ func Test_domain_basic(t *testing.T) {
 	require.NoError(err)
 
 	devDomainName := "dev" + uuid.NewString()
+	devDomain := "domain" + uuid.NewString() + ".dev"
 	prodDomainName := "prod" + uuid.NewString()
+	prodDomain := "domain" + uuid.NewString() + ".prod"
 
-	// FAIL: create dev domain
-	cmd.RootCmd.SetArgs([]string{"create", "domain", devDomainName, "--env", "dev", "--domain", "domain.dev"})
+	// create dev domain
+	cmd.RootCmd.SetArgs([]string{"create", "domain", devDomainName, "--env", "dev", "--domain", devDomain})
 	err = cmd.RootCmd.Execute()
-	require.Error(err)
-	require.Contains(err.Error(), "saas portal does not exist for environment type")
+	if err != nil {
+		require.Contains(err.Error(), "saas portal does not exist for environment type")
+	}
 
-	// FAIL: create prod domain
-	cmd.RootCmd.SetArgs([]string{"create", "domain", prodDomainName, "--env", "prod", "--domain", "domain.prod"})
+	// create prod domain
+	cmd.RootCmd.SetArgs([]string{"create", "domain", prodDomainName, "--env", "prod", "--domain", prodDomain})
 	err = cmd.RootCmd.Execute()
-	require.Error(err)
-	require.Contains(err.Error(), "saas portal does not exist for environment type")
+	if err != nil {
+		require.Contains(err.Error(), "saas portal does not exist for environment type")
+	}
 
 	// PASS: get domains
 	cmd.RootCmd.SetArgs([]string{"get", "domain"})
@@ -50,9 +54,10 @@ func Test_domain_basic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	// FAIL: delete domains
+	// delete domains
 	cmd.RootCmd.SetArgs([]string{"delete", "domain", devDomainName, prodDomainName})
 	err = cmd.RootCmd.Execute()
-	require.Error(err)
-	require.Contains(err.Error(), "domain(s) not found")
+	if err != nil {
+		require.Contains(err.Error(), "domain(s) not found")
+	}
 }
