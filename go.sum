@@ -2,6 +2,7 @@ github.com/atotto/clipboard v0.1.4 h1:EH0zSVneZPSuFR11BlR9YppQTVDbh5+16AmcJi4g1z
 github.com/atotto/clipboard v0.1.4/go.mod h1:ZY9tmq7sm5xIbd9bOK4onWV4S6X0u6GY7Vn0Yu86PYI=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
+github.com/burl/inquire v0.0.0-20160628014821-4f639feb19de/go.mod h1:JlP3MYYPXJHI6sd/8XICX1rkOTzzAktmppsPLNurXAM=
 github.com/burl/inquire v0.2.0 h1:eKYkwCoFGWYvq08A8b+px0l+0ccaRy9t/lBzi10IYh4=
 github.com/burl/inquire v0.2.0/go.mod h1:JlP3MYYPXJHI6sd/8XICX1rkOTzzAktmppsPLNurXAM=
 github.com/burl/termbox-go v0.0.0-20140625061802-caf64437d773/go.mod h1:TUygBzp/EDfG7WTqU46RPh2Dr/UdJwygyQyIfPihKTc=
