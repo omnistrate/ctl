@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-func SsoLogin(cmd *cobra.Command, args []string) error {
+func SSOLogin(cmd *cobra.Command, args []string) error {
 	// Step 1: Request device and user verification codes from GitHub
 	deviceCodeResponse, err := requestDeviceCode()
 	if err != nil {
