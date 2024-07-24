@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-func SSOLogin(cmd *cobra.Command, args []string) error {
+func SSOLoginWithGitHub(cmd *cobra.Command, args []string) error {
 	// Step 1: Request device and user verification codes from GitHub
 	deviceCodeResponse, err := requestDeviceCode()
 	if err != nil {
@@ -212,4 +212,10 @@ func pollForAccessToken(deviceCode string, interval int) (*AccessTokenResponse, 
 
 		return &accessTokenResponse, nil
 	}
+}
+
+func SSOLoginWithGoogle(cmd *cobra.Command, args []string) error {
+	err := errors.New("Google SSO login is not yet implemented")
+	utils.PrintError(err)
+	return err
 }
