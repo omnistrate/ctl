@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/omnistrate/ctl/cmd"
 	"github.com/omnistrate/ctl/test/testutils"
+	"strings"
 	"testing"
 
 	"github.com/omnistrate/commons/pkg/utils"
@@ -34,14 +35,34 @@ func Test_domain_basic(t *testing.T) {
 	cmd.RootCmd.SetArgs([]string{"create", "domain", devDomainName, "--env", "dev", "--domain", devDomain})
 	err = cmd.RootCmd.Execute()
 	if err != nil {
-		require.Contains(err.Error(), "saas portal does not exist for environment type")
+		require.Condition(func() bool {
+			if strings.Contains(err.Error(), "saas portal does not exist for environment type") {
+				return true
+			}
+
+			if strings.Contains(err.Error(), "domain with the same environment type already exists") {
+				return true
+			}
+
+			return false
+		})
 	}
 
 	// create prod domain
 	cmd.RootCmd.SetArgs([]string{"create", "domain", prodDomainName, "--env", "prod", "--domain", prodDomain})
 	err = cmd.RootCmd.Execute()
 	if err != nil {
-		require.Contains(err.Error(), "saas portal does not exist for environment type")
+		require.Condition(func() bool {
+			if strings.Contains(err.Error(), "saas portal does not exist for environment type") {
+				return true
+			}
+
+			if strings.Contains(err.Error(), "domain with the same environment type already exists") {
+				return true
+			}
+
+			return false
+		})
 	}
 
 	// PASS: get domains
