@@ -31,6 +31,12 @@ const (
   echo $OMNISTRATE_PASSWORD | omnistrate-ctl login --email email --password-stdin`
 )
 
+var (
+	email         string
+	password      string
+	passwordStdin bool
+)
+
 // LoginCmd represents the login command
 var LoginCmd = &cobra.Command{
 	Use:          `login`,
@@ -42,16 +48,13 @@ var LoginCmd = &cobra.Command{
 }
 
 func init() {
-	LoginCmd.Flags().String("email", "", "email")
-	LoginCmd.Flags().String("password", "", "password")
-	LoginCmd.Flags().Bool("password-stdin", false, "Reads the password from stdin")
+	LoginCmd.Flags().StringVarP(&email, "email", "", "", "email")
+	LoginCmd.Flags().StringVarP(&password, "password", "", "", "password")
+	LoginCmd.Flags().BoolVarP(&passwordStdin, "password-stdin", "", false, "Reads the password from stdin")
 }
 
 func runLogin(cmd *cobra.Command, args []string) error {
-	// Get flags
-	email, _ := cmd.Flags().GetString("email")
-	password, _ := cmd.Flags().GetString("password")
-	passwordStdin, _ := cmd.Flags().GetBool("password-stdin")
+	defer resetLogin()
 
 	// SSO login if no email and password provided
 	if len(email) == 0 && len(password) == 0 && !passwordStdin {
@@ -141,4 +144,10 @@ func validateLogin(email string, pass string) (token string, err error) {
 
 	token = res.JWTToken
 	return
+}
+
+func resetLogin() {
+	email = ""
+	password = ""
+	passwordStdin = false
 }
