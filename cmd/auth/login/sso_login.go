@@ -39,7 +39,7 @@ const (
 	googleDevClientID      = "635031719937-gqvm0qeelipdc812g9ie2v6ohk3j6gs6.apps.googleusercontent.com" // #nosec G101
 	googleProdClientID     = "421577562987-98lkfnu7e07rig5p6rt4p0dgqpktihhb.apps.googleusercontent.com" // #nosec G101
 	googleDeviceCodeURL    = "https://oauth2.googleapis.com/device/code"
-	gitHubDeviceCodeURL    = "https://oauth2.googleapis.com/device/code"
+	gitHubDeviceCodeURL    = "https://github.com/login/device/code"
 	googleVerificationURI  = "https://www.google.com/device"
 	gitHubVerificationURI  = "https://github.com/login/device"
 	gitHubScope            = "user:email"
