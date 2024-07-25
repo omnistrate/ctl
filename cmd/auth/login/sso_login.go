@@ -152,7 +152,8 @@ func pollForAccessTokenAndLogin(identityProviderName, deviceCode string, interva
 			if strings.Contains(err.Error(), "Failed to get access token with status code: 403 Forbidden") { // access_denied
 				return nil, errors.New("Access denied. Please try again.")
 			}
-			if identityProviderName == "GitHub" && strings.Contains(err.Error(), "Invalid request: empty access token") { // authorization_pending
+			// TODO: handle GitHub error in a better way to differentiate between different errors.
+			if identityProviderName == "GitHub" && strings.Contains(err.Error(), "Invalid request: empty access token") {
 				continue
 			}
 			return nil, err
