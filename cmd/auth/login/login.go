@@ -100,7 +100,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 	case string(loginWithGoogle):
 		return SSOLogin("Google for CTL")
 	case string(loginWithGitHub):
-		return SSOLogin("GitHub")
+		return SSOLogin("GitHub for CTL")
 
 	default:
 		err := errors.New("Invalid selection")

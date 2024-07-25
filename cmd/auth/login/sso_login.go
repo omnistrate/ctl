@@ -166,45 +166,53 @@ func pollForAccessTokenAndLogin(identityProviderName, deviceCode string, interva
 }
 
 func getClientID(identityProviderName string) string {
-	if identityProviderName == "Google for CTL" {
-		clientID := googleDevClientID
+	switch identityProviderName {
+	case "GitHub for CTL":
 		if utils.IsProd() {
-			clientID = googleProdClientID
+			return gitHubProdClientID
+		} else {
+			return gitHubDevClientID
 		}
-		return clientID
+	case "Google for CTL":
+		if utils.IsProd() {
+			return googleProdClientID
+		} else {
+			return googleDevClientID
+		}
+	default:
+		return ""
 	}
-
-	// Default to GitHub
-	clientID := gitHubDevClientID
-	if utils.IsProd() {
-		clientID = gitHubProdClientID
-	}
-	return clientID
 }
 
 func getScope(identityProviderName string) string {
-	if identityProviderName == "Google for CTL" {
+	switch identityProviderName {
+	case "GitHub for CTL":
+		return gitHubScope
+	case "Google for CTL":
 		return googleScope
+	default:
+		return ""
 	}
-
-	// Default to GitHub
-	return gitHubScope
 }
 
 func getDeviceCodeURL(identityProviderName string) string {
-	if identityProviderName == "Google for CTL" {
+	switch identityProviderName {
+	case "GitHub for CTL":
+		return "https://github.com/login/device/code"
+	case "Google for CTL":
 		return "https://oauth2.googleapis.com/device/code"
+	default:
+		return ""
 	}
-
-	// Default to GitHub
-	return "https://github.com/login/device/code"
 }
 
 func getVerificationURI(identityProviderName string) string {
-	if identityProviderName == "Google for CTL" {
+	switch identityProviderName {
+	case "GitHub for CTL":
+		return "https://github.com/login/device"
+	case "Google for CTL":
 		return "https://www.google.com/device"
+	default:
+		return ""
 	}
-
-	// Default to GitHub
-	return "https://github.com/login/device"
 }
