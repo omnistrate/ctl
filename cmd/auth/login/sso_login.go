@@ -81,7 +81,6 @@ func SSOLogin(identityProviderName string) error {
 	// Step 3: Poll identity provider server to check if the user authorized the device via backend API
 	jwtTokenResponse, err := pollForAccessTokenAndLogin(identityProviderName, deviceCodeResponse.DeviceCode, deviceCodeResponse.Interval)
 	if err != nil {
-		err = errors.New(fmt.Sprintf("Error polling for access token: %v\n", err))
 		utils.PrintError(err)
 		return err
 	}
