@@ -12,9 +12,12 @@ import (
 	"strings"
 )
 
-func PasswordLogin(cmd *cobra.Command, args []string) error {
+func PasswordLogin(cmd *cobra.Command, args []string, calledByInteractiveMode bool) error {
 	if len(password) > 0 {
-		ctlutils.PrintWarning("Notice: Using the --password flag is insecure. Please consider using the --password-stdin flag instead. Refer to the help documentation for examples.")
+		if !calledByInteractiveMode {
+			ctlutils.PrintWarning("Notice: Using the --password flag is insecure. Please consider using the --password-stdin flag instead. Refer to the help documentation for examples.")
+		}
+
 		if passwordStdin {
 			err := fmt.Errorf("--password and --password-stdin are mutually exclusive")
 			ctlutils.PrintError(err)
@@ -22,7 +25,7 @@ func PasswordLogin(cmd *cobra.Command, args []string) error {
 		}
 
 		if len(email) == 0 {
-			err := errors.New("must provide --email with --password")
+			err := errors.New("must provide --email")
 			ctlutils.PrintError(err)
 			return err
 		}
@@ -30,7 +33,7 @@ func PasswordLogin(cmd *cobra.Command, args []string) error {
 
 	if passwordStdin {
 		if len(email) == 0 {
-			err := errors.New("must provide --email with --password-stdin")
+			err := errors.New("must provide --email")
 			ctlutils.PrintError(err)
 			return err
 		}

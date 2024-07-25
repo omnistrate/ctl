@@ -57,7 +57,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 
 	// Login with email and password if any of the flags are set
 	if len(email) > 0 || len(password) > 0 || passwordStdin {
-		return PasswordLogin(cmd, args)
+		return PasswordLogin(cmd, args, false)
 	}
 
 	// Login interactively
@@ -96,7 +96,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		return PasswordLogin(cmd, args)
+		return PasswordLogin(cmd, args, true)
 	case string(loginWithGoogle):
 		return SSOLogin("Google for CTL")
 	case string(loginWithGitHub):
