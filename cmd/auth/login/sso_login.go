@@ -146,7 +146,13 @@ func pollForAccessTokenAndLogin(identityProviderName, deviceCode string, interva
 
 		resp, err := dataaccess.LoginWithIdentityProvider(deviceCode, identityProviderName)
 		if err != nil {
-			if strings.Contains(err.Error(), "empty access token") {
+			if strings.Contains(err.Error(), "Failed to get access token with status code: 428 Precondition Required") { // authorization_pending
+				continue
+			}
+			if strings.Contains(err.Error(), "Failed to get access token with status code: 403 Forbidden") { // access_denied
+				return nil, errors.New("Access denied. Please try again.")
+			}
+			if identityProviderName == "GitHub" && strings.Contains(err.Error(), "Invalid request: empty access token") { // authorization_pending
 				continue
 			}
 			return nil, err
@@ -159,7 +165,7 @@ func pollForAccessTokenAndLogin(identityProviderName, deviceCode string, interva
 }
 
 func getClientID(identityProviderName string) string {
-	if identityProviderName == "Google" {
+	if identityProviderName == "Google for CTL" {
 		clientID := googleDevClientID
 		if utils.IsProd() {
 			clientID = googleProdClientID
@@ -176,7 +182,7 @@ func getClientID(identityProviderName string) string {
 }
 
 func getScope(identityProviderName string) string {
-	if identityProviderName == "Google" {
+	if identityProviderName == "Google for CTL" {
 		return googleScope
 	}
 
@@ -185,7 +191,7 @@ func getScope(identityProviderName string) string {
 }
 
 func getDeviceCodeURL(identityProviderName string) string {
-	if identityProviderName == "Google" {
+	if identityProviderName == "Google for CTL" {
 		return "https://oauth2.googleapis.com/device/code"
 	}
 
@@ -193,17 +199,8 @@ func getDeviceCodeURL(identityProviderName string) string {
 	return "https://github.com/login/device/code"
 }
 
-func getAccessTokenURL(identityProviderName string) string {
-	if identityProviderName == "Google" {
-		return "https://oauth2.googleapis.com/token"
-	}
-
-	// Default to GitHub
-	return "https://github.com/login/oauth/access_token"
-}
-
 func getVerificationURI(identityProviderName string) string {
-	if identityProviderName == "Google" {
+	if identityProviderName == "Google for CTL" {
 		return "https://www.google.com/device"
 	}
 

@@ -94,10 +94,15 @@ github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240724175050-23e
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240724175050-23e9e99b7bf0/go.mod h1:HWRdwqwHEWT/I38jWrCdkydGjsxdSigrjX0ZMjVABBw=
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240725063928-624ea8164afe h1:aTne/F3puJFEdSJX7NAn9ZfV+EOL8bW7aUlKGkn7de0=
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240725063928-624ea8164afe/go.mod h1:HWRdwqwHEWT/I38jWrCdkydGjsxdSigrjX0ZMjVABBw=
+github.com/omnistrate/commons v0.10.706 h1:ZxhC0K3I2RfyLpYhrovSv6cburEkDSBEN7ABT3kqzOE=
 github.com/omnistrate/commons/pkg/constants v0.0.0-20240724002014-c9e09fdc914f h1:fdRtO0I7SOgTDHQ0EuRCCMs7Y1ecckyhCnayD0wANNk=
 github.com/omnistrate/commons/pkg/constants v0.0.0-20240724002014-c9e09fdc914f/go.mod h1:okYQlNYHtWts036uSo4UprIiYXWFu/pAo49v9oDLnG4=
+github.com/omnistrate/commons/pkg/constants v0.0.0-20240725062820-33c2df7b3221 h1:pxIEdCfyr9ukwur663U1Ub/AwGDGh8sCCZfvGsAVCN8=
+github.com/omnistrate/commons/pkg/constants v0.0.0-20240725062820-33c2df7b3221/go.mod h1:okYQlNYHtWts036uSo4UprIiYXWFu/pAo49v9oDLnG4=
 github.com/omnistrate/commons/pkg/utils v0.0.0-20240724002014-c9e09fdc914f h1:l3HqxBbB1NWHyfhLTNl3CGLFGlvx8HPz6K68JB2JUGo=
 github.com/omnistrate/commons/pkg/utils v0.0.0-20240724002014-c9e09fdc914f/go.mod h1:lUfifVbx727sQRCko0sSUhXtzlAIjvccDp1mrvj35W4=
+github.com/omnistrate/commons/pkg/utils v0.0.0-20240725062820-33c2df7b3221 h1:s8biOvZ9D4aMLdDNwqQuswisiFRMewPiigKFEJVXAms=
+github.com/omnistrate/commons/pkg/utils v0.0.0-20240725062820-33c2df7b3221/go.mod h1:lUfifVbx727sQRCko0sSUhXtzlAIjvccDp1mrvj35W4=
 github.com/opencontainers/go-digest v1.0.0 h1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=
 github.com/opencontainers/go-digest v1.0.0/go.mod h1:0JzlMkj0TRzQZfJkVvzbP0HBR3IKzErnv2BNG4W4MAM=
 github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c h1:+mdjkGKdHQG3305AYmdv1U2eRNDiU2ErMBj1gwrq8eQ=

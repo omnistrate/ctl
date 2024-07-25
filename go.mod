@@ -14,7 +14,7 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1
 	github.com/omnistrate/api-design v0.6.486
 	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240725063928-624ea8164afe
-	github.com/omnistrate/commons/pkg/utils v0.0.0-20240724002014-c9e09fdc914f
+	github.com/omnistrate/commons/pkg/utils v0.0.0-20240725062820-33c2df7b3221
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.0
@@ -52,7 +52,7 @@ require (
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/omnistrate/commons/pkg/constants v0.0.0-20240724002014-c9e09fdc914f // indirect
+	github.com/omnistrate/commons/pkg/constants v0.0.0-20240725062820-33c2df7b3221 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.19.1 // indirect
