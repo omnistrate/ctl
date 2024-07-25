@@ -11,15 +11,14 @@ import (
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/browser"
 	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
 	"io"
 	"net/http"
 	"time"
 )
 
-func SSOLoginWithGitHub(cmd *cobra.Command, args []string) error {
-	// Step 1: Request device and user verification codes from GitHub
-	deviceCodeResponse, err := requestDeviceCode()
+func SSOLogin(identityProviderName string) error {
+	// Step 1: Request device and user verification codes
+	deviceCodeResponse, err := requestDeviceCode(identityProviderName)
 	if err != nil {
 		err = errors.New(fmt.Sprintf("Error requesting device code: %v\n", err))
 		utils.PrintError(err)
@@ -37,20 +36,20 @@ func SSOLoginWithGitHub(cmd *cobra.Command, args []string) error {
 
 	// Automatically open the verification URI in the default browser
 	fmt.Println("Attempting to automatically open the SSO authentication page in your default browser.")
-	err = browser.OpenURL(deviceCodeResponse.VerificationURI)
+	err = browser.OpenURL(getVerificationURI(identityProviderName))
 	if err != nil {
 		err = errors.New(fmt.Sprintf("Error opening browser: %v\n", err))
 		utils.PrintError(err)
 		return err
 	}
 	fmt.Print("If the browser does not open or you wish to use a different device to authorize this request, open the following URL:\n\n")
-	fmt.Printf("%s\n\n", deviceCodeResponse.VerificationURI)
+	fmt.Printf("%s\n\n", getVerificationURI(identityProviderName))
 	fmt.Print("The code has been copied to your clipboard. Paste it in the browser when prompted.\n")
 	fmt.Print("You can also manually type in the code:\n\n")
 	fmt.Printf("%s\n\n", deviceCodeResponse.UserCode)
 
 	// Step 3: Poll GitHub to check if the user authorized the device
-	accessTokenResponse, err := pollForAccessToken(deviceCodeResponse.DeviceCode, deviceCodeResponse.Interval)
+	accessTokenResponse, err := pollForAccessToken(identityProviderName, deviceCodeResponse.DeviceCode, deviceCodeResponse.Interval)
 	if err != nil {
 		err = errors.New(fmt.Sprintf("Error polling for access token: %v\n", err))
 		utils.PrintError(err)
@@ -58,7 +57,9 @@ func SSOLoginWithGitHub(cmd *cobra.Command, args []string) error {
 	}
 
 	// Step 4: Use the access token to authenticate with the Omnistrate platform
-	res, err := dataaccess.LoginWithIdentityProvider(accessTokenResponse.AccessToken, accessTokenResponse.TokenType, "GitHub")
+	println(accessTokenResponse.AccessToken)
+	println(accessTokenResponse.TokenType)
+	res, err := dataaccess.LoginWithIdentityProvider(accessTokenResponse.AccessToken, accessTokenResponse.TokenType, identityProviderName)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -81,11 +82,10 @@ func SSOLoginWithGitHub(cmd *cobra.Command, args []string) error {
 
 // DeviceCodeResponse represents the response from the device code request
 type DeviceCodeResponse struct {
-	DeviceCode      string `json:"device_code"`
-	UserCode        string `json:"user_code"`
-	VerificationURI string `json:"verification_uri"`
-	ExpiresIn       int    `json:"expires_in"`
-	Interval        int    `json:"interval"`
+	DeviceCode string `json:"device_code"`
+	UserCode   string `json:"user_code"`
+	ExpiresIn  int    `json:"expires_in"`
+	Interval   int    `json:"interval"`
 }
 
 // AccessTokenResponse represents the response from the access token request
@@ -97,20 +97,19 @@ type AccessTokenResponse struct {
 
 // GitHub client credentials
 const (
-	devClientID  = "Ov23ctpQGrpGvsIIJxFv"
-	prodClientID = "Ov23li2nyhdelepEtjcg"
-	scope        = "user:email"
+	gitHubDevClientID  = "Ov23ctpQGrpGvsIIJxFv"
+	gitHubProdClientID = "Ov23li2nyhdelepEtjcg"
+	googleDevClientID  = "635031719937-gqvm0qeelipdc812g9ie2v6ohk3j6gs6.apps.googleusercontent.com"
+	googleProdClientID = "421577562987-98lkfnu7e07rig5p6rt4p0dgqpktihhb.apps.googleusercontent.com"
+	gitHubScope        = "user:email"
+	googleScope        = "email"
 )
 
 // requestDeviceCode requests a device and user verification code from GitHub
-func requestDeviceCode() (*DeviceCodeResponse, error) {
-	clientID := devClientID
-	if utils.IsProd() {
-		clientID = prodClientID
-	}
+func requestDeviceCode(identityProviderName string) (*DeviceCodeResponse, error) {
 	data := map[string]string{
-		"client_id": clientID,
-		"scope":     scope,
+		"client_id": getClientID(identityProviderName),
+		"scope":     getScope(identityProviderName),
 	}
 
 	dataBytes, err := json.Marshal(data)
@@ -118,7 +117,7 @@ func requestDeviceCode() (*DeviceCodeResponse, error) {
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(context.Background(), "POST", "https://github.com/login/device/code", bytes.NewBuffer(dataBytes))
+	req, err := http.NewRequestWithContext(context.Background(), "POST", getDeviceCodeURL(identityProviderName), bytes.NewBuffer(dataBytes))
 	if err != nil {
 		return nil, err
 	}
@@ -151,13 +150,9 @@ func requestDeviceCode() (*DeviceCodeResponse, error) {
 }
 
 // pollForAccessToken polls GitHub for an access token
-func pollForAccessToken(deviceCode string, interval int) (*AccessTokenResponse, error) {
-	clientID := devClientID
-	if utils.IsProd() {
-		clientID = prodClientID
-	}
+func pollForAccessToken(identityProviderName, deviceCode string, interval int) (*AccessTokenResponse, error) {
 	data := map[string]string{
-		"client_id":   clientID,
+		"client_id":   getClientID(identityProviderName),
 		"device_code": deviceCode,
 		"grant_type":  "urn:ietf:params:oauth:grant-type:device_code",
 	}
@@ -170,7 +165,7 @@ func pollForAccessToken(deviceCode string, interval int) (*AccessTokenResponse, 
 			return nil, err
 		}
 
-		req, err := http.NewRequestWithContext(context.Background(), "POST", "https://github.com/login/oauth/access_token", bytes.NewBuffer(dataBytes))
+		req, err := http.NewRequestWithContext(context.Background(), "POST", getAccessTokenURL(identityProviderName), bytes.NewBuffer(dataBytes))
 		if err != nil {
 			return nil, err
 		}
@@ -214,8 +209,55 @@ func pollForAccessToken(deviceCode string, interval int) (*AccessTokenResponse, 
 	}
 }
 
-func SSOLoginWithGoogle(cmd *cobra.Command, args []string) error {
-	err := errors.New("Google SSO login is not yet implemented")
-	utils.PrintError(err)
-	return err
+func getClientID(identityProviderName string) string {
+	if identityProviderName == "Google" {
+		clientID := googleDevClientID
+		if utils.IsProd() {
+			clientID = googleProdClientID
+		}
+		return clientID
+	}
+
+	// Default to GitHub
+	clientID := gitHubDevClientID
+	if utils.IsProd() {
+		clientID = gitHubProdClientID
+	}
+	return clientID
+}
+
+func getScope(identityProviderName string) string {
+	if identityProviderName == "Google" {
+		return googleScope
+	}
+
+	// Default to GitHub
+	return gitHubScope
+}
+
+func getDeviceCodeURL(identityProviderName string) string {
+	if identityProviderName == "Google" {
+		return "https://oauth2.googleapis.com/device/code"
+	}
+
+	// Default to GitHub
+	return "https://github.com/login/device/code"
+}
+
+func getAccessTokenURL(identityProviderName string) string {
+	if identityProviderName == "Google" {
+		return "https://oauth2.googleapis.com/token"
+	}
+
+	// Default to GitHub
+	return "https://github.com/login/oauth/access_token"
+}
+
+func getVerificationURI(identityProviderName string) string {
+	if identityProviderName == "Google" {
+		return "https://www.google.com/device"
+	}
+
+	// Default to GitHub
+	return "https://github.com/login/device"
 }

@@ -81,9 +81,9 @@ func runLogin(cmd *cobra.Command, args []string) error {
 
 		return PasswordLogin(cmd, args)
 	case "Google":
-		return SSOLoginWithGoogle(cmd, args)
+		return SSOLogin("Google")
 	case "GitHub":
-		return SSOLoginWithGitHub(cmd, args)
+		return SSOLogin("GitHub")
 
 	default:
 		err := errors.New("Invalid selection")
