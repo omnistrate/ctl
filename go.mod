@@ -2,10 +2,6 @@ module github.com/omnistrate/ctl
 
 go 1.22.0
 
-replace (
-	github.com/burl/inquire v0.2.0 => github.com/burl/inquire v0.0.0-20160628014821-4f639feb19de
-)
-
 require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/burl/inquire v0.2.0
