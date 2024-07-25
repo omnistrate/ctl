@@ -4,7 +4,6 @@ go 1.22.0
 
 replace (
 	github.com/burl/inquire v0.2.0 => github.com/burl/inquire v0.0.0-20160628014821-4f639feb19de
-	github.com/burl/termbox-go v0.0.0-20160628184006-0e2effceb9ce => github.com/burl/termbox-go v0.0.0-20160612132104-c45773466a30
 )
 
 require (
