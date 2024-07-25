@@ -1,13 +1,16 @@
 package login
 
 import (
-	"github.com/burl/inquire"
-	"github.com/burl/inquire/widget"
+	"github.com/cqroot/prompt"
+	"github.com/cqroot/prompt/choose"
+	"github.com/cqroot/prompt/input"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"strings"
+	"regexp"
 )
+
+type loginMethod string
 
 const (
 	loginExample = `  # Login interactively with a single sign-on provider or using email and password
@@ -21,6 +24,10 @@ const (
 
   # Login with email and password from stdin. Save the password in an environment variable and use echo to read it
   echo $OMNISTRATE_PASSWORD | omnistrate-ctl login --email email --password-stdin`
+
+	loginWithEmailAndPassword loginMethod = "Login with email and password"
+	loginWithGoogle           loginMethod = "Login with Google"
+	loginWithGitHub           loginMethod = "Login with GitHub"
 )
 
 var (
@@ -54,35 +61,45 @@ func runLogin(cmd *cobra.Command, args []string) error {
 	}
 
 	// Login interactively
-	var identityProvider string
-	inquire.Query().
-		Menu(&identityProvider, "How would you like to log in", func(w *widget.Menu) {
-			w.Hint("Use arrows to move, enter to select")
-			w.Item("Password", "Login with email and password")
-			w.Item("Google", "Login with Google")
-			w.Item("GitHub", "Login with GitHub")
-		}).
-		Exec()
+	choice, err := prompt.New().Ask("How would you like to log in?").
+		Choose([]string{
+			string(loginWithEmailAndPassword),
+			string(loginWithGoogle),
+			string(loginWithGitHub),
+		}, choose.WithTheme(choose.ThemeArrow))
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
 
-	switch identityProvider {
-	case "Password":
-		inquire.Query().Input(&email, "Please enter your email", func(w *widget.Input) {
-			w.Valid(func(input string) string {
-				if !strings.Contains(input, "@") {
-					return "Please enter a valid email address"
-				}
-				return ""
-			})
-		}).
-			Input(&password, "Please enter your password", func(w *widget.Input) {
-				w.MaskInput()
-			}).
-			Exec()
+	switch choice {
+	case string(loginWithEmailAndPassword):
+		email, err = prompt.New().Ask("Please enter your email:").
+			Input("", input.WithValidateFunc(
+				func(input string) error {
+					emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+					if emailRegex.MatchString(input) {
+						return nil
+					} else {
+						return errors.New("invalid email address")
+					}
+				}))
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+
+		password, err = prompt.New().Ask("Please enter your password:").
+			Input("", input.WithEchoMode(input.EchoPassword))
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
 
 		return PasswordLogin(cmd, args)
-	case "Google":
+	case string(loginWithGoogle):
 		return SSOLogin("Google")
-	case "GitHub":
+	case string(loginWithGitHub):
 		return SSOLogin("GitHub")
 
 	default:

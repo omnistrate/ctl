@@ -57,8 +57,6 @@ func SSOLogin(identityProviderName string) error {
 	}
 
 	// Step 4: Use the access token to authenticate with the Omnistrate platform
-	println(accessTokenResponse.AccessToken)
-	println(accessTokenResponse.TokenType)
 	res, err := dataaccess.LoginWithIdentityProvider(accessTokenResponse.AccessToken, accessTokenResponse.TokenType, identityProviderName)
 	if err != nil {
 		utils.PrintError(err)
@@ -75,7 +73,7 @@ func SSOLogin(identityProviderName string) error {
 		return err
 	}
 
-	utils.PrintSuccess("Successfully logged in.")
+	utils.PrintSuccess("Successfully logged in")
 
 	return nil
 }
@@ -99,8 +97,8 @@ type AccessTokenResponse struct {
 const (
 	gitHubDevClientID  = "Ov23ctpQGrpGvsIIJxFv"
 	gitHubProdClientID = "Ov23li2nyhdelepEtjcg"
-	googleDevClientID  = "635031719937-gqvm0qeelipdc812g9ie2v6ohk3j6gs6.apps.googleusercontent.com"
-	googleProdClientID = "421577562987-98lkfnu7e07rig5p6rt4p0dgqpktihhb.apps.googleusercontent.com"
+	googleDevClientID  = "635031719937-gqvm0qeelipdc812g9ie2v6ohk3j6gs6.apps.googleusercontent.com" // #nosec G101
+	googleProdClientID = "421577562987-98lkfnu7e07rig5p6rt4p0dgqpktihhb.apps.googleusercontent.com" // #nosec G101
 	gitHubScope        = "user:email"
 	googleScope        = "email"
 )

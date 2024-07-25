@@ -50,8 +50,6 @@ func PasswordLogin(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	ctlutils.PrintInfo("Calling the Omnistrate server to validate the credentials...")
-
 	token, err := dataaccess.LoginWithPassword(email, password)
 	if err != nil {
 		ctlutils.PrintError(err)
@@ -66,7 +64,7 @@ func PasswordLogin(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	ctlutils.PrintSuccess(fmt.Sprintf("Credential saved for %s", email))
+	ctlutils.PrintSuccess("Successfully logged in")
 
 	return nil
 }
