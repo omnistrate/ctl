@@ -12,8 +12,8 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.5.9
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-wordwrap v1.0.1
-	github.com/omnistrate/api-design v0.6.481
-	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240724175050-23e9e99b7bf0
+	github.com/omnistrate/api-design v0.6.486
+	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240725063928-624ea8164afe
 	github.com/omnistrate/commons/pkg/utils v0.0.0-20240724002014-c9e09fdc914f
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/pkg/errors v0.9.1

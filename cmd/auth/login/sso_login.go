@@ -13,6 +13,7 @@ import (
 	"github.com/pkg/errors"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -48,22 +49,15 @@ func SSOLogin(identityProviderName string) error {
 	fmt.Print("You can also manually type in the code:\n\n")
 	fmt.Printf("%s\n\n", deviceCodeResponse.UserCode)
 
-	// Step 3: Poll GitHub to check if the user authorized the device
-	accessTokenResponse, err := pollForAccessToken(identityProviderName, deviceCodeResponse.DeviceCode, deviceCodeResponse.Interval)
+	// Step 3: Poll identity provider server to check if the user authorized the device via backend API
+	jwtTokenResponse, err := pollForAccessTokenAndLogin(identityProviderName, deviceCodeResponse.DeviceCode, deviceCodeResponse.Interval)
 	if err != nil {
 		err = errors.New(fmt.Sprintf("Error polling for access token: %v\n", err))
 		utils.PrintError(err)
 		return err
 	}
 
-	// Step 4: Use the access token to authenticate with the Omnistrate platform
-	res, err := dataaccess.LoginWithIdentityProvider(accessTokenResponse.AccessToken, accessTokenResponse.TokenType, identityProviderName)
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
-	token := res.JWTToken
+	token := jwtTokenResponse.JWTToken
 
 	authConfig := config.AuthConfig{
 		Token: token,
@@ -86,11 +80,9 @@ type DeviceCodeResponse struct {
 	Interval   int    `json:"interval"`
 }
 
-// AccessTokenResponse represents the response from the access token request
+// AccessTokenResponse represents the response from the jwt token request
 type AccessTokenResponse struct {
-	AccessToken string `json:"access_token"`
-	TokenType   string `json:"token_type"`
-	Scope       string `json:"scope"`
+	JWTToken string `json:"jwt_token"`
 }
 
 // GitHub client credentials
@@ -147,63 +139,22 @@ func requestDeviceCode(identityProviderName string) (*DeviceCodeResponse, error)
 	return &deviceCodeResponse, nil
 }
 
-// pollForAccessToken polls GitHub for an access token
-func pollForAccessToken(identityProviderName, deviceCode string, interval int) (*AccessTokenResponse, error) {
-	data := map[string]string{
-		"client_id":   getClientID(identityProviderName),
-		"device_code": deviceCode,
-		"grant_type":  "urn:ietf:params:oauth:grant-type:device_code",
-	}
-
+// pollForAccessTokenAndLogin polls identity provider server for an access token and uses it to log user into the platform
+func pollForAccessTokenAndLogin(identityProviderName, deviceCode string, interval int) (*AccessTokenResponse, error) {
 	for {
 		time.Sleep(time.Duration(interval) * time.Second)
 
-		dataBytes, err := json.Marshal(data)
+		resp, err := dataaccess.LoginWithIdentityProvider(deviceCode, identityProviderName)
 		if err != nil {
-			return nil, err
-		}
-
-		req, err := http.NewRequestWithContext(context.Background(), "POST", getAccessTokenURL(identityProviderName), bytes.NewBuffer(dataBytes))
-		if err != nil {
-			return nil, err
-		}
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Accept", "application/json")
-
-		client := &http.Client{}
-		resp, err := client.Do(req)
-		if err != nil {
-			return nil, err
-		}
-		defer resp.Body.Close()
-
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-
-		var errorResponse struct {
-			Error            string `json:"error"`
-			ErrorDescription string `json:"error_description"`
-			Interval         int    `json:"interval"`
-		}
-		if err = json.Unmarshal(body, &errorResponse); err == nil {
-			if errorResponse.Error == "authorization_pending" {
+			if strings.Contains(err.Error(), "empty access token") {
 				continue
 			}
-			if errorResponse.Error == "slow_down" {
-				interval += 5
-				continue
-			}
-		}
-
-		var accessTokenResponse AccessTokenResponse
-		err = json.Unmarshal(body, &accessTokenResponse)
-		if err != nil {
 			return nil, err
 		}
 
-		return &accessTokenResponse, nil
+		return &AccessTokenResponse{
+			JWTToken: resp.JWTToken,
+		}, nil
 	}
 }
 

@@ -98,7 +98,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 
 		return PasswordLogin(cmd, args)
 	case string(loginWithGoogle):
-		return SSOLogin("Google")
+		return SSOLogin("Google for CTL")
 	case string(loginWithGitHub):
 		return SSOLogin("GitHub")
 

@@ -37,14 +37,14 @@ func LoginWithPassword(email string, pass string) (token string, err error) {
 	return
 }
 
-func LoginWithIdentityProvider(accessToken, tokenType, identityProviderName string) (*signinapi.LoginWithIdentityProviderResult, error) {
+func LoginWithIdentityProvider(deviceCode, identityProviderName string) (*signinapi.LoginWithIdentityProviderResult, error) {
 	signin, err := httpclientwrapper.NewSignin(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return nil, err
 	}
 
 	res, err := signin.LoginWithIdentityProvider(context.Background(), &signinapi.LoginWithIdentityProviderRequest{
-		AccessToken:          commonutils.ToPtr(tokenType + " " + accessToken),
+		DeviceCode:           commonutils.ToPtr(deviceCode),
 		IdentityProviderName: signinapi.IdentityProviderName(identityProviderName),
 	})
 	if err != nil {
