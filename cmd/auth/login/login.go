@@ -50,6 +50,8 @@ func init() {
 	LoginCmd.Flags().StringVarP(&email, "email", "", "", "email")
 	LoginCmd.Flags().StringVarP(&password, "password", "", "", "password")
 	LoginCmd.Flags().BoolVarP(&passwordStdin, "password-stdin", "", false, "Reads the password from stdin")
+
+	LoginCmd.Args = cobra.NoArgs
 }
 
 func runLogin(cmd *cobra.Command, args []string) error {
