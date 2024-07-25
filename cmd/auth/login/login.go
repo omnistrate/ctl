@@ -19,6 +19,11 @@ const (
   # Login with email and password
   omnistrate-ctl login --email email --password password
 
+  # Login with environment variables
+  export OMNISTRATE_USER_NAME=YOUR_EMAIL
+  export OMNISTRATE_PASSWORD=YOUR_PASSWORD
+  ./omnistrate-ctl-darwin-arm64 login --email "$OMNISTRATE_USER_NAME" --password "$OMNISTRATE_PASSWORD"
+
   # Login with email and password from stdin. Save the password in a file and use cat to read it
   cat ~/omnistrate_pass.txt | omnistrate-ctl login --email email --password-stdin
 
