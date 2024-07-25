@@ -17,6 +17,35 @@ import (
 	"time"
 )
 
+// DeviceCodeResponse represents the response from the device code request
+type DeviceCodeResponse struct {
+	DeviceCode string `json:"device_code"`
+	UserCode   string `json:"user_code"`
+	ExpiresIn  int    `json:"expires_in"`
+	Interval   int    `json:"interval"`
+}
+
+// AccessTokenResponse represents the response from the jwt token request
+type AccessTokenResponse struct {
+	JWTToken string `json:"jwt_token"`
+}
+
+// GitHub client credentials
+const (
+	identityProviderGitHub = "GitHub for CTL"
+	identityProviderGoogle = "Google for CTL"
+	gitHubDevClientID      = "Ov23ctpQGrpGvsIIJxFv"
+	gitHubProdClientID     = "Ov23li2nyhdelepEtjcg"
+	googleDevClientID      = "635031719937-gqvm0qeelipdc812g9ie2v6ohk3j6gs6.apps.googleusercontent.com" // #nosec G101
+	googleProdClientID     = "421577562987-98lkfnu7e07rig5p6rt4p0dgqpktihhb.apps.googleusercontent.com" // #nosec G101
+	googleDeviceCodeURL    = "https://oauth2.googleapis.com/device/code"
+	gitHubDeviceCodeURL    = "https://oauth2.googleapis.com/device/code"
+	googleVerificationURI  = "https://www.google.com/device"
+	gitHubVerificationURI  = "https://github.com/login/device"
+	gitHubScope            = "user:email"
+	googleScope            = "email"
+)
+
 func SSOLogin(identityProviderName string) error {
 	// Step 1: Request device and user verification codes
 	deviceCodeResponse, err := requestDeviceCode(identityProviderName)
@@ -72,30 +101,7 @@ func SSOLogin(identityProviderName string) error {
 	return nil
 }
 
-// DeviceCodeResponse represents the response from the device code request
-type DeviceCodeResponse struct {
-	DeviceCode string `json:"device_code"`
-	UserCode   string `json:"user_code"`
-	ExpiresIn  int    `json:"expires_in"`
-	Interval   int    `json:"interval"`
-}
-
-// AccessTokenResponse represents the response from the jwt token request
-type AccessTokenResponse struct {
-	JWTToken string `json:"jwt_token"`
-}
-
-// GitHub client credentials
-const (
-	gitHubDevClientID  = "Ov23ctpQGrpGvsIIJxFv"
-	gitHubProdClientID = "Ov23li2nyhdelepEtjcg"
-	googleDevClientID  = "635031719937-gqvm0qeelipdc812g9ie2v6ohk3j6gs6.apps.googleusercontent.com" // #nosec G101
-	googleProdClientID = "421577562987-98lkfnu7e07rig5p6rt4p0dgqpktihhb.apps.googleusercontent.com" // #nosec G101
-	gitHubScope        = "user:email"
-	googleScope        = "email"
-)
-
-// requestDeviceCode requests a device and user verification code from GitHub
+// requestDeviceCode requests a device and user verification code from the identity provider
 func requestDeviceCode(identityProviderName string) (*DeviceCodeResponse, error) {
 	data := map[string]string{
 		"client_id": getClientID(identityProviderName),
@@ -153,7 +159,7 @@ func pollForAccessTokenAndLogin(identityProviderName, deviceCode string, interva
 				return nil, errors.New("Access denied. Please try again.")
 			}
 			// TODO: handle GitHub error in a better way to differentiate between different errors.
-			if identityProviderName == "GitHub" && strings.Contains(err.Error(), "Invalid request: empty access token") {
+			if identityProviderName == identityProviderGitHub && strings.Contains(err.Error(), "Invalid request: empty access token") {
 				continue
 			}
 			return nil, err
@@ -167,13 +173,13 @@ func pollForAccessTokenAndLogin(identityProviderName, deviceCode string, interva
 
 func getClientID(identityProviderName string) string {
 	switch identityProviderName {
-	case "GitHub for CTL":
+	case identityProviderGitHub:
 		if utils.IsProd() {
 			return gitHubProdClientID
 		} else {
 			return gitHubDevClientID
 		}
-	case "Google for CTL":
+	case identityProviderGoogle:
 		if utils.IsProd() {
 			return googleProdClientID
 		} else {
@@ -186,9 +192,9 @@ func getClientID(identityProviderName string) string {
 
 func getScope(identityProviderName string) string {
 	switch identityProviderName {
-	case "GitHub for CTL":
+	case identityProviderGitHub:
 		return gitHubScope
-	case "Google for CTL":
+	case identityProviderGoogle:
 		return googleScope
 	default:
 		return ""
@@ -197,10 +203,10 @@ func getScope(identityProviderName string) string {
 
 func getDeviceCodeURL(identityProviderName string) string {
 	switch identityProviderName {
-	case "GitHub for CTL":
-		return "https://github.com/login/device/code"
-	case "Google for CTL":
-		return "https://oauth2.googleapis.com/device/code"
+	case identityProviderGitHub:
+		return gitHubDeviceCodeURL
+	case identityProviderGoogle:
+		return googleDeviceCodeURL
 	default:
 		return ""
 	}
@@ -208,10 +214,10 @@ func getDeviceCodeURL(identityProviderName string) string {
 
 func getVerificationURI(identityProviderName string) string {
 	switch identityProviderName {
-	case "GitHub for CTL":
-		return "https://github.com/login/device"
-	case "Google for CTL":
-		return "https://www.google.com/device"
+	case identityProviderGitHub:
+		return gitHubVerificationURI
+	case identityProviderGoogle:
+		return googleVerificationURI
 	default:
 		return ""
 	}
