@@ -34,6 +34,8 @@ var (
 	email         string
 	password      string
 	passwordStdin bool
+	gh            bool
+	google        bool
 )
 
 // LoginCmd represents the login command
@@ -51,6 +53,11 @@ func init() {
 	LoginCmd.Flags().StringVarP(&password, "password", "", "", "password")
 	LoginCmd.Flags().BoolVarP(&passwordStdin, "password-stdin", "", false, "Reads the password from stdin")
 
+	LoginCmd.Flags().BoolVarP(&gh, "gh", "", false, "Login with GitHub")
+	LoginCmd.Flags().BoolVarP(&google, "google", "", false, "Login with Google")
+
+	LoginCmd.MarkFlagsMutuallyExclusive("gh", "google", "email")
+
 	LoginCmd.Args = cobra.NoArgs
 }
 
@@ -60,6 +67,14 @@ func runLogin(cmd *cobra.Command, args []string) error {
 	// Login with email and password if any of the flags are set
 	if len(email) > 0 || len(password) > 0 || passwordStdin {
 		return PasswordLogin(cmd, args, false)
+	}
+
+	if gh {
+		return SSOLogin(identityProviderGitHub)
+	}
+
+	if google {
+		return SSOLogin(identityProviderGoogle)
 	}
 
 	// Login interactively
@@ -100,9 +115,9 @@ func runLogin(cmd *cobra.Command, args []string) error {
 
 		return PasswordLogin(cmd, args, true)
 	case string(loginWithGoogle):
-		return SSOLogin("Google for CTL")
+		return SSOLogin(identityProviderGoogle)
 	case string(loginWithGitHub):
-		return SSOLogin("GitHub for CTL")
+		return SSOLogin(identityProviderGitHub)
 
 	default:
 		err := errors.New("Invalid selection")
