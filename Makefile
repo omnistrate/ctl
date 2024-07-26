@@ -118,7 +118,13 @@ sec-verbose:
 update-dependencies:
 	echo "Updating dependencies"
 	go get -t -u ./...
-	go mod tidy
+	make tidy
+
+.PHONY: update-omnistrate-dependencies
+update-omnistrate-dependencies:
+	echo "Updating omnistrate dependencies"
+	go get -u github.com/omnistrate/... 
+	make tidy
 
 .PHONY: docker
 docker: docker-build
