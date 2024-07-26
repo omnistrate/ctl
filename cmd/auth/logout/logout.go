@@ -1,4 +1,4 @@
-package auth
+package logout
 
 import (
 	"github.com/omnistrate/ctl/utils"

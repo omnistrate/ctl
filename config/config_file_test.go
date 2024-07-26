@@ -49,7 +49,6 @@ func TestSaveAndLoad(t *testing.T) {
 	assert.NoError(t, err)
 
 	cfg.AuthConfigs = append(cfg.AuthConfigs, AuthConfig{
-		Email: "test@example.com",
 		Token: "token123",
 	})
 
@@ -70,7 +69,6 @@ func TestSaveAndLoad(t *testing.T) {
 
 func TestCreateOrUpdateAuthConfig(t *testing.T) {
 	authConfig := AuthConfig{
-		Email: "test@example.com",
 		Token: "token123",
 	}
 
@@ -90,7 +88,6 @@ func TestLookupAuthConfig(t *testing.T) {
 	assert.Error(t, err)
 
 	authConfig := AuthConfig{
-		Email: "test@example.com",
 		Token: "token123",
 	}
 
@@ -107,7 +104,6 @@ func TestLookupAuthConfig(t *testing.T) {
 
 func TestRemoveAuthConfig(t *testing.T) {
 	authConfig := AuthConfig{
-		Email: "test@example.com",
 		Token: "token123",
 	}
 

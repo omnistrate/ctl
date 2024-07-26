@@ -29,3 +29,7 @@ func GetRootDomain() string {
 func GetHostScheme() string {
 	return utils.GetEnv("OMNISTRATE_HOST_SCHEME", "https")
 }
+
+func IsProd() bool {
+	return GetRootDomain() == "omnistrate.cloud"
+}
