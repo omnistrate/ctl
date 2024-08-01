@@ -12,14 +12,14 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.5.9
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-wordwrap v1.0.1
-	github.com/omnistrate/api-design v0.6.488
+	github.com/omnistrate/api-design v0.6.502
 	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240725190448-993cb3330d04
-	github.com/omnistrate/commons/pkg/utils v0.0.0-20240726061426-47c2c1dfd9d6
+	github.com/omnistrate/commons/pkg/utils v0.0.0-20240726171125-4dd704f9870c
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
-	goa.design/goa/v3 v3.17.2
+	goa.design/goa/v3 v3.18.1
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -55,7 +55,7 @@ require (
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/omnistrate/commons/pkg/constants v0.0.0-20240726061426-47c2c1dfd9d6 // indirect
+	github.com/omnistrate/commons/pkg/constants v0.0.0-20240726171125-4dd704f9870c // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.19.1 // indirect
