@@ -63,6 +63,8 @@ func run(cmd *cobra.Command, args []string) error {
 
 	upgrades := make(map[string]*Upgrade)
 	for _, instanceID := range args {
+		upgrades[instanceID] = &Upgrade{}
+
 		upgrades[instanceID].Spinner = sm.AddSpinner(fmt.Sprintf("preparing %s", instanceID))
 
 		// Check if the instance exists
@@ -73,8 +75,9 @@ func run(cmd *cobra.Command, args []string) error {
 		}
 
 		if searchRes == nil || len(searchRes.ResourceInstanceResults) == 0 {
-			utils.PrintError(fmt.Errorf("%s not found. Please check the instance ID and try again", instanceID))
-			return nil
+			err = fmt.Errorf("%s not found. Please check the instance ID and try again", instanceID)
+			utils.PrintError(err)
+			return err
 		}
 
 		var found bool
@@ -87,7 +90,8 @@ func run(cmd *cobra.Command, args []string) error {
 			}
 		}
 		if !found {
-			utils.PrintError(fmt.Errorf("%s not found. Please check the instance ID and try again", instanceID))
+			err = fmt.Errorf("%s not found. Please check the instance ID and try again", instanceID)
+			utils.PrintError(err)
 			return nil
 		}
 

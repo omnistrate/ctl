@@ -50,3 +50,21 @@ func DescribeUpgradePath(token, serviceID, productTierID, upgradePathID string) 
 
 	return res, nil
 }
+
+func ListUpgradePaths(token, serviceID, productTierID string) (*upgradepathapi.ListUpgradePathsResult, error) {
+	upgradePath, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := upgradePath.ListUpgradePath(context.Background(), &upgradepathapi.ListUpgradePathsRequest{
+		Token:         token,
+		ServiceID:     upgradepathapi.ServiceID(serviceID),
+		ProductTierID: upgradepathapi.ProductTierID(productTierID),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
