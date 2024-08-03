@@ -33,6 +33,7 @@ var (
 	environmentType    string
 	release            bool
 	releaseAsPreferred bool
+	releaseName        string
 	interactive        bool
 
 	buildExample = `  # Build in dev environment
@@ -41,11 +42,11 @@ var (
   # Build in prod environment
   omnistrate-ctl build --file docker-compose.yml --name "My Service" --environment prod --environment-type prod
 
-  # Build and release the service
-  omnistrate-ctl build --file docker-compose.yml --name "My Service" --release
+  # Build and release the service with a specific release version name
+  omnistrate-ctl build --file docker-compose.yml --name "My Service" --release --release-name "v1.0.0-alpha"
 
-  # Build and release the service as preferred
-  omnistrate-ctl build --file docker-compose.yml --name "My Service" --release-as-preferred
+  # Build and release the service as preferred with a specific release version name
+  omnistrate-ctl build --file docker-compose.yml --name "My Service" --release-as-preferred --release-name "v1.0.0-alpha"
 
   # Build interactively
   omnistrate-ctl build --file docker-compose.yml --name "My Service" --interactive
@@ -88,6 +89,7 @@ func init() {
 	BuildCmd.Flags().StringVarP(&environmentType, "environment-type", "", "dev", "Type of environment. Valid options include: 'dev', 'prod', 'qa', 'canary', 'staging', 'private')")
 	BuildCmd.Flags().BoolVarP(&release, "release", "", false, "Release the service after building it")
 	BuildCmd.Flags().BoolVarP(&releaseAsPreferred, "release-as-preferred", "", false, "Release the service as preferred after building it")
+	BuildCmd.Flags().StringVarP(&releaseName, "release-name", "", "", "Name of the release version")
 	BuildCmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "Interactive mode")
 
 	err := BuildCmd.MarkFlagRequired("file")
@@ -145,11 +147,17 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		environmentTypePtr = nil
 	}
 
+	releaseNamePtr := &releaseName
+	if releaseName == "" {
+		releaseNamePtr = nil
+	}
+
 	sm1 := ysmrr.NewSpinnerManager()
 	building := sm1.AddSpinner("Building service...")
 	sm1.Start()
 
-	ServiceID, EnvironmentID, ProductTierID, err = buildService(file, token, name, descriptionPtr, serviceLogoURLPtr, environmentPtr, environmentTypePtr, release, releaseAsPreferred)
+	ServiceID, EnvironmentID, ProductTierID, err = buildService(file, token, name, descriptionPtr, serviceLogoURLPtr,
+		environmentPtr, environmentTypePtr, release, releaseAsPreferred, releaseNamePtr)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -321,7 +329,8 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func buildService(file, token, name string, description, serviceLogoURL, environment, environmentType *string, release, releaseAsPreferred bool) (serviceID string, environmentID string, productTierID string, err error) {
+func buildService(file, token, name string, description, serviceLogoURL, environment, environmentType *string, release,
+	releaseAsPreferred bool, releaseName *string) (serviceID string, environmentID string, productTierID string, err error) {
 	if name == "" {
 		return "", "", "", errors.New("name is required")
 	}
@@ -346,6 +355,7 @@ func buildService(file, token, name string, description, serviceLogoURL, environ
 		FileContent:        base64.StdEncoding.EncodeToString(fileData),
 		Release:            &release,
 		ReleaseAsPreferred: &releaseAsPreferred,
+		ReleaseVersionName: releaseName,
 	}
 
 	// Load the YAML content
