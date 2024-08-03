@@ -69,7 +69,7 @@ func run(cmd *cobra.Command, args []string) error {
 	for _, instanceID := range args {
 		upgrades[instanceID] = &Upgrade{}
 
-		upgrades[instanceID].Spinner = sm.AddSpinner(fmt.Sprintf("preparing %s", instanceID))
+		upgrades[instanceID].Spinner = sm.AddSpinner(fmt.Sprintf("Preparing %s for upgrade", instanceID))
 
 		// Check if the instance exists
 		searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("resourceinstance:%s", instanceID))
@@ -128,6 +128,13 @@ func run(cmd *cobra.Command, args []string) error {
 			utils.PrintError(err)
 			return err
 		}
+
+		// Check if the target is the same as the source
+		if upgrades[instanceID].SourceVersion == upgrades[instanceID].TargetVersion {
+			err = fmt.Errorf("source version %s is the same as target version for %s", upgrades[instanceID].SourceVersion, instanceID)
+			utils.PrintError(err)
+			return err
+		}
 	}
 
 	// Create upgrade path
@@ -139,7 +146,7 @@ func run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("%s initiated", instanceID))
+		upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("Upgrade %s from version %s to %s initiated", instanceID, upgrades[instanceID].SourceVersion, upgrades[instanceID].TargetVersion))
 		upgrades[instanceID].UpgradePathID = string(upgradePathID)
 
 		wg.Add(1)

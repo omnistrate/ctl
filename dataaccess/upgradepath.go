@@ -29,7 +29,7 @@ func CreateUpgradePath(token, serviceID, productTierID, sourceVersion, targetVer
 		return "", err
 	}
 
-	return res, nil
+	return res.UpgradePathID, nil
 }
 
 func DescribeUpgradePath(token, serviceID, productTierID, upgradePathID string) (*upgradepathapi.UpgradePath, error) {
