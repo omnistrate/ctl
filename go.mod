@@ -2,6 +2,11 @@ module github.com/omnistrate/ctl
 
 go 1.22.0
 
+replace (
+ 	github.com/omnistrate/api-design => ../api-design
+ 	github.com/omnistrate/api-design/pkg/httpclientwrapper => ../api-design/pkg/httpclientwrapper
+)
+
 require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/chelnak/ysmrr v0.4.0
