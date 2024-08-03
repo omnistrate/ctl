@@ -10,6 +10,7 @@ import (
 	"github.com/omnistrate/ctl/cmd/deprecated"
 	"github.com/omnistrate/ctl/cmd/describe"
 	"github.com/omnistrate/ctl/cmd/get"
+	"github.com/omnistrate/ctl/cmd/upgrade"
 	"os"
 
 	"github.com/fatih/color"
@@ -93,4 +94,6 @@ func init() {
 
 	RootCmd.AddCommand(deprecated.ListCmd)
 	RootCmd.AddCommand(deprecated.RemoveCmd)
+
+	RootCmd.AddCommand(upgrade.UpgradeCmd)
 }

@@ -35,7 +35,9 @@ var (
 	releaseAsPreferred bool
 	releaseName        string
 	interactive        bool
+)
 
+const (
 	buildExample = `  # Build in dev environment
   omnistrate-ctl build --file docker-compose.yml --name "My Service"
 

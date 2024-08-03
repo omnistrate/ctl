@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
+const (
 	accountExample = `  # Create aws account
   create account <name> --aws-account-id <aws-account-id>
 
