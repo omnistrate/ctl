@@ -166,27 +166,27 @@ func run(cmd *cobra.Command, args []string) error {
 					upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("Upgrade %s from version %s to %s completed", instanceID, upgrades[instanceID].SourceVersion, upgrades[instanceID].TargetVersion))
 					upgrades[instanceID].Spinner.Complete()
 					wg.Done()
-					break
+					return
 				case "FAILED":
 					upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("Upgrade %s from version %s to %s failed", instanceID, upgrades[instanceID].SourceVersion, upgrades[instanceID].TargetVersion))
 					upgrades[instanceID].Spinner.Error()
 					wg.Done()
-					break
+					return
 				case "PAUSED":
 					upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("Upgrade %s from version %s to %s paused", instanceID, upgrades[instanceID].SourceVersion, upgrades[instanceID].TargetVersion))
 					upgrades[instanceID].Spinner.Error()
 					wg.Done()
-					break
+					return
 				case "CANCELLED":
 					upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("Upgrade %s from version %s to %s cancelled", instanceID, upgrades[instanceID].SourceVersion, upgrades[instanceID].TargetVersion))
 					upgrades[instanceID].Spinner.Error()
 					wg.Done()
-					break
+					return
 				default:
 					err := fmt.Errorf("unknown status: %s", upgradePath.Status)
 					utils.PrintError(err)
 					wg.Done()
-					break
+					return
 				}
 			}
 
