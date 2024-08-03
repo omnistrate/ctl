@@ -1,19 +1,18 @@
 package dataaccess
 
 import (
-	"context"
-	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
+	"bytes"
+	"encoding/json"
+	"fmt"
 	upgradepathapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
 	"github.com/omnistrate/ctl/utils"
+	"net/http"
 )
 
 func CreateUpgradePath(token, serviceID, productTierID, sourceVersion, TargetVersion, instanceID string) (upgradepathapi.UpgradePathID, error) {
-	upgradePath, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
-	if err != nil {
-		return "", err
-	}
+	url := fmt.Sprintf("%s://%s/2022-09-01-00/fleet/service/%v/productTier/%v/upgrade-path", utils.GetHostScheme(), utils.GetHost(), serviceID, productTierID)
 
-	res, err := upgradePath.CreateUpgradePath(context.Background(), &upgradepathapi.CreateUpgradePathRequest{
+	payload := upgradepathapi.CreateUpgradePathRequest{
 		Token:         token,
 		ServiceID:     upgradepathapi.ServiceID(serviceID),
 		ProductTierID: upgradepathapi.ProductTierID(productTierID),
@@ -24,47 +23,72 @@ func CreateUpgradePath(token, serviceID, productTierID, sourceVersion, TargetVer
 				instanceID,
 			},
 		},
-	})
+	}
+
+	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return "", err
 	}
 
-	return res, nil
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payloadBytes))
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		err := fmt.Errorf("%s", resp.Status)
+		return "", err
+	}
+
+	// Marshal the response body into a struct
+	var result upgradepathapi.UpgradePath
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	if err != nil {
+		return "", err
+	}
+
+	return result.UpgradePathID, nil
 }
 
 func DescribeUpgradePath(token, serviceID, productTierID, upgradePathID string) (*upgradepathapi.UpgradePath, error) {
-	upgradePath, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
+	url := fmt.Sprintf("%s://%s/2022-09-01-00/fleet/service/%v/productTier/%v/upgrade-path/%v", utils.GetHostScheme(), utils.GetHost(), serviceID, productTierID, upgradePathID)
+
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := upgradePath.DescribeUpgradePath(context.Background(), &upgradepathapi.DescribeUpgradePathRequest{
-		Token:         token,
-		ServiceID:     upgradepathapi.ServiceID(serviceID),
-		ProductTierID: upgradepathapi.ProductTierID(productTierID),
-		UpgradePathID: upgradepathapi.UpgradePathID(upgradePathID),
-	})
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		err := fmt.Errorf("%s", resp.Status)
+		return nil, err
+	}
+
+	// Marshal the response body into a struct
+	var result upgradepathapi.UpgradePath
+	err = json.NewDecoder(resp.Body).Decode(&result)
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
-}
-
-func ListUpgradePaths(token, serviceID, productTierID string) (*upgradepathapi.ListUpgradePathsResult, error) {
-	upgradePath, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := upgradePath.ListUpgradePath(context.Background(), &upgradepathapi.ListUpgradePathsRequest{
-		Token:         token,
-		ServiceID:     upgradepathapi.ServiceID(serviceID),
-		ProductTierID: upgradepathapi.ProductTierID(productTierID),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return res, nil
+	return &result, nil
 }

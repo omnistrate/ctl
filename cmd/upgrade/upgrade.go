@@ -5,8 +5,11 @@ import (
 	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"strings"
 	"sync"
+	"time"
 )
 
 const (
@@ -60,6 +63,7 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	sm := ysmrr.NewSpinnerManager()
+	sm.Start()
 
 	upgrades := make(map[string]*Upgrade)
 	for _, instanceID := range args {
@@ -86,6 +90,7 @@ func run(cmd *cobra.Command, args []string) error {
 				upgrades[instanceID].ServiceID = string(instance.ServiceID)
 				upgrades[instanceID].EnvironmentID = string(instance.ServiceEnvironmentID)
 				upgrades[instanceID].ProductTierID = string(instance.ProductTierID)
+				found = true
 				break
 			}
 		}
@@ -117,11 +122,13 @@ func run(cmd *cobra.Command, args []string) error {
 		// Check if the target version exists
 		_, err = dataaccess.DescribeVersionSet(token, upgrades[instanceID].ServiceID, upgrades[instanceID].ProductTierID, upgrades[instanceID].TargetVersion)
 		if err != nil {
+			if strings.Contains(err.Error(), "Version set not found") {
+				err = errors.New(fmt.Sprintf("version %s not found", version))
+			}
 			utils.PrintError(err)
 			return err
 		}
 	}
-	sm.Start()
 
 	// Create upgrade path
 	var wg sync.WaitGroup
@@ -132,7 +139,9 @@ func run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("upgrading %s", instanceID))
+		println(fmt.Sprintf("Upgrading %s from version %s to version %s", instanceID, upgrades[instanceID].SourceVersion, upgrades[instanceID].TargetVersion))
+
+		upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("%s initiated", instanceID))
 		upgrades[instanceID].UpgradePathID = string(upgradePathID)
 
 		wg.Add(1)
@@ -151,8 +160,10 @@ func run(cmd *cobra.Command, args []string) error {
 				switch upgradePath.Status {
 				case "PENDING":
 					upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("%s pending", instanceID))
+					time.Sleep(5 * time.Second)
 				case "IN_PROGRESS":
 					upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("%s in progress", instanceID))
+					time.Sleep(5 * time.Second)
 				case "COMPLETE":
 					upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("%s completed", instanceID))
 					upgrades[instanceID].Spinner.Complete()
