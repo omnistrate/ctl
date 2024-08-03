@@ -97,12 +97,16 @@ github.com/omnistrate/api-design v0.6.515 h1:eo1xU7OqoOcvxgP42AmjA9NxfFnA4JvzxEz
 github.com/omnistrate/api-design v0.6.515/go.mod h1:WQu8OeRn1of63FfRB8eukv4E4Lwixm1IlVx5heE/xjg=
 github.com/omnistrate/api-design v0.6.518 h1:twzWuX/NyVVG9V5NJN6US8xalKulME1BPyhTuZ1o+6o=
 github.com/omnistrate/api-design v0.6.518/go.mod h1:WQu8OeRn1of63FfRB8eukv4E4Lwixm1IlVx5heE/xjg=
+github.com/omnistrate/api-design v0.6.519 h1:9i2HABJyLgzoU6tRE3jKma6umJ7RltKfNGDZ+z6jeSo=
+github.com/omnistrate/api-design v0.6.519/go.mod h1:WQu8OeRn1of63FfRB8eukv4E4Lwixm1IlVx5heE/xjg=
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240725190448-993cb3330d04 h1:NemiFHyALIAFnbPFtnrdASf7J4/F4WOwfVW8QYb/AGQ=
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240725190448-993cb3330d04/go.mod h1:HWRdwqwHEWT/I38jWrCdkydGjsxdSigrjX0ZMjVABBw=
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240802215453-a93cb126a01a h1:p7e4CS4Zx5WDbXugXsQxKJrfnKdH8LnQjxijE0MGujs=
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240802215453-a93cb126a01a/go.mod h1:xMTkwU92CrJ/lx1qyxE2fU2m0JLsKbvObRym+nP4ENg=
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240803021811-0ae2da7067c1 h1:wefS1CIQQHLa+TbbVnaM0MI0OlWdYcqtihb/PKr1dKw=
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240803021811-0ae2da7067c1/go.mod h1:xMTkwU92CrJ/lx1qyxE2fU2m0JLsKbvObRym+nP4ENg=
+github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240803034906-61df85fb4775 h1:SiDQUfcz/kiCQCAyWgtNFdT//e+x9/2Uy021UGAB/MA=
+github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240803034906-61df85fb4775/go.mod h1:xMTkwU92CrJ/lx1qyxE2fU2m0JLsKbvObRym+nP4ENg=
 github.com/omnistrate/commons/pkg/constants v0.0.0-20240726061426-47c2c1dfd9d6 h1:zfuqiD0SHWkKBR9kki/1Kowsff/YAyxhpoeijOW4qBA=
 github.com/omnistrate/commons/pkg/constants v0.0.0-20240726061426-47c2c1dfd9d6/go.mod h1:okYQlNYHtWts036uSo4UprIiYXWFu/pAo49v9oDLnG4=
 github.com/omnistrate/commons/pkg/constants v0.0.0-20240726171125-4dd704f9870c h1:JNk8iF03kPXRsvWXA5DM5T0jkXvW3W+NeWVwKgL/xrA=

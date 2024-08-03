@@ -139,8 +139,6 @@ func run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		println(fmt.Sprintf("Upgrading %s from version %s to version %s", instanceID, upgrades[instanceID].SourceVersion, upgrades[instanceID].TargetVersion))
-
 		upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("%s initiated", instanceID))
 		upgrades[instanceID].UpgradePathID = string(upgradePathID)
 
@@ -159,28 +157,28 @@ func run(cmd *cobra.Command, args []string) error {
 
 				switch upgradePath.Status {
 				case "PENDING":
-					upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("%s pending", instanceID))
+					upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("Pending upgrade %s from version %s to %s", instanceID, upgrades[instanceID].SourceVersion, upgrades[instanceID].TargetVersion))
 					time.Sleep(5 * time.Second)
 				case "IN_PROGRESS":
-					upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("%s in progress", instanceID))
+					upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("Upgrading %s from version %s to %s", instanceID, upgrades[instanceID].SourceVersion, upgrades[instanceID].TargetVersion))
 					time.Sleep(5 * time.Second)
 				case "COMPLETE":
-					upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("%s completed", instanceID))
+					upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("Upgrade %s from version %s to %s completed", instanceID, upgrades[instanceID].SourceVersion, upgrades[instanceID].TargetVersion))
 					upgrades[instanceID].Spinner.Complete()
 					wg.Done()
 					break
 				case "FAILED":
-					upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("%s failed", instanceID))
+					upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("Upgrade %s from version %s to %s failed", instanceID, upgrades[instanceID].SourceVersion, upgrades[instanceID].TargetVersion))
 					upgrades[instanceID].Spinner.Error()
 					wg.Done()
 					break
 				case "PAUSED":
-					upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("%s paused", instanceID))
+					upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("Upgrade %s from version %s to %s paused", instanceID, upgrades[instanceID].SourceVersion, upgrades[instanceID].TargetVersion))
 					upgrades[instanceID].Spinner.Error()
 					wg.Done()
 					break
 				case "CANCELLED":
-					upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("%s cancelled", instanceID))
+					upgrades[instanceID].Spinner.UpdateMessage(fmt.Sprintf("Upgrade %s from version %s to %s cancelled", instanceID, upgrades[instanceID].SourceVersion, upgrades[instanceID].TargetVersion))
 					upgrades[instanceID].Spinner.Error()
 					wg.Done()
 					break
