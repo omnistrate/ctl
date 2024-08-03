@@ -25,6 +25,7 @@ func Test_upgrade_basic(t *testing.T) {
 	//err = cmd.RootCmd.Execute()
 	//require.NoError(err)
 
+	// TODO: Fix the following tests
 	_, err := dataaccess.SearchInventory("token", "query")
 	require.Error(err)
 
