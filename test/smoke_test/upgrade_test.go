@@ -33,11 +33,11 @@ func Test_upgrade_basic(t *testing.T) {
 	require.Contains(err.Error(), "upgrade-invalid not found")
 
 	// TODO: Create real upgrade path after we added the CRUD instance cmd
-	cmd.RootCmd.SetArgs([]string{"upgrade", "status", "upgrade-qtxOTgcnDI", "upgrade-QsfmLshnvN"})
+	cmd.RootCmd.SetArgs([]string{"upgrade", "status", "upgrade-qtxOTgcnDI"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"upgrade", "status", "upgrade-qtxOTgcnDI", "upgrade-QsfmLshnvN", "--output", "json"})
+	cmd.RootCmd.SetArgs([]string{"upgrade", "status", "upgrade-qtxOTgcnDI", "--output", "json"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 }
