@@ -17,7 +17,7 @@ const (
 	upgradeLong = ``
 
 	upgradeExample = `  # Upgrade instances to a specific version
-  omnistrate-ctl upgrade <instance1> <instance2> --version 1.2.3
+  omnistrate-ctl upgrade <instance1> <instance2> --version 2.0
 
   # Upgrade instances to the latest version
   omnistrate-ctl upgrade <instance1> <instance2> --version latest
@@ -81,13 +81,15 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	sm := ysmrr.NewSpinnerManager()
+	msg := "Scheduling upgrade for all instances"
+	if len(args) == 1 {
+		msg = fmt.Sprintf("Scheduling upgrade for %s", args[0])
+	}
+	spinner := sm.AddSpinner(msg)
 	sm.Start()
-	spinners := make(map[string]*ysmrr.Spinner)
 
 	upgrades := make(map[Args]*Res)
 	for _, instanceID := range args {
-		spinners[instanceID] = sm.AddSpinner(fmt.Sprintf("Preparing %s for upgrade", instanceID))
-
 		// Check if the instance exists
 		searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("resourceinstance:%s", instanceID))
 		if err != nil {
@@ -198,14 +200,13 @@ func run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		for _, instanceID := range upgradeRes.InstanceIDs {
-			spinners[instanceID].UpdateMessage(fmt.Sprintf("Upgrade %s from version %s to %s initiated", instanceID, upgradeArgs.SourceVersion, upgradeArgs.TargetVersion))
-		}
-
 		upgrades[upgradeArgs].UpgradePathID = string(upgradePathID)
 	}
 
+	spinner.Complete()
 	sm.Stop()
+
+	println("\nThe following upgrades have been scheduled:")
 
 	// Print output
 	switch output {
@@ -217,6 +218,11 @@ func run(cmd *cobra.Command, args []string) error {
 		err = fmt.Errorf("invalid output format %s", output)
 		utils.PrintError(err)
 		return err
+	}
+
+	println("\nCheck the upgrade status using the following command:")
+	for _, upgradeRes := range upgrades {
+		fmt.Printf("  omnistrate-ctl upgrade status %s\n", upgradeRes.UpgradePathID)
 	}
 
 	return nil
