@@ -36,14 +36,18 @@ Usage:
   omnistrate-ctl [command]
 
 Available Commands:
-  build       Build a service from a Docker Compose file
+  build       Build one service plan from docker compose.
   completion  Generate the autocompletion script for the specified shell
-  describe    Get detailed information about a service
+  create      Create object from stdin by providing the object type and name.
+  delete      Delete one or many objects by specifying the object type and name.
+  describe    Describe detailed information about one or many objects and output results as JSON to stdout.
+  get         Display one or many objects with a table, only the most important information will be displayed.
   help        Help about any command
-  list        List all available services
-  login       Log in to the Omnistrate platform
-  logout      Logout from the Omnistrate platform
-  remove      Remove a service from the Omnistrate platform
+  list        List all available services (deprecated)
+  login       Log in to the Omnistrate platform.
+  logout      Logout.
+  remove      Remove a service from the Omnistrate platform (deprecated)
+  upgrade     Upgrade instance to a newer version or an older version.
 
 Flags:
   -h, --help   help for omnistrate-ctl
@@ -150,6 +154,53 @@ omnistrate-ctl remove --service-id <service-id>
 ```
 
 Replace `<service-id>` with the ID of the service you want to remove. This command will remove the specified service from the platform.
+
+### Upgrading Instances
+
+To upgrade an instance to a newer version or an older version, use the `upgrade` command and specify the instance id(s) and the version you want to upgrade to:
+
+```bash
+omnistrate-ctl upgrade <instance> [--version VERSION] [flags]
+
+Flags:
+  -h, --help             help for upgrade
+  -o, --output string    Output format. One of: table, json (default "table")
+      --version string   Specify the version number to upgrade to. Use 'latest' to upgrade to the latest version. Use 'preferred' to upgrade to the preferred version.
+```
+
+To get overall upgrade status, use the `upgrade status` command and specify the upgrade ID(s):
+
+```bash
+omnistrate-ctl upgrade status <upgrade>
+
+Flags:
+  -h, --help            help for detail
+  -o, --output string   Output format. One of: table, json (default "table")
+```
+
+To get per instance upgrade status, use the `upgrade status detail` command and specify the upgrade ID:
+
+```bash
+omnistrate-ctl upgrade status detail <upgrade>
+```
+
+Examples:
+```bash
+  # Upgrade instances to a specific version
+  omnistrate-ctl upgrade <instance1> <instance2> --version 2.0
+
+  # Upgrade instances to the latest version
+  omnistrate-ctl upgrade <instance1> <instance2> --version latest
+
+ # Upgrade instances to the preferred version
+  omnistrate-ctl upgrade <instance1> <instance2> --version preferred
+
+  # Get upgrade status
+  omnistrate-ctl upgrade status <upgrade1> <upgrade2>
+
+  # Get upgrade status detail
+  omnistrate-ctl upgrade status detail <upgrade>
+```
 
 ## Examples
 ### Example 1: Creating a Service with Multiple Plans
