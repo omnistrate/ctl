@@ -2,10 +2,8 @@ package status
 
 import (
 	"fmt"
-	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"os"
 	"text/tabwriter"
@@ -50,28 +48,39 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	allUpgrades, err := dataaccess.ListAllUpgradePaths(token)
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
-	allUpgradesMap := make(map[string]*inventoryapi.UpgradePath)
-	for _, upgradePath := range allUpgrades {
-		allUpgradesMap[string(upgradePath.UpgradePathID)] = upgradePath
-	}
-
 	res := make([]*Res, 0)
 
 	for _, upgradePathID := range args {
-		upgradePath, ok := allUpgradesMap[upgradePathID]
-		if !ok {
-			err = errors.New(fmt.Sprintf("%s not found", upgradePathID))
+		searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("upgradepath:%s", upgradePathID))
+		if err != nil {
 			utils.PrintError(err)
 			return err
 		}
 
-		instanceUpgrades, err := dataaccess.ListEligibleInstancesPerUpgrade(token, string(upgradePath.ServiceID), string(upgradePath.ProductTierID), string(upgradePath.UpgradePathID))
+		if len(searchRes.UpgradePathResults) == 0 {
+			err = fmt.Errorf("%s not found", upgradePathID)
+			utils.PrintError(err)
+			return err
+		}
+
+		found := false
+		var serviceID, productTierID string
+		for _, upgradePath := range searchRes.UpgradePathResults {
+			if string(upgradePath.ID) == upgradePathID {
+				found = true
+				serviceID = string(upgradePath.ServiceID)
+				productTierID = string(upgradePath.ProductTierID)
+				break
+			}
+		}
+
+		if !found {
+			err = fmt.Errorf("%s not found", upgradePathID)
+			utils.PrintError(err)
+			return err
+		}
+
+		instanceUpgrades, err := dataaccess.ListEligibleInstancesPerUpgrade(token, serviceID, productTierID, upgradePathID)
 		if err != nil {
 			utils.PrintError(err)
 			return err
@@ -88,7 +97,7 @@ func run(cmd *cobra.Command, args []string) error {
 				endTime = *instanceUpgrade.UpgradeEndTime
 			}
 			res = append(res, &Res{
-				UpgradeID:        string(upgradePath.UpgradePathID),
+				UpgradeID:        upgradePathID,
 				InstanceID:       string(instanceUpgrade.InstanceID),
 				UpgradeStartTime: startTime,
 				UpgradeEndTime:   endTime,
