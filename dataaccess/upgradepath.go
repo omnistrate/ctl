@@ -30,43 +30,6 @@ func CreateUpgradePath(token, serviceID, productTierID, sourceVersion, targetVer
 	return res.UpgradePathID, nil
 }
 
-func DescribeUpgradePath(token, serviceID, productTierID, upgradePathID string) (*upgradepathapi.UpgradePath, error) {
-	upgradePath, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := upgradePath.DescribeUpgradePath(context.Background(), &upgradepathapi.DescribeUpgradePathRequest{
-		Token:         token,
-		ServiceID:     upgradepathapi.ServiceID(serviceID),
-		ProductTierID: upgradepathapi.ProductTierID(productTierID),
-		UpgradePathID: upgradepathapi.UpgradePathID(upgradePathID),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return res, nil
-}
-
-func ListUpgradePaths(token, serviceID, productTierID string) ([]*upgradepathapi.UpgradePath, error) {
-	upgradePath, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := upgradePath.ListUpgradePath(context.Background(), &upgradepathapi.ListUpgradePathsRequest{
-		Token:         token,
-		ServiceID:     upgradepathapi.ServiceID(serviceID),
-		ProductTierID: upgradepathapi.ProductTierID(productTierID),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return res.UpgradePaths, nil
-}
-
 func ListEligibleInstancesPerUpgrade(token, serviceID, productTierID, upgradePathID string) ([]*upgradepathapi.InstanceUpgrade, error) {
 	upgradePath, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {

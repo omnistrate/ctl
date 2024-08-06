@@ -99,9 +99,9 @@ func run(cmd *cobra.Command, args []string) error {
 			res = append(res, &Res{
 				UpgradeID:        upgradePathID,
 				InstanceID:       string(instanceUpgrade.InstanceID),
+				UpgradeStatus:    string(instanceUpgrade.Status),
 				UpgradeStartTime: startTime,
 				UpgradeEndTime:   endTime,
-				UpgradeStatus:    string(instanceUpgrade.Status),
 			})
 		}
 	}
@@ -123,15 +123,15 @@ func run(cmd *cobra.Command, args []string) error {
 func printTable(res []*Res) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 
-	fmt.Fprintln(w, "Upgrade ID\tInstance ID\tStart Time\tEnd Time\tStatus")
+	fmt.Fprintln(w, "Upgrade ID\tInstance ID\tStatus\tStart Time\tEnd Time")
 
 	for _, r := range res {
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
 			r.UpgradeID,
 			r.InstanceID,
+			r.UpgradeStatus,
 			r.UpgradeStartTime,
 			r.UpgradeEndTime,
-			r.UpgradeStatus,
 		)
 	}
 
