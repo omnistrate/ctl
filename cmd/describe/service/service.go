@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-var (
+const (
 	serviceExample = `  # Describe service with name
   omnistrate-ctl describe service <name>
 

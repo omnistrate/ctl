@@ -11,7 +11,7 @@ import (
 	"slices"
 )
 
-var (
+const (
 	accountExample = `  # Describe account with name
   omnistrate-ctl describe account <name>
 

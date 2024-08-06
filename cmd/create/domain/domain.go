@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-var (
+const (
 	domainExample = `  # Create a custom domain for dev environment
   create domain dev --domain abc.dev --env dev
 

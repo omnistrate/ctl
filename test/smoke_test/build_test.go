@@ -38,7 +38,16 @@ func Test_build_basic(t *testing.T) {
 			continue
 		}
 
-		cmd.RootCmd.SetArgs([]string{"build", "-f", "composefiles/" + f.Name(), "--name", f.Name() + uuid.NewString(), "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
+		cmd.RootCmd.SetArgs([]string{"build",
+			"-f", "composefiles/" + f.Name(),
+			"--name", f.Name() + uuid.NewString(),
+			"--description", "My Service Description",
+			"--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png",
+			"--environment", "dev",
+			"--environment-type", "dev",
+			"--release-as-preferred",
+			"--release-name", "v1.0.0-alpha",
+		})
 		err = cmd.RootCmd.Execute()
 		require.NoError(err, f.Name())
 
