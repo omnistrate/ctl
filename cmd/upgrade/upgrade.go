@@ -20,7 +20,10 @@ const (
   omnistrate-ctl upgrade <instance1> <instance2> --version 1.2.3
 
   # Upgrade instances to the latest version
-  omnistrate-ctl upgrade <instance1> <instance2> --version latest`
+  omnistrate-ctl upgrade <instance1> <instance2> --version latest
+
+ # Upgrade instances to the preferred version
+  omnistrate-ctl upgrade <instance1> <instance2> --version preferred`
 )
 
 var version string
@@ -41,7 +44,7 @@ func init() {
 
 	Cmd.Args = cobra.MinimumNArgs(1)
 
-	Cmd.Flags().StringVarP(&version, "version", "", "", "Specify the version number to upgrade to. Use 'latest' to upgrade to the latest version.")
+	Cmd.Flags().StringVarP(&version, "version", "", "", "Specify the version number to upgrade to. Use 'latest' to upgrade to the latest version. Use 'preferred' to upgrade to the preferred version.")
 	Cmd.Flags().StringVarP(&output, "output", "o", "table", "Output format. One of: table, json")
 
 	err := Cmd.MarkFlagRequired("version")
@@ -124,13 +127,20 @@ func run(cmd *cobra.Command, args []string) error {
 		sourceVersion = describeRes.TierVersion
 
 		// Check if the target version exists
-		if version == "latest" {
+		switch version {
+		case "latest":
 			targetVersion, err = dataaccess.FindLatestVersion(token, serviceID, productTierID)
 			if err != nil {
 				utils.PrintError(err)
 				return err
 			}
-		} else {
+		case "preferred":
+			targetVersion, err = dataaccess.FindPreferredVersion(token, serviceID, productTierID)
+			if err != nil {
+				utils.PrintError(err)
+				return err
+			}
+		default:
 			targetVersion = version
 		}
 
