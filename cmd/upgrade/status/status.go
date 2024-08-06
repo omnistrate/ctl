@@ -78,11 +78,20 @@ func run(cmd *cobra.Command, args []string) error {
 		}
 
 		for _, instanceUpgrade := range instanceUpgrades {
+			startTime := ""
+			if instanceUpgrade.UpgradeStartTime != nil {
+				startTime = *instanceUpgrade.UpgradeStartTime
+			}
+
+			endTime := ""
+			if instanceUpgrade.UpgradeEndTime != nil {
+				endTime = *instanceUpgrade.UpgradeEndTime
+			}
 			res = append(res, &Res{
 				UpgradeID:        string(upgradePath.UpgradePathID),
 				InstanceID:       string(instanceUpgrade.InstanceID),
-				UpgradeStartTime: instanceUpgrade.UpgradeStartTime,
-				UpgradeEndTime:   instanceUpgrade.UpgradeEndTime,
+				UpgradeStartTime: startTime,
+				UpgradeEndTime:   endTime,
 				UpgradeStatus:    string(instanceUpgrade.Status),
 			})
 		}
