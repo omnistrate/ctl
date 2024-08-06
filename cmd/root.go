@@ -95,5 +95,5 @@ func init() {
 	RootCmd.AddCommand(deprecated.ListCmd)
 	RootCmd.AddCommand(deprecated.RemoveCmd)
 
-	RootCmd.AddCommand(upgrade.UpgradeCmd)
+	RootCmd.AddCommand(upgrade.Cmd)
 }
