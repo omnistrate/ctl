@@ -2,6 +2,7 @@ package status
 
 import (
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/upgrade/status/detail"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
@@ -22,23 +23,36 @@ var Cmd = &cobra.Command{
 	Use:          "status <upgrade>",
 	Short:        "Get upgrade status",
 	Long:         statusLong,
-	Example:      statusExample,
 	RunE:         run,
 	SilenceUsage: true,
 }
 
 func init() {
-	Cmd.Args = cobra.ExactArgs(1)
+	Cmd.AddCommand(detail.Cmd)
+
+	Cmd.Example = getExample()
+
+	Cmd.Args = cobra.MinimumNArgs(1)
 
 	Cmd.Flags().StringVarP(&output, "output", "o", "table", "Output format. One of: table, json")
 }
 
+func getExample() (example string) {
+	example += statusExample + "\n\n"
+	for _, cmd := range Cmd.Commands() {
+		example += cmd.Example + "\n\n"
+	}
+	return example
+}
+
 type Res struct {
-	UpgradeID        string
-	InstanceID       string
-	UpgradeStartTime string
-	UpgradeEndTime   string
-	UpgradeStatus    string
+	UpgradeID  string
+	Total      int
+	Pending    int
+	InProgress int
+	Completed  int
+	Failed     int
+	Status     string
 }
 
 func run(cmd *cobra.Command, args []string) error {
@@ -50,58 +64,50 @@ func run(cmd *cobra.Command, args []string) error {
 
 	res := make([]*Res, 0)
 
-	upgradePathID := args[0]
-	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("upgradepath:%s", upgradePathID))
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
-	if len(searchRes.UpgradePathResults) == 0 {
-		err = fmt.Errorf("%s not found", upgradePathID)
-		utils.PrintError(err)
-		return err
-	}
-
-	found := false
-	var serviceID, productTierID string
-	for _, upgradePath := range searchRes.UpgradePathResults {
-		if string(upgradePath.ID) == upgradePathID {
-			found = true
-			serviceID = string(upgradePath.ServiceID)
-			productTierID = string(upgradePath.ProductTierID)
-			break
-		}
-	}
-
-	if !found {
-		err = fmt.Errorf("%s not found", upgradePathID)
-		utils.PrintError(err)
-		return err
-	}
-
-	instanceUpgrades, err := dataaccess.ListEligibleInstancesPerUpgrade(token, serviceID, productTierID, upgradePathID)
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
-	for _, instanceUpgrade := range instanceUpgrades {
-		startTime := ""
-		if instanceUpgrade.UpgradeStartTime != nil {
-			startTime = *instanceUpgrade.UpgradeStartTime
+	for _, upgradePathID := range args {
+		searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("upgradepath:%s", upgradePathID))
+		if err != nil {
+			utils.PrintError(err)
+			return err
 		}
 
-		endTime := ""
-		if instanceUpgrade.UpgradeEndTime != nil {
-			endTime = *instanceUpgrade.UpgradeEndTime
+		if len(searchRes.UpgradePathResults) == 0 {
+			err = fmt.Errorf("%s not found", upgradePathID)
+			utils.PrintError(err)
+			return err
 		}
+
+		found := false
+		var serviceID, productTierID string
+		for _, upgradePath := range searchRes.UpgradePathResults {
+			if string(upgradePath.ID) == upgradePathID {
+				found = true
+				serviceID = string(upgradePath.ServiceID)
+				productTierID = string(upgradePath.ProductTierID)
+				break
+			}
+		}
+
+		if !found {
+			err = fmt.Errorf("%s not found", upgradePathID)
+			utils.PrintError(err)
+			return err
+		}
+
+		upgrade, err := dataaccess.DescribeUpgradePath(token, serviceID, productTierID, upgradePathID)
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+
 		res = append(res, &Res{
-			UpgradeID:        upgradePathID,
-			InstanceID:       string(instanceUpgrade.InstanceID),
-			UpgradeStatus:    string(instanceUpgrade.Status),
-			UpgradeStartTime: startTime,
-			UpgradeEndTime:   endTime,
+			UpgradeID:  upgradePathID,
+			Total:      upgrade.TotalCount,
+			Pending:    upgrade.PendingCount,
+			InProgress: upgrade.InProgressCount,
+			Completed:  upgrade.CompletedCount,
+			Failed:     upgrade.FailedCount,
+			Status:     string(upgrade.Status),
 		})
 	}
 
@@ -116,20 +122,28 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	println("\nTo get more details, run the following command(s):")
+	for _, r := range res {
+		println(fmt.Sprintf("  omnistrate-ctl upgrade status detail %s", r.UpgradeID))
+	}
+
 	return nil
 }
 
 func printTable(res []*Res) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 
-	fmt.Fprintln(w, "Instance ID\tStatus\tStart Time\tEnd Time")
+	fmt.Fprintln(w, "Upgrade ID\tTotal\tPending\tIn Progress\tCompleted\tFailed\tStatus")
 
 	for _, r := range res {
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
-			r.InstanceID,
-			r.UpgradeStatus,
-			r.UpgradeStartTime,
-			r.UpgradeEndTime,
+		fmt.Fprintf(w, "%s\t%d\t%d\t%d\t%d\t%d\t%s\n",
+			r.UpgradeID,
+			r.Total,
+			r.Pending,
+			r.InProgress,
+			r.Completed,
+			r.Failed,
+			r.Status,
 		)
 	}
 
