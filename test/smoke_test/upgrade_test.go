@@ -40,4 +40,12 @@ func Test_upgrade_basic(t *testing.T) {
 	cmd.RootCmd.SetArgs([]string{"upgrade", "status", "upgrade-qtxOTgcnDI", "--output", "json"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
+
+	cmd.RootCmd.SetArgs([]string{"upgrade", "status", "detail", "upgrade-qtxOTgcnDI"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	cmd.RootCmd.SetArgs([]string{"upgrade", "status", "detail", "upgrade-qtxOTgcnDI", "--output", "json"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
 }

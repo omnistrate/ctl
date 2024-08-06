@@ -220,7 +220,7 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	println("\nCheck the upgrade status using the following command:")
+	println("\nCheck the upgrade status using the following command(s):")
 	for _, upgradeRes := range upgrades {
 		fmt.Printf("  omnistrate-ctl upgrade status %s\n", upgradeRes.UpgradePathID)
 	}
