@@ -174,7 +174,7 @@ jobs:
 
       - name: Upload binaries on a new release
         timeout-minutes: 5
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
             files: | 
               ${{ steps.calc_binary_name.outputs.binary_name }}/${{ steps.calc_binary_name.outputs.binary_name }}
