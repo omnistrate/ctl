@@ -7,7 +7,7 @@ import (
 	"github.com/omnistrate/ctl/utils"
 )
 
-func CreateUpgradePath(token, serviceID, productTierID, sourceVersion, targetVersion, instanceID string) (upgradepathapi.UpgradePathID, error) {
+func CreateUpgradePath(token, serviceID, productTierID, sourceVersion, targetVersion string, instanceIDs []string) (upgradepathapi.UpgradePathID, error) {
 	upgradePath, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return "", err
@@ -20,9 +20,7 @@ func CreateUpgradePath(token, serviceID, productTierID, sourceVersion, targetVer
 		SourceVersion: sourceVersion,
 		TargetVersion: targetVersion,
 		UpgradeFilters: map[upgradepathapi.UpgradeFilterType][]string{
-			"INSTANCE_IDS": {
-				instanceID,
-			},
+			"INSTANCE_IDS": instanceIDs,
 		},
 	})
 	if err != nil {
@@ -32,13 +30,13 @@ func CreateUpgradePath(token, serviceID, productTierID, sourceVersion, targetVer
 	return res.UpgradePathID, nil
 }
 
-func DescribeUpgradePath(token, serviceID, productTierID, upgradePathID string) (*upgradepathapi.UpgradePath, error) {
+func ListEligibleInstancesPerUpgrade(token, serviceID, productTierID, upgradePathID string) ([]*upgradepathapi.InstanceUpgrade, error) {
 	upgradePath, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := upgradePath.DescribeUpgradePath(context.Background(), &upgradepathapi.DescribeUpgradePathRequest{
+	res, err := upgradePath.ListEligibleInstancesPerUpgrade(context.Background(), &upgradepathapi.ListEligibleInstancesPerUpgradeRequest{
 		Token:         token,
 		ServiceID:     upgradepathapi.ServiceID(serviceID),
 		ProductTierID: upgradepathapi.ProductTierID(productTierID),
@@ -48,5 +46,5 @@ func DescribeUpgradePath(token, serviceID, productTierID, upgradePathID string) 
 		return nil, err
 	}
 
-	return res, nil
+	return res.Instances, nil
 }

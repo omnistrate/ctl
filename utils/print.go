@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/omnistrate/commons/pkg/utils"
@@ -33,4 +34,13 @@ func PrintWarning(msg string) {
 func PrintURL(label, url string) {
 	urlMsg := color.New(color.FgCyan).SprintFunc()
 	fmt.Printf("%s: %s\n", label, urlMsg(url))
+}
+
+func PrintJSON(res interface{}) {
+	data, err := json.MarshalIndent(res, "", "    ")
+	if err != nil {
+		PrintError(err)
+		return
+	}
+	fmt.Println(string(data))
 }
