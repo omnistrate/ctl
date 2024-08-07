@@ -9,6 +9,16 @@ env:
   GOPRIVATE: "github.com/omnistrate/*"
   GOPROXY: ${{ secrets.GOPROXY }}
   GOSUMDB: ${{ secrets.GOSUMDB }}
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
+  # platforms to build the image for
+  PLATFORMS: linux/arm64,linux/amd64  
+  # default platform of the runners, used to mitigate time of building on x arch during PRs
+  PR_PLATFORMS: linux/amd64
+  # name of the package 
+  PACKAGE_NAME: omnistrate-ctl
   
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
