@@ -151,22 +151,7 @@ jobs:
     permissions:
       contents: read
 
-    strategy:
-      matrix:
-        goos: [linux, darwin, windows]
-        goarch: [amd64, arm64]
-
     steps: 
-      - name: Calculate binary name
-        timeout-minutes: 1
-        id: calc_binary_name
-        run: |
-          binary_name="omnistrate-ctl-${{ matrix.goos }}-${{ matrix.goarch }}"
-          if [ "${{ matrix.goos }}" == "windows" ]; then
-            binary_name="${binary_name}.exe"
-          fi
-          echo "binary_name=$binary_name" >> "$GITHUB_OUTPUT"
-
       - name: Download build artifacts
         timeout-minutes: 5
         uses: actions/download-artifact@v4
@@ -188,12 +173,16 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
             files: | 
-              ${{ steps.calc_binary_name.outputs.binary_name }}/${{ steps.calc_binary_name.outputs.binary_name }}
+                omnistrate-ctl-darwin-amd64/omnistrate-ctl-darwin-amd64
+                omnistrate-ctl-darwin-arm64/omnistrate-ctl-darwin-arm64
+                omnistrate-ctl-linux-amd64/omnistrate-ctl-linux-amd64
+                omnistrate-ctl-linux-arm64/omnistrate-ctl-linux-arm64
+                omnistrate-ctl-windows-amd64.exe/omnistrate-ctl-windows-amd64.exe
+                omnistrate-ctl-windows-arm64.exe/omnistrate-ctl-windows-arm64.exe
             repository: omnistrate/cli
             token: ${{ steps.generate_token_cli.outputs.token }}
             fail_on_unmatched_files: true
             draft: false
-
   update-brew-formula:
     environment: Prod
     runs-on: ubuntu-latest
