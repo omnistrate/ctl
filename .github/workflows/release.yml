@@ -183,9 +183,11 @@ jobs:
             token: ${{ steps.generate_token_cli.outputs.token }}
             fail_on_unmatched_files: true
             draft: false
+
   update-brew-formula:
     environment: Prod
     runs-on: ubuntu-latest
+    needs: sanity-check
     permissions:
       contents: read
     
