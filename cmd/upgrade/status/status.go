@@ -34,7 +34,7 @@ func init() {
 
 	Cmd.Args = cobra.MinimumNArgs(1)
 
-	Cmd.Flags().StringVarP(&output, "output", "o", "table", "Output format. One of: table, json")
+	Cmd.Flags().StringVarP(&output, "output", "o", "text", "Output format. One of: text, json")
 }
 
 func getExample() (example string) {
@@ -112,19 +112,20 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	switch output {
-	case "table":
+	case "text":
 		printTable(res)
+
+		println("\nTo get more details, run the following command(s):")
+		for _, r := range res {
+			println(fmt.Sprintf("  omnistrate-ctl upgrade status detail %s", r.UpgradeID))
+		}
+
 	case "json":
 		utils.PrintJSON(res)
 	default:
 		err = fmt.Errorf("invalid output format: %s", output)
 		utils.PrintError(err)
 		return err
-	}
-
-	println("\nTo get more details, run the following command(s):")
-	for _, r := range res {
-		println(fmt.Sprintf("  omnistrate-ctl upgrade status detail %s", r.UpgradeID))
 	}
 
 	return nil
