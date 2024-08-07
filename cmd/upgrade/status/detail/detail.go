@@ -30,7 +30,7 @@ var Cmd = &cobra.Command{
 func init() {
 	Cmd.Args = cobra.ExactArgs(1)
 
-	Cmd.Flags().StringVarP(&output, "output", "o", "table", "Output format. One of: table, json")
+	Cmd.Flags().StringVarP(&output, "output", "o", "text", "Output format. One of: text, json")
 }
 
 type Res struct {
@@ -106,7 +106,7 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	switch output {
-	case "table":
+	case "text":
 		printTable(res)
 	case "json":
 		utils.PrintJSON(res)

@@ -45,7 +45,7 @@ func init() {
 	Cmd.Args = cobra.MinimumNArgs(1)
 
 	Cmd.Flags().StringVarP(&version, "version", "", "", "Specify the version number to upgrade to. Use 'latest' to upgrade to the latest version. Use 'preferred' to upgrade to the preferred version.")
-	Cmd.Flags().StringVarP(&output, "output", "o", "table", "Output format. One of: table, json")
+	Cmd.Flags().StringVarP(&output, "output", "o", "text", "Output format. One of: text, json")
 
 	err := Cmd.MarkFlagRequired("version")
 	if err != nil {
@@ -80,13 +80,17 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	sm := ysmrr.NewSpinnerManager()
-	msg := "Scheduling upgrade for all instances"
-	if len(args) == 1 {
-		msg = fmt.Sprintf("Scheduling upgrade for %s", args[0])
+	var sm ysmrr.SpinnerManager
+	var spinner *ysmrr.Spinner
+	if output == "text" {
+		sm = ysmrr.NewSpinnerManager()
+		msg := "Scheduling upgrade for all instances"
+		if len(args) == 1 {
+			msg = fmt.Sprintf("Scheduling upgrade for %s", args[0])
+		}
+		spinner = sm.AddSpinner(msg)
+		sm.Start()
 	}
-	spinner := sm.AddSpinner(msg)
-	sm.Start()
 
 	upgrades := make(map[Args]*Res)
 	for _, instanceID := range args {
@@ -203,26 +207,28 @@ func run(cmd *cobra.Command, args []string) error {
 		upgrades[upgradeArgs].UpgradePathID = string(upgradePathID)
 	}
 
-	spinner.Complete()
-	sm.Stop()
-
-	println("\nThe following upgrades have been scheduled:")
+	if spinner != nil {
+		spinner.Complete()
+		sm.Stop()
+	}
 
 	// Print output
 	switch output {
-	case "table":
+	case "text":
+		println("\nThe following upgrades have been scheduled:")
+
 		printTable(upgrades)
+
+		println("\nCheck the upgrade status using the following command(s):")
+		for _, upgradeRes := range upgrades {
+			fmt.Printf("  omnistrate-ctl upgrade status %s\n", upgradeRes.UpgradePathID)
+		}
 	case "json":
 		printJSON(upgrades)
 	default:
 		err = fmt.Errorf("invalid output format %s", output)
 		utils.PrintError(err)
 		return err
-	}
-
-	println("\nCheck the upgrade status using the following command(s):")
-	for _, upgradeRes := range upgrades {
-		fmt.Printf("  omnistrate-ctl upgrade status %s\n", upgradeRes.UpgradePathID)
 	}
 
 	return nil
