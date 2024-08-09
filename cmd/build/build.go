@@ -146,8 +146,6 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		descriptionPtr = nil
 	}
 
-	specTypePtr := &specType
-
 	if !isValidSpecType(specType) {
 		err = errors.New(fmt.Sprintf("invalid spec type, valid options are: %s", strings.Join(validSpecType, ", ")))
 		utils.PrintError(err)
@@ -173,7 +171,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	building := sm1.AddSpinner("Building service...")
 	sm1.Start()
 
-	ServiceID, EnvironmentID, ProductTierID, err = buildService(file, token, name, specTypePtr, descriptionPtr, serviceLogoURLPtr,
+	ServiceID, EnvironmentID, ProductTierID, err = buildService(file, token, name, specType, descriptionPtr, serviceLogoURLPtr,
 		environmentPtr, environmentTypePtr, release, releaseAsPreferred, releaseNamePtr)
 	if err != nil {
 		utils.PrintError(err)
@@ -346,7 +344,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func buildService(file, token, name string, specTypePtr, description, serviceLogoURL, environment, environmentType *string, release,
+func buildService(file, token, name, specType string, description, serviceLogoURL, environment, environmentType *string, release,
 	releaseAsPreferred bool, releaseName *string) (serviceID string, environmentID string, productTierID string, err error) {
 	if name == "" {
 		return "", "", "", errors.New("name is required")
@@ -362,11 +360,11 @@ func buildService(file, token, name string, specTypePtr, description, serviceLog
 		return "", "", "", err
 	}
 
-	if specTypePtr == nil {
+	if specType == "" {
 		return "", "", "", errors.New("specType is required")
 	}
 
-	switch *specTypePtr {
+	switch specType {
 	case ServicePlanSpecType:
 		request := serviceapi.BuildServiceFromServicePlanSpecRequest{
 			Token:           token,
