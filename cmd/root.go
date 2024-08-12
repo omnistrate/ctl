@@ -5,11 +5,8 @@ import (
 	"github.com/omnistrate/ctl/cmd/auth/login"
 	"github.com/omnistrate/ctl/cmd/auth/logout"
 	"github.com/omnistrate/ctl/cmd/build"
-	"github.com/omnistrate/ctl/cmd/create"
-	"github.com/omnistrate/ctl/cmd/deletec"
 	"github.com/omnistrate/ctl/cmd/deprecated"
 	"github.com/omnistrate/ctl/cmd/describe"
-	"github.com/omnistrate/ctl/cmd/get"
 	"github.com/omnistrate/ctl/cmd/upgrade"
 	"os"
 
@@ -86,11 +83,7 @@ func init() {
 	RootCmd.AddCommand(logout.LogoutCmd)
 
 	RootCmd.AddCommand(build.BuildCmd)
-
-	RootCmd.AddCommand(get.GetCmd)
 	RootCmd.AddCommand(describe.DescribeCmd)
-	RootCmd.AddCommand(create.CreateCmd)
-	RootCmd.AddCommand(deletec.DeleteCmd)
 
 	RootCmd.AddCommand(deprecated.ListCmd)
 	RootCmd.AddCommand(deprecated.RemoveCmd)

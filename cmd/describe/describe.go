@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
-	"github.com/omnistrate/ctl/cmd/describe/account"
-	"github.com/omnistrate/ctl/cmd/describe/service"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
@@ -20,17 +18,14 @@ var (
 )
 
 var DescribeCmd = &cobra.Command{
-	Use:          "describe [type] [name] [flags]",
-	Short:        "Describe detailed information about one or many objects and output results as JSON to stdout.",
+	Use:          "describe [flags]",
+	Short:        "Describe a service",
 	Long:         describeLong,
 	RunE:         run,
 	SilenceUsage: true,
 }
 
 func init() {
-	DescribeCmd.AddCommand(service.ServiceCmd)
-	DescribeCmd.AddCommand(account.AccountCmd)
-
 	DescribeCmd.Example = describeExample()
 
 	// Deprecated flags. Kept for backwards compatibility.
