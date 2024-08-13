@@ -15,7 +15,7 @@ func init() {
 
 	Cmd.Example = instanceExample()
 
-	Cmd.Args = cobra.MinimumNArgs(0)
+	Cmd.Args = cobra.MinimumNArgs(1)
 }
 
 func instanceExample() (example string) {

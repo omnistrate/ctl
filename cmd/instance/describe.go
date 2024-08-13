@@ -11,11 +11,11 @@ import (
 
 const (
 	describeExample = `# Describe the instance deployment
-omnistrate instance describe --instance-id=instance-12345`
+omnistrate instance describe instance-12345`
 )
 
 var describeCmd = &cobra.Command{
-	Use:          "describe --instance-id=[instance-id]",
+	Use:          "describe [instance-id]",
 	Short:        "Describe a instance deployment your service.",
 	Long:         `This command helps you describe the instance for your service.`,
 	Example:      describeExample,
@@ -24,18 +24,12 @@ var describeCmd = &cobra.Command{
 }
 
 func init() {
-	describeCmd.Flags().String("instance-id", "", "Instance ID")
-
-	err := describeCmd.MarkFlagRequired("instance-id")
-	if err != nil {
-		return
-	}
+	describeCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 }
 
 func runDescribe(cmd *cobra.Command, args []string) error {
 	// Get flags
-
-	instanceId, _ := cmd.Flags().GetString("instance-id")
+	instanceId := args[0]
 
 	// Validate user is currently logged in
 	token, err := utils.GetToken()
