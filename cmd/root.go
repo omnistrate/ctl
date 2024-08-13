@@ -10,6 +10,7 @@ import (
 	"github.com/omnistrate/ctl/cmd/deprecated"
 	"github.com/omnistrate/ctl/cmd/describe"
 	"github.com/omnistrate/ctl/cmd/get"
+	"github.com/omnistrate/ctl/cmd/helm"
 	"github.com/omnistrate/ctl/cmd/upgrade"
 	"os"
 
@@ -96,4 +97,5 @@ func init() {
 	RootCmd.AddCommand(deprecated.RemoveCmd)
 
 	RootCmd.AddCommand(upgrade.Cmd)
+	RootCmd.AddCommand(helm.Cmd)
 }
