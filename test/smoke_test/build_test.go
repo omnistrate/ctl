@@ -190,7 +190,7 @@ func Test_build_duplicate_service_plan_name(t *testing.T) {
 	require.Equal(prodEnvironmentID, build.EnvironmentID)
 	require.Equal(prodProductTierID, build.ProductTierID)
 
-	cmd.RootCmd.SetArgs([]string{"delete", "service", serviceName})
+	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", build.ServiceID})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 }
