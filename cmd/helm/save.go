@@ -90,6 +90,12 @@ func runSave(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	utils.PrintSuccess(fmt.Sprintf("Helm Chart %s saved successfully", helmPackage.ChartName))
+	var data []byte
+	data, err = json.MarshalIndent(helmPackage, "", "    ")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+	fmt.Println(string(data))
 	return nil
 }
