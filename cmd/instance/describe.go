@@ -11,11 +11,11 @@ import (
 
 const (
 	describeExample = `# Describe the instance deployment
-omnistrate instance describe --service-id=s-12345 --service-environment-id=se-12345 --instance-id=instance-12345`
+omnistrate instance describe --instance-id=instance-12345`
 )
 
 var describeCmd = &cobra.Command{
-	Use:          "describe --service-id=[service-id] --service-environment-id=[service-environment-id] --instance-id=[instance-id]",
+	Use:          "describe --instance-id=[instance-id]",
 	Short:        "Describe a instance deployment your service.",
 	Long:         `This command helps you describe the instance for your service.`,
 	Example:      describeExample,
@@ -24,21 +24,9 @@ var describeCmd = &cobra.Command{
 }
 
 func init() {
-	describeCmd.Flags().String("service-id", "", "Service ID")
-	describeCmd.Flags().String("service-environment-id", "", "Service Environment ID")
 	describeCmd.Flags().String("instance-id", "", "Instance ID")
 
-	err := describeCmd.MarkFlagRequired("service-id")
-	if err != nil {
-		return
-	}
-
-	err = describeCmd.MarkFlagRequired("service-environment-id")
-	if err != nil {
-		return
-	}
-
-	err = describeCmd.MarkFlagRequired("instance-id")
+	err := describeCmd.MarkFlagRequired("instance-id")
 	if err != nil {
 		return
 	}
@@ -46,8 +34,7 @@ func init() {
 
 func runDescribe(cmd *cobra.Command, args []string) error {
 	// Get flags
-	serviceId, _ := cmd.Flags().GetString("service-id")
-	serviceEnvironmentId, _ := cmd.Flags().GetString("service-environment-id")
+
 	instanceId, _ := cmd.Flags().GetString("instance-id")
 
 	// Validate user is currently logged in
@@ -57,8 +44,31 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// Check if the instance exists
+	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("resourceinstance:%s", instanceId))
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	var found bool
+	var serviceId, environmentId string
+	for _, instance := range searchRes.ResourceInstanceResults {
+		if instance.ID == instanceId {
+			serviceId = string(instance.ServiceID)
+			environmentId = string(instance.ServiceEnvironmentID)
+			found = true
+			break
+		}
+	}
+	if !found {
+		err = fmt.Errorf("%s not found. Please check the instance ID and try again", instanceId)
+		utils.PrintError(err)
+		return nil
+	}
+
 	var instance *inventoryapi.ResourceInstance
-	instance, err = dataaccess.DescribeInstance(token, serviceId, serviceEnvironmentId, instanceId)
+	instance, err = dataaccess.DescribeInstance(token, serviceId, environmentId, instanceId)
 	if err != nil {
 		utils.PrintError(err)
 		return err
