@@ -2,12 +2,15 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/account"
 	"github.com/omnistrate/ctl/cmd/auth/login"
 	"github.com/omnistrate/ctl/cmd/auth/logout"
 	"github.com/omnistrate/ctl/cmd/build"
 	"github.com/omnistrate/ctl/cmd/deprecated"
+	"github.com/omnistrate/ctl/cmd/domain"
 	"github.com/omnistrate/ctl/cmd/helm"
 	"github.com/omnistrate/ctl/cmd/instance"
+	"github.com/omnistrate/ctl/cmd/service"
 	"github.com/omnistrate/ctl/cmd/upgrade"
 	"os"
 
@@ -84,12 +87,16 @@ func init() {
 	RootCmd.AddCommand(logout.LogoutCmd)
 
 	RootCmd.AddCommand(build.BuildCmd)
-	RootCmd.AddCommand(deprecated.DescribeCmd)
 
-	RootCmd.AddCommand(deprecated.ListCmd)
-	RootCmd.AddCommand(deprecated.RemoveCmd)
-
+	RootCmd.AddCommand(service.Cmd)
+	RootCmd.AddCommand(account.Cmd)
+	RootCmd.AddCommand(domain.Cmd)
 	RootCmd.AddCommand(upgrade.Cmd)
 	RootCmd.AddCommand(helm.Cmd)
 	RootCmd.AddCommand(instance.Cmd)
+
+	// Deprecated
+	RootCmd.AddCommand(deprecated.DescribeCmd)
+	RootCmd.AddCommand(deprecated.ListCmd)
+	RootCmd.AddCommand(deprecated.RemoveCmd)
 }
