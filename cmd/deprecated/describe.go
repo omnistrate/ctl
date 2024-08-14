@@ -1,4 +1,4 @@
-package describe
+package deprecated
 
 import (
 	"encoding/json"

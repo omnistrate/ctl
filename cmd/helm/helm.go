@@ -19,8 +19,6 @@ func init() {
 	Cmd.AddCommand(listInstallationsCmd)
 
 	Cmd.Example = helmExample()
-
-	Cmd.Args = cobra.MinimumNArgs(1)
 }
 
 func helmExample() (example string) {
