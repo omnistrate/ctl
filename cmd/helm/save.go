@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/omnistrate/ctl/dataaccess"
+	"github.com/omnistrate/ctl/table"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 	"os"
@@ -30,6 +31,7 @@ func init() {
 	saveCmd.Flags().String("version", "", "Helm Chart version")
 	saveCmd.Flags().String("namespace", "", "Helm Chart namespace")
 	saveCmd.Flags().String("values-file", "", "Helm Chart values file containing custom values defined as a JSON")
+	saveCmd.Flags().StringP("output", "o", "text", "Output format (text|json)")
 
 	err := saveCmd.MarkFlagRequired("repo-url")
 	if err != nil {
@@ -54,6 +56,7 @@ func runSave(cmd *cobra.Command, args []string) error {
 	version, _ := cmd.Flags().GetString("version")
 	namespace, _ := cmd.Flags().GetString("namespace")
 	valuesFile, _ := cmd.Flags().GetString("values-file")
+	output, _ := cmd.Flags().GetString("output")
 
 	// Validate user is currently logged in
 	token, err := utils.GetToken()
@@ -96,6 +99,33 @@ func runSave(cmd *cobra.Command, args []string) error {
 		utils.PrintError(err)
 		return err
 	}
-	fmt.Println(string(data))
+
+	switch output {
+	case "text":
+		utils.PrintSuccess("Helm Chart saved successfully")
+
+		var tableWriter *table.Table
+		if tableWriter, err = table.NewTableFromJSONTemplate(data); err != nil {
+			// Just print the JSON directly and return
+			fmt.Println(string(data))
+			return err
+		}
+
+		if err = tableWriter.AddRowFromJSON(data); err != nil {
+			// Just print the JSON directly and return
+			fmt.Println(string(data))
+			return err
+		}
+
+		tableWriter.Print()
+
+	case "json":
+		fmt.Println(string(data))
+
+	default:
+		err = fmt.Errorf("unsupported output format: %s", output)
+		utils.PrintError(err)
+		return err
+	}
 	return nil
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	helmpackageapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/helm_package_api"
 	"github.com/omnistrate/ctl/dataaccess"
+	"github.com/omnistrate/ctl/table"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 )
@@ -23,7 +24,14 @@ var listCmd = &cobra.Command{
 	SilenceUsage: true,
 }
 
+func init() {
+	listCmd.Flags().StringP("output", "o", "text", "Output format (text|json)")
+}
+
 func runList(cmd *cobra.Command, args []string) error {
+	// Get flags
+	output, _ := cmd.Flags().GetString("output")
+
 	// Validate user is currently logged in
 	token, err := utils.GetToken()
 	if err != nil {
@@ -38,13 +46,48 @@ func runList(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	var jsonData []string
 	for _, helmPackage := range helmPackageResult.HelmPackages {
 		data, err := json.MarshalIndent(helmPackage, "", "    ")
 		if err != nil {
 			utils.PrintError(err)
 			return err
 		}
-		fmt.Println(string(data))
+
+		jsonData = append(jsonData, string(data))
+	}
+
+	if len(jsonData) == 0 {
+		utils.PrintInfo("No Helm packages found.")
+		return nil
+	}
+
+	switch output {
+	case "text":
+		var tableWriter *table.Table
+		if tableWriter, err = table.NewTableFromJSONTemplate(json.RawMessage(jsonData[0])); err != nil {
+			// Just print the JSON directly and return
+			fmt.Printf("%+v\n", jsonData)
+			return err
+		}
+
+		for _, data := range jsonData {
+			if err = tableWriter.AddRowFromJSON(json.RawMessage(data)); err != nil {
+				// Just print the JSON directly and return
+				fmt.Printf("%+v\n", jsonData)
+				return err
+			}
+		}
+
+		tableWriter.Print()
+
+	case "json":
+		fmt.Printf("%+v\n", jsonData)
+
+	default:
+		err = fmt.Errorf("unsupported output format: %s", output)
+		utils.PrintError(err)
+		return err
 	}
 
 	return nil
