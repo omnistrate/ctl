@@ -1,10 +1,13 @@
 package helm
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/omnistrate/ctl/utils"
+	"github.com/spf13/cobra"
+)
 
 var Cmd = &cobra.Command{
 	Use:   "helm [operation] [flags]",
-	Short: "Manage Helm Charts for your service using this command.",
+	Short: "Manage Helm Charts for your service using this command",
 	Long: `This command helps you manage the templates for your helm charts. 
 Omnistrate automatically installs this charts and maintains the deployment of the release in every cloud / region / account your service is active in.`,
 	Run:          run,
@@ -18,16 +21,7 @@ func init() {
 	Cmd.AddCommand(listCmd)
 	Cmd.AddCommand(listInstallationsCmd)
 
-	Cmd.Example = helmExample()
-
-	Cmd.Args = cobra.MinimumNArgs(1)
-}
-
-func helmExample() (example string) {
-	for _, cmd := range Cmd.Commands() {
-		example += cmd.Example + "\n\n"
-	}
-	return
+	Cmd.Example = utils.CombineSubCmdExamples(Cmd)
 }
 
 func run(cmd *cobra.Command, args []string) {

@@ -1,4 +1,4 @@
-package instance
+package account
 
 import (
 	"github.com/omnistrate/ctl/utils"
@@ -6,19 +6,20 @@ import (
 )
 
 var Cmd = &cobra.Command{
-	Use:          "instance [operation] [flags]",
-	Short:        "Manage Instance deployment for your service using this command",
-	Long:         `This command helps you manage the deployment of your service instances.`,
+	Use:          "account [operation] [flags]",
+	Short:        "Manage your cloud provider accounts",
+	Long:         `This command helps you manage your cloud provider accounts.`,
 	Run:          run,
 	SilenceUsage: true,
 }
 
 func init() {
+	Cmd.AddCommand(createCmd)
+	Cmd.AddCommand(getCmd)
 	Cmd.AddCommand(describeCmd)
+	Cmd.AddCommand(deleteCmd)
 
 	Cmd.Example = utils.CombineSubCmdExamples(Cmd)
-
-	Cmd.Args = cobra.MinimumNArgs(1)
 }
 
 func run(cmd *cobra.Command, args []string) {

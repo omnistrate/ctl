@@ -3,6 +3,7 @@ package utils
 import (
 	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/config"
+	"github.com/spf13/cobra"
 )
 
 // GetToken returns the authentication token for current user
@@ -32,4 +33,11 @@ func GetHostScheme() string {
 
 func IsProd() bool {
 	return GetRootDomain() == "omnistrate.cloud"
+}
+
+func CombineSubCmdExamples(root *cobra.Command) (example string) {
+	for _, cmd := range root.Commands() {
+		example += cmd.Example + "\n\n"
+	}
+	return
 }

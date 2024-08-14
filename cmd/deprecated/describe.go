@@ -1,4 +1,4 @@
-package describe
+package deprecated
 
 import (
 	"encoding/json"
@@ -9,34 +9,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const (
-	describeLong = ``
-)
-
 var (
 	describeServiceID string
 )
 
 var DescribeCmd = &cobra.Command{
 	Use:          "describe [flags]",
-	Short:        "Describe a service",
-	Long:         describeLong,
+	Short:        "Describe a service (deprecated)",
 	RunE:         run,
 	SilenceUsage: true,
 }
 
 func init() {
-	DescribeCmd.Example = describeExample()
-
 	// Deprecated flags. Kept for backwards compatibility.
 	DescribeCmd.Flags().StringVarP(&describeServiceID, "service-id", "", "", "this flag is deprecated.")
-}
-
-func describeExample() (example string) {
-	for _, cmd := range DescribeCmd.Commands() {
-		example += cmd.Example + "\n\n"
-	}
-	return
 }
 
 func run(cmd *cobra.Command, args []string) (err error) {

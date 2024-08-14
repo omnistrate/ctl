@@ -30,17 +30,16 @@ var version string
 var output string
 
 var Cmd = &cobra.Command{
-	Use:          "upgrade <instance> [--version VERSION]",
-	Short:        "Upgrade instance to a newer version or an older version.",
+	Use:          "upgrade [--version VERSION]",
+	Short:        "Upgrade instance to a newer version or an older version",
 	Long:         upgradeLong,
+	Example:      upgradeExample,
 	RunE:         run,
 	SilenceUsage: true,
 }
 
 func init() {
 	Cmd.AddCommand(status.Cmd)
-
-	Cmd.Example = getExample()
 
 	Cmd.Args = cobra.MinimumNArgs(1)
 
@@ -51,14 +50,6 @@ func init() {
 	if err != nil {
 		return
 	}
-}
-
-func getExample() (example string) {
-	example = upgradeExample + "\n\n"
-	for _, cmd := range Cmd.Commands() {
-		example += cmd.Example + "\n\n"
-	}
-	return example
 }
 
 type Args struct {

@@ -26,7 +26,7 @@ type helmPackageInstallationIntermediate struct {
 
 var listInstallationsCmd = &cobra.Command{
 	Use:          "list-installations --host-cluster-id=[host-cluster-id]",
-	Short:        "List all Helm Packages and the Kubernetes clusters that they are installed on.",
+	Short:        "List all Helm Packages and the Kubernetes clusters that they are installed on",
 	Long:         `This command helps you list all the Helm Packages and the Kubernetes clusters that they are installed on.`,
 	Example:      listInstallationsExample,
 	RunE:         runListInstallations,

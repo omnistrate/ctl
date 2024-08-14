@@ -11,8 +11,6 @@ import (
 )
 
 const (
-	statusLong = ``
-
 	statusExample = `  # Get upgrade status
   omnistrate-ctl upgrade status <upgrade>`
 )
@@ -20,9 +18,9 @@ const (
 var output string
 
 var Cmd = &cobra.Command{
-	Use:          "status <upgrade>",
+	Use:          "status",
 	Short:        "Get upgrade status",
-	Long:         statusLong,
+	Example:      statusExample,
 	RunE:         run,
 	SilenceUsage: true,
 }
@@ -30,19 +28,9 @@ var Cmd = &cobra.Command{
 func init() {
 	Cmd.AddCommand(detail.Cmd)
 
-	Cmd.Example = getExample()
-
 	Cmd.Args = cobra.MinimumNArgs(1)
 
 	Cmd.Flags().StringVarP(&output, "output", "o", "text", "Output format. One of: text, json")
-}
-
-func getExample() (example string) {
-	example += statusExample + "\n\n"
-	for _, cmd := range Cmd.Commands() {
-		example += cmd.Example + "\n\n"
-	}
-	return example
 }
 
 type Res struct {

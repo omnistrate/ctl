@@ -17,7 +17,7 @@ omnistrate helm save redis --repo-url=https://charts.bitnami.com/bitnami --versi
 
 var saveCmd = &cobra.Command{
 	Use:          "save chart --repo-url=[repo-url] --version=[version] --namespace=[namespace] --values-file=[values-file]",
-	Short:        "Save a Helm Chart for your service.",
+	Short:        "Save a Helm Chart for your service",
 	Long:         `This command helps you save the templates for your helm charts.`,
 	Example:      saveExample,
 	RunE:         runSave,

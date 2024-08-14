@@ -10,7 +10,7 @@ import (
 // LogoutCmd represents the logout command
 var LogoutCmd = &cobra.Command{
 	Use:          "logout",
-	Short:        "Logout.",
+	Short:        "Logout",
 	Long:         `The logout command is used to log out from the Omnistrate platform.`,
 	Example:      `  omnistrate-ctl logout`,
 	RunE:         runLogout,

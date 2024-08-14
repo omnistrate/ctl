@@ -13,7 +13,7 @@ omnistrate helm delete redis --version=20.0.1`
 
 var deleteCmd = &cobra.Command{
 	Use:          "delete chart --version=[version]",
-	Short:        "Delete a Helm package for your service.",
+	Short:        "Delete a Helm package for your service",
 	Long:         `This command helps you delete the templates for your helm packages.`,
 	Example:      deleteExample,
 	RunE:         runDelete,
