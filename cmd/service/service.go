@@ -7,9 +7,9 @@ import (
 
 var Cmd = &cobra.Command{
 	Use:   "service [operation] [flags]",
-	Short: "Manage services for your account using this command.",
+	Short: "Manage services for your account.",
 	Long: `This command helps you manage the services for your account.
-You can delete, describe, and get services using this command.`,
+You can delete, describe, and get services.`,
 	Run:          run,
 	SilenceUsage: true,
 }
