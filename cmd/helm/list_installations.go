@@ -6,6 +6,7 @@ import (
 	helmpackageapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/helm_package_api"
 	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/dataaccess"
+	"github.com/omnistrate/ctl/table"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 )
@@ -14,6 +15,14 @@ const (
 	listInstallationsExample = `# List all Helm Packages and the Kubernetes clusters that they are installed on
 omnistrate helm list-installations --host-cluster-id=[host-cluster-id]`
 )
+
+type helmPackageInstallationIntermediate struct {
+	ChartName     string
+	ChartVersion  string
+	Namespace     string
+	HostClusterID string
+	Status        string
+}
 
 var listInstallationsCmd = &cobra.Command{
 	Use:          "list-installations --host-cluster-id=[host-cluster-id]",
@@ -28,11 +37,13 @@ func init() {
 	saveCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 
 	listInstallationsCmd.Flags().String("host-cluster-id", "", "Host cluster ID")
+	listInstallationsCmd.Flags().StringP("output", "o", "text", "Output format (text|json)")
 }
 
 func runListInstallations(cmd *cobra.Command, args []string) error {
 	// Get flags
 	hostClusterID, _ := cmd.Flags().GetString("host-cluster-id")
+	output, _ := cmd.Flags().GetString("output")
 
 	// Validate user is currently logged in
 	token, err := utils.GetToken()
@@ -54,13 +65,55 @@ func runListInstallations(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	var jsonData []string
 	for _, helmPackageInstallation := range helmPackageResult.HelmPackageInstallations {
-		data, err := json.MarshalIndent(helmPackageInstallation, "", "    ")
+		// Convert HelmPackageInstallation to intermediate struct
+		intermediate := helmPackageInstallationIntermediate{
+			ChartName:     helmPackageInstallation.HelmPackage.ChartName,
+			ChartVersion:  helmPackageInstallation.HelmPackage.ChartVersion,
+			Namespace:     helmPackageInstallation.HelmPackage.Namespace,
+			HostClusterID: string(helmPackageInstallation.HostClusterID),
+			Status:        helmPackageInstallation.Status,
+		}
+		data, err := json.MarshalIndent(intermediate, "", "    ")
 		if err != nil {
 			utils.PrintError(err)
 			return err
 		}
-		fmt.Println(string(data))
+		jsonData = append(jsonData, string(data))
+	}
+
+	if len(jsonData) == 0 {
+		utils.PrintInfo("No Helm package installations found.")
+		return nil
+	}
+
+	switch output {
+	case "text":
+		var tableWriter *table.Table
+		if tableWriter, err = table.NewTableFromJSONTemplate(json.RawMessage(jsonData[0])); err != nil {
+			// Just print the JSON directly and return
+			fmt.Printf("%+v\n", jsonData)
+			return err
+		}
+
+		for _, data := range jsonData {
+			if err = tableWriter.AddRowFromJSON(json.RawMessage(data)); err != nil {
+				// Just print the JSON directly and return
+				fmt.Printf("%+v\n", jsonData)
+				return err
+			}
+		}
+
+		tableWriter.Print()
+
+	case "json":
+		fmt.Printf("%+v\n", jsonData)
+
+	default:
+		err = fmt.Errorf("unsupported output format: %s", output)
+		utils.PrintError(err)
+		return err
 	}
 
 	return nil
