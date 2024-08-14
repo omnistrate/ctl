@@ -1,10 +1,11 @@
 package account
 
 import (
+	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 )
 
-var AccountCmd = &cobra.Command{
+var Cmd = &cobra.Command{
 	Use:          "account [operation] [flags]",
 	Short:        "Manage your cloud provider accounts.",
 	Long:         `This command helps you manage your cloud provider accounts.`,
@@ -13,19 +14,12 @@ var AccountCmd = &cobra.Command{
 }
 
 func init() {
-	AccountCmd.AddCommand(createCmd)
-	AccountCmd.AddCommand(getCmd)
-	AccountCmd.AddCommand(describeCmd)
-	AccountCmd.AddCommand(deleteCmd)
+	Cmd.AddCommand(createCmd)
+	Cmd.AddCommand(getCmd)
+	Cmd.AddCommand(describeCmd)
+	Cmd.AddCommand(deleteCmd)
 
-	AccountCmd.Example = accountExample()
-}
-
-func accountExample() (example string) {
-	for _, cmd := range AccountCmd.Commands() {
-		example += cmd.Example + "\n\n"
-	}
-	return
+	Cmd.Example = utils.CombineSubCmdExamples(Cmd)
 }
 
 func run(cmd *cobra.Command, args []string) {

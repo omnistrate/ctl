@@ -1,1 +1,30 @@
 package service
+
+import (
+	"github.com/omnistrate/ctl/utils"
+	"github.com/spf13/cobra"
+)
+
+var Cmd = &cobra.Command{
+	Use:   "service [operation] [flags]",
+	Short: "Manage services for your account using this command.",
+	Long: `This command helps you manage the services for your account.
+You can delete, describe, and get services using this command.`,
+	Run:          run,
+	SilenceUsage: true,
+}
+
+func init() {
+	Cmd.AddCommand(describeCmd)
+	Cmd.AddCommand(deleteCmd)
+	Cmd.AddCommand(getCmd)
+
+	Cmd.Example = utils.CombineSubCmdExamples(Cmd)
+}
+
+func run(cmd *cobra.Command, args []string) {
+	err := cmd.Help()
+	if err != nil {
+		return
+	}
+}

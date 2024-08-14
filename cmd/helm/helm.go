@@ -1,6 +1,9 @@
 package helm
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/omnistrate/ctl/utils"
+	"github.com/spf13/cobra"
+)
 
 var Cmd = &cobra.Command{
 	Use:   "helm [operation] [flags]",
@@ -18,14 +21,7 @@ func init() {
 	Cmd.AddCommand(listCmd)
 	Cmd.AddCommand(listInstallationsCmd)
 
-	Cmd.Example = helmExample()
-}
-
-func helmExample() (example string) {
-	for _, cmd := range Cmd.Commands() {
-		example += cmd.Example + "\n\n"
-	}
-	return
+	Cmd.Example = utils.CombineSubCmdExamples(Cmd)
 }
 
 func run(cmd *cobra.Command, args []string) {

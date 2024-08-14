@@ -10,27 +10,27 @@ import (
 )
 
 var (
-	domainExample = `  # Delete domain with name
+	deleteExample = `  # Delete domain with name
   omnistrate-ctl delete domain <name>
 
   # Delete multiple domains with names
   omnistrate-ctl delete domain <name1> <name2> <name3>`
 )
 
-var DomainCmd = &cobra.Command{
-	Use:          "domain <name>",
+var deleteCmd = &cobra.Command{
+	Use:          "delete",
 	Short:        "Delete one or more domains",
 	Long:         `Delete domain by specifying name or environment type. Use --env to specify environment type. If not specified, name is assumed. If multiple domains are found with the same name, all of them will be deleted.`,
-	Example:      domainExample,
-	RunE:         run,
+	Example:      deleteExample,
+	RunE:         runDelete,
 	SilenceUsage: true,
 }
 
 func init() {
-	DomainCmd.Args = cobra.MinimumNArgs(1) // Require at least one argument
+	deleteCmd.Args = cobra.MinimumNArgs(1) // Require at least one argument
 }
 
-func run(cmd *cobra.Command, args []string) error {
+func runDelete(cmd *cobra.Command, args []string) error {
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)

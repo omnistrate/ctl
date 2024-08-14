@@ -11,16 +11,16 @@ import (
 
 const (
 	createExample = `  # Create aws account
-  omctl account create <name> --aws-account-id <aws-account-id>
+  omnistrate-ctl account create <name> --aws-account-id <aws-account-id>
 
   # Create gcp account
-  omctl account create <name> --gcp-project-id <gcp-project-id> --gcp-project-number <gcp-project-number>`
+  omnistrate-ctl account create <name> --gcp-project-id <gcp-project-id> --gcp-project-number <gcp-project-number>`
 )
 
 var createCmd = &cobra.Command{
-	Use:          "account <name> [flags]",
+	Use:          "create [flags]",
 	Short:        "Create an account",
-	Long:         ``,
+	Long:         `Create an account with the specified name and cloud provider details.`,
 	Example:      createExample,
 	RunE:         runCreate,
 	SilenceUsage: true,

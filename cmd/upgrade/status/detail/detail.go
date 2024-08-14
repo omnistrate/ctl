@@ -19,7 +19,7 @@ const (
 var output string
 
 var Cmd = &cobra.Command{
-	Use:          "detail <upgrade>",
+	Use:          "detail",
 	Short:        "Get upgrade status detail",
 	Long:         detailLong,
 	Example:      detailExample,

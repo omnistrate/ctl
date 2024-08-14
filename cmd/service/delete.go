@@ -11,35 +11,35 @@ import (
 )
 
 var (
-	serviceExample = `  # Delete service with name
-  omnistrate-ctl delete service <name>
+	deleteExample = `  # Delete service with name
+  omnistrate-ctl service delete <name>
 
   # Delete service with ID
-  omnistrate-ctl delete service <ID> --id
+  omnistrate-ctl service delete <ID> --id
 
   # Delete multiple services with names
-  omnistrate-ctl delete service <name1> <name2> <name3>
+  omnistrate-ctl service delete <name1> <name2> <name3>
 
   # Delete multiple services with IDs
-  omnistrate-ctl delete service <ID1> <ID2> <ID3> --id`
+  omnistrate-ctl service delete <ID1> <ID2> <ID3> --id`
 )
 
-var ServiceCmd = &cobra.Command{
-	Use:          "service <name>",
+var deleteCmd = &cobra.Command{
+	Use:          "delete",
 	Short:        "Delete one or more services",
 	Long:         `Delete service with name or ID. Use --id to specify ID. If not specified, name is assumed.`,
-	Example:      serviceExample,
-	RunE:         run,
+	Example:      deleteExample,
+	RunE:         runDelete,
 	SilenceUsage: true,
 }
 
 func init() {
-	ServiceCmd.Args = cobra.MinimumNArgs(1) // Require at least one argument
+	deleteCmd.Args = cobra.MinimumNArgs(1) // Require at least one argument
 
-	ServiceCmd.Flags().Bool("id", false, "Specify service ID instead of name")
+	deleteCmd.Flags().Bool("id", false, "Specify service ID instead of name")
 }
 
-func run(cmd *cobra.Command, args []string) error {
+func runDelete(cmd *cobra.Command, args []string) error {
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)

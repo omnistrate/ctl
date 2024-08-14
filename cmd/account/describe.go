@@ -12,25 +12,25 @@ import (
 )
 
 const (
-	accountExample = `  # Describe account with name
-  omnistrate-ctl describe account <name>
+	describeExample = `  # Describe account with name
+  omnistrate-ctl account describe <name>
 
   # Describe account with ID
-  omnistrate-ctl describe account <id> --id
+  omnistrate-ctl account describe <id> --id
   
   # Describe multiple accounts with names
-  omnistrate-ctl describe account <name1> <name2> <name3>
+  omnistrate-ctl account describe <name1> <name2> <name3>
 
   # Describe multiple accounts with IDs
-  omnistrate-ctl describe account <id1> <id2> <id3> --id`
+  omnistrate-ctl account describe <id1> <id2> <id3> --id`
 )
 
-var AccountCmd = &cobra.Command{
-	Use:     "account <name>",
+var describeCmd = &cobra.Command{
+	Use:     "describe",
 	Short:   "Display details for one or more accounts",
 	Long:    "Display detailed information about the account by specifying the account name or ID.",
-	Example: accountExample,
-	RunE:    Run,
+	Example: describeExample,
+	RunE:    runDescribe,
 	PostRun: func(cmd *cobra.Command, args []string) {
 		dataaccess.AskVerifyAccountIfAny()
 	},
@@ -38,12 +38,12 @@ var AccountCmd = &cobra.Command{
 }
 
 func init() {
-	AccountCmd.Args = cobra.MinimumNArgs(1) // Require at least one argument
+	describeCmd.Args = cobra.MinimumNArgs(1) // Require at least one argument
 
-	AccountCmd.Flags().Bool("id", false, "Specify account ID instead of name")
+	describeCmd.Flags().Bool("id", false, "Specify account ID instead of name")
 }
 
-func Run(cmd *cobra.Command, args []string) error {
+func runDescribe(cmd *cobra.Command, args []string) error {
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)

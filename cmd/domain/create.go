@@ -11,39 +11,39 @@ import (
 )
 
 const (
-	domainExample = `  # Create a custom domain for dev environment
-  create domain dev --domain abc.dev --env dev
+	createExample = `  # Create a custom domain for dev environment
+  omnistrate-ctl domain create dev --domain abc.dev --env dev
 
   # Create a custom domain for prod environment
-  create domain abc.cloud --domain abc.cloud --env prod`
+  omnistrate-ctl domain create abc.cloud --domain abc.cloud --env prod`
 )
 
-var DomainCmd = &cobra.Command{
-	Use:          "domain <name> [flags]",
+var createCmd = &cobra.Command{
+	Use:          "create [flags]",
 	Short:        "Create a domain",
-	Long:         ``,
-	Example:      domainExample,
-	RunE:         run,
+	Long:         `Create a domain with the specified name and custom domain. The domain will be created for the specified environment type.`,
+	Example:      createExample,
+	RunE:         runCreate,
 	SilenceUsage: true,
 }
 
 func init() {
-	DomainCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
+	createCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 
-	DomainCmd.Flags().String("domain", "", "Custom domain")
-	DomainCmd.Flags().String("env", "", "Type of environment. Valid options include: 'prod', 'canary', 'staging', 'qa', 'dev'")
+	createCmd.Flags().String("domain", "", "Custom domain")
+	createCmd.Flags().String("env", "", "Type of environment. Valid options include: 'prod', 'dev', 'canary', 'staging', 'qa'")
 
-	err := DomainCmd.MarkFlagRequired("domain")
+	err := createCmd.MarkFlagRequired("domain")
 	if err != nil {
 		return
 	}
-	err = DomainCmd.MarkFlagRequired("env")
+	err = createCmd.MarkFlagRequired("env")
 	if err != nil {
 		return
 	}
 }
 
-func run(cmd *cobra.Command, args []string) error {
+func runCreate(cmd *cobra.Command, args []string) error {
 	// Get flags
 	domain, _ := cmd.Flags().GetString("domain")
 	env, _ := cmd.Flags().GetString("env")

@@ -12,35 +12,35 @@ import (
 )
 
 const (
-	serviceExample = `  # Describe service with name
-  omnistrate-ctl describe service <name>
+	describeExample = `  # Describe service with name
+  omnistrate-ctl service describe <name>
 
   # Describe service with ID
-  omnistrate-ctl describe service <id> --id
+  omnistrate-ctl service describe <id> --id
 
   # Describe multiple services with names
-  omnistrate-ctl describe service <name1> <name2> <name3>
+  omnistrate-ctl service describe <name1> <name2> <name3>
 
   # Describe multiple services with IDs
-  omnistrate-ctl describe service <id1> <id2> <id3> --id`
+  omnistrate-ctl service describe <id1> <id2> <id3> --id`
 )
 
-var ServiceCmd = &cobra.Command{
-	Use:          "service <name>",
+var describeCmd = &cobra.Command{
+	Use:          "describe",
 	Short:        "Display details for one or more services",
 	Long:         "Display detailed information about the service by specifying the service name or ID.",
-	Example:      serviceExample,
-	RunE:         Run,
+	Example:      describeExample,
+	RunE:         runDescribe,
 	SilenceUsage: true,
 }
 
 func init() {
-	ServiceCmd.Args = cobra.MinimumNArgs(1) // Require at least one argument
+	describeCmd.Args = cobra.MinimumNArgs(1) // Require at least one argument
 
-	ServiceCmd.Flags().Bool("id", false, "Specify service ID instead of name")
+	describeCmd.Flags().Bool("id", false, "Specify service ID instead of name")
 }
 
-func Run(cmd *cobra.Command, args []string) error {
+func runDescribe(cmd *cobra.Command, args []string) error {
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)

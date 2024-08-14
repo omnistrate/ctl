@@ -11,29 +11,28 @@ import (
 )
 
 var (
-	accountExample = `  # Get all accounts
-  omnistrate-ctl get account
+	getExample = `  # Get all accounts
+  omnistrate-ctl account get
 
   # Get account with name
-  omnistrate-ctl get account <name>
+  omnistrate-ctl account get <name>
 
   # Get multiple accounts
-  omnistrate-ctl get account <name1> <name2> <name3>
+  omnistrate-ctl account get <name1> <name2> <name3>
 
   # Get account with ID
-  omnistrate-ctl get account <id> --id
+  omnistrate-ctl account get <id> --id
 
   # Get multiple accounts with IDs
-  omnistrate-ctl get account <id1> <id2> <id3> --id`
+  omnistrate-ctl account get <id1> <id2> <id3> --id`
 )
 
-// AccountCmd represents the describe command
-var AccountCmd = &cobra.Command{
-	Use:     "account <name>",
+var getCmd = &cobra.Command{
+	Use:     "get",
 	Short:   "Display one or more accounts",
-	Long:    `The get account command displays basic information about one or more accounts.`,
-	Example: accountExample,
-	RunE:    Run,
+	Long:    `The account get command displays basic information about one or more accounts.`,
+	Example: getExample,
+	RunE:    runGet,
 	PostRun: func(cmd *cobra.Command, args []string) {
 		dataaccess.AskVerifyAccountIfAny()
 	},
@@ -41,10 +40,10 @@ var AccountCmd = &cobra.Command{
 }
 
 func init() {
-	AccountCmd.Flags().Bool("id", false, "Specify account ID instead of name")
+	getCmd.Flags().Bool("id", false, "Specify account ID instead of name")
 }
 
-func Run(cmd *cobra.Command, args []string) error {
+func runGet(cmd *cobra.Command, args []string) error {
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)

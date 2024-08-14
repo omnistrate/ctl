@@ -12,37 +12,36 @@ import (
 )
 
 var (
-	serviceExample = `  # Get all services
-  omnistrate-ctl get service
+	getExample = `  # Get all services
+  omnistrate-ctl service get
 
   # Get service with name
-  omnistrate-ctl get service <name>
+  omnistrate-ctl service get <name>
 
   # Get multiple services with names
-  omnistrate-ctl get service <name1> <name2> <name3>
+  omnistrate-ctl service get <name1> <name2> <name3>
 
   # Get service with ID
-  omnistrate-ctl get service <id> --id
+  omnistrate-ctl service get <id> --id
 
   # Get multiple services with IDs
-  omnistrate-ctl get service <id1> <id2> <id3> --id`
+  omnistrate-ctl service get <id1> <id2> <id3> --id`
 )
 
-// ServiceCmd represents the describe command
-var ServiceCmd = &cobra.Command{
-	Use:          "service <name>",
+var getCmd = &cobra.Command{
+	Use:          "get",
 	Short:        "Display one or more services",
-	Long:         `The get service command displays basic information about one or more services.`,
-	Example:      serviceExample,
-	RunE:         Run,
+	Long:         `The service get command displays basic information about one or more services.`,
+	Example:      getExample,
+	RunE:         runGet,
 	SilenceUsage: true,
 }
 
 func init() {
-	ServiceCmd.Flags().Bool("id", false, "Specify service ID instead of name")
+	getCmd.Flags().Bool("id", false, "Specify service ID instead of name")
 }
 
-func Run(cmd *cobra.Command, args []string) error {
+func runGet(cmd *cobra.Command, args []string) error {
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)

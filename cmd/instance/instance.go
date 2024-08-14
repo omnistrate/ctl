@@ -1,6 +1,9 @@
 package instance
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/omnistrate/ctl/utils"
+	"github.com/spf13/cobra"
+)
 
 var Cmd = &cobra.Command{
 	Use:          "instance [operation] [flags]",
@@ -13,16 +16,9 @@ var Cmd = &cobra.Command{
 func init() {
 	Cmd.AddCommand(describeCmd)
 
-	Cmd.Example = instanceExample()
+	Cmd.Example = utils.CombineSubCmdExamples(Cmd)
 
 	Cmd.Args = cobra.MinimumNArgs(1)
-}
-
-func instanceExample() (example string) {
-	for _, cmd := range Cmd.Commands() {
-		example += cmd.Example + "\n\n"
-	}
-	return
 }
 
 func run(cmd *cobra.Command, args []string) {
