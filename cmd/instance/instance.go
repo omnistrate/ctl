@@ -7,7 +7,7 @@ import (
 
 var Cmd = &cobra.Command{
 	Use:          "instance [operation] [flags]",
-	Short:        "Manage Instance deployment for your service using this command.",
+	Short:        "Manage Instance deployment for your service using this command",
 	Long:         `This command helps you manage the deployment of your service instances.`,
 	Run:          run,
 	SilenceUsage: true,

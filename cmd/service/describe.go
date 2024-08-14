@@ -28,7 +28,7 @@ const (
 var describeCmd = &cobra.Command{
 	Use:          "describe",
 	Short:        "Display details for one or more services",
-	Long:         "Display detailed information about the service by specifying the service name or ID.",
+	Long:         "Display detailed information about the service by specifying the service name or ID",
 	Example:      describeExample,
 	RunE:         runDescribe,
 	SilenceUsage: true,

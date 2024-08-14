@@ -17,7 +17,7 @@ omnistrate helm list`
 
 var listCmd = &cobra.Command{
 	Use:          "list",
-	Short:        "List all Helm packages that are saved.",
+	Short:        "List all Helm packages that are saved",
 	Long:         `This command helps you list all the Helm packages that are saved.`,
 	Example:      listExample,
 	RunE:         runList,

@@ -7,7 +7,7 @@ import (
 
 var Cmd = &cobra.Command{
 	Use:   "helm [operation] [flags]",
-	Short: "Manage Helm Charts for your service using this command.",
+	Short: "Manage Helm Charts for your service using this command",
 	Long: `This command helps you manage the templates for your helm charts. 
 Omnistrate automatically installs this charts and maintains the deployment of the release in every cloud / region / account your service is active in.`,
 	Run:          run,

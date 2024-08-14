@@ -28,7 +28,7 @@ const (
 var describeCmd = &cobra.Command{
 	Use:     "describe",
 	Short:   "Display details for one or more accounts",
-	Long:    "Display detailed information about the account by specifying the account name or ID.",
+	Long:    "Display detailed information about the account by specifying the account name or ID",
 	Example: describeExample,
 	RunE:    runDescribe,
 	PostRun: func(cmd *cobra.Command, args []string) {

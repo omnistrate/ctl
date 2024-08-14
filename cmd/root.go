@@ -30,7 +30,7 @@ const versionDescription = "Omnistrate CTL %s"
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "omnistrate-ctl",
-	Short: "Manage your Omnistrate SaaS from the command line.",
+	Short: "Manage your Omnistrate SaaS from the command line",
 	Long: wordwrap.WrapString(`
 Omnistrate CTL is a command line tool designed to streamline the creation, deployment, and management of your Omnistrate SaaS. Use it to build services from docker-compose files, manage service plans, and interact with the Omnistrate platform efficiently.
 
@@ -82,7 +82,7 @@ func Execute() {
 
 func init() {
 	RootCmd.PersistentFlags().BoolP("version", "v", false, "Print the version number of omnistrate-ctl")
-	
+
 	RootCmd.AddCommand(login.LoginCmd)
 	RootCmd.AddCommand(logout.LogoutCmd)
 

@@ -15,7 +15,7 @@ var (
 
 var DescribeCmd = &cobra.Command{
 	Use:          "describe [flags]",
-	Short:        "Describe a service",
+	Short:        "Describe a service (deprecated)",
 	RunE:         run,
 	SilenceUsage: true,
 }

@@ -17,7 +17,7 @@ omnistrate helm describe redis --version=20.0.1`
 
 var describeCmd = &cobra.Command{
 	Use:          "describe chart --version=[version]",
-	Short:        "Describe a Helm Chart for your service.",
+	Short:        "Describe a Helm Chart for your service",
 	Long:         `This command helps you describe the templates for your helm charts.`,
 	Example:      describeExample,
 	RunE:         runDescribe,

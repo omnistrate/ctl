@@ -11,8 +11,6 @@ import (
 )
 
 const (
-	statusLong = ``
-
 	statusExample = `  # Get upgrade status
   omnistrate-ctl upgrade status <upgrade>`
 )
@@ -22,7 +20,6 @@ var output string
 var Cmd = &cobra.Command{
 	Use:          "status",
 	Short:        "Get upgrade status",
-	Long:         statusLong,
 	Example:      statusExample,
 	RunE:         run,
 	SilenceUsage: true,
