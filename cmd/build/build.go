@@ -623,7 +623,6 @@ func convertVolumesToConfigs(project *types.Project) (converted *types.Project, 
 }
 
 func listFiles(dir string) (files []string, err error) {
-	fmt.Printf("Listing files in %s\n", dir)
 	err = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		// Skip the directory itself
 		if path == dir {
@@ -631,7 +630,6 @@ func listFiles(dir string) (files []string, err error) {
 		}
 
 		if !info.IsDir() {
-			fmt.Printf("File: %s\n", path)
 			files = append(files, path)
 		}
 
