@@ -28,7 +28,7 @@ You can filter for specific instances by using the filter flag.`,
 }
 
 func init() {
-	listCmd.Flags().StringP("output", "o", "text", "Output format (text|json)")
+	listCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 	listCmd.Flags().StringP("filters", "f", "", "Filter instances by a specific criteria")
 }
 
