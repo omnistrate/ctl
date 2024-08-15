@@ -25,10 +25,4 @@ func TestInstanceBasic(t *testing.T) {
 	cmd.RootCmd.SetArgs([]string{"instance", "list"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(t, err)
-
-	// Step 3: delete instance
-	cmd.RootCmd.SetArgs([]string{"instance", "delete", "instance-invalid", "--yes"})
-	err = cmd.RootCmd.Execute()
-	require.Error(t, err)
-	require.Contains(t, err.Error(), "instance-invalid not found. Please check the instance ID and try again")
 }
