@@ -536,6 +536,7 @@ func convertVolumesToConfigs(project *types.Project) (converted *types.Project, 
 			if volume.Source != "" {
 				source := filepath.Clean(volume.Source)
 				if _, err = os.Stat(source); os.IsNotExist(err) {
+					err = nil
 					continue
 				}
 
