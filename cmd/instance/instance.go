@@ -19,8 +19,6 @@ func init() {
 	Cmd.AddCommand(listCmd)
 
 	Cmd.Example = utils.CombineSubCmdExamples(Cmd)
-
-	Cmd.Args = cobra.MinimumNArgs(1)
 }
 
 func run(cmd *cobra.Command, args []string) {

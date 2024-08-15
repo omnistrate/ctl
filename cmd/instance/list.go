@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/omnistrate/ctl/dataaccess"
-	"github.com/omnistrate/ctl/table"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
+	"os"
+	"text/tabwriter"
 )
 
 const (
 	listExample = `# List instances
 omnistrate instance list --filters "service:postgres,environment:prod"`
+	defaultMaxNameLength = 30 // Maximum length of the name column in the table
 )
 
 var listCmd = &cobra.Command{
@@ -74,10 +76,14 @@ func runList(cmd *cobra.Command, args []string) error {
 		if instance.ProductTierVersion != nil {
 			planVersion = *instance.ProductTierVersion
 		}
+		envType := ""
+		if instance.ServiceEnvironmentType != nil {
+			envType = string(*instance.ServiceEnvironmentType)
+		}
 		instances = append(instances, Instance{
 			InstanceID:    instance.ID,
-			Service:       string(instance.ServiceID),
-			Environment:   string(instance.ServiceEnvironmentID),
+			Service:       instance.ServiceName,
+			Environment:   envType,
 			PlanName:      planName,
 			PlanVersion:   planVersion,
 			Resource:      instance.ResourceName,
@@ -105,22 +111,7 @@ func runList(cmd *cobra.Command, args []string) error {
 
 	switch output {
 	case "text":
-		var tableWriter *table.Table
-		if tableWriter, err = table.NewTableFromJSONTemplate(json.RawMessage(jsonData[0])); err != nil {
-			// Just print the JSON directly and return
-			fmt.Printf("%+v\n", jsonData)
-			return err
-		}
-
-		for _, data := range jsonData {
-			if err = tableWriter.AddRowFromJSON(json.RawMessage(data)); err != nil {
-				// Just print the JSON directly and return
-				fmt.Printf("%+v\n", jsonData)
-				return err
-			}
-		}
-
-		tableWriter.Print()
+		printTable(instances)
 	case "json":
 		fmt.Printf("%+v\n", jsonData)
 
@@ -131,4 +122,29 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+func printTable(res []Instance) {
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
+
+	fmt.Fprintln(w, "Instance ID\tService\tEnvironment\tPlan Name\tPlan Version\tResource\tCloud Provider\tRegion\tStatus")
+
+	for _, r := range res {
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+			r.InstanceID,
+			utils.Truncate(r.Service, defaultMaxNameLength),
+			r.Environment,
+			utils.Truncate(r.PlanName, defaultMaxNameLength),
+			r.PlanVersion,
+			r.Resource,
+			r.CloudProvider,
+			r.Region,
+			r.Status,
+		)
+	}
+
+	err := w.Flush()
+	if err != nil {
+		utils.PrintError(err)
+	}
 }

@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	describeExample = `# Describe the instance deployment
+	describeExample = `# Describe instance
 omnistrate instance describe instance-abcd1234`
 )
 
