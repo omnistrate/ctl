@@ -13,7 +13,7 @@ import (
 
 const (
 	listExample = `# List instances of the service postgres in the prod environment
-omnistrate instance list --output=table --filters "service:postgres,environment:prod"`
+omnistrate instance list --output=table"`
 	defaultMaxNameLength = 30 // Maximum length of the name column in the table
 )
 
@@ -29,8 +29,8 @@ You can filter for specific instances by using the filter flag.`,
 
 func init() {
 	listCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
-	listCmd.Flags().StringP("filters", "f", "", "Filter instances by a specific criteria")
 	listCmd.Flags().Bool("truncate-names", false, "Truncate long names in the output")
+	// TODO: Implement filters
 }
 
 type Instance struct {
@@ -57,7 +57,6 @@ func runList(cmd *cobra.Command, args []string) error {
 		utils.PrintError(err)
 		return err
 	}
-	// TODO: Implement filters
 
 	// Validate user is currently logged in
 	token, err := utils.GetToken()
