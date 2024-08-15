@@ -1,4 +1,4 @@
-package table
+package utils
 
 import (
 	"encoding/json"

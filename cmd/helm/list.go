@@ -5,7 +5,6 @@ import (
 	"fmt"
 	helmpackageapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/helm_package_api"
 	"github.com/omnistrate/ctl/dataaccess"
-	"github.com/omnistrate/ctl/table"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 	"os"
@@ -66,10 +65,10 @@ func runList(cmd *cobra.Command, args []string) error {
 
 	switch output {
 	case "text":
-		printTable(helmPackageResult.HelmPackages)
+		PrintTable(helmPackageResult.HelmPackages)
 	case "table":
-		var tableWriter *table.Table
-		if tableWriter, err = table.NewTableFromJSONTemplate(json.RawMessage(jsonData[0])); err != nil {
+		var tableWriter *utils.Table
+		if tableWriter, err = utils.NewTableFromJSONTemplate(json.RawMessage(jsonData[0])); err != nil {
 			// Just print the JSON directly and return
 			fmt.Printf("%+v\n", jsonData)
 			return err
@@ -97,7 +96,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func printTable(res []*helmpackageapi.HelmPackage) {
+func PrintTable(res []*helmpackageapi.HelmPackage) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 
 	_, err := fmt.Fprintln(w, "Chart Name\tChart Version\tNamespace\tRepo URL\tValues")

@@ -4,24 +4,25 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/omnistrate/ctl/dataaccess"
-	"github.com/omnistrate/ctl/table"
+	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
-	"os"
-	"text/tabwriter"
+	"strings"
 )
 
 const (
 	listExample = `# List instances of the service postgres in the prod environment
-omnistrate instance list --output=table"`
+omnistrate instance list --output=table --filters="service:postgres,environment:prod"`
 	defaultMaxNameLength = 30 // Maximum length of the name column in the table
 )
 
+var supportedFilterKeys = []string{"id", "service", "environment", "plan", "version", "resource", "cloud_provider", "region", "status"}
+
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List all instances in your account",
-	Long: `This command helps you list all the instances in your account.
-You can filter for specific instances by using the filter flag.`,
+	Short: "List instance deployments for your services",
+	Long: `This command helps you list instance deployments for your services.
+You can filter for specific instances by using the filters flag.`,
 	Example:      listExample,
 	RunE:         runList,
 	SilenceUsage: true,
@@ -29,20 +30,8 @@ You can filter for specific instances by using the filter flag.`,
 
 func init() {
 	listCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
-	listCmd.Flags().Bool("truncate-names", false, "Truncate long names in the output")
-	// TODO: Implement filters
-}
-
-type Instance struct {
-	InstanceID    string `json:"instance_id"`
-	Service       string `json:"service"`
-	Environment   string `json:"environment"`
-	PlanName      string `json:"plan_name"`
-	PlanVersion   string `json:"plan_version"`
-	Resource      string `json:"resource"`
-	CloudProvider string `json:"cloud_provider"`
-	Region        string `json:"region"`
-	Status        string `json:"status"`
+	listCmd.Flags().StringArrayP("filters", "f", []string{}, "Filters to apply to the list of instances. Format: 'key:value,key:value' 'key:value'. Supported keys: "+strings.Join(supportedFilterKeys, ","))
+	listCmd.Flags().Bool("truncate", false, "Truncate long names in the output")
 }
 
 func runList(cmd *cobra.Command, args []string) error {
@@ -52,7 +41,19 @@ func runList(cmd *cobra.Command, args []string) error {
 		utils.PrintError(err)
 		return err
 	}
-	truncateNames, err := cmd.Flags().GetBool("truncate-names")
+	filters, err := cmd.Flags().GetStringArray("filters")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+	truncateNames, err := cmd.Flags().GetBool("truncate")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	// Parse filters into a map
+	filterMaps, err := utils.ParseFilters(filters, supportedFilterKeys)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -66,14 +67,17 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the instance exists
-	searchRes, err := dataaccess.SearchInventory(token, "resourceinstance:%s")
+	searchRes, err := dataaccess.SearchInventory(token, "resourceinstance:i") // Get all instances
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	instances := make([]Instance, 0)
+	instances := make([]model.Instance, 0)
 	for _, instance := range searchRes.ResourceInstanceResults {
+		if instance == nil {
+			continue
+		}
 		planName := ""
 		if instance.ProductTierName != nil {
 			planName = *instance.ProductTierName
@@ -91,18 +95,27 @@ func runList(cmd *cobra.Command, args []string) error {
 			serviceName = utils.TruncateString(serviceName, defaultMaxNameLength)
 			planName = utils.TruncateString(planName, defaultMaxNameLength)
 		}
-
-		instances = append(instances, Instance{
-			InstanceID:    instance.ID,
+		formattedInstance := model.Instance{
+			ID:            instance.ID,
 			Service:       serviceName,
 			Environment:   envType,
-			PlanName:      planName,
-			PlanVersion:   planVersion,
+			Plan:          planName,
+			Version:       planVersion,
 			Resource:      instance.ResourceName,
 			CloudProvider: string(instance.CloudProvider),
 			Region:        instance.RegionCode,
 			Status:        string(instance.Status),
-		})
+		}
+
+		// Check if the instance matches the filters
+		ok, err := utils.MatchesFilters(formattedInstance, filterMaps)
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+		if ok {
+			instances = append(instances, formattedInstance)
+		}
 	}
 
 	var jsonData []string
@@ -123,10 +136,13 @@ func runList(cmd *cobra.Command, args []string) error {
 
 	switch output {
 	case "text":
-		printTable(instances)
+		err = utils.PrintText(jsonData)
+		if err != nil {
+			return err
+		}
 	case "table":
-		var tableWriter *table.Table
-		if tableWriter, err = table.NewTableFromJSONTemplate(json.RawMessage(jsonData[0])); err != nil {
+		var tableWriter *utils.Table
+		if tableWriter, err = utils.NewTableFromJSONTemplate(json.RawMessage(jsonData[0])); err != nil {
 			// Just print the JSON directly and return
 			fmt.Printf("%+v\n", jsonData)
 			return err
@@ -150,35 +166,4 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
-}
-
-func printTable(res []Instance) {
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-
-	_, err := fmt.Fprintln(w, "Instance ID\tService\tEnvironment\tPlan Name\tPlan Version\tResource\tCloud Provider\tRegion\tStatus")
-	if err != nil {
-		return
-	}
-
-	for _, r := range res {
-		_, err = fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
-			r.InstanceID,
-			r.Service,
-			r.Environment,
-			r.PlanName,
-			r.PlanVersion,
-			r.Resource,
-			r.CloudProvider,
-			r.Region,
-			r.Status,
-		)
-		if err != nil {
-			return
-		}
-	}
-
-	err = w.Flush()
-	if err != nil {
-		utils.PrintError(err)
-	}
 }
