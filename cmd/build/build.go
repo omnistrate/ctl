@@ -170,16 +170,18 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	sm1 := ysmrr.NewSpinnerManager()
 	building := sm1.AddSpinner("Building service...")
 	sm1.Start()
-	defer sm1.Stop()
-	defer building.Complete()
 
 	ServiceID, EnvironmentID, ProductTierID, err = buildService(file, token, name, specType, descriptionPtr, serviceLogoURLPtr,
 		environmentPtr, environmentTypePtr, release, releaseAsPreferred, releaseNamePtr)
 	if err != nil {
+		building.Error()
+		sm1.Stop()
 		utils.PrintError(err)
 		return err
 	}
 
+	building.Complete()
+	sm1.Stop()
 	utils.PrintURL("Check the service plan result at", fmt.Sprintf("https://%s/product-tier?serviceId=%s&environmentId=%s", utils.GetRootDomain(), ServiceID, EnvironmentID))
 
 	// Ask user to verify account if there are any unverified accounts
