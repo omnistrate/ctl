@@ -38,12 +38,17 @@ func PrintText(data []string) (err error) {
 
 	// Print the data
 	for _, d := range data {
+		mappedData = make(map[string]any)
 		if err = json.Unmarshal(json.RawMessage(d), &mappedData); err != nil {
 			return
 		}
 
 		var rowSlice []any
 		for _, column := range columnsAsStrings {
+			if mappedData[column] == nil {
+				rowSlice = append(rowSlice, "")
+				continue
+			}
 			rowSlice = append(rowSlice, mappedData[column])
 		}
 
