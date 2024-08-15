@@ -88,7 +88,7 @@ func TestMatchesFilters(t *testing.T) {
 		{
 			name: "Instance matches all filters",
 			model: model.Instance{
-				ID:            "123",
+				InstanceID:    "123",
 				Service:       "s1",
 				Environment:   "e2",
 				Plan:          "p1",
@@ -99,7 +99,7 @@ func TestMatchesFilters(t *testing.T) {
 				Status:        "active",
 			},
 			filters: []map[string]string{
-				{"id": "123", "service": "s1", "environment": "e2", "plan": "p1", "version": "v1", "resource": "r1", "cloud_provider": "cp1", "region": "rc1", "status": "active"},
+				{"instance_id": "123", "service": "s1", "environment": "e2", "plan": "p1", "version": "v1", "resource": "r1", "cloud_provider": "cp1", "region": "rc1", "status": "active"},
 			},
 			ok:          true,
 			expectError: false,
@@ -107,7 +107,7 @@ func TestMatchesFilters(t *testing.T) {
 		{
 			name: "Instance does not match any filters",
 			model: model.Instance{
-				ID:            "123",
+				InstanceID:    "123",
 				Service:       "s1",
 				Environment:   "e2",
 				Plan:          "p1",
@@ -119,7 +119,7 @@ func TestMatchesFilters(t *testing.T) {
 			},
 			filters: []map[string]string{
 				{"service": "s2", "environment": "e2"},
-				{"id": "999", "status": "inactive"},
+				{"instance_id": "999", "status": "inactive"},
 			},
 			ok:          false,
 			expectError: false,
@@ -127,7 +127,7 @@ func TestMatchesFilters(t *testing.T) {
 		{
 			name: "Instance matches one of the filters",
 			model: model.Instance{
-				ID:            "123",
+				InstanceID:    "123",
 				Service:       "s1",
 				Environment:   "e2",
 				Plan:          "p1",
@@ -139,7 +139,7 @@ func TestMatchesFilters(t *testing.T) {
 			},
 			filters: []map[string]string{
 				{"service": "s1", "environment": "e2"},
-				{"id": "123"},
+				{"instance_id": "123"},
 			},
 			ok:          true,
 			expectError: false,
@@ -147,7 +147,7 @@ func TestMatchesFilters(t *testing.T) {
 		{
 			name: "Empty filters",
 			model: model.Instance{
-				ID:            "123",
+				InstanceID:    "123",
 				Service:       "s1",
 				Environment:   "e2",
 				Plan:          "p1",
@@ -164,7 +164,7 @@ func TestMatchesFilters(t *testing.T) {
 		{
 			name: "Invalid filter key",
 			model: model.Instance{
-				ID:            "123",
+				InstanceID:    "123",
 				Service:       "s1",
 				Environment:   "e2",
 				Plan:          "p1",

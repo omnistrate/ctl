@@ -94,7 +94,7 @@ func runList(cmd *cobra.Command, args []string) error {
 			planName = utils.TruncateString(planName, defaultMaxNameLength)
 		}
 		formattedInstance := model.Instance{
-			ID:            instance.ID,
+			InstanceID:    instance.ID,
 			Service:       serviceName,
 			Environment:   envType,
 			Plan:          planName,
