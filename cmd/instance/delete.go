@@ -75,13 +75,13 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	// Confirm deletion
 	yes, _ := cmd.Flags().GetBool("yes")
 	if !yes {
-		ok, err := prompt.New().Ask("Are you sure you want to delete this instance?").
+		ok, err := prompt.New().Ask("Are you sure you want to delete this instance? (y/n)").
 			Input("", input.WithValidateFunc(
 				func(input string) error {
 					if slices.Contains([]string{"y", "yes", "n", "no"}, strings.ToLower(input)) {
 						return nil
 					} else {
-						return errors.New("invalid ok")
+						return errors.New("invalid input")
 					}
 				}))
 		if err != nil {
