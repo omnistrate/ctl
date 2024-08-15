@@ -26,3 +26,39 @@ func DescribeInstance(token, serviceId, serviceEnvironmentId, instanceId string)
 
 	return
 }
+
+func CreateInstance(token string, request inventoryapi.FleetCreateResourceInstanceRequest) (res *inventoryapi.CreateResourceInstanceResult, err error) {
+	request.Token = token
+
+	fleetService, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
+	if err != nil {
+		return
+	}
+
+	if res, err = fleetService.CreateResourceInstance(context.Background(), &request); err != nil {
+		return
+	}
+
+	return
+}
+
+func DeleteInstance(token, serviceId, serviceEnvironmentId, resourceId, instanceId string) (err error) {
+	fleetService, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
+	if err != nil {
+		return
+	}
+
+	request := &inventoryapi.FleetDeleteResourceInstanceRequest{
+		Token:         token,
+		ServiceID:     inventoryapi.ServiceID(serviceId),
+		EnvironmentID: inventoryapi.ServiceEnvironmentID(serviceEnvironmentId),
+		InstanceID:    inventoryapi.ResourceInstanceID(instanceId),
+		ResourceID:    inventoryapi.ResourceID(resourceId),
+	}
+
+	if err = fleetService.DeleteResourceInstance(context.Background(), request); err != nil {
+		return
+	}
+
+	return
+}

@@ -112,7 +112,10 @@ func runGet(cmd *cobra.Command, args []string) error {
 func printTable(accounts []*accountconfigapi.DescribeAccountConfigResult) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 
-	fmt.Fprintln(w, "ID\tName\tStatus\tCloud Provider\tTarget Account ID")
+	_, err := fmt.Fprintln(w, "ID\tName\tStatus\tCloud Provider\tTarget Account ID")
+	if err != nil {
+		return
+	}
 
 	for _, account := range accounts {
 		var targetAccountID, cloudProvider string
@@ -124,15 +127,18 @@ func printTable(accounts []*accountconfigapi.DescribeAccountConfigResult) {
 			cloudProvider = "GCP"
 		}
 
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
+		_, err = fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
 			account.ID,
 			account.Name,
 			account.Status,
 			cloudProvider,
 			targetAccountID)
+		if err != nil {
+			return
+		}
 	}
 
-	err := w.Flush()
+	err = w.Flush()
 	if err != nil {
 		utils.PrintError(err)
 	}

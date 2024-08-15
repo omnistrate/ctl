@@ -8,6 +8,8 @@ import (
 	"github.com/omnistrate/ctl/table"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
+	"os"
+	"text/tabwriter"
 )
 
 const (
@@ -25,7 +27,7 @@ var listCmd = &cobra.Command{
 }
 
 func init() {
-	listCmd.Flags().StringP("output", "o", "text", "Output format (text|json)")
+	listCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 }
 
 func runList(cmd *cobra.Command, args []string) error {
@@ -64,6 +66,8 @@ func runList(cmd *cobra.Command, args []string) error {
 
 	switch output {
 	case "text":
+		printTable(helmPackageResult.HelmPackages)
+	case "table":
 		var tableWriter *table.Table
 		if tableWriter, err = table.NewTableFromJSONTemplate(json.RawMessage(jsonData[0])); err != nil {
 			// Just print the JSON directly and return
@@ -91,4 +95,31 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+func printTable(res []*helmpackageapi.HelmPackage) {
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
+
+	_, err := fmt.Fprintln(w, "Chart Name\tChart Version\tNamespace\tRepo URL\tValues")
+	if err != nil {
+		return
+	}
+
+	for _, r := range res {
+		_, err = fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
+			r.ChartName,
+			r.ChartVersion,
+			r.Namespace,
+			r.RepoURL,
+			r.Values,
+		)
+		if err != nil {
+			return
+		}
+	}
+
+	err = w.Flush()
+	if err != nil {
+		utils.PrintError(err)
+	}
 }

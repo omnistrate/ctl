@@ -122,10 +122,14 @@ func run(cmd *cobra.Command, args []string) error {
 func printTable(res []*Res) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 
-	fmt.Fprintln(w, "Upgrade ID\tTotal\tPending\tIn Progress\tCompleted\tFailed\tStatus")
+	_, err := fmt.Fprintln(w, "Upgrade ID\tTotal\tPending\tIn Progress\tCompleted\tFailed\tStatus")
+	if err != nil {
+		utils.PrintError(err)
+		return
+	}
 
 	for _, r := range res {
-		fmt.Fprintf(w, "%s\t%d\t%d\t%d\t%d\t%d\t%s\n",
+		_, err = fmt.Fprintf(w, "%s\t%d\t%d\t%d\t%d\t%d\t%s\n",
 			r.UpgradeID,
 			r.Total,
 			r.Pending,
@@ -134,9 +138,12 @@ func printTable(res []*Res) {
 			r.Failed,
 			r.Status,
 		)
+		if err != nil {
+			return
+		}
 	}
 
-	err := w.Flush()
+	err = w.Flush()
 	if err != nil {
 		utils.PrintError(err)
 	}

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	prettytable "github.com/jedib0t/go-pretty/v6/table"
-	"github.com/jedib0t/go-pretty/v6/text"
 	"io"
 	"os"
 	"slices"
@@ -37,11 +36,7 @@ func NewTable(columns []any) (t *Table) {
 		columnsAsAny = append(columnsAsAny, column)
 	}
 
-	t.tableWriter.SetStyle(prettytable.StyleColoredBlueWhiteOnBlack)
 	t.tableWriter.AppendHeader(columnsAsAny)
-	t.tableWriter.SetRowPainter(func(row prettytable.Row) text.Colors {
-		return text.Colors{text.FgHiWhite}
-	})
 
 	return
 }
