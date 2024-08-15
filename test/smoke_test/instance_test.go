@@ -14,15 +14,20 @@ func TestInstanceBasic(t *testing.T) {
 
 	defer testutils.Cleanup()
 
-	// Step 1: login
+	// PASS: login
 	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
 	require.NoError(t, err)
 	cmd.RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = cmd.RootCmd.Execute()
 	require.NoError(t, err)
 
-	// Step 2: list instances
+	// PASS: instance list
 	cmd.RootCmd.SetArgs([]string{"instance", "list"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(t, err)
+
+	// PASS: instance list with filters
+	cmd.RootCmd.SetArgs([]string{"instance", "list", "-f", "environment:DEV,cloud_provider:gcp", "-f", "environment:DEV,cloud_provider:aws"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(t, err)
 }

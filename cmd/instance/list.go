@@ -4,24 +4,23 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/omnistrate/ctl/dataaccess"
-	"github.com/omnistrate/ctl/table"
+	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
-	"os"
-	"text/tabwriter"
+	"strings"
 )
 
 const (
-	listExample = `# List instances of the service postgres in the prod environment
-omnistrate instance list --output=table"`
+	listExample = `# List instances of the service postgres in the prod and dev environments
+omnistrate instance list -o=table -f="service:postgres,environment:PROD" -f="service:postgres,environment:DEV"`
 	defaultMaxNameLength = 30 // Maximum length of the name column in the table
 )
 
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List all instances in your account",
-	Long: `This command helps you list all the instances in your account.
-You can filter for specific instances by using the filter flag.`,
+	Short: "List instance deployments for your services",
+	Long: `This command helps you list instance deployments for your services.
+You can filter for specific instances by using the filters flag.`,
 	Example:      listExample,
 	RunE:         runList,
 	SilenceUsage: true,
@@ -29,20 +28,8 @@ You can filter for specific instances by using the filter flag.`,
 
 func init() {
 	listCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
-	listCmd.Flags().Bool("truncate-names", false, "Truncate long names in the output")
-	// TODO: Implement filters
-}
-
-type Instance struct {
-	InstanceID    string `json:"instance_id"`
-	Service       string `json:"service"`
-	Environment   string `json:"environment"`
-	PlanName      string `json:"plan_name"`
-	PlanVersion   string `json:"plan_version"`
-	Resource      string `json:"resource"`
-	CloudProvider string `json:"cloud_provider"`
-	Region        string `json:"region"`
-	Status        string `json:"status"`
+	listCmd.Flags().StringArrayP("filter", "f", []string{}, "Filter to apply to the list of instances. E.g.: key1:value1,key2:value2, which filters instances where key1 equals value1 and key2 equals value2. Allow use of multiple filters to form the logical OR operation. Supported keys: "+strings.Join(utils.GetSupportedFilterKeys(model.Instance{}), ",")+". Check the examples for more details.")
+	listCmd.Flags().Bool("truncate", false, "Truncate long names in the output")
 }
 
 func runList(cmd *cobra.Command, args []string) error {
@@ -52,7 +39,19 @@ func runList(cmd *cobra.Command, args []string) error {
 		utils.PrintError(err)
 		return err
 	}
-	truncateNames, err := cmd.Flags().GetBool("truncate-names")
+	filters, err := cmd.Flags().GetStringArray("filter")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+	truncateNames, err := cmd.Flags().GetBool("truncate")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	// Parse filters into a map
+	filterMaps, err := utils.ParseFilters(filters, utils.GetSupportedFilterKeys(model.Instance{}))
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -65,15 +64,18 @@ func runList(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Check if the instance exists
-	searchRes, err := dataaccess.SearchInventory(token, "resourceinstance:%s")
+	// Get all instances
+	searchRes, err := dataaccess.SearchInventory(token, "resourceinstance:i")
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	instances := make([]Instance, 0)
+	instances := make([]model.Instance, 0)
 	for _, instance := range searchRes.ResourceInstanceResults {
+		if instance == nil {
+			continue
+		}
 		planName := ""
 		if instance.ProductTierName != nil {
 			planName = *instance.ProductTierName
@@ -91,18 +93,27 @@ func runList(cmd *cobra.Command, args []string) error {
 			serviceName = utils.TruncateString(serviceName, defaultMaxNameLength)
 			planName = utils.TruncateString(planName, defaultMaxNameLength)
 		}
-
-		instances = append(instances, Instance{
-			InstanceID:    instance.ID,
+		formattedInstance := model.Instance{
+			ID:            instance.ID,
 			Service:       serviceName,
 			Environment:   envType,
-			PlanName:      planName,
-			PlanVersion:   planVersion,
+			Plan:          planName,
+			Version:       planVersion,
 			Resource:      instance.ResourceName,
 			CloudProvider: string(instance.CloudProvider),
 			Region:        instance.RegionCode,
 			Status:        string(instance.Status),
-		})
+		}
+
+		// Check if the instance matches the filters
+		ok, err := utils.MatchesFilters(formattedInstance, filterMaps)
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+		if ok {
+			instances = append(instances, formattedInstance)
+		}
 	}
 
 	var jsonData []string
@@ -123,24 +134,15 @@ func runList(cmd *cobra.Command, args []string) error {
 
 	switch output {
 	case "text":
-		printTable(instances)
-	case "table":
-		var tableWriter *table.Table
-		if tableWriter, err = table.NewTableFromJSONTemplate(json.RawMessage(jsonData[0])); err != nil {
-			// Just print the JSON directly and return
-			fmt.Printf("%+v\n", jsonData)
+		err = utils.PrintText(jsonData)
+		if err != nil {
 			return err
 		}
-
-		for _, data := range jsonData {
-			if err = tableWriter.AddRowFromJSON(json.RawMessage(data)); err != nil {
-				// Just print the JSON directly and return
-				fmt.Printf("%+v\n", jsonData)
-				return err
-			}
+	case "table":
+		err = utils.PrintTable(jsonData)
+		if err != nil {
+			return err
 		}
-
-		tableWriter.Print()
 	case "json":
 		fmt.Printf("%+v\n", jsonData)
 	default:
@@ -150,35 +152,4 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
-}
-
-func printTable(res []Instance) {
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-
-	_, err := fmt.Fprintln(w, "Instance ID\tService\tEnvironment\tPlan Name\tPlan Version\tResource\tCloud Provider\tRegion\tStatus")
-	if err != nil {
-		return
-	}
-
-	for _, r := range res {
-		_, err = fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
-			r.InstanceID,
-			r.Service,
-			r.Environment,
-			r.PlanName,
-			r.PlanVersion,
-			r.Resource,
-			r.CloudProvider,
-			r.Region,
-			r.Status,
-		)
-		if err != nil {
-			return
-		}
-	}
-
-	err = w.Flush()
-	if err != nil {
-		utils.PrintError(err)
-	}
 }

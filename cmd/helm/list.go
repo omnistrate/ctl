@@ -5,11 +5,8 @@ import (
 	"fmt"
 	helmpackageapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/helm_package_api"
 	"github.com/omnistrate/ctl/dataaccess"
-	"github.com/omnistrate/ctl/table"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
-	"os"
-	"text/tabwriter"
 )
 
 const (
@@ -66,25 +63,15 @@ func runList(cmd *cobra.Command, args []string) error {
 
 	switch output {
 	case "text":
-		printTable(helmPackageResult.HelmPackages)
-	case "table":
-		var tableWriter *table.Table
-		if tableWriter, err = table.NewTableFromJSONTemplate(json.RawMessage(jsonData[0])); err != nil {
-			// Just print the JSON directly and return
-			fmt.Printf("%+v\n", jsonData)
+		err = utils.PrintText(jsonData)
+		if err != nil {
 			return err
 		}
-
-		for _, data := range jsonData {
-			if err = tableWriter.AddRowFromJSON(json.RawMessage(data)); err != nil {
-				// Just print the JSON directly and return
-				fmt.Printf("%+v\n", jsonData)
-				return err
-			}
+	case "table":
+		err = utils.PrintTable(jsonData)
+		if err != nil {
+			return err
 		}
-
-		tableWriter.Print()
-
 	case "json":
 		fmt.Printf("%+v\n", jsonData)
 
@@ -95,31 +82,4 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
-}
-
-func printTable(res []*helmpackageapi.HelmPackage) {
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-
-	_, err := fmt.Fprintln(w, "Chart Name\tChart Version\tNamespace\tRepo URL\tValues")
-	if err != nil {
-		return
-	}
-
-	for _, r := range res {
-		_, err = fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
-			r.ChartName,
-			r.ChartVersion,
-			r.Namespace,
-			r.RepoURL,
-			r.Values,
-		)
-		if err != nil {
-			return
-		}
-	}
-
-	err = w.Flush()
-	if err != nil {
-		utils.PrintError(err)
-	}
 }

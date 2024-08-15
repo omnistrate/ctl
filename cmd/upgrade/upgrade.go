@@ -14,8 +14,6 @@ import (
 )
 
 const (
-	upgradeLong = ``
-
 	upgradeExample = `  # Upgrade instances to a specific version
   omnistrate-ctl upgrade <instance1> <instance2> --version 2.0
 
@@ -31,8 +29,8 @@ var output string
 
 var Cmd = &cobra.Command{
 	Use:          "upgrade [--version VERSION]",
-	Short:        "Upgrade instance to a newer version or an older version",
-	Long:         upgradeLong,
+	Short:        "Upgrade instance to a newer or older version",
+	Long:         `This command helps you upgrade instances to a newer or older version.`,
 	Example:      upgradeExample,
 	RunE:         run,
 	SilenceUsage: true,
@@ -44,7 +42,7 @@ func init() {
 	Cmd.Args = cobra.MinimumNArgs(1)
 
 	Cmd.Flags().StringVarP(&version, "version", "", "", "Specify the version number to upgrade to. Use 'latest' to upgrade to the latest version. Use 'preferred' to upgrade to the preferred version.")
-	Cmd.Flags().StringVarP(&output, "output", "o", "text", "Output format. One of: text, json")
+	Cmd.Flags().StringVarP(&output, "output", "o", "text", "Output format (text|table|json)")
 
 	err := Cmd.MarkFlagRequired("version")
 	if err != nil {
@@ -73,7 +71,7 @@ func run(cmd *cobra.Command, args []string) error {
 
 	var sm ysmrr.SpinnerManager
 	var spinner *ysmrr.Spinner
-	if output == "text" {
+	if output != "json" {
 		sm = ysmrr.NewSpinnerManager()
 		msg := "Scheduling upgrade for all instances"
 		if len(args) == 1 {
