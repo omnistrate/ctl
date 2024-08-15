@@ -2,11 +2,6 @@ module github.com/omnistrate/ctl
 
 go 1.22.0
 
-replace (
-	github.com/omnistrate/api-design => ../api-design
-	github.com/omnistrate/api-design/pkg/httpclientwrapper => ../api-design/pkg/httpclientwrapper
-)
-
 require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/chelnak/ysmrr v0.4.0
@@ -17,8 +12,8 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.5.9
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-wordwrap v1.0.1
-	github.com/omnistrate/api-design v0.6.544
-	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240814001714-5270ed2d220a
+	github.com/omnistrate/api-design v0.6.553
+	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240815003608-6510e69c5fbb
 	github.com/omnistrate/commons/pkg/utils v0.0.0-20240813020114-6ad156adc1f8
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/pkg/errors v0.9.1
