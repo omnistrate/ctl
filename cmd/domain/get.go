@@ -85,18 +85,24 @@ func runGet(cmd *cobra.Command, args []string) error {
 func printTable(domains []*saasportalapi.CustomDomain) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 
-	fmt.Fprintln(w, "Environment Type\tName\tDomain\tStatus\tCluster Endpoint")
+	_, err := fmt.Fprintln(w, "Environment Type\tName\tDomain\tStatus\tCluster Endpoint")
+	if err != nil {
+		return
+	}
 
 	for _, domain := range domains {
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
+		_, err = fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
 			domain.EnvironmentType,
 			domain.Name,
 			domain.CustomDomain,
 			domain.Status,
 			domain.ClusterEndpoint)
+		if err != nil {
+			return
+		}
 	}
 
-	err := w.Flush()
+	err = w.Flush()
 	if err != nil {
 		utils.PrintError(err)
 	}

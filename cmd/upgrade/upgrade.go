@@ -228,18 +228,24 @@ func run(cmd *cobra.Command, args []string) error {
 func printTable(upgrades map[Args]*Res) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 
-	fmt.Fprintln(w, "Upgrade ID\tSource Version\tTarget Version\tInstance IDs")
+	_, err := fmt.Fprintln(w, "Upgrade ID\tSource Version\tTarget Version\tInstance IDs")
+	if err != nil {
+		return
+	}
 
 	for args, res := range upgrades {
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
+		_, err = fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
 			res.UpgradePathID,
 			args.SourceVersion,
 			args.TargetVersion,
 			strings.Join(res.InstanceIDs, ", "),
 		)
+		if err != nil {
+			return
+		}
 	}
 
-	err := w.Flush()
+	err = w.Flush()
 	if err != nil {
 		utils.PrintError(err)
 	}

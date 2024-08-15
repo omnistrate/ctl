@@ -119,18 +119,24 @@ func run(cmd *cobra.Command, args []string) error {
 func printTable(res []*Res) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 
-	fmt.Fprintln(w, "Instance ID\tStatus\tStart Time\tEnd Time")
+	_, err := fmt.Fprintln(w, "Instance ID\tStatus\tStart Time\tEnd Time")
+	if err != nil {
+		return
+	}
 
 	for _, r := range res {
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
+		_, err = fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
 			r.InstanceID,
 			r.UpgradeStatus,
 			r.UpgradeStartTime,
 			r.UpgradeEndTime,
 		)
+		if err != nil {
+			return
+		}
 	}
 
-	err := w.Flush()
+	err = w.Flush()
 	if err != nil {
 		utils.PrintError(err)
 	}

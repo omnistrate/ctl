@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/omnistrate/ctl/dataaccess"
+	"github.com/omnistrate/ctl/table"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 	"os"
@@ -112,9 +113,25 @@ func runList(cmd *cobra.Command, args []string) error {
 	switch output {
 	case "text":
 		printTable(instances)
+	case "table":
+		var tableWriter *table.Table
+		if tableWriter, err = table.NewTableFromJSONTemplate(json.RawMessage(jsonData[0])); err != nil {
+			// Just print the JSON directly and return
+			fmt.Printf("%+v\n", jsonData)
+			return err
+		}
+
+		for _, data := range jsonData {
+			if err = tableWriter.AddRowFromJSON(json.RawMessage(data)); err != nil {
+				// Just print the JSON directly and return
+				fmt.Printf("%+v\n", jsonData)
+				return err
+			}
+		}
+
+		tableWriter.Print()
 	case "json":
 		fmt.Printf("%+v\n", jsonData)
-
 	default:
 		err = fmt.Errorf("unsupported output format: %s", output)
 		utils.PrintError(err)
@@ -127,10 +144,13 @@ func runList(cmd *cobra.Command, args []string) error {
 func printTable(res []Instance) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 
-	fmt.Fprintln(w, "Instance ID\tService\tEnvironment\tPlan Name\tPlan Version\tResource\tCloud Provider\tRegion\tStatus")
+	_, err := fmt.Fprintln(w, "Instance ID\tService\tEnvironment\tPlan Name\tPlan Version\tResource\tCloud Provider\tRegion\tStatus")
+	if err != nil {
+		return
+	}
 
 	for _, r := range res {
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+		_, err = fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
 			r.InstanceID,
 			utils.Truncate(r.Service, defaultMaxNameLength),
 			r.Environment,
@@ -141,9 +161,12 @@ func printTable(res []Instance) {
 			r.Region,
 			r.Status,
 		)
+		if err != nil {
+			return
+		}
 	}
 
-	err := w.Flush()
+	err = w.Flush()
 	if err != nil {
 		utils.PrintError(err)
 	}
