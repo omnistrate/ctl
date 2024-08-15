@@ -43,7 +43,7 @@ func CombineSubCmdExamples(root *cobra.Command) (example string) {
 	return
 }
 
-func Truncate(s string, max int) string {
+func TruncateString(s string, max int) string {
 	if len(s) < max {
 		return s
 	}

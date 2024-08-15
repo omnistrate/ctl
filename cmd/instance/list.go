@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	listExample = `# List instances
-omnistrate instance list --filters "service:postgres,environment:prod"`
+	listExample = `# List instances of the service postgres in the prod environment
+omnistrate instance list --output=table --filters "service:postgres,environment:prod"`
 	defaultMaxNameLength = 30 // Maximum length of the name column in the table
 )
 
@@ -30,6 +30,7 @@ You can filter for specific instances by using the filter flag.`,
 func init() {
 	listCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 	listCmd.Flags().StringP("filters", "f", "", "Filter instances by a specific criteria")
+	listCmd.Flags().Bool("truncate-names", false, "Truncate long names in the output")
 }
 
 type Instance struct {
@@ -47,6 +48,11 @@ type Instance struct {
 func runList(cmd *cobra.Command, args []string) error {
 	// Get flags
 	output, err := cmd.Flags().GetString("output")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+	truncateNames, err := cmd.Flags().GetBool("truncate-names")
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -81,9 +87,15 @@ func runList(cmd *cobra.Command, args []string) error {
 		if instance.ServiceEnvironmentType != nil {
 			envType = string(*instance.ServiceEnvironmentType)
 		}
+		serviceName := instance.ServiceName
+		if truncateNames {
+			serviceName = utils.TruncateString(serviceName, defaultMaxNameLength)
+			planName = utils.TruncateString(planName, defaultMaxNameLength)
+		}
+
 		instances = append(instances, Instance{
 			InstanceID:    instance.ID,
-			Service:       instance.ServiceName,
+			Service:       serviceName,
 			Environment:   envType,
 			PlanName:      planName,
 			PlanVersion:   planVersion,
@@ -152,9 +164,9 @@ func printTable(res []Instance) {
 	for _, r := range res {
 		_, err = fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
 			r.InstanceID,
-			utils.Truncate(r.Service, defaultMaxNameLength),
+			r.Service,
 			r.Environment,
-			utils.Truncate(r.PlanName, defaultMaxNameLength),
+			r.PlanName,
 			r.PlanVersion,
 			r.Resource,
 			r.CloudProvider,
