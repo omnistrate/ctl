@@ -21,13 +21,13 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(t, err)
 
-	//// PASS: instance list
-	//cmd.RootCmd.SetArgs([]string{"instance", "list"})
-	//err = cmd.RootCmd.Execute()
-	//require.NoError(t, err)
+	// PASS: instance list
+	cmd.RootCmd.SetArgs([]string{"instance", "list"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(t, err)
 
 	// PASS: instance list with filters
-	cmd.RootCmd.SetArgs([]string{"instance", "list", "--filters", "environment:DEV"})
+	cmd.RootCmd.SetArgs([]string{"instance", "list", "-f", "environment:DEV,cloud_provider:gcp", "-f", "environment:DEV,cloud_provider:aws"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(t, err)
 }

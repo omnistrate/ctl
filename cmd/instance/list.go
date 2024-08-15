@@ -11,12 +11,10 @@ import (
 )
 
 const (
-	listExample = `# List instances of the service postgres in the prod environment
-omnistrate instance list --output=table --filters="service:postgres,environment:prod"`
+	listExample = `# List instances of the service postgres in the prod and dev environments
+omnistrate instance list -o=table -f="service:postgres,environment:PROD" -f="service:postgres,environment:DEV"`
 	defaultMaxNameLength = 30 // Maximum length of the name column in the table
 )
-
-var supportedFilterKeys = []string{"id", "service", "environment", "plan", "version", "resource", "cloud_provider", "region", "status"}
 
 var listCmd = &cobra.Command{
 	Use:   "list",
@@ -30,7 +28,7 @@ You can filter for specific instances by using the filters flag.`,
 
 func init() {
 	listCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
-	listCmd.Flags().StringArrayP("filters", "f", []string{}, "Filters to apply to the list of instances. Format: 'key:value,key:value' 'key:value'. Supported keys: "+strings.Join(supportedFilterKeys, ","))
+	listCmd.Flags().StringArrayP("filter", "f", []string{}, "Filter to apply to the list of instances. E.g.: key1:value1,key2:value2, which filters instances where key1 equals value1 and key2 equals value2. Allow use of multiple filters to form the logical OR operation. Supported keys: "+strings.Join(utils.GetSupportedFilterKeys(model.Instance{}), ",")+". Check the examples for more details.")
 	listCmd.Flags().Bool("truncate", false, "Truncate long names in the output")
 }
 
@@ -41,7 +39,7 @@ func runList(cmd *cobra.Command, args []string) error {
 		utils.PrintError(err)
 		return err
 	}
-	filters, err := cmd.Flags().GetStringArray("filters")
+	filters, err := cmd.Flags().GetStringArray("filter")
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -53,7 +51,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	// Parse filters into a map
-	filterMaps, err := utils.ParseFilters(filters, supportedFilterKeys)
+	filterMaps, err := utils.ParseFilters(filters, utils.GetSupportedFilterKeys(model.Instance{}))
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -66,8 +64,8 @@ func runList(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Check if the instance exists
-	searchRes, err := dataaccess.SearchInventory(token, "resourceinstance:i") // Get all instances
+	// Get all instances
+	searchRes, err := dataaccess.SearchInventory(token, "resourceinstance:i")
 	if err != nil {
 		utils.PrintError(err)
 		return err

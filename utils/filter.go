@@ -7,6 +7,26 @@ import (
 	"strings"
 )
 
+func GetSupportedFilterKeys[T any](obj T) (supportedFilterKeys []string) {
+	objValue := reflect.ValueOf(obj)
+	if objValue.Kind() != reflect.Struct {
+		return
+	}
+
+	objType := objValue.Type()
+	for i := 0; i < objType.NumField(); i++ {
+		field := objType.Field(i)
+		jsonTag := field.Tag.Get("json")
+		if jsonTag != "" {
+			// jsonTag may have options, e.g., "name,omitempty"
+			parts := strings.Split(jsonTag, ",")
+			jsonTag = parts[0] // Use the first part as the JSON field name
+			supportedFilterKeys = append(supportedFilterKeys, jsonTag)
+		}
+	}
+	return
+}
+
 func ParseFilters(filters []string, supportedFilterKeys []string) (filterMaps []map[string]string, err error) {
 	filterMaps = make([]map[string]string, 0)
 	for _, filter := range filters {

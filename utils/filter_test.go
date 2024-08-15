@@ -86,7 +86,7 @@ func TestMatchesFilters(t *testing.T) {
 		expectedErrorMsg string
 	}{
 		{
-			name: "Match all filters",
+			name: "Instance matches all filters",
 			model: model.Instance{
 				ID:            "123",
 				Service:       "s1",
@@ -105,7 +105,7 @@ func TestMatchesFilters(t *testing.T) {
 			expectError: false,
 		},
 		{
-			name: "No match",
+			name: "Instance does not match any filters",
 			model: model.Instance{
 				ID:            "123",
 				Service:       "s1",
@@ -125,7 +125,7 @@ func TestMatchesFilters(t *testing.T) {
 			expectError: false,
 		},
 		{
-			name: "Partial match",
+			name: "Instance matches one of the filters",
 			model: model.Instance{
 				ID:            "123",
 				Service:       "s1",
@@ -162,7 +162,7 @@ func TestMatchesFilters(t *testing.T) {
 			expectError: false,
 		},
 		{
-			name: "Invalid field",
+			name: "Invalid filter key",
 			model: model.Instance{
 				ID:            "123",
 				Service:       "s1",
