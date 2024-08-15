@@ -81,7 +81,10 @@ func TestPrintText(t *testing.T) {
 			}
 			os.Stdout = old
 			var buf bytes.Buffer
-			io.Copy(&buf, r)
+			_, err = io.Copy(&buf, r)
+			if err != nil {
+				return
+			}
 
 			// Compare the output
 			if !tt.expectErr {

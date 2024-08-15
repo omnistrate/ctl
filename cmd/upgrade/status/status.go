@@ -1,13 +1,13 @@
 package status
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/omnistrate/ctl/cmd/upgrade/status/detail"
 	"github.com/omnistrate/ctl/dataaccess"
+	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
-	"os"
-	"text/tabwriter"
 )
 
 const (
@@ -30,17 +30,7 @@ func init() {
 
 	Cmd.Args = cobra.MinimumNArgs(1)
 
-	Cmd.Flags().StringVarP(&output, "output", "o", "text", "Output format. One of: text, json")
-}
-
-type Res struct {
-	UpgradeID  string
-	Total      int
-	Pending    int
-	InProgress int
-	Completed  int
-	Failed     int
-	Status     string
+	Cmd.Flags().StringVarP(&output, "output", "o", "text", "Output format (text|table|json)")
 }
 
 func run(cmd *cobra.Command, args []string) error {
@@ -50,7 +40,7 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	res := make([]*Res, 0)
+	res := make([]*model.UpgradeStatus, 0)
 
 	for _, upgradePathID := range args {
 		searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("upgradepath:%s", upgradePathID))
@@ -88,7 +78,7 @@ func run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		res = append(res, &Res{
+		res = append(res, &model.UpgradeStatus{
 			UpgradeID:  upgradePathID,
 			Total:      upgrade.TotalCount,
 			Pending:    upgrade.PendingCount,
@@ -99,17 +89,45 @@ func run(cmd *cobra.Command, args []string) error {
 		})
 	}
 
+	var jsonData []string
+	for _, instance := range res {
+		data, err := json.MarshalIndent(instance, "", "    ")
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+
+		jsonData = append(jsonData, string(data))
+	}
+
+	if len(jsonData) == 0 {
+		utils.PrintInfo("No upgrades found.")
+		return nil
+	}
+
 	switch output {
 	case "text":
-		printTable(res)
+		err = utils.PrintText(jsonData)
+		if err != nil {
+			return err
+		}
 
 		println("\nTo get more details, run the following command(s):")
 		for _, r := range res {
 			println(fmt.Sprintf("  omnistrate-ctl upgrade status detail %s", r.UpgradeID))
 		}
+	case "table":
+		err = utils.PrintTable(jsonData)
+		if err != nil {
+			return err
+		}
 
+		println("\nTo get more details, run the following command(s):")
+		for _, r := range res {
+			println(fmt.Sprintf("  omnistrate-ctl upgrade status detail %s", r.UpgradeID))
+		}
 	case "json":
-		utils.PrintJSON(res)
+		fmt.Printf("%+v\n", jsonData)
 	default:
 		err = fmt.Errorf("invalid output format: %s", output)
 		utils.PrintError(err)
@@ -117,34 +135,4 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
-}
-
-func printTable(res []*Res) {
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-
-	_, err := fmt.Fprintln(w, "Upgrade ID\tTotal\tPending\tIn Progress\tCompleted\tFailed\tStatus")
-	if err != nil {
-		utils.PrintError(err)
-		return
-	}
-
-	for _, r := range res {
-		_, err = fmt.Fprintf(w, "%s\t%d\t%d\t%d\t%d\t%d\t%s\n",
-			r.UpgradeID,
-			r.Total,
-			r.Pending,
-			r.InProgress,
-			r.Completed,
-			r.Failed,
-			r.Status,
-		)
-		if err != nil {
-			return
-		}
-	}
-
-	err = w.Flush()
-	if err != nil {
-		utils.PrintError(err)
-	}
 }

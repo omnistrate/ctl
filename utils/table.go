@@ -85,3 +85,24 @@ func (t Table) PrintToWriter(finalW io.Writer) {
 	t.tableWriter.SetOutputMirror(finalW)
 	t.tableWriter.Render()
 }
+
+func PrintTable(jsonData []string) (err error) {
+	var tableWriter *Table
+	if tableWriter, err = NewTableFromJSONTemplate(json.RawMessage(jsonData[0])); err != nil {
+		// Just print the JSON directly and return
+		fmt.Printf("%+v\n", jsonData)
+		return err
+	}
+
+	for _, data := range jsonData {
+		if err = tableWriter.AddRowFromJSON(json.RawMessage(data)); err != nil {
+			// Just print the JSON directly and return
+			fmt.Printf("%+v\n", jsonData)
+			return err
+		}
+	}
+
+	tableWriter.Print()
+
+	return
+}

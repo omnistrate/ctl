@@ -55,31 +55,25 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	var jsonData []string
 	data, err := json.MarshalIndent(helmPackage, "", "    ")
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
+	jsonData = append(jsonData, string(data))
 
 	switch output {
 	case "text":
-		PrintTable([]*helmpackageapi.HelmPackage{helmPackage})
+		err = utils.PrintText(jsonData)
+		if err != nil {
+			return err
+		}
 	case "table":
-		var tableWriter *utils.Table
-		if tableWriter, err = utils.NewTableFromJSONTemplate(data); err != nil {
-			// Just print the JSON directly and return
-			fmt.Println(string(data))
+		err = utils.PrintTable(jsonData)
+		if err != nil {
 			return err
 		}
-
-		if err = tableWriter.AddRowFromJSON(data); err != nil {
-			// Just print the JSON directly and return
-			fmt.Println(string(data))
-			return err
-		}
-
-		tableWriter.Print()
-
 	case "json":
 		fmt.Println(string(data))
 
