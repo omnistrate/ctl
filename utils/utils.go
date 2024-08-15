@@ -44,8 +44,11 @@ func CombineSubCmdExamples(root *cobra.Command) (example string) {
 }
 
 func TruncateString(s string, max int) string {
-	if len(s) < max {
+	if len(s) <= max {
 		return s
 	}
-	return s[:strings.LastIndexAny(s[:max], " .,:;-")] + "..."
+	if !strings.ContainsAny(s[:max], " .,:;-") {
+		return s[:max] + "..."
+	}
+	return s[:strings.LastIndexAny(s[:max], " .,:;-!")] + "..."
 }
