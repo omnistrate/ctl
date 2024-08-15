@@ -110,20 +110,26 @@ func runGet(cmd *cobra.Command, args []string) error {
 func printTable(services []*serviceapi.DescribeServiceResult) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 
-	fmt.Fprintln(w, "ID\tName\tEnvironments")
+	_, err := fmt.Fprintln(w, "ID\tName\tEnvironments")
+	if err != nil {
+		return
+	}
 
 	for _, service := range services {
 		envNames := []string{}
 		for _, env := range service.ServiceEnvironments {
 			envNames = append(envNames, env.Name)
 		}
-		fmt.Fprintf(w, "%s\t%s\t%s\n",
+		_, err = fmt.Fprintf(w, "%s\t%s\t%s\n",
 			service.ID,
 			service.Name,
 			strings.Join(envNames, ","))
+		if err != nil {
+			return
+		}
 	}
 
-	err := w.Flush()
+	err = w.Flush()
 	if err != nil {
 		utils.PrintError(err)
 	}

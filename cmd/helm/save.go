@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/omnistrate/ctl/dataaccess"
-	"github.com/omnistrate/ctl/table"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 	"os"
@@ -104,8 +103,8 @@ func runSave(cmd *cobra.Command, args []string) error {
 	case "text":
 		utils.PrintSuccess("Helm Chart saved successfully")
 
-		var tableWriter *table.Table
-		if tableWriter, err = table.NewTableFromJSONTemplate(data); err != nil {
+		var tableWriter *utils.Table
+		if tableWriter, err = utils.NewTableFromJSONTemplate(data); err != nil {
 			// Just print the JSON directly and return
 			fmt.Println(string(data))
 			return err

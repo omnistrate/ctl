@@ -5,7 +5,6 @@ import (
 	"fmt"
 	helmpackageapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/helm_package_api"
 	"github.com/omnistrate/ctl/dataaccess"
-	"github.com/omnistrate/ctl/table"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 )
@@ -25,7 +24,7 @@ var listCmd = &cobra.Command{
 }
 
 func init() {
-	listCmd.Flags().StringP("output", "o", "text", "Output format (text|json)")
+	listCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 }
 
 func runList(cmd *cobra.Command, args []string) error {
@@ -64,23 +63,15 @@ func runList(cmd *cobra.Command, args []string) error {
 
 	switch output {
 	case "text":
-		var tableWriter *table.Table
-		if tableWriter, err = table.NewTableFromJSONTemplate(json.RawMessage(jsonData[0])); err != nil {
-			// Just print the JSON directly and return
-			fmt.Printf("%+v\n", jsonData)
+		err = utils.PrintText(jsonData)
+		if err != nil {
 			return err
 		}
-
-		for _, data := range jsonData {
-			if err = tableWriter.AddRowFromJSON(json.RawMessage(data)); err != nil {
-				// Just print the JSON directly and return
-				fmt.Printf("%+v\n", jsonData)
-				return err
-			}
+	case "table":
+		err = utils.PrintTable(jsonData)
+		if err != nil {
+			return err
 		}
-
-		tableWriter.Print()
-
 	case "json":
 		fmt.Printf("%+v\n", jsonData)
 

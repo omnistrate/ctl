@@ -1,12 +1,12 @@
 package detail
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/omnistrate/ctl/dataaccess"
+	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
-	"os"
-	"text/tabwriter"
 )
 
 const (
@@ -27,15 +27,7 @@ var Cmd = &cobra.Command{
 func init() {
 	Cmd.Args = cobra.ExactArgs(1)
 
-	Cmd.Flags().StringVarP(&output, "output", "o", "text", "Output format. One of: text, json")
-}
-
-type Res struct {
-	UpgradeID        string
-	InstanceID       string
-	UpgradeStartTime string
-	UpgradeEndTime   string
-	UpgradeStatus    string
+	Cmd.Flags().StringVarP(&output, "output", "o", "text", "Output format (text|table|json)")
 }
 
 func run(cmd *cobra.Command, args []string) error {
@@ -45,7 +37,7 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	res := make([]*Res, 0)
+	res := make([]*model.UpgradeStatusDetail, 0)
 
 	upgradePathID := args[0]
 	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("upgradepath:%s", upgradePathID))
@@ -93,7 +85,7 @@ func run(cmd *cobra.Command, args []string) error {
 		if instanceUpgrade.UpgradeEndTime != nil {
 			endTime = *instanceUpgrade.UpgradeEndTime
 		}
-		res = append(res, &Res{
+		res = append(res, &model.UpgradeStatusDetail{
 			UpgradeID:        upgradePathID,
 			InstanceID:       string(instanceUpgrade.InstanceID),
 			UpgradeStatus:    string(instanceUpgrade.Status),
@@ -102,11 +94,30 @@ func run(cmd *cobra.Command, args []string) error {
 		})
 	}
 
+	var jsonData []string
+	for _, instance := range res {
+		data, err := json.MarshalIndent(instance, "", "    ")
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+
+		jsonData = append(jsonData, string(data))
+	}
+
 	switch output {
 	case "text":
-		printTable(res)
+		err = utils.PrintText(jsonData)
+		if err != nil {
+			return err
+		}
+	case "table":
+		err = utils.PrintTable(jsonData)
+		if err != nil {
+			return err
+		}
 	case "json":
-		utils.PrintJSON(res)
+		fmt.Printf("%+v\n", jsonData)
 	default:
 		err = fmt.Errorf("invalid output format: %s", output)
 		utils.PrintError(err)
@@ -114,24 +125,4 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
-}
-
-func printTable(res []*Res) {
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-
-	fmt.Fprintln(w, "Instance ID\tStatus\tStart Time\tEnd Time")
-
-	for _, r := range res {
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
-			r.InstanceID,
-			r.UpgradeStatus,
-			r.UpgradeStartTime,
-			r.UpgradeEndTime,
-		)
-	}
-
-	err := w.Flush()
-	if err != nil {
-		utils.PrintError(err)
-	}
 }

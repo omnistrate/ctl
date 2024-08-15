@@ -5,7 +5,6 @@ import (
 	"fmt"
 	helmpackageapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/helm_package_api"
 	"github.com/omnistrate/ctl/dataaccess"
-	"github.com/omnistrate/ctl/table"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 )
@@ -28,7 +27,7 @@ func init() {
 	describeCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 
 	describeCmd.Flags().String("version", "", "Helm Chart version")
-	describeCmd.Flags().StringP("output", "o", "text", "Output format (text|json)")
+	describeCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 
 	err := describeCmd.MarkFlagRequired("version")
 	if err != nil {
@@ -56,29 +55,25 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	var jsonData []string
 	data, err := json.MarshalIndent(helmPackage, "", "    ")
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
+	jsonData = append(jsonData, string(data))
 
 	switch output {
 	case "text":
-		var tableWriter *table.Table
-		if tableWriter, err = table.NewTableFromJSONTemplate(data); err != nil {
-			// Just print the JSON directly and return
-			fmt.Println(string(data))
+		err = utils.PrintText(jsonData)
+		if err != nil {
 			return err
 		}
-
-		if err = tableWriter.AddRowFromJSON(data); err != nil {
-			// Just print the JSON directly and return
-			fmt.Println(string(data))
+	case "table":
+		err = utils.PrintTable(jsonData)
+		if err != nil {
 			return err
 		}
-
-		tableWriter.Print()
-
 	case "json":
 		fmt.Println(string(data))
 

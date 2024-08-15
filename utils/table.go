@@ -1,10 +1,9 @@
-package table
+package utils
 
 import (
 	"encoding/json"
 	"fmt"
 	prettytable "github.com/jedib0t/go-pretty/v6/table"
-	"github.com/jedib0t/go-pretty/v6/text"
 	"io"
 	"os"
 	"slices"
@@ -37,11 +36,7 @@ func NewTable(columns []any) (t *Table) {
 		columnsAsAny = append(columnsAsAny, column)
 	}
 
-	t.tableWriter.SetStyle(prettytable.StyleColoredBlueWhiteOnBlack)
 	t.tableWriter.AppendHeader(columnsAsAny)
-	t.tableWriter.SetRowPainter(func(row prettytable.Row) text.Colors {
-		return text.Colors{text.FgHiWhite}
-	})
 
 	return
 }
@@ -89,4 +84,25 @@ func (t Table) Print() {
 func (t Table) PrintToWriter(finalW io.Writer) {
 	t.tableWriter.SetOutputMirror(finalW)
 	t.tableWriter.Render()
+}
+
+func PrintTable(jsonData []string) (err error) {
+	var tableWriter *Table
+	if tableWriter, err = NewTableFromJSONTemplate(json.RawMessage(jsonData[0])); err != nil {
+		// Just print the JSON directly and return
+		fmt.Printf("%+v\n", jsonData)
+		return err
+	}
+
+	for _, data := range jsonData {
+		if err = tableWriter.AddRowFromJSON(json.RawMessage(data)); err != nil {
+			// Just print the JSON directly and return
+			fmt.Printf("%+v\n", jsonData)
+			return err
+		}
+	}
+
+	tableWriter.Print()
+
+	return
 }

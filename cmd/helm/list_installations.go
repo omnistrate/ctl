@@ -6,7 +6,6 @@ import (
 	helmpackageapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/helm_package_api"
 	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/dataaccess"
-	"github.com/omnistrate/ctl/table"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 )
@@ -90,8 +89,8 @@ func runListInstallations(cmd *cobra.Command, args []string) error {
 
 	switch output {
 	case "text":
-		var tableWriter *table.Table
-		if tableWriter, err = table.NewTableFromJSONTemplate(json.RawMessage(jsonData[0])); err != nil {
+		var tableWriter *utils.Table
+		if tableWriter, err = utils.NewTableFromJSONTemplate(json.RawMessage(jsonData[0])); err != nil {
 			// Just print the JSON directly and return
 			fmt.Printf("%+v\n", jsonData)
 			return err
