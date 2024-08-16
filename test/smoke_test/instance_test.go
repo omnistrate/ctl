@@ -21,6 +21,19 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(t, err)
 
+	// PASS: instance create
+	cmd.RootCmd.SetArgs([]string{"instance", "create",
+		"--service=mySQL",
+		"--environment=dev",
+		"--plan=mysql",
+		"--version=latest",
+		"--resource=mySQL",
+		"--cloud-provider=aws",
+		"--region=ca-central-1",
+		"--param", `{"databaseName":"default","password":"a_secure_password","rootPassword":"a_secure_root_password","username":"user"},"productTierVersion":"1.0"}`})
+	err = cmd.RootCmd.Execute()
+	require.NoError(t, err)
+
 	// PASS: instance list
 	cmd.RootCmd.SetArgs([]string{"instance", "list"})
 	err = cmd.RootCmd.Execute()

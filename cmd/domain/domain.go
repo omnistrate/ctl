@@ -9,7 +9,7 @@ var Cmd = &cobra.Command{
 	Use:   "domain [operation] [flags]",
 	Short: "Manage Customer Domains for your service",
 	Long: `This command helps you manage the domains for your service.
-These domains are used to access your service in the cloud. You can set up custom domains for each environment type, such as 'prod', 'dev', 'canary', 'staging', 'qa'.`,
+These domains are used to access your service in the cloud. You can set up custom domains for each environment type, such as 'dev', 'prod', 'qa', 'canary', 'staging', 'private'.`,
 	Run:          run,
 	SilenceUsage: true,
 }

@@ -121,7 +121,7 @@ func run(cmd *cobra.Command, args []string) error {
 		}
 		sourceVersion = describeRes.TierVersion
 
-		// Check if the target version exists
+		// Get the target version
 		switch version {
 		case "latest":
 			targetVersion, err = dataaccess.FindLatestVersion(token, serviceID, productTierID)

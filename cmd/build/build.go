@@ -105,6 +105,10 @@ func init() {
 	if err != nil {
 		return
 	}
+	err = BuildCmd.MarkFlagFilename("file")
+	if err != nil {
+		return
+	}
 	err = BuildCmd.MarkFlagRequired("name")
 	if err != nil {
 		return
