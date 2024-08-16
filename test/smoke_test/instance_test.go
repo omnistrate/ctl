@@ -49,6 +49,7 @@ func TestInstanceBasic(t *testing.T) {
 		"--param=",
 		"--param-file", "paramfiles/instance_create_param.json"})
 	err = cmd.RootCmd.Execute()
+	require.NoError(t, err)
 	instanceID2 := instance.InstanceID
 	require.NotEmpty(t, instanceID2)
 
