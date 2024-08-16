@@ -22,7 +22,7 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(t, err)
 
-	// PASS: instance create
+	// PASS: create instance 1 with param
 	cmd.RootCmd.SetArgs([]string{"instance", "create",
 		"--service=mysql",
 		"--environment=dev",
@@ -34,10 +34,31 @@ func TestInstanceBasic(t *testing.T) {
 		"--param", `{"databaseName":"default","password":"a_secure_password","rootPassword":"a_secure_root_password","username":"user"}`})
 	err = cmd.RootCmd.Execute()
 	require.NoError(t, err)
-	require.NotEmpty(t, instance.InstanceID)
+	instanceID1 := instance.InstanceID
+	require.NotEmpty(t, instanceID1)
 
-	// PASS: instance describe
-	cmd.RootCmd.SetArgs([]string{"instance", "describe", instance.InstanceID})
+	// PASS: create instance 2 with param file
+	cmd.RootCmd.SetArgs([]string{"instance", "create",
+		"--service=mysql",
+		"--environment=dev",
+		"--plan=mysql",
+		"--version=latest",
+		"--resource=mySQL",
+		"--cloud-provider=aws",
+		"--region=ca-central-1",
+		"--param-file", "paramfiles/instance_create_param.json"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(t, err)
+	instanceID2 := instance.InstanceID
+	require.NotEmpty(t, instanceID2)
+
+	// PASS: describe instance 1
+	cmd.RootCmd.SetArgs([]string{"instance", "describe", instanceID1})
+	err = cmd.RootCmd.Execute()
+	require.NoError(t, err)
+
+	// PASS: describe instance 2
+	cmd.RootCmd.SetArgs([]string{"instance", "describe", instanceID2})
 	err = cmd.RootCmd.Execute()
 	require.NoError(t, err)
 
@@ -51,8 +72,13 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(t, err)
 
-	// PASS: instance delete
-	cmd.RootCmd.SetArgs([]string{"instance", "delete", instance.InstanceID, "--yes"})
+	// PASS: delete instance 1
+	cmd.RootCmd.SetArgs([]string{"instance", "delete", instanceID1, "--yes"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(t, err)
+
+	// PASS: delete instance 2
+	cmd.RootCmd.SetArgs([]string{"instance", "delete", instanceID2, "--yes"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(t, err)
 }
