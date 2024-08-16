@@ -3,6 +3,7 @@ package instance
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/chelnak/ysmrr"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
@@ -15,7 +16,7 @@ import (
 
 const (
 	createExample = `# Create an instance deployment
-omnistrate instance create --service postgres --environment dev --plan mysql --version latest --resource mySQL --cloud-provider aws --region ca-central-1 --param "{"databaseName":"default","password":"a_secure_password","rootPassword":"a_secure_root_password","username":"user"},"productTierVersion":"1.0"}"`
+omnistrate instance create --service=mysql --environment=dev --plan=mysql --version=latest --resource=mySQL --cloud-provider=aws --region=ca-central-1 --param '{"databaseName":"default","password":"a_secure_password","rootPassword":"a_secure_root_password","username":"user"}'`
 )
 
 var InstanceID string
@@ -123,6 +124,15 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		utils.PrintError(err)
 		return err
+	}
+
+	var sm ysmrr.SpinnerManager
+	var spinner *ysmrr.Spinner
+	if output != "json" {
+		sm = ysmrr.NewSpinnerManager()
+		msg := "Creating instance..."
+		spinner = sm.AddSpinner(msg)
+		sm.Start()
 	}
 
 	// Get resource
@@ -248,6 +258,12 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		err = errors.New("failed to create instance")
 		utils.PrintError(err)
 		return err
+	}
+
+	if spinner != nil {
+		spinner.UpdateMessage("Successfully created instance")
+		spinner.Complete()
+		sm.Stop()
 	}
 
 	formattedInstance := model.Instance{

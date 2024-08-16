@@ -47,35 +47,6 @@ func runDelete(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Check if the instance exists
-	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("resourceinstance:%s", instanceId))
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
-	var found bool
-	var serviceId, environmentId, resourceId string
-	for _, instance := range searchRes.ResourceInstanceResults {
-		if instance.ID == instanceId {
-			serviceId = string(instance.ServiceID)
-			environmentId = string(instance.ServiceEnvironmentID)
-			if instance.ResourceID == nil {
-				err = fmt.Errorf("resource ID not returned for instance %s", instanceId)
-				utils.PrintError(err)
-				return err
-			}
-			resourceId = string(*instance.ResourceID)
-			found = true
-			break
-		}
-	}
-	if !found {
-		err = fmt.Errorf("%s not found. Please check the instance ID and try again", instanceId)
-		utils.PrintError(err)
-		return nil
-	}
-
 	// Confirm deletion
 	if !yes {
 		ok, err := prompt.New().Ask("Are you sure you want to delete this instance? (y/n)").
@@ -104,6 +75,35 @@ func runDelete(cmd *cobra.Command, args []string) error {
 		msg := "Deleting instance..."
 		spinner = sm.AddSpinner(msg)
 		sm.Start()
+	}
+
+	// Check if the instance exists
+	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("resourceinstance:%s", instanceId))
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	var found bool
+	var serviceId, environmentId, resourceId string
+	for _, instance := range searchRes.ResourceInstanceResults {
+		if instance.ID == instanceId {
+			serviceId = string(instance.ServiceID)
+			environmentId = string(instance.ServiceEnvironmentID)
+			if instance.ResourceID == nil {
+				err = fmt.Errorf("resource ID not returned for instance %s", instanceId)
+				utils.PrintError(err)
+				return err
+			}
+			resourceId = string(*instance.ResourceID)
+			found = true
+			break
+		}
+	}
+	if !found {
+		err = fmt.Errorf("%s not found. Please check the instance ID and try again", instanceId)
+		utils.PrintError(err)
+		return nil
 	}
 
 	err = dataaccess.DeleteInstance(token, serviceId, environmentId, resourceId, instanceId)
