@@ -39,7 +39,7 @@ func init() {
 	createCmd.Flags().String("cloud-provider", "", "Cloud provider (aws|gcp)")
 	createCmd.Flags().String("region", "", "Region code (e.g. us-east-2, us-central1)")
 	createCmd.Flags().String("param", "", "Parameters for the instance deployment")
-	createCmd.Flags().String("param-file", "", "File containing parameters for the instance deployment")
+	createCmd.Flags().String("param-file", "", "Json file containing parameters for the instance deployment")
 	createCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 
 	if err := createCmd.MarkFlagRequired("service"); err != nil {
