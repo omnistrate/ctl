@@ -28,7 +28,7 @@ func TestInstanceBasic(t *testing.T) {
 		"--environment=dev",
 		"--plan=mysql",
 		"--version=latest",
-		"--resource=MySQL",
+		"--resource=mySQL",
 		"--cloud-provider=aws",
 		"--region=ca-central-1",
 		"--param", `{"databaseName":"default","password":"a_secure_password","rootPassword":"a_secure_root_password","username":"user"}`})

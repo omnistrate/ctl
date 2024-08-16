@@ -209,6 +209,21 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	var resourceKey string
+	found = false
+	for _, resourceEntity := range offering.ResourceParameters {
+		if strings.ToLower(resourceEntity.Name) == strings.ToLower(resource) {
+			found = true
+			resourceKey = resourceEntity.URLKey
+		}
+	}
+
+	if !found {
+		err = fmt.Errorf("resource %s not found in the service offering", resource)
+		utils.PrintError(err)
+		return err
+	}
+
 	request := inventoryapi.FleetCreateResourceInstanceRequest{
 		ServiceProviderID:     inventoryapi.ServiceProviderID(res.ConsumptionDescribeServiceOfferingResult.ServiceProviderID),
 		ServiceKey:            res.ConsumptionDescribeServiceOfferingResult.ServiceURLKey,
@@ -217,7 +232,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		ServiceModelKey:       offering.ServiceModelURLKey,
 		ProductTierKey:        offering.ProductTierURLKey,
 		ProductTierVersion:    &version,
-		ResourceKey:           resource,
+		ResourceKey:           resourceKey,
 		CloudProvider:         &cloudProvider,
 		Region:                &region,
 		RequestParams:         formattedParams,
