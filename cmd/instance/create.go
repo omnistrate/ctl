@@ -18,6 +18,8 @@ const (
 omnistrate instance create --service postgres --environment dev --plan mysql --version latest --resource mySQL --cloud-provider aws --region ca-central-1 --param "{"databaseName":"default","password":"a_secure_password","rootPassword":"a_secure_root_password","username":"user"},"productTierVersion":"1.0"}"`
 )
 
+var InstanceID string
+
 var createCmd = &cobra.Command{
 	Use:          "create",
 	Short:        "Create an instance deployment",
@@ -29,7 +31,7 @@ var createCmd = &cobra.Command{
 
 func init() {
 	createCmd.Flags().String("service", "", "Service name")
-	createCmd.Flags().String("environment", "", "Environment name") // TODO: Ask for type instead of name
+	createCmd.Flags().String("environment", "", "Environment type")
 	createCmd.Flags().String("plan", "", "Service plan name")
 	createCmd.Flags().String("version", "preferred", "Service plan version (latest|preferred|1.0 etc.)")
 	createCmd.Flags().String("resource", "", "Resource name")
@@ -136,7 +138,10 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		if res == nil {
 			continue
 		}
-		if strings.ToLower(res.Name) == strings.ToLower(resource) && strings.ToLower(res.ServiceName) == strings.ToLower(service) && strings.ToLower(res.ServiceEnvironmentName) == strings.ToLower(environment) && strings.ToLower(res.ProductTierName) == strings.ToLower(plan) {
+		if strings.ToLower(res.Name) == strings.ToLower(resource) &&
+			strings.ToLower(res.ServiceName) == strings.ToLower(service) &&
+			strings.ToLower(res.ProductTierName) == strings.ToLower(plan) &&
+			res.ServiceEnvironmentType != nil && strings.ToLower(string(*res.ServiceEnvironmentType)) == strings.ToLower(environment) {
 			found = true
 			serviceID = string(res.ServiceID)
 			productTierID = string(res.ProductTierID)
@@ -195,7 +200,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Extract parameters from json format param
-	var formattedParams map[string]string
+	var formattedParams map[string]interface{}
 	if param != "" {
 		err = json.Unmarshal([]byte(param), &formattedParams)
 		if err != nil {
@@ -241,6 +246,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		Region:        region,
 		Status:        "DEPLOYING",
 	}
+	InstanceID = formattedInstance.ID
 
 	var jsonData []string
 	data, err := json.MarshalIndent(formattedInstance, "", "    ")
@@ -263,7 +269,11 @@ func runCreate(cmd *cobra.Command, args []string) error {
 			return err
 		}
 	case "json":
-		fmt.Printf("%+v\n", jsonData)
+		_, err = fmt.Fprintf(cmd.OutOrStdout(), "%+v\n", jsonData[0])
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
 	default:
 		err = fmt.Errorf("unsupported output format: %s", output)
 		utils.PrintError(err)

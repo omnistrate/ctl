@@ -2,6 +2,7 @@ package instance
 
 import (
 	"fmt"
+	"github.com/chelnak/ysmrr"
 	"github.com/cqroot/prompt"
 	"github.com/cqroot/prompt/input"
 	"github.com/omnistrate/ctl/dataaccess"
@@ -33,8 +34,11 @@ func init() {
 }
 
 func runDelete(cmd *cobra.Command, args []string) error {
-	// Get flags
 	instanceId := args[0]
+
+	// Get flags
+	output, _ := cmd.Flags().GetString("output")
+	yes, _ := cmd.Flags().GetBool("yes")
 
 	// Validate user is currently logged in
 	token, err := utils.GetToken()
@@ -73,7 +77,6 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	// Confirm deletion
-	yes, _ := cmd.Flags().GetBool("yes")
 	if !yes {
 		ok, err := prompt.New().Ask("Are you sure you want to delete this instance? (y/n)").
 			Input("", input.WithValidateFunc(
@@ -94,10 +97,27 @@ func runDelete(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	var sm ysmrr.SpinnerManager
+	var spinner *ysmrr.Spinner
+	if output != "json" {
+		sm = ysmrr.NewSpinnerManager()
+		msg := "Deleting instance..."
+		spinner = sm.AddSpinner(msg)
+		sm.Start()
+	}
+
 	err = dataaccess.DeleteInstance(token, serviceId, environmentId, resourceId, instanceId)
 	if err != nil {
+		spinner.Error()
+		sm.Stop()
 		utils.PrintError(err)
 		return err
+	}
+
+	if output != "json" {
+		spinner.UpdateMessage("Successfully deleted instance")
+		spinner.Complete()
+		sm.Stop()
 	}
 
 	return nil
