@@ -10,7 +10,7 @@ import (
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -148,10 +148,10 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		if res == nil {
 			continue
 		}
-		if strings.ToLower(res.Name) == strings.ToLower(resource) &&
-			strings.ToLower(res.ServiceName) == strings.ToLower(service) &&
-			strings.ToLower(res.ProductTierName) == strings.ToLower(plan) &&
-			res.ServiceEnvironmentType != nil && strings.ToLower(string(*res.ServiceEnvironmentType)) == strings.ToLower(environment) {
+		if strings.EqualFold(res.Name, resource) &&
+			strings.EqualFold(res.ServiceName, service) &&
+			strings.EqualFold(res.ProductTierName, plan) &&
+			res.ServiceEnvironmentType != nil && strings.EqualFold(string(*res.ServiceEnvironmentType), environment) {
 			found = true
 			serviceID = string(res.ServiceID)
 			productTierID = string(res.ProductTierID)
@@ -201,7 +201,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 
 	// Read parameters from file if provided
 	if paramFile != "" {
-		fileContent, err := ioutil.ReadFile(paramFile)
+		fileContent, err := os.ReadFile(paramFile)
 		if err != nil {
 			utils.PrintError(err)
 			return err
@@ -222,7 +222,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	var resourceKey string
 	found = false
 	for _, resourceEntity := range offering.ResourceParameters {
-		if strings.ToLower(resourceEntity.Name) == strings.ToLower(resource) {
+		if strings.EqualFold(resourceEntity.Name, resource) {
 			found = true
 			resourceKey = resourceEntity.URLKey
 		}
