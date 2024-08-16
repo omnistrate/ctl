@@ -266,7 +266,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	formattedInstance := model.Instance{
-		ID:            *instance.ID,
+		InstanceID:    *instance.ID,
 		Service:       service,
 		Environment:   environment,
 		Plan:          plan,
@@ -276,7 +276,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		Region:        region,
 		Status:        "DEPLOYING",
 	}
-	InstanceID = formattedInstance.ID
+	InstanceID = formattedInstance.InstanceID
 
 	var jsonData []string
 	data, err := json.MarshalIndent(formattedInstance, "", "    ")
