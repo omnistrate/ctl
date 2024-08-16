@@ -178,6 +178,8 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	ServiceID, EnvironmentID, ProductTierID, err = buildService(file, token, name, specType, descriptionPtr, serviceLogoURLPtr,
 		environmentPtr, environmentTypePtr, release, releaseAsPreferred, releaseNamePtr)
 	if err != nil {
+		building.Error()
+		sm1.Stop()
 		utils.PrintError(err)
 		return err
 	}
@@ -428,6 +430,22 @@ func buildService(file, token, name, specType string, description, serviceLogoUR
 			return
 		}
 
+		// Convert config volumes to configs
+		var modified bool
+		if project, modified, err = convertVolumesToConfigs(project); err != nil {
+			return "", "", "", err
+		}
+
+		// Convert the project back to YAML, in case it was modified
+		if modified {
+			var parsedYamlContent []byte
+			if parsedYamlContent, err = project.MarshalYAML(); err != nil {
+				err = errors.Wrap(err, "failed to marshal project to YAML")
+				return
+			}
+			request.FileContent = base64.StdEncoding.EncodeToString(parsedYamlContent)
+		}
+
 		// Get the configs from the project
 		if project.Configs != nil {
 			request.Configs = make(map[string]string)
@@ -510,4 +528,117 @@ func isValidSpecType(s string) bool {
 		}
 	}
 	return false
+}
+
+// Most compose files mount the configs directly as volumes. This function converts the volumes to configs.
+func convertVolumesToConfigs(project *types.Project) (converted *types.Project, modified bool, err error) {
+	modified = false
+	volumesToBeRemoved := make(map[int]int) // map of volume index to service index
+	for svcIdx, service := range project.Services {
+		for volIdx, volume := range service.Volumes {
+			// Check if the volume source exists. If so, it needs to be a directory with files or the source is itself a file
+			if volume.Source != "" {
+				source := filepath.Clean(volume.Source)
+				if _, err = os.Stat(source); os.IsNotExist(err) {
+					err = nil
+					continue
+				}
+
+				// Check if the source is a directory
+				var fileInfo os.FileInfo
+				fileInfo, err = os.Stat(source)
+				if err != nil {
+					err = errors.Wrapf(err, "failed to get file info for %s", source)
+					return
+				}
+
+				if fileInfo.IsDir() {
+					// Check if the directory has files
+					var files []string
+					files, err = listFiles(source)
+					if err != nil {
+						err = errors.Wrapf(err, "failed to list files in %s", source)
+						return
+					}
+
+					if len(files) == 0 {
+						continue
+					}
+
+					// Create a config for each file
+					for _, fileInDir := range files {
+						sourceFileNameSHA := commonutils.HashPasswordSha256(fileInDir)
+						config := types.ConfigObjConfig{
+							Name: sourceFileNameSHA,
+							File: fileInDir,
+						}
+						project.Configs[sourceFileNameSHA] = config
+
+						// Also append to the configs list for this service
+						var absolutePathToDir string
+						absolutePathToDir, err = filepath.Abs(source)
+						if err != nil {
+							err = errors.Wrapf(err, "failed to get absolute path for %s", source)
+							return
+						}
+						var relativePathInTarget string
+						relativePathInTarget, err = filepath.Rel(absolutePathToDir, fileInDir)
+						if err != nil {
+							err = errors.Wrapf(err, "failed to get relative path for %s", fileInDir)
+							return
+						}
+						service.Configs = append(service.Configs, types.ServiceConfigObjConfig{
+							Source: sourceFileNameSHA,
+							Target: filepath.Join(volume.Target, relativePathInTarget),
+						})
+					}
+				} else {
+					sourceFileNameSHA := commonutils.HashPasswordSha256(source)
+					config := types.ConfigObjConfig{
+						Name: sourceFileNameSHA,
+						File: source,
+					}
+					project.Configs[sourceFileNameSHA] = config
+
+					// Also append to the configs list for this service
+					service.Configs = append(service.Configs, types.ServiceConfigObjConfig{
+						Source: sourceFileNameSHA,
+						Target: volume.Target,
+					})
+				}
+
+				// Remove the volume from the service
+				volumesToBeRemoved[svcIdx] = volIdx
+			}
+		}
+
+		// Update the service in the project
+		project.Services[svcIdx] = service
+	}
+
+	// Remove the volumes from the services
+	for svcIdx, volIdx := range volumesToBeRemoved {
+		project.Services[svcIdx].Volumes = append(project.Services[svcIdx].Volumes[:volIdx], project.Services[svcIdx].Volumes[volIdx+1:]...)
+	}
+
+	converted = project
+	modified = len(volumesToBeRemoved) > 0
+	return
+}
+
+func listFiles(dir string) (files []string, err error) {
+	err = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		// Skip the directory itself
+		if path == dir {
+			return nil
+		}
+
+		if !info.IsDir() {
+			files = append(files, path)
+		}
+
+		return nil
+	})
+
+	return
 }
