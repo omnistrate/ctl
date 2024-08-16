@@ -46,7 +46,6 @@ func TestInstanceBasic(t *testing.T) {
 		"--resource=mySQL",
 		"--cloud-provider=aws",
 		"--region=ca-central-1",
-		"--param=",
 		"--param-file", "paramfiles/instance_create_param.json"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(t, err)
