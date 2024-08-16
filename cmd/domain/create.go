@@ -31,7 +31,7 @@ func init() {
 	createCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 
 	createCmd.Flags().String("domain", "", "Custom domain")
-	createCmd.Flags().String("env", "", "Type of environment. Valid options include: 'prod', 'dev', 'canary', 'staging', 'qa'")
+	createCmd.Flags().String("env", "", "Type of environment. Valid options include: 'dev', 'prod', 'qa', 'canary', 'staging', 'private'")
 
 	err := createCmd.MarkFlagRequired("domain")
 	if err != nil {

@@ -2,6 +2,7 @@ package instance
 
 import (
 	"fmt"
+	"github.com/chelnak/ysmrr"
 	"github.com/cqroot/prompt"
 	"github.com/cqroot/prompt/input"
 	"github.com/omnistrate/ctl/dataaccess"
@@ -33,14 +34,47 @@ func init() {
 }
 
 func runDelete(cmd *cobra.Command, args []string) error {
-	// Get flags
 	instanceId := args[0]
+
+	// Get flags
+	output, _ := cmd.Flags().GetString("output")
+	yes, _ := cmd.Flags().GetBool("yes")
 
 	// Validate user is currently logged in
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err
+	}
+
+	// Confirm deletion
+	if !yes {
+		ok, err := prompt.New().Ask("Are you sure you want to delete this instance? (y/n)").
+			Input("", input.WithValidateFunc(
+				func(input string) error {
+					if slices.Contains([]string{"y", "yes", "n", "no"}, strings.ToLower(input)) {
+						return nil
+					} else {
+						return errors.New("invalid input")
+					}
+				}))
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+
+		if !slices.Contains([]string{"y", "yes"}, strings.ToLower(ok)) {
+			return nil
+		}
+	}
+
+	var sm ysmrr.SpinnerManager
+	var spinner *ysmrr.Spinner
+	if output != "json" {
+		sm = ysmrr.NewSpinnerManager()
+		msg := "Deleting instance..."
+		spinner = sm.AddSpinner(msg)
+		sm.Start()
 	}
 
 	// Check if the instance exists
@@ -72,32 +106,18 @@ func runDelete(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	// Confirm deletion
-	yes, _ := cmd.Flags().GetBool("yes")
-	if !yes {
-		ok, err := prompt.New().Ask("Are you sure you want to delete this instance? (y/n)").
-			Input("", input.WithValidateFunc(
-				func(input string) error {
-					if slices.Contains([]string{"y", "yes", "n", "no"}, strings.ToLower(input)) {
-						return nil
-					} else {
-						return errors.New("invalid input")
-					}
-				}))
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-
-		if !slices.Contains([]string{"y", "yes"}, strings.ToLower(ok)) {
-			return nil
-		}
-	}
-
 	err = dataaccess.DeleteInstance(token, serviceId, environmentId, resourceId, instanceId)
 	if err != nil {
+		spinner.Error()
+		sm.Stop()
 		utils.PrintError(err)
 		return err
+	}
+
+	if output != "json" {
+		spinner.UpdateMessage("Successfully deleted instance")
+		spinner.Complete()
+		sm.Stop()
 	}
 
 	return nil

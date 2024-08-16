@@ -20,7 +20,7 @@ var (
 var deleteCmd = &cobra.Command{
 	Use:          "delete",
 	Short:        "Delete one or more domains",
-	Long:         `Delete domain by specifying name or environment type. Use --env to specify environment type. If not specified, name is assumed. If multiple domains are found with the same name, all of them will be deleted.`,
+	Long:         `Delete domain by specifying name.`,
 	Example:      deleteExample,
 	RunE:         runDelete,
 	SilenceUsage: true,
