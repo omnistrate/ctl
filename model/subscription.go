@@ -6,7 +6,7 @@ type Subscription struct {
 	ServiceName            string `json:"service_name"`
 	PlanID                 string `json:"plan_id"`
 	PlanName               string `json:"plan_name"`
-	EnvironmentType        string `json:"environment_type"`
+	Environment            string `json:"environment"`
 	SubscriptionOwnerName  string `json:"subscription_owner_name"`
 	SubscriptionOwnerEmail string `json:"subscription_owner_email"`
 	Status                 string `json:"status"`
