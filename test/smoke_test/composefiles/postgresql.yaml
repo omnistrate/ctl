@@ -1,4 +1,6 @@
 version: '3.9'
+x-omnistrate-service-plan:
+  name: postgresql
 services:
   postgres:
     image: postgres
