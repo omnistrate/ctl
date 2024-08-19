@@ -79,8 +79,8 @@ func runDelete(cmd *cobra.Command, args []string) error {
 
 	servicePlansMap := make(map[string][]string)
 	for _, plan := range searchRes.ServicePlanResults {
-		if (string(plan.ServiceID) == serviceId || strings.EqualFold(plan.ServiceName, args[0])) &&
-			(plan.ID == planId || strings.EqualFold(plan.Name, args[1])) {
+		if (string(plan.ServiceID) == serviceId || (len(args) == 2 && strings.EqualFold(plan.ServiceName, args[0]))) &&
+			(plan.ID == planId || (len(args) == 2 && strings.EqualFold(plan.Name, args[1]))) {
 			if _, ok := servicePlansMap[string(plan.ServiceID)]; !ok {
 				servicePlansMap[string(plan.ServiceID)] = []string{}
 			}
