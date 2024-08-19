@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/omnistrate/ctl/cmd"
+	"github.com/omnistrate/ctl/cmd/build"
 	"github.com/omnistrate/ctl/test/testutils"
 	"testing"
 
@@ -33,6 +34,22 @@ func Test_service_plan_basic(t *testing.T) {
 
 	// PASS: delete postgresql service plan
 	cmd.RootCmd.SetArgs([]string{"service-plan", "delete", serviceName, "postgresql"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: delete postgresql service
+	cmd.RootCmd.SetArgs([]string{"service", "delete", serviceName})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: create postgresql service
+	serviceName = "postgresql" + uuid.NewString()
+	cmd.RootCmd.SetArgs([]string{"build", "--file", "composefiles/postgresql.yaml", "--name", serviceName})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: delete postgresql service plan
+	cmd.RootCmd.SetArgs([]string{"service-plan", "delete", "--service-id", build.ServiceID, "--plan-id", build.ProductTierID})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
