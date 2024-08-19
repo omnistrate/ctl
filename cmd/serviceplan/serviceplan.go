@@ -15,6 +15,7 @@ var Cmd = &cobra.Command{
 
 func init() {
 	Cmd.AddCommand(deleteCmd)
+	Cmd.AddCommand(releaseCmd)
 
 	Cmd.Example = utils.CombineSubCmdExamples(Cmd)
 }
