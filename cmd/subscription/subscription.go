@@ -15,6 +15,7 @@ var Cmd = &cobra.Command{
 
 func init() {
 	Cmd.AddCommand(listCmd)
+	Cmd.AddCommand(describeCmd)
 
 	Cmd.Example = utils.CombineSubCmdExamples(Cmd)
 }

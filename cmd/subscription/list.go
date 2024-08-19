@@ -18,8 +18,8 @@ omnistrate subscription list -o=table -f="service_name:postgres,environment:PROD
 
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List subscriptions for your services",
-	Long: `This command helps you list subscriptions for your services.
+	Short: "List customer subscriptions to your services",
+	Long: `This command helps you list customer subscriptions to your services.
 You can filter for specific subscriptions by using the filters flag.`,
 	Example:      listExample,
 	RunE:         runList,
@@ -82,13 +82,17 @@ func runList(cmd *cobra.Command, args []string) error {
 			serviceName = utils.TruncateString(serviceName, defaultMaxNameLength)
 			planName = utils.TruncateString(planName, defaultMaxNameLength)
 		}
+		envType := ""
+		if subscription.ServiceEnvironmentType != nil {
+			envType = string(*subscription.ServiceEnvironmentType)
+		}
 		formattedSubscription := model.Subscription{
 			SubscriptionID:         subscription.ID,
 			ServiceID:              string(subscription.ServiceID),
 			ServiceName:            serviceName,
 			PlanID:                 string(subscription.ProductTierID),
 			PlanName:               planName,
-			Environment:            subscription.ServiceEnvironmentName, // TODO: use the environment type
+			Environment:            envType,
 			SubscriptionOwnerName:  subscription.RootUserName,
 			SubscriptionOwnerEmail: subscription.RootUserEmail,
 			Status:                 string(subscription.Status),
