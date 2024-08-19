@@ -29,8 +29,8 @@ var deleteCmd = &cobra.Command{
 
 func init() {
 	deleteCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
-	deleteCmd.Flags().StringP("service-id", "", "", "Service ID")
-	deleteCmd.Flags().StringP("plan-id", "", "", "Plan ID")
+	deleteCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
+	deleteCmd.Flags().StringP("plan-id", "", "", "Plan ID. Required if plan name is not provided")
 }
 
 func runDelete(cmd *cobra.Command, args []string) error {
