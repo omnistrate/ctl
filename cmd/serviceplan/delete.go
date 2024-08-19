@@ -71,7 +71,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the service plan exists
-	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprint("serviceplan:pt"))
+	searchRes, err := dataaccess.SearchInventory(token, "serviceplan:pt")
 	if err != nil {
 		utils.PrintError(err)
 		return err
