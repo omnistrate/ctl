@@ -91,8 +91,6 @@ github.com/muesli/termenv v0.15.2 h1:GohcuySI0QmI3wN8Ok9PtKGkgkFIk7y6Vpb5PvrY+Wo
 github.com/muesli/termenv v0.15.2/go.mod h1:Epx+iuz8sNs7mNKhxzH4fWXGNpZwUaJKRS1noLXviQ8=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
-github.com/omnistrate/api-design v0.6.544 h1:fbcebrpROt1d/hxM7AnrqZ/bLH/umb4YhClRiKONcgw=
-github.com/omnistrate/api-design v0.6.544/go.mod h1:LsZJirg0Wo/b1DhEEOsMSpIuRa26NyIfAOjxlKUAFiQ=
 github.com/omnistrate/api-design v0.6.553 h1:PD7oVGJ3nkYlRyykyY1/6udzoV/HUn3b9sH5RtoIjPs=
 github.com/omnistrate/api-design v0.6.553/go.mod h1:ZFI4nSfWTDPba6vQ6sJ9m3aylzy2hWKdJkMPXcyl+/g=
 github.com/omnistrate/api-design v0.6.555 h1:wH4S6CepHQvGjYO2jY6Slyuvm6ff8N4CdflkNPgeMvA=

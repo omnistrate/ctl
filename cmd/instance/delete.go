@@ -28,7 +28,7 @@ var deleteCmd = &cobra.Command{
 }
 
 func init() {
-	deleteCmd.Flags().StringP("output", "o", "text", "Output format (text|json)")
+	deleteCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 	deleteCmd.Flags().BoolP("yes", "y", false, "Pre-approve the deletion of the instance without prompting for confirmation")
 	deleteCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 }

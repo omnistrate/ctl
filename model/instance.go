@@ -1,7 +1,7 @@
 package model
 
 type Instance struct {
-	ID            string `json:"id"`
+	InstanceID    string `json:"instance_id"`
 	Service       string `json:"service"`
 	Environment   string `json:"environment"`
 	Plan          string `json:"plan"`

@@ -218,12 +218,13 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	var resourceKey string
+	var resourceKey, resourceName string
 	found = false
 	for _, resourceEntity := range offering.ResourceParameters {
 		if strings.EqualFold(resourceEntity.Name, resource) {
 			found = true
 			resourceKey = resourceEntity.URLKey
+			resourceName = resourceEntity.Name
 		}
 	}
 
@@ -266,17 +267,17 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	formattedInstance := model.Instance{
-		ID:            *instance.ID,
-		Service:       service,
-		Environment:   environment,
-		Plan:          plan,
-		Version:       version,
-		Resource:      resource,
+		InstanceID:    *instance.ID,
+		Service:       res.ConsumptionDescribeServiceOfferingResult.ServiceName,
+		Environment:   string(offering.ServiceEnvironmentType),
+		Plan:          offering.ProductTierName,
+		Version:       offering.ProductTierVersion,
+		Resource:      resourceName,
 		CloudProvider: cloudProvider,
 		Region:        region,
 		Status:        "DEPLOYING",
 	}
-	InstanceID = formattedInstance.ID
+	InstanceID = formattedInstance.InstanceID
 
 	var jsonData []string
 	data, err := json.MarshalIndent(formattedInstance, "", "    ")
