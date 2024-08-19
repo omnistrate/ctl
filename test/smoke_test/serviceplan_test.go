@@ -47,9 +47,11 @@ func Test_service_plan_basic(t *testing.T) {
 	cmd.RootCmd.SetArgs([]string{"build", "--file", "composefiles/postgresql.yaml", "--name", serviceName})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
+	serviceId := build.ServiceID
+	productTierId := build.ProductTierID
 
 	// PASS: delete postgresql service plan
-	cmd.RootCmd.SetArgs([]string{"service-plan", "delete", "--service-id", build.ServiceID, "--plan-id", build.ProductTierID})
+	cmd.RootCmd.SetArgs([]string{"service-plan", "delete", "--service-id", serviceId, "--plan-id", productTierId})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
