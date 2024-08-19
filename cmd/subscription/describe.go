@@ -3,8 +3,8 @@ package subscription
 import (
 	"encoding/json"
 	"fmt"
-	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
 	"github.com/omnistrate/ctl/dataaccess"
+	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 )
@@ -46,11 +46,8 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	var found bool
-	var serviceId, environmentId string
 	for _, subscription := range searchRes.SubscriptionResults {
 		if subscription.ID == subscriptionId {
-			serviceId = string(subscription.ServiceID)
-			environmentId = string(subscription.ServiceEnvironmentID)
 			found = true
 			break
 		}
@@ -61,14 +58,25 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	var subscription *inventoryapi.FleetDescribeSubscriptionResult
-	subscription, err = dataaccess.DescribeSubscription(token, serviceId, environmentId, subscriptionId)
-	if err != nil {
-		utils.PrintError(err)
-		return err
+	subscription := searchRes.SubscriptionResults[0]
+	envType := ""
+	if subscription.ServiceEnvironmentType != nil {
+		envType = string(*subscription.ServiceEnvironmentType)
 	}
 
-	data, err := json.MarshalIndent(subscription, "", "    ")
+	formattedSubscription := model.Subscription{
+		SubscriptionID:         subscription.ID,
+		ServiceID:              string(subscription.ServiceID),
+		ServiceName:            subscription.ServiceName,
+		PlanID:                 string(subscription.ProductTierID),
+		PlanName:               subscription.ServicePlanName,
+		Environment:            envType,
+		SubscriptionOwnerName:  subscription.RootUserName,
+		SubscriptionOwnerEmail: subscription.RootUserEmail,
+		Status:                 string(subscription.Status),
+	}
+
+	data, err := json.MarshalIndent(formattedSubscription, "", "    ")
 	if err != nil {
 		utils.PrintError(err)
 		return err
