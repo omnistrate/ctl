@@ -87,7 +87,6 @@ func runDelete(cmd *cobra.Command, args []string) error {
 			servicePlansMap[string(plan.ServiceID)] = append(servicePlansMap[string(plan.ServiceID)], plan.ID)
 			serviceId = string(plan.ServiceID)
 			planId = plan.ID
-			break
 		}
 	}
 	if len(servicePlansMap) == 0 {
