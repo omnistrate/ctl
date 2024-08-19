@@ -96,6 +96,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	for _, serviceID := range serviceIDs {
 		err = dataaccess.DeleteService(serviceID, token)
 		if err != nil {
+			err = errors.Wrapf(err, "failed to delete service %s", serviceID)
 			utils.PrintError(err)
 			return err
 		}
