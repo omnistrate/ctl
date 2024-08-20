@@ -163,16 +163,16 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 				versionName = *servicePlan.VersionName
 			}
 			formattedServicePlan = model.ServicePlan{
-				PlanID:           servicePlan.ID,
-				PlanName:         servicePlan.Name,
-				ServiceID:        string(servicePlan.ServiceID),
-				ServiceName:      servicePlan.ServiceName,
-				Environment:      envType,
-				Version:          servicePlan.Version,
-				ReleaseName:      versionName,
-				VersionSetStatus: servicePlan.VersionSetStatus,
-				DeploymentType:   string(servicePlan.DeploymentType),
-				TenancyType:      string(servicePlan.TenancyType),
+				PlanID:             servicePlan.ID,
+				PlanName:           servicePlan.Name,
+				ServiceID:          string(servicePlan.ServiceID),
+				ServiceName:        servicePlan.ServiceName,
+				Environment:        envType,
+				Version:            servicePlan.Version,
+				ReleaseDescription: versionName,
+				VersionSetStatus:   servicePlan.VersionSetStatus,
+				DeploymentType:     string(servicePlan.DeploymentType),
+				TenancyType:        string(servicePlan.TenancyType),
 			}
 		}
 	}

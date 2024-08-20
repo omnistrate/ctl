@@ -29,7 +29,7 @@ var releaseCmd = &cobra.Command{
 }
 
 func init() {
-	releaseCmd.Flags().String("release-name", "", "Set custom release name")
+	releaseCmd.Flags().String("release-description", "", "Set custom release description for this released version")
 	releaseCmd.Flags().Bool("release-as-preferred", false, "Release the service plan as preferred")
 	releaseCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 	releaseCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
@@ -38,7 +38,7 @@ func init() {
 
 func runRelease(cmd *cobra.Command, args []string) error {
 	// Get flags
-	releaseName, _ := cmd.Flags().GetString("releaseName")
+	releaseDescription, _ := cmd.Flags().GetString("release-description")
 	releaseAsPreferred, _ := cmd.Flags().GetBool("release-as-preferred")
 	output, _ := cmd.Flags().GetString("output")
 	serviceId, _ := cmd.Flags().GetString("service-id")
@@ -131,11 +131,11 @@ func runRelease(cmd *cobra.Command, args []string) error {
 	serviceApiId := string(serviceModel.ServiceAPIID)
 
 	// Release service plan
-	var releaseNamePtr *string
-	if releaseName != "" {
-		releaseNamePtr = &releaseName
+	var releaseDescriptionPtr *string
+	if releaseDescription != "" {
+		releaseDescriptionPtr = &releaseDescription
 	}
-	err = dataaccess.ReleaseServicePlan(token, serviceId, serviceApiId, planId, releaseNamePtr, releaseAsPreferred)
+	err = dataaccess.ReleaseServicePlan(token, serviceId, serviceApiId, planId, releaseDescriptionPtr, releaseAsPreferred)
 	if err != nil {
 		spinner.Error()
 		sm.Stop()
@@ -174,16 +174,16 @@ func runRelease(cmd *cobra.Command, args []string) error {
 				versionName = *servicePlan.VersionName
 			}
 			formattedServicePlan = model.ServicePlan{
-				PlanID:           servicePlan.ID,
-				PlanName:         servicePlan.Name,
-				ServiceID:        string(servicePlan.ServiceID),
-				ServiceName:      servicePlan.ServiceName,
-				Environment:      envType,
-				Version:          servicePlan.Version,
-				ReleaseName:      versionName,
-				VersionSetStatus: servicePlan.VersionSetStatus,
-				DeploymentType:   string(servicePlan.DeploymentType),
-				TenancyType:      string(servicePlan.TenancyType),
+				PlanID:             servicePlan.ID,
+				PlanName:           servicePlan.Name,
+				ServiceID:          string(servicePlan.ServiceID),
+				ServiceName:        servicePlan.ServiceName,
+				Environment:        envType,
+				Version:            servicePlan.Version,
+				ReleaseDescription: versionName,
+				VersionSetStatus:   servicePlan.VersionSetStatus,
+				DeploymentType:     string(servicePlan.DeploymentType),
+				TenancyType:        string(servicePlan.TenancyType),
 			}
 		}
 	}
