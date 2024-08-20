@@ -71,22 +71,25 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the environment exists
-	searchRes, err := dataaccess.SearchInventory(token, "serviceenvironment:pt")
+	services, err := dataaccess.ListServices(token)
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
 	serviceEnvironmentsMap := make(map[string]map[string]bool)
-	for _, environment := range searchRes.ServiceEnvironmentResults {
-		if (string(environment.ServiceID) == serviceId || (len(args) == 2 && strings.EqualFold(environment.ServiceName, args[0]))) &&
-			(environment.ID == environmentId || (len(args) == 2 && strings.EqualFold(environment.Name, args[1]))) {
-			if _, ok := serviceEnvironmentsMap[string(environment.ServiceID)]; !ok {
-				serviceEnvironmentsMap[string(environment.ServiceID)] = make(map[string]bool)
+	for _, service := range services.Services {
+		if string(service.ID) == serviceId || (len(args) == 2 && strings.EqualFold(service.Name, args[0])) {
+			for _, environment := range service.ServiceEnvironments {
+				if string(environment.ID) == environmentId || (len(args) == 2 && strings.EqualFold(environment.Name, args[1])) {
+					if _, ok := serviceEnvironmentsMap[string(service.ID)]; !ok {
+						serviceEnvironmentsMap[string(service.ID)] = make(map[string]bool)
+					}
+					serviceEnvironmentsMap[string(service.ID)][string(environment.ID)] = true
+					serviceId = string(service.ID)
+					environmentId = string(environment.ID)
+				}
 			}
-			serviceEnvironmentsMap[string(environment.ServiceID)][environment.ID] = true
-			serviceId = string(environment.ServiceID)
-			environmentId = environment.ID
 		}
 	}
 	if len(serviceEnvironmentsMap) == 0 {
