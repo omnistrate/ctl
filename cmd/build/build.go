@@ -35,6 +35,7 @@ var (
 	release            bool
 	releaseAsPreferred bool
 	releaseName        string
+	releaseDescription string
 	interactive        bool
 
 	validSpecType = []string{DockerComposeSpecType, ServicePlanSpecType}
@@ -97,7 +98,8 @@ func init() {
 	BuildCmd.Flags().StringVarP(&environmentType, "environment-type", "", "dev", "Type of environment. Valid options include: 'dev', 'prod', 'qa', 'canary', 'staging', 'private')")
 	BuildCmd.Flags().BoolVarP(&release, "release", "", false, "Release the service after building it")
 	BuildCmd.Flags().BoolVarP(&releaseAsPreferred, "release-as-preferred", "", false, "Release the service as preferred after building it")
-	BuildCmd.Flags().StringVarP(&releaseName, "release-name", "", "", "Name of the release version")
+	BuildCmd.Flags().StringVarP(&releaseName, "release-name", "", "", "Custom description of the release version. Deprecated: use --release-description instead")
+	BuildCmd.Flags().StringVarP(&releaseDescription, "release-description", "", "", "Custom description of the release version")
 	BuildCmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "Interactive mode")
 	BuildCmd.Flags().StringVarP(&specType, "spec-type", "s", DockerComposeSpecType, "Spec type")
 
@@ -166,9 +168,12 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		environmentTypePtr = nil
 	}
 
-	releaseNamePtr := &releaseName
-	if releaseName == "" {
-		releaseNamePtr = nil
+	var releaseNamePtr *string
+	if releaseName != "" {
+		releaseNamePtr = &releaseName
+	}
+	if releaseDescription != "" {
+		releaseNamePtr = &releaseDescription
 	}
 
 	sm1 := ysmrr.NewSpinnerManager()
