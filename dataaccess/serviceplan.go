@@ -4,8 +4,7 @@ import (
 	"context"
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	producttierapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/product_tier_api"
-	serviceapiapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_apiapi"
-	commonutils "github.com/omnistrate/commons/pkg/utils"
+	tierversionsetapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/tier_version_set_api"
 	"github.com/omnistrate/ctl/utils"
 )
 
@@ -48,23 +47,20 @@ func DescribeProductTier(token, serviceId, productTierId string) (productTier *p
 	return
 }
 
-func ReleaseServicePlan(token, serviceId, serviceApiId, productTierId string, versionSetName *string, isPreferred bool) (err error) {
-	serviceApi, err := httpclientwrapper.NewServiceAPI(utils.GetHostScheme(), utils.GetHost())
+func ReleaseServicePlan(token, serviceId, productTierId, version string) (tierVersionSet *tierversionsetapi.TierVersionSet, err error) {
+	versionSet, err := httpclientwrapper.NewVersionSet(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return
 	}
 
-	request := &serviceapiapi.ReleaseServiceAPIRequest{
-		Token:          token,
-		ServiceID:      serviceapiapi.ServiceID(serviceId),
-		ID:             serviceapiapi.ServiceAPIID(serviceApiId),
-		ProductTierID:  commonutils.ToPtr(serviceapiapi.ProductTierID(productTierId)),
-		VersionSetName: versionSetName,
-		VersionSetType: commonutils.ToPtr("Major"),
-		IsPreferred:    isPreferred,
+	request := &tierversionsetapi.PromoteTierVersionSetRequest{
+		Token:         token,
+		ServiceID:     tierversionsetapi.ServiceID(serviceId),
+		ProductTierID: tierversionsetapi.ProductTierID(productTierId),
+		Version:       version,
 	}
 
-	if err = serviceApi.ReleaseServiceAPI(context.Background(), request); err != nil {
+	if tierVersionSet, err = versionSet.PromoteTierVersionSet(context.Background(), request); err != nil {
 		return
 	}
 
