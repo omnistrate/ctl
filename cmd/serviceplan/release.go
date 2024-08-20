@@ -16,7 +16,7 @@ const (
 omnistrate service-plan release [service-name] [plan-name]
 
 # Release service plan by ID instead of name
-omnistrate service-plan release --service-id [plan-id] --plan-id [plan-id]`
+omnistrate service-plan release --service-id [service-id] --plan-id [plan-id]`
 )
 
 var releaseCmd = &cobra.Command{

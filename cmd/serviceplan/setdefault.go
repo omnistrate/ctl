@@ -16,7 +16,7 @@ const (
 omnistrate service-plan set-default [service-name] [plan-name] --version [version]
 
 # Set  service plan as default by ID instead of name
-omnistrate service-plan set-default --service-id [plan-id] --plan-id [plan-id] --version [version]`
+omnistrate service-plan set-default --service-id [service-id] --plan-id [plan-id] --version [version]`
 )
 
 var setDefaultCmd = &cobra.Command{
