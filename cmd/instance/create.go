@@ -41,7 +41,7 @@ func init() {
 	createCmd.Flags().String("region", "", "Region code (e.g. us-east-2, us-central1)")
 	createCmd.Flags().String("param", "", "Parameters for the instance deployment")
 	createCmd.Flags().String("param-file", "", "Json file containing parameters for the instance deployment")
-	createCmd.Flags().StringP("subscription-id", "", "", "Subscription ID to use for the instance deployment")
+	createCmd.Flags().StringP("subscription-id", "", "", "Subscription ID to use for the instance deployment. If not provided, instance deployment will be created in your own subscription.")
 	createCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 
 	if err := createCmd.MarkFlagRequired("service"); err != nil {
