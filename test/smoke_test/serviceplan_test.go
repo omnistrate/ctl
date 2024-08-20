@@ -32,6 +32,16 @@ func Test_service_plan_basic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
+	// PASS: release postgresql service plan
+	cmd.RootCmd.SetArgs([]string{"service-plan", "release", serviceName, "postgresql"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: set it as preferred
+	cmd.RootCmd.SetArgs([]string{"service-plan", "set-default", serviceName, "postgresql", "--version=latest"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
 	// PASS: delete postgresql service plan
 	cmd.RootCmd.SetArgs([]string{"service-plan", "delete", serviceName, "postgresql"})
 	err = cmd.RootCmd.Execute()
@@ -49,6 +59,16 @@ func Test_service_plan_basic(t *testing.T) {
 	require.NoError(err)
 	serviceId := build.ServiceID
 	productTierId := build.ProductTierID
+
+	// PASS: release postgresql service plan
+	cmd.RootCmd.SetArgs([]string{"service-plan", "release", "--service-id", serviceId, "--plan-id", productTierId})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: set it as preferred
+	cmd.RootCmd.SetArgs([]string{"service-plan", "set-default", "--service-id", serviceId, "--plan-id", productTierId, "--version=latest"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
 
 	// PASS: delete postgresql service plan
 	cmd.RootCmd.SetArgs([]string{"service-plan", "delete", "--service-id", serviceId, "--plan-id", productTierId})
