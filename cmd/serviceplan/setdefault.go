@@ -158,6 +158,10 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 			if servicePlan.ServiceEnvironmentType != nil {
 				envType = string(*servicePlan.ServiceEnvironmentType)
 			}
+			versionName := ""
+			if servicePlan.VersionName != nil {
+				versionName = *servicePlan.VersionName
+			}
 			formattedServicePlan = model.ServicePlan{
 				PlanID:           servicePlan.ID,
 				PlanName:         servicePlan.Name,
@@ -165,7 +169,7 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 				ServiceName:      servicePlan.ServiceName,
 				Environment:      envType,
 				Version:          servicePlan.Version,
-				ReleaseName:      servicePlan.VersionName,
+				ReleaseName:      versionName,
 				VersionSetStatus: servicePlan.VersionSetStatus,
 				DeploymentType:   string(servicePlan.DeploymentType),
 				TenancyType:      string(servicePlan.TenancyType),
