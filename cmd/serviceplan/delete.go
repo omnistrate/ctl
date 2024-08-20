@@ -15,7 +15,7 @@ const (
 omnistrate service-plan delete [service-name] [plan-name]
 
 # Delete service plan by ID instead of name
-omnistrate service-plan delete --service-id [plan-id] --plan-id [plan-id]`
+omnistrate service-plan delete --service-id [service-id] --plan-id [plan-id]`
 )
 
 var deleteCmd = &cobra.Command{

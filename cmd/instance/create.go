@@ -33,7 +33,7 @@ var createCmd = &cobra.Command{
 
 func init() {
 	createCmd.Flags().String("service", "", "Service name")
-	createCmd.Flags().String("environment", "", "Environment type")
+	createCmd.Flags().String("environment", "", "Environment name")
 	createCmd.Flags().String("plan", "", "Service plan name")
 	createCmd.Flags().String("version", "preferred", "Service plan version (latest|preferred|1.0 etc.)")
 	createCmd.Flags().String("resource", "", "Resource name")
@@ -157,7 +157,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		if strings.EqualFold(res.Name, resource) &&
 			strings.EqualFold(res.ServiceName, service) &&
 			strings.EqualFold(res.ProductTierName, plan) &&
-			res.ServiceEnvironmentType != nil && strings.EqualFold(string(*res.ServiceEnvironmentType), environment) {
+			strings.EqualFold(res.ServiceEnvironmentName, environment) {
 			found = true
 			serviceID = string(res.ServiceID)
 			productTierID = string(res.ProductTierID)
@@ -279,7 +279,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	formattedInstance := model.Instance{
 		InstanceID:     *instance.ID,
 		Service:        res.ConsumptionDescribeServiceOfferingResult.ServiceName,
-		Environment:    string(offering.ServiceEnvironmentType),
+		Environment:    offering.ServiceEnvironmentName,
 		Plan:           offering.ProductTierName,
 		Version:        offering.ProductTierVersion,
 		Resource:       resourceName,

@@ -59,18 +59,13 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	subscription := searchRes.SubscriptionResults[0]
-	envType := ""
-	if subscription.ServiceEnvironmentType != nil {
-		envType = string(*subscription.ServiceEnvironmentType)
-	}
-
 	formattedSubscription := model.Subscription{
 		SubscriptionID:         subscription.ID,
 		ServiceID:              string(subscription.ServiceID),
 		ServiceName:            subscription.ServiceName,
 		PlanID:                 string(subscription.ProductTierID),
 		PlanName:               subscription.ServicePlanName,
-		Environment:            envType,
+		Environment:            subscription.ServiceEnvironmentName,
 		SubscriptionOwnerName:  subscription.RootUserName,
 		SubscriptionOwnerEmail: subscription.RootUserEmail,
 		Status:                 string(subscription.Status),

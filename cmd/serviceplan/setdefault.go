@@ -16,7 +16,7 @@ const (
 omnistrate service-plan set-default [service-name] [plan-name] --version [version]
 
 # Set  service plan as default by ID instead of name
-omnistrate service-plan set-default --service-id [plan-id] --plan-id [plan-id] --version [version]`
+omnistrate service-plan set-default --service-id [service-id] --plan-id [plan-id] --version [version]`
 )
 
 var setDefaultCmd = &cobra.Command{
@@ -154,10 +154,6 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 	var formattedServicePlan model.ServicePlan
 	for _, servicePlan := range searchRes.ServicePlanResults {
 		if string(servicePlan.ServiceID) == serviceId && servicePlan.ID == planId && servicePlan.Version == targetVersion {
-			envType := ""
-			if servicePlan.ServiceEnvironmentType != nil {
-				envType = string(*servicePlan.ServiceEnvironmentType)
-			}
 			versionName := ""
 			if servicePlan.VersionName != nil {
 				versionName = *servicePlan.VersionName
@@ -167,7 +163,7 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 				PlanName:           servicePlan.Name,
 				ServiceID:          string(servicePlan.ServiceID),
 				ServiceName:        servicePlan.ServiceName,
-				Environment:        envType,
+				Environment:        servicePlan.ServiceEnvironmentName,
 				Version:            servicePlan.Version,
 				ReleaseDescription: versionName,
 				VersionSetStatus:   servicePlan.VersionSetStatus,
