@@ -12,7 +12,7 @@ import (
 
 const (
 	listExample = `# List instances of the service postgres in the prod and dev environments
-omnistrate instance list -o=table -f="service:postgres,environment:PROD" -f="service:postgres,environment:DEV"`
+omnistrate instance list -o=table -f="service:postgres,environment:Production" -f="service:postgres,environment:Dev"`
 	defaultMaxNameLength = 30 // Maximum length of the name column in the table
 )
 
@@ -84,10 +84,6 @@ func runList(cmd *cobra.Command, args []string) error {
 		if instance.ProductTierVersion != nil {
 			planVersion = *instance.ProductTierVersion
 		}
-		envType := ""
-		if instance.ServiceEnvironmentType != nil {
-			envType = string(*instance.ServiceEnvironmentType)
-		}
 		serviceName := instance.ServiceName
 		if truncateNames {
 			serviceName = utils.TruncateString(serviceName, defaultMaxNameLength)
@@ -100,7 +96,7 @@ func runList(cmd *cobra.Command, args []string) error {
 		formattedInstance := model.Instance{
 			InstanceID:     instance.ID,
 			Service:        serviceName,
-			Environment:    envType,
+			Environment:    instance.ServiceEnvironmentName,
 			Plan:           planName,
 			Version:        planVersion,
 			Resource:       instance.ResourceName,

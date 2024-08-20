@@ -165,10 +165,6 @@ func runRelease(cmd *cobra.Command, args []string) error {
 	var formattedServicePlan model.ServicePlan
 	for _, servicePlan := range searchRes.ServicePlanResults {
 		if string(servicePlan.ServiceID) == serviceId && servicePlan.ID == planId && servicePlan.Version == latestVersion {
-			envType := ""
-			if servicePlan.ServiceEnvironmentType != nil {
-				envType = string(*servicePlan.ServiceEnvironmentType)
-			}
 			versionName := ""
 			if servicePlan.VersionName != nil {
 				versionName = *servicePlan.VersionName
@@ -178,7 +174,7 @@ func runRelease(cmd *cobra.Command, args []string) error {
 				PlanName:           servicePlan.Name,
 				ServiceID:          string(servicePlan.ServiceID),
 				ServiceName:        servicePlan.ServiceName,
-				Environment:        envType,
+				Environment:        servicePlan.ServiceEnvironmentName,
 				Version:            servicePlan.Version,
 				ReleaseDescription: versionName,
 				VersionSetStatus:   servicePlan.VersionSetStatus,
