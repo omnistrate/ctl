@@ -21,7 +21,7 @@ omnistrate environment delete --service-id [service-id] --environment-id [enviro
 var deleteCmd = &cobra.Command{
 	Use:          "delete [service-name] [environment-name] [flags]",
 	Short:        "Delete a environment",
-	Long:         `This command helps you delete a environment from your service.`,
+	Long:         `This command helps you delete a environment in your service.`,
 	Example:      deleteExample,
 	RunE:         runDelete,
 	SilenceUsage: true,

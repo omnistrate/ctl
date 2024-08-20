@@ -26,7 +26,7 @@ omnistrate environment create [environment-name] --service-id [service-id] --typ
 var createCmd = &cobra.Command{
 	Use:          "create [service-name] [environment-name] [flags]",
 	Short:        "Create a environment",
-	Long:         `This command helps you create a environment from your service.`,
+	Long:         `This command helps you create a environment in your service.`,
 	Example:      createExample,
 	RunE:         runCreate,
 	SilenceUsage: true,
@@ -52,7 +52,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	// Get flags
 	description, _ := cmd.Flags().GetString("description")
 	envType, _ := cmd.Flags().GetString("type")
-	source, _ := cmd.Flags().GetString("source")
+	sourceEnvName, _ := cmd.Flags().GetString("source")
 	output, _ := cmd.Flags().GetString("output")
 	serviceId, _ := cmd.Flags().GetString("service-id")
 	envName := args[len(args)-1]
@@ -117,7 +117,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 
 	// Check if source environment exists
 	var sourceEnvID string
-	if source != "" {
+	if sourceEnvName != "" {
 		describeServiceRes, err := dataaccess.DescribeService(token, serviceId)
 		if err != nil {
 			utils.PrintError(err)
@@ -126,9 +126,9 @@ func runCreate(cmd *cobra.Command, args []string) error {
 
 		sourceEnvFound := false
 		for _, env := range describeServiceRes.ServiceEnvironments {
-			if strings.EqualFold(env.Name, source) {
+			if strings.EqualFold(env.Name, sourceEnvName) {
 				sourceEnvFound = true
-				source = env.Name
+				sourceEnvName = env.Name
 				sourceEnvID = string(env.ID)
 				break
 			}
@@ -213,8 +213,8 @@ func runCreate(cmd *cobra.Command, args []string) error {
 
 	// Get promote status
 	promoteStatus := ""
-	if source != "" {
-		promoteRes, err := dataaccess.PromoteServiceEnvironmentStatus(token, serviceId, sourceEnvID)
+	if !commonutils.CheckIfNilOrEmpty((*string)(environment.SourceEnvironmentID)) {
+		promoteRes, err := dataaccess.PromoteServiceEnvironmentStatus(token, serviceId, string(*environment.SourceEnvironmentID))
 		if err != nil {
 			utils.PrintError(err)
 			return err
@@ -234,7 +234,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		EnvironmentType:  string(environment.Type),
 		ServiceID:        string(environment.ServiceID),
 		ServiceName:      serviceName,
-		SourceEnvName:    source,
+		SourceEnvName:    sourceEnvName,
 		PromoteStatus:    promoteStatus,
 		SaasPortalStatus: saasPortalStatus,
 		SaasPortalURL:    saasPortalURL,
