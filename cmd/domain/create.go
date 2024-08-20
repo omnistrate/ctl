@@ -31,13 +31,13 @@ func init() {
 	createCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 
 	createCmd.Flags().String("domain", "", "Custom domain")
-	createCmd.Flags().String("env", "", "Type of environment. Valid options include: 'dev', 'prod', 'qa', 'canary', 'staging', 'private'")
+	createCmd.Flags().String("environment-type", "", "Type of environment. Valid options include: 'dev', 'prod', 'qa', 'canary', 'staging', 'private'")
 
 	err := createCmd.MarkFlagRequired("domain")
 	if err != nil {
 		return
 	}
-	err = createCmd.MarkFlagRequired("env")
+	err = createCmd.MarkFlagRequired("environment-type")
 	if err != nil {
 		return
 	}
@@ -46,7 +46,7 @@ func init() {
 func runCreate(cmd *cobra.Command, args []string) error {
 	// Get flags
 	domain, _ := cmd.Flags().GetString("domain")
-	env, _ := cmd.Flags().GetString("env")
+	environmentType, _ := cmd.Flags().GetString("environment-type")
 
 	// Validate user is currently logged in
 	token, err := utils.GetToken()
@@ -77,7 +77,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		}
 
 		// Check if domain of the same environment type already exists
-		if d.EnvironmentType == saasportalapi.EnvironmentType(strings.ToUpper(env)) {
+		if d.EnvironmentType == saasportalapi.EnvironmentType(strings.ToUpper(environmentType)) {
 			err = errors.New("domain with the same environment type already exists, please choose a different environment type. You can use 'omnistrate-ctl get domain' to list all existing domains.")
 			utils.PrintError(err)
 			return err
@@ -88,8 +88,8 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	request := &saasportalapi.CreateSaaSPortalCustomDomainRequest{
 		Token:           token,
 		Name:            args[0],
-		Description:     "Custom domain for " + env + " environment",
-		EnvironmentType: saasportalapi.EnvironmentType(strings.ToUpper(env)),
+		Description:     "Custom domain for " + environmentType + " environment",
+		EnvironmentType: saasportalapi.EnvironmentType(strings.ToUpper(environmentType)),
 		CustomDomain:    domain,
 	}
 
