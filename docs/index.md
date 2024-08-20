@@ -54,7 +54,7 @@ The latest version of the CTL can be found in the docker image `ghcr.io/omnistra
 Please refer to the [Using CTL with Docker](#using-ctl-with-docker) section for more information.
 
 ### GitHub Action
-To integrate CTL into your GitHub workflows, you can use the GitHub Action: [Setup Omnistrate CTL](#https://github.com/marketplace/actions/setup-omnistrate-ctl).
+To integrate CTL into your GitHub workflows, you can use the GitHub Action: [Setup Omnistrate CTL](https://github.com/marketplace/actions/setup-omnistrate-ctl).
 Using the GitHub Action you can execute any command on the CTL to automate your deployment workflow in GitHub.
 
 ## CTL usage
