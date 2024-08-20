@@ -254,7 +254,9 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		Region:                &region,
 		RequestParams:         formattedParams,
 		NetworkType:           nil,
-		SubscriptionID:        (*inventoryapi.SubscriptionID)(commonutils.ToPtr(subscriptionID)),
+	}
+	if subscriptionID != "" {
+		request.SubscriptionID = (*inventoryapi.SubscriptionID)(commonutils.ToPtr(subscriptionID))
 	}
 	instance, err := dataaccess.CreateInstance(token, request)
 	if err != nil {
