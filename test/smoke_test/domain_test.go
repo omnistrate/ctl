@@ -32,7 +32,7 @@ func Test_domain_basic(t *testing.T) {
 	prodDomain := "domain" + uuid.NewString() + ".prod"
 
 	// create dev domain
-	cmd.RootCmd.SetArgs([]string{"domain", "create", devDomainName, "--env", "dev", "--domain", devDomain})
+	cmd.RootCmd.SetArgs([]string{"domain", "create", devDomainName, "--environment-type", "dev", "--domain", devDomain})
 	err = cmd.RootCmd.Execute()
 	if err != nil {
 		require.Condition(func() bool {
@@ -49,7 +49,7 @@ func Test_domain_basic(t *testing.T) {
 	}
 
 	// create prod domain
-	cmd.RootCmd.SetArgs([]string{"domain", "create", prodDomainName, "--env", "prod", "--domain", prodDomain})
+	cmd.RootCmd.SetArgs([]string{"domain", "create", prodDomainName, "--environment-type", "prod", "--domain", prodDomain})
 	err = cmd.RootCmd.Execute()
 	if err != nil {
 		require.Condition(func() bool {

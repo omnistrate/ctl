@@ -81,7 +81,7 @@ This command has an interactive mode. In this mode, you can choose to promote th
 
 // BuildCmd represents the build command
 var BuildCmd = &cobra.Command{
-	Use:          "build [--file FILE] [--specType SPEC_TYPE][--name NAME] [--environment ENVIRONMENT] [--environment ENVIRONMENT_TYPE] [--release] [--release-as-preferred][--interactive][--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] ",
+	Use:          "build [--file FILE] [--spec-type SPEC_TYPE][--name NAME] [--environment ENVIRONMENT] [--environment-type ENVIRONMENT_TYPE] [--release] [--release-as-preferred][--interactive][--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] ",
 	Short:        "Build one service plan from docker compose",
 	Long:         buildLong,
 	Example:      buildExample,

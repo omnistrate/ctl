@@ -82,17 +82,13 @@ func runList(cmd *cobra.Command, args []string) error {
 			serviceName = utils.TruncateString(serviceName, defaultMaxNameLength)
 			planName = utils.TruncateString(planName, defaultMaxNameLength)
 		}
-		envType := ""
-		if subscription.ServiceEnvironmentType != nil {
-			envType = string(*subscription.ServiceEnvironmentType)
-		}
 		formattedSubscription := model.Subscription{
 			SubscriptionID:         subscription.ID,
 			ServiceID:              string(subscription.ServiceID),
 			ServiceName:            serviceName,
 			PlanID:                 string(subscription.ProductTierID),
 			PlanName:               planName,
-			Environment:            envType,
+			Environment:            subscription.ServiceEnvironmentName,
 			SubscriptionOwnerName:  subscription.RootUserName,
 			SubscriptionOwnerEmail: subscription.RootUserEmail,
 			Status:                 string(subscription.Status),
