@@ -12,10 +12,10 @@ import (
 
 const (
 	createExample = `  # Create a custom domain for dev environment
-  omnistrate-ctl domain create dev --domain abc.dev --env dev
+  omnistrate-ctl domain create dev --domain abc.dev --environment-type dev
 
   # Create a custom domain for prod environment
-  omnistrate-ctl domain create abc.cloud --domain abc.cloud --env prod`
+  omnistrate-ctl domain create abc.cloud --domain abc.cloud --environment-type prod`
 )
 
 var createCmd = &cobra.Command{
