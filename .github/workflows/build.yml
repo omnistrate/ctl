@@ -99,6 +99,11 @@ jobs:
         run: |
           echo "machine github.com login api password ${GH_ACCESS_TOKEN}" > ~/.netrc
 
+      - name: Check dependencies
+        timeout-minutes: 10
+        run: | 
+          make check-dependencies
+
       - name: Set up go
         uses: actions/setup-go@v5
         with:
