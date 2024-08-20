@@ -138,6 +138,11 @@ check-dependencies:
         echo "No conflicting dependencies found."; \
     fi
 
+.PHONY: generate-docs
+generate-docs:
+	echo "Generating docs"
+	go run gen_doc.go
+
 .PHONY: docker
 docker: docker-build
 .PHONY: docker-build
