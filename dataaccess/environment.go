@@ -13,7 +13,7 @@ var (
 	ErrEnvironmentNotFound = errors.New("environment not found")
 )
 
-func CreateServiceEnvironment(request serviceenvironmentapi.CreateServiceEnvironmentRequest, token string) (serviceenvironmentapi.ServiceEnvironmentID, error) {
+func CreateServiceEnvironment(token string, request serviceenvironmentapi.CreateServiceEnvironmentRequest) (serviceenvironmentapi.ServiceEnvironmentID, error) {
 	service, err := httpclientwrapper.NewServiceEnvironment(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return "", err
@@ -28,7 +28,7 @@ func CreateServiceEnvironment(request serviceenvironmentapi.CreateServiceEnviron
 	return res, nil
 }
 
-func DescribeServiceEnvironment(serviceId, serviceEnvironmentId, token string) (*serviceenvironmentapi.DescribeServiceEnvironmentResult, error) {
+func DescribeServiceEnvironment(token, serviceId, serviceEnvironmentId string) (*serviceenvironmentapi.DescribeServiceEnvironmentResult, error) {
 	service, err := httpclientwrapper.NewServiceEnvironment(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func DescribeServiceEnvironment(serviceId, serviceEnvironmentId, token string) (
 	return res, nil
 }
 
-func ListServiceEnvironments(serviceId, token string) (*serviceenvironmentapi.ListServiceEnvironmentsResult, error) {
+func ListServiceEnvironments(token, serviceId string) (*serviceenvironmentapi.ListServiceEnvironmentsResult, error) {
 	service, err := httpclientwrapper.NewServiceEnvironment(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func ListServiceEnvironments(serviceId, token string) (*serviceenvironmentapi.Li
 	return res, nil
 }
 
-func PromoteServiceEnvironment(serviceId, serviceEnvironmentId, token string) error {
+func PromoteServiceEnvironment(token, serviceId, serviceEnvironmentId string) error {
 	service, err := httpclientwrapper.NewServiceEnvironment(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return err
@@ -84,14 +84,34 @@ func PromoteServiceEnvironment(serviceId, serviceEnvironmentId, token string) er
 	return nil
 }
 
-func FindEnvironment(serviceId, environmentType, token string) (*serviceenvironmentapi.DescribeServiceEnvironmentResult, error) {
-	listRes, err := ListServiceEnvironments(serviceId, token)
+func DeleteServiceEnvironment(token, serviceId, serviceEnvironmentId string) error {
+	service, err := httpclientwrapper.NewServiceEnvironment(utils.GetHostScheme(), utils.GetHost())
+	if err != nil {
+		return err
+	}
+
+	request := serviceenvironmentapi.DeleteServiceEnvironmentRequest{
+		Token:     token,
+		ServiceID: serviceenvironmentapi.ServiceID(serviceId),
+		ID:        serviceenvironmentapi.ServiceEnvironmentID(serviceEnvironmentId),
+	}
+
+	err = service.DeleteServiceEnvironment(context.Background(), &request)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func FindEnvironment(token, serviceId, environmentType string) (*serviceenvironmentapi.DescribeServiceEnvironmentResult, error) {
+	listRes, err := ListServiceEnvironments(token, serviceId)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, id := range listRes.Ids {
-		descRes, err := DescribeServiceEnvironment(serviceId, string(id), token)
+		descRes, err := DescribeServiceEnvironment(token, serviceId, string(id))
 		if err != nil {
 			return nil, err
 		}

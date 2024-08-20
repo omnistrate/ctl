@@ -196,7 +196,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	// Ask user to verify account if there are any unverified accounts
 	dataaccess.AskVerifyAccountIfAny()
 
-	serviceEnvironment, err := dataaccess.DescribeServiceEnvironment(ServiceID, EnvironmentID, token)
+	serviceEnvironment, err := dataaccess.DescribeServiceEnvironment(token, ServiceID, EnvironmentID)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -223,7 +223,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 			sm2.Start()
 
 			for {
-				serviceEnvironment, err = dataaccess.DescribeServiceEnvironment(ServiceID, EnvironmentID, token)
+				serviceEnvironment, err = dataaccess.DescribeServiceEnvironment(token, ServiceID, EnvironmentID)
 				if err != nil {
 					utils.PrintError(err)
 					return err
@@ -257,7 +257,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 				launching := sm2.AddSpinner("Launching service to production...")
 				sm2.Start()
 
-				prodEnvironment, err := dataaccess.FindEnvironment(ServiceID, "prod", token)
+				prodEnvironment, err := dataaccess.FindEnvironment(token, ServiceID, "prod")
 				if err != nil && !errors.As(err, &dataaccess.ErrEnvironmentNotFound) {
 					utils.PrintError(err)
 					return err
@@ -284,7 +284,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 						AutoApproveSubscription: commonutils.ToPtr(true),
 					}
 
-					prodEnvironmentID, err = dataaccess.CreateServiceEnvironment(prod, token)
+					prodEnvironmentID, err = dataaccess.CreateServiceEnvironment(token, prod)
 					if err != nil {
 						utils.PrintError(err)
 						return err
@@ -294,7 +294,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 				}
 
 				// Promote the service to production
-				err = dataaccess.PromoteServiceEnvironment(ServiceID, EnvironmentID, token)
+				err = dataaccess.PromoteServiceEnvironment(token, ServiceID, EnvironmentID)
 				if err != nil {
 					utils.PrintError(err)
 					return err
@@ -304,7 +304,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 				sm2.Stop()
 
 				// Retrieve the prod SaaS portal URL
-				prodEnvironment, err = dataaccess.DescribeServiceEnvironment(ServiceID, string(prodEnvironmentID), token)
+				prodEnvironment, err = dataaccess.DescribeServiceEnvironment(token, ServiceID, string(prodEnvironmentID))
 				if err != nil {
 					utils.PrintError(err)
 					return err
@@ -328,7 +328,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 						sm3.Start()
 
 						for {
-							serviceEnvironment, err = dataaccess.DescribeServiceEnvironment(ServiceID, string(prodEnvironmentID), token)
+							serviceEnvironment, err = dataaccess.DescribeServiceEnvironment(token, ServiceID, string(prodEnvironmentID))
 							if err != nil {
 								utils.PrintError(err)
 								return err

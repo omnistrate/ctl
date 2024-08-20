@@ -59,7 +59,7 @@ func runGet(cmd *cobra.Command, args []string) error {
 	if ID {
 		for _, id := range args {
 			var service *serviceapi.DescribeServiceResult
-			service, err = dataaccess.DescribeService(id, token)
+			service, err = dataaccess.DescribeService(token, id)
 			if err != nil {
 				utils.PrintError(err)
 				continue

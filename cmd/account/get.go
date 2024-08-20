@@ -61,7 +61,7 @@ func runGet(cmd *cobra.Command, args []string) error {
 	if ID {
 		for _, id := range args {
 			var account *accountconfigapi.DescribeAccountConfigResult
-			account, err = dataaccess.DescribeAccount(id, token)
+			account, err = dataaccess.DescribeAccount(token, id)
 			if err != nil {
 				utils.PrintError(err)
 				return err

@@ -16,7 +16,7 @@ const (
 omnistrate service-plan release [service-name] [plan-name]
 
 # Release service plan by ID instead of name
-omnistrate service-plan release --service-id [plan-id] --plan-id [plan-id]`
+omnistrate service-plan release --service-id [service-id] --plan-id [plan-id]`
 )
 
 var releaseCmd = &cobra.Command{
@@ -97,7 +97,7 @@ func runRelease(cmd *cobra.Command, args []string) error {
 	}
 
 	servicePlanFound := false
-	describeServiceRes, err := dataaccess.DescribeService(serviceId, token)
+	describeServiceRes, err := dataaccess.DescribeService(token, serviceId)
 	if err != nil {
 		utils.PrintError(err)
 		return err

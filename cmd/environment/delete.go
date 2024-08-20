@@ -12,10 +12,10 @@ import (
 
 const (
 	deleteExample = `# Delete environment
-omnistrate service-plan delete [service-name] [environment-name]
+omnistrate environment delete [service-name] [environment-name]
 
 # Delete environment by ID instead of name
-omnistrate service-plan delete --service-id [plan-id] --plan-id [plan-id]`
+omnistrate environment delete --service-id [service-id] --environment-id [environment-id]`
 )
 
 var deleteCmd = &cobra.Command{
@@ -30,19 +30,19 @@ var deleteCmd = &cobra.Command{
 func init() {
 	deleteCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 	deleteCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
-	deleteCmd.Flags().StringP("plan-id", "", "", "Plan ID. Required if plan name is not provided")
+	deleteCmd.Flags().StringP("environment-id", "", "", "Environment ID. Required if environment name is not provided")
 }
 
 func runDelete(cmd *cobra.Command, args []string) error {
 	// Get flags
 	output, _ := cmd.Flags().GetString("output")
 	serviceId, _ := cmd.Flags().GetString("service-id")
-	planId, _ := cmd.Flags().GetString("plan-id")
+	environmentId, _ := cmd.Flags().GetString("environment-id")
 
 	if len(args) == 0 {
-		// Check if service ID and plan ID are provided
-		if serviceId == "" || planId == "" {
-			err := fmt.Errorf("please provide the service name and plan name or the service ID and plan ID")
+		// Check if service ID and environment ID are provided
+		if serviceId == "" || environmentId == "" {
+			err := fmt.Errorf("please provide the service name and environment name or the service ID and environment ID")
 			utils.PrintError(err)
 			return err
 		}
@@ -71,36 +71,36 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the environment exists
-	searchRes, err := dataaccess.SearchInventory(token, "serviceplan:pt")
+	searchRes, err := dataaccess.SearchInventory(token, "serviceenvironment:pt")
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	servicePlansMap := make(map[string]map[string]bool)
-	for _, plan := range searchRes.ServicePlanResults {
-		if (string(plan.ServiceID) == serviceId || (len(args) == 2 && strings.EqualFold(plan.ServiceName, args[0]))) &&
-			(plan.ID == planId || (len(args) == 2 && strings.EqualFold(plan.Name, args[1]))) {
-			if _, ok := servicePlansMap[string(plan.ServiceID)]; !ok {
-				servicePlansMap[string(plan.ServiceID)] = make(map[string]bool)
+	serviceEnvironmentsMap := make(map[string]map[string]bool)
+	for _, environment := range searchRes.ServiceEnvironmentResults {
+		if (string(environment.ServiceID) == serviceId || (len(args) == 2 && strings.EqualFold(environment.ServiceName, args[0]))) &&
+			(environment.ID == environmentId || (len(args) == 2 && strings.EqualFold(environment.Name, args[1]))) {
+			if _, ok := serviceEnvironmentsMap[string(environment.ServiceID)]; !ok {
+				serviceEnvironmentsMap[string(environment.ServiceID)] = make(map[string]bool)
 			}
-			servicePlansMap[string(plan.ServiceID)][plan.ID] = true
-			serviceId = string(plan.ServiceID)
-			planId = plan.ID
+			serviceEnvironmentsMap[string(environment.ServiceID)][environment.ID] = true
+			serviceId = string(environment.ServiceID)
+			environmentId = environment.ID
 		}
 	}
-	if len(servicePlansMap) == 0 {
+	if len(serviceEnvironmentsMap) == 0 {
 		err = errors.New("environment not found. Please check the input values and try again")
 		utils.PrintError(err)
 		return err
 	}
-	if len(servicePlansMap) > 1 || len(servicePlansMap[serviceId]) > 1 {
-		err = errors.New("multiple environments found. Please provide the service ID and plan ID instead of the names")
+	if len(serviceEnvironmentsMap) > 1 || len(serviceEnvironmentsMap[serviceId]) > 1 {
+		err = errors.New("multiple environments found. Please provide the service ID and environment ID instead of the names")
 		utils.PrintError(err)
 		return err
 	}
 
-	err = dataaccess.DeleteServicePlan(token, serviceId, planId)
+	err = dataaccess.DeleteServiceEnvironment(token, serviceId, environmentId)
 	if err != nil {
 		spinner.Error()
 		sm.Stop()
