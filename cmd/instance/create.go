@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/chelnak/ysmrr"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
+	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
@@ -40,6 +41,7 @@ func init() {
 	createCmd.Flags().String("region", "", "Region code (e.g. us-east-2, us-central1)")
 	createCmd.Flags().String("param", "", "Parameters for the instance deployment")
 	createCmd.Flags().String("param-file", "", "Json file containing parameters for the instance deployment")
+	createCmd.Flags().StringP("subscription-id", "", "", "Subscription ID to use for the instance deployment. If not provided, instance deployment will be created in your own subscription.")
 	createCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 
 	if err := createCmd.MarkFlagRequired("service"); err != nil {
@@ -108,6 +110,11 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	paramFile, err := cmd.Flags().GetString("param-file")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+	subscriptionID, err := cmd.Flags().GetString("subscription-id")
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -248,6 +255,9 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		RequestParams:         formattedParams,
 		NetworkType:           nil,
 	}
+	if subscriptionID != "" {
+		request.SubscriptionID = (*inventoryapi.SubscriptionID)(commonutils.ToPtr(subscriptionID))
+	}
 	instance, err := dataaccess.CreateInstance(token, request)
 	if err != nil {
 		utils.PrintError(err)
@@ -267,15 +277,16 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	formattedInstance := model.Instance{
-		InstanceID:    *instance.ID,
-		Service:       res.ConsumptionDescribeServiceOfferingResult.ServiceName,
-		Environment:   string(offering.ServiceEnvironmentType),
-		Plan:          offering.ProductTierName,
-		Version:       offering.ProductTierVersion,
-		Resource:      resourceName,
-		CloudProvider: cloudProvider,
-		Region:        region,
-		Status:        "DEPLOYING",
+		InstanceID:     *instance.ID,
+		Service:        res.ConsumptionDescribeServiceOfferingResult.ServiceName,
+		Environment:    string(offering.ServiceEnvironmentType),
+		Plan:           offering.ProductTierName,
+		Version:        offering.ProductTierVersion,
+		Resource:       resourceName,
+		CloudProvider:  cloudProvider,
+		Region:         region,
+		Status:         "DEPLOYING",
+		SubscriptionID: subscriptionID,
 	}
 	InstanceID = formattedInstance.InstanceID
 
