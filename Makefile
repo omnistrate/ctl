@@ -126,6 +126,18 @@ update-omnistrate-dependencies:
 	go get -u github.com/omnistrate/... 
 	make tidy
 
+.PHONY: check-dependencies
+check-dependencies:
+	@echo "Checking dependencies starting with github.com/omnistrate..."
+	@violating_deps=$$(grep -E '^\s*github.com/omnistrate' go.mod | grep -v -E 'github.com/omnistrate/commons/pkg/constants|github.com/omnistrate/commons/pkg/utils|github.com/omnistrate/api-design|github.com/omnistrate/api-design/pkg/httpclientwrapper'); \
+    if [ -n "$$violating_deps" ]; then \
+        echo "Error: Found dependencies starting with github.com/omnistrate/commons other than allowed ones:"; \
+        echo "$$violating_deps"; \
+        exit 1; \
+    else \
+        echo "No conflicting dependencies found."; \
+    fi
+
 .PHONY: docker
 docker: docker-build
 .PHONY: docker-build
@@ -146,3 +158,4 @@ clean:
 	rm ./coverage-report.txt
 	rm ./test-report.json
 	rm ./security-report.html
+	rm ./docs
