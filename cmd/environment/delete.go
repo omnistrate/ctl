@@ -39,13 +39,10 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	serviceId, _ := cmd.Flags().GetString("service-id")
 	environmentId, _ := cmd.Flags().GetString("environment-id")
 
-	if len(args) == 0 {
-		// Check if service ID and environment ID are provided
-		if serviceId == "" || environmentId == "" {
-			err := fmt.Errorf("please provide the service name and environment name or the service ID and environment ID")
-			utils.PrintError(err)
-			return err
-		}
+	if len(args) == 0 && (serviceId == "" || environmentId == "") {
+		err := fmt.Errorf("please provide the service name and environment name or the service ID and environment ID")
+		utils.PrintError(err)
+		return err
 	}
 
 	if len(args) > 0 && len(args) != 2 {
