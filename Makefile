@@ -26,7 +26,7 @@ CGO_ENABLED=0
 GOPRIVATE=github.com/omnistrate
 
 .PHONY: all
-all: tidy build unit-test lint sec
+all: tidy build unit-test lint gen-doc
 
 .PHONY: tidy
 tidy:
@@ -138,10 +138,10 @@ check-dependencies:
         echo "No conflicting dependencies found."; \
     fi
 
-.PHONY: generate-docs
-generate-docs:
+.PHONY: gen-doc
+gen-doc:
 	echo "Generating docs"
-	go run gen_doc.go
+	go run doc-gen/main.go
 
 .PHONY: docker
 docker: docker-build
