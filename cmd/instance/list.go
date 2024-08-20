@@ -93,16 +93,21 @@ func runList(cmd *cobra.Command, args []string) error {
 			serviceName = utils.TruncateString(serviceName, defaultMaxNameLength)
 			planName = utils.TruncateString(planName, defaultMaxNameLength)
 		}
+		subscriptionID := ""
+		if instance.SubscriptionID != nil {
+			subscriptionID = string(*instance.SubscriptionID)
+		}
 		formattedInstance := model.Instance{
-			InstanceID:    instance.ID,
-			Service:       serviceName,
-			Environment:   envType,
-			Plan:          planName,
-			Version:       planVersion,
-			Resource:      instance.ResourceName,
-			CloudProvider: string(instance.CloudProvider),
-			Region:        instance.RegionCode,
-			Status:        string(instance.Status),
+			InstanceID:     instance.ID,
+			Service:        serviceName,
+			Environment:    envType,
+			Plan:           planName,
+			Version:        planVersion,
+			Resource:       instance.ResourceName,
+			CloudProvider:  string(instance.CloudProvider),
+			Region:         instance.RegionCode,
+			Status:         string(instance.Status),
+			SubscriptionID: subscriptionID,
 		}
 
 		// Check if the instance matches the filters
