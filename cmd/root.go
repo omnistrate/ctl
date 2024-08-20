@@ -2,14 +2,17 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/account"
 	"github.com/omnistrate/ctl/cmd/auth/login"
 	"github.com/omnistrate/ctl/cmd/auth/logout"
 	"github.com/omnistrate/ctl/cmd/build"
-	"github.com/omnistrate/ctl/cmd/create"
-	"github.com/omnistrate/ctl/cmd/deletec"
 	"github.com/omnistrate/ctl/cmd/deprecated"
-	"github.com/omnistrate/ctl/cmd/describe"
-	"github.com/omnistrate/ctl/cmd/get"
+	"github.com/omnistrate/ctl/cmd/domain"
+	"github.com/omnistrate/ctl/cmd/helm"
+	"github.com/omnistrate/ctl/cmd/instance"
+	"github.com/omnistrate/ctl/cmd/service"
+	"github.com/omnistrate/ctl/cmd/serviceplan"
+	"github.com/omnistrate/ctl/cmd/subscription"
 	"github.com/omnistrate/ctl/cmd/upgrade"
 	"os"
 
@@ -29,7 +32,7 @@ const versionDescription = "Omnistrate CTL %s"
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "omnistrate-ctl",
-	Short: "Manage your Omnistrate SaaS from the command line.",
+	Short: "Manage your Omnistrate SaaS from the command line",
 	Long: wordwrap.WrapString(`
 Omnistrate CTL is a command line tool designed to streamline the creation, deployment, and management of your Omnistrate SaaS. Use it to build services from docker-compose files, manage service plans, and interact with the Omnistrate platform efficiently.
 
@@ -87,13 +90,17 @@ func init() {
 
 	RootCmd.AddCommand(build.BuildCmd)
 
-	RootCmd.AddCommand(get.GetCmd)
-	RootCmd.AddCommand(describe.DescribeCmd)
-	RootCmd.AddCommand(create.CreateCmd)
-	RootCmd.AddCommand(deletec.DeleteCmd)
+	RootCmd.AddCommand(service.Cmd)
+	RootCmd.AddCommand(account.Cmd)
+	RootCmd.AddCommand(domain.Cmd)
+	RootCmd.AddCommand(upgrade.Cmd)
+	RootCmd.AddCommand(helm.Cmd)
+	RootCmd.AddCommand(instance.Cmd)
+	RootCmd.AddCommand(serviceplan.Cmd)
+	RootCmd.AddCommand(subscription.Cmd)
 
+	// Deprecated
+	RootCmd.AddCommand(deprecated.DescribeCmd)
 	RootCmd.AddCommand(deprecated.ListCmd)
 	RootCmd.AddCommand(deprecated.RemoveCmd)
-
-	RootCmd.AddCommand(upgrade.Cmd)
 }

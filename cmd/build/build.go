@@ -26,6 +26,7 @@ var (
 	EnvironmentID      string
 	ProductTierID      string
 	file               string
+	specType           string
 	name               string
 	description        string
 	serviceLogoURL     string
@@ -35,9 +36,14 @@ var (
 	releaseAsPreferred bool
 	releaseName        string
 	interactive        bool
+
+	validSpecType = []string{DockerComposeSpecType, ServicePlanSpecType}
 )
 
 const (
+	DockerComposeSpecType = "DockerCompose"
+	ServicePlanSpecType   = "ServicePlanSpec"
+
 	buildExample = `  # Build in dev environment
   omnistrate-ctl build --file docker-compose.yml --name "My Service"
 
@@ -74,8 +80,8 @@ This command has an interactive mode. In this mode, you can choose to promote th
 
 // BuildCmd represents the build command
 var BuildCmd = &cobra.Command{
-	Use:          "build [--file FILE] [--name NAME] [--environment ENVIRONMENT] [--environment ENVIRONMENT_TYPE] [--release] [--release-as-preferred][--interactive][--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] ",
-	Short:        "Build one service plan from docker compose.",
+	Use:          "build [--file FILE] [--specType SPEC_TYPE][--name NAME] [--environment ENVIRONMENT] [--environment ENVIRONMENT_TYPE] [--release] [--release-as-preferred][--interactive][--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] ",
+	Short:        "Build one service plan from docker compose",
 	Long:         buildLong,
 	Example:      buildExample,
 	RunE:         runBuild,
@@ -93,8 +99,13 @@ func init() {
 	BuildCmd.Flags().BoolVarP(&releaseAsPreferred, "release-as-preferred", "", false, "Release the service as preferred after building it")
 	BuildCmd.Flags().StringVarP(&releaseName, "release-name", "", "", "Name of the release version")
 	BuildCmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "Interactive mode")
+	BuildCmd.Flags().StringVarP(&specType, "spec-type", "s", DockerComposeSpecType, "Spec type")
 
 	err := BuildCmd.MarkFlagRequired("file")
+	if err != nil {
+		return
+	}
+	err = BuildCmd.MarkFlagFilename("file")
 	if err != nil {
 		return
 	}
@@ -139,6 +150,12 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		descriptionPtr = nil
 	}
 
+	if !isValidSpecType(specType) {
+		err = errors.New(fmt.Sprintf("invalid spec type, valid options are: %s", strings.Join(validSpecType, ", ")))
+		utils.PrintError(err)
+		return err
+	}
+
 	environmentPtr := &environment
 	if environment == "" {
 		environmentPtr = nil
@@ -158,9 +175,11 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	building := sm1.AddSpinner("Building service...")
 	sm1.Start()
 
-	ServiceID, EnvironmentID, ProductTierID, err = buildService(file, token, name, descriptionPtr, serviceLogoURLPtr,
+	ServiceID, EnvironmentID, ProductTierID, err = buildService(file, token, name, specType, descriptionPtr, serviceLogoURLPtr,
 		environmentPtr, environmentTypePtr, release, releaseAsPreferred, releaseNamePtr)
 	if err != nil {
+		building.Error()
+		sm1.Stop()
 		utils.PrintError(err)
 		return err
 	}
@@ -331,7 +350,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func buildService(file, token, name string, description, serviceLogoURL, environment, environmentType *string, release,
+func buildService(file, token, name, specType string, description, serviceLogoURL, environment, environmentType *string, release,
 	releaseAsPreferred bool, releaseName *string) (serviceID string, environmentID string, productTierID string, err error) {
 	if name == "" {
 		return "", "", "", errors.New("name is required")
@@ -347,82 +366,131 @@ func buildService(file, token, name string, description, serviceLogoURL, environ
 		return "", "", "", err
 	}
 
-	request := serviceapi.BuildServiceFromComposeSpecRequest{
-		Token:              token,
-		Name:               name,
-		Description:        description,
-		ServiceLogoURL:     serviceLogoURL,
-		Environment:        environment,
-		EnvironmentType:    (*serviceapi.EnvironmentType)(environmentType),
-		FileContent:        base64.StdEncoding.EncodeToString(fileData),
-		Release:            &release,
-		ReleaseAsPreferred: &releaseAsPreferred,
-		ReleaseVersionName: releaseName,
+	if specType == "" {
+		return "", "", "", errors.New("specType is required")
 	}
 
-	// Load the YAML content
-	parsedYaml, err := loader.ParseYAML(fileData)
-	if err != nil {
-		err = errors.Wrap(err, "failed to parse YAML content")
-		return
-	}
+	switch specType {
+	case ServicePlanSpecType:
+		request := serviceapi.BuildServiceFromServicePlanSpecRequest{
+			Token:           token,
+			Name:            name,
+			Description:     description,
+			ServiceLogoURL:  serviceLogoURL,
+			Environment:     environment,
+			EnvironmentType: (*serviceapi.EnvironmentType)(environmentType),
+			FileContent:     base64.StdEncoding.EncodeToString(fileData),
+		}
 
-	// Decode spec YAML into a compose project
-	var project *types.Project
-	if project, err = loader.LoadWithContext(context.Background(), types.ConfigDetails{
-		ConfigFiles: []types.ConfigFile{
-			{
-				Config: parsedYaml,
+		var buildRes *serviceapi.BuildServiceFromServicePlanSpecResult
+		buildRes, err = service.BuildServiceFromServicePlanSpec(context.Background(), &request)
+		if err != nil {
+			var serviceError *goa.ServiceError
+			if errors.As(err, &serviceError) {
+				return "", "", "", fmt.Errorf("%s\nDetail: %s", serviceError.Name, serviceError.Message)
+			}
+			return
+		}
+		if buildRes == nil {
+			return "", "", "", errors.New("empty response from server")
+		}
+		return string(buildRes.ServiceID), string(buildRes.ServiceEnvironmentID), string(buildRes.ProductTierID), nil
+	case DockerComposeSpecType:
+		request := serviceapi.BuildServiceFromComposeSpecRequest{
+			Token:              token,
+			Name:               name,
+			Description:        description,
+			ServiceLogoURL:     serviceLogoURL,
+			Environment:        environment,
+			EnvironmentType:    (*serviceapi.EnvironmentType)(environmentType),
+			FileContent:        base64.StdEncoding.EncodeToString(fileData),
+			Release:            &release,
+			ReleaseAsPreferred: &releaseAsPreferred,
+			ReleaseVersionName: releaseName,
+		}
+
+		// Load the YAML content
+		var parsedYaml map[string]interface{}
+		parsedYaml, err = loader.ParseYAML(fileData)
+		if err != nil {
+			err = errors.Wrap(err, "failed to parse YAML content")
+			return
+		}
+
+		// Decode spec YAML into a compose project
+		var project *types.Project
+		if project, err = loader.LoadWithContext(context.Background(), types.ConfigDetails{
+			ConfigFiles: []types.ConfigFile{
+				{
+					Config: parsedYaml,
+				},
 			},
-		},
-	}); err != nil {
-		err = errors.Wrap(err, "invalid compose")
-		return
-	}
+		}); err != nil {
+			err = errors.Wrap(err, "invalid compose")
+			return
+		}
 
-	// Get the configs from the project
-	if project.Configs != nil {
-		request.Configs = make(map[string]string)
-		for configName, config := range project.Configs {
-			var fileContent []byte
-			fileContent, err = os.ReadFile(filepath.Clean(config.File))
-			if err != nil {
-				return "", "", "", err
+		// Convert config volumes to configs
+		var modified bool
+		if project, modified, err = convertVolumesToConfigs(project); err != nil {
+			return "", "", "", err
+		}
+
+		// Convert the project back to YAML, in case it was modified
+		if modified {
+			var parsedYamlContent []byte
+			if parsedYamlContent, err = project.MarshalYAML(); err != nil {
+				err = errors.Wrap(err, "failed to marshal project to YAML")
+				return
 			}
-
-			request.Configs[configName] = base64.StdEncoding.EncodeToString(fileContent)
+			request.FileContent = base64.StdEncoding.EncodeToString(parsedYamlContent)
 		}
-	}
 
-	// Get the secrets from the project
-	if project.Secrets != nil {
-		request.Secrets = make(map[string]string)
-		for secretName, secret := range project.Secrets {
-			var fileContent []byte
-			fileContent, err = os.ReadFile(filepath.Clean(secret.File))
-			if err != nil {
-				return "", "", "", err
+		// Get the configs from the project
+		if project.Configs != nil {
+			request.Configs = make(map[string]string)
+			for configName, config := range project.Configs {
+				var fileContent []byte
+				fileContent, err = os.ReadFile(filepath.Clean(config.File))
+				if err != nil {
+					return "", "", "", err
+				}
+
+				request.Configs[configName] = base64.StdEncoding.EncodeToString(fileContent)
 			}
-
-			request.Secrets[secretName] = base64.StdEncoding.EncodeToString(fileContent)
 		}
-	}
 
-	var buildRes *serviceapi.BuildServiceFromComposeSpecResult
-	buildRes, err = service.BuildServiceFromComposeSpec(context.Background(), &request)
-	if err != nil {
-		var serviceError *goa.ServiceError
-		if errors.As(err, &serviceError) {
-			return "", "", "", fmt.Errorf("%s\nDetail: %s", serviceError.Name, serviceError.Message)
+		// Get the secrets from the project
+		if project.Secrets != nil {
+			request.Secrets = make(map[string]string)
+			for secretName, secret := range project.Secrets {
+				var fileContent []byte
+				fileContent, err = os.ReadFile(filepath.Clean(secret.File))
+				if err != nil {
+					return "", "", "", err
+				}
+
+				request.Secrets[secretName] = base64.StdEncoding.EncodeToString(fileContent)
+			}
 		}
-		return
-	}
 
-	if buildRes == nil {
-		return "", "", "", errors.New("empty response from server")
-	}
+		var buildRes *serviceapi.BuildServiceFromComposeSpecResult
+		buildRes, err = service.BuildServiceFromComposeSpec(context.Background(), &request)
+		if err != nil {
+			var serviceError *goa.ServiceError
+			if errors.As(err, &serviceError) {
+				return "", "", "", fmt.Errorf("%s\nDetail: %s", serviceError.Name, serviceError.Message)
+			}
+			return
+		}
+		if buildRes == nil {
+			return "", "", "", errors.New("empty response from server")
+		}
+		return string(buildRes.ServiceID), string(buildRes.ServiceEnvironmentID), string(buildRes.ProductTierID), nil
 
-	return string(buildRes.ServiceID), string(buildRes.ServiceEnvironmentID), string(buildRes.ProductTierID), nil
+	default:
+		return "", "", "", errors.New("invalid spec type")
+	}
 }
 
 func resetBuild() {
@@ -451,4 +519,126 @@ func getSaaSPortalURL(serviceEnvironment *serviceenvironmentapi.DescribeServiceE
 	}
 
 	return ""
+}
+
+func isValidSpecType(s string) bool {
+	for _, v := range validSpecType {
+		if v == s {
+			return true
+		}
+	}
+	return false
+}
+
+// Most compose files mount the configs directly as volumes. This function converts the volumes to configs.
+func convertVolumesToConfigs(project *types.Project) (converted *types.Project, modified bool, err error) {
+	modified = false
+	volumesToBeRemoved := make(map[int]int) // map of volume index to service index
+	for svcIdx, service := range project.Services {
+		for volIdx, volume := range service.Volumes {
+			// Check if the volume source exists. If so, it needs to be a directory with files or the source is itself a file
+			if volume.Source != "" {
+				source := filepath.Clean(volume.Source)
+				if _, err = os.Stat(source); os.IsNotExist(err) {
+					err = nil
+					continue
+				}
+
+				// Check if the source is a directory
+				var fileInfo os.FileInfo
+				fileInfo, err = os.Stat(source)
+				if err != nil {
+					err = errors.Wrapf(err, "failed to get file info for %s", source)
+					return
+				}
+
+				if fileInfo.IsDir() {
+					// Check if the directory has files
+					var files []string
+					files, err = listFiles(source)
+					if err != nil {
+						err = errors.Wrapf(err, "failed to list files in %s", source)
+						return
+					}
+
+					if len(files) == 0 {
+						continue
+					}
+
+					// Create a config for each file
+					for _, fileInDir := range files {
+						sourceFileNameSHA := commonutils.HashPasswordSha256(fileInDir)
+						config := types.ConfigObjConfig{
+							Name: sourceFileNameSHA,
+							File: fileInDir,
+						}
+						project.Configs[sourceFileNameSHA] = config
+
+						// Also append to the configs list for this service
+						var absolutePathToDir string
+						absolutePathToDir, err = filepath.Abs(source)
+						if err != nil {
+							err = errors.Wrapf(err, "failed to get absolute path for %s", source)
+							return
+						}
+						var relativePathInTarget string
+						relativePathInTarget, err = filepath.Rel(absolutePathToDir, fileInDir)
+						if err != nil {
+							err = errors.Wrapf(err, "failed to get relative path for %s", fileInDir)
+							return
+						}
+						service.Configs = append(service.Configs, types.ServiceConfigObjConfig{
+							Source: sourceFileNameSHA,
+							Target: filepath.Join(volume.Target, relativePathInTarget),
+						})
+					}
+				} else {
+					sourceFileNameSHA := commonutils.HashPasswordSha256(source)
+					config := types.ConfigObjConfig{
+						Name: sourceFileNameSHA,
+						File: source,
+					}
+					project.Configs[sourceFileNameSHA] = config
+
+					// Also append to the configs list for this service
+					service.Configs = append(service.Configs, types.ServiceConfigObjConfig{
+						Source: sourceFileNameSHA,
+						Target: volume.Target,
+					})
+				}
+
+				// Remove the volume from the service
+				volumesToBeRemoved[svcIdx] = volIdx
+			}
+		}
+
+		// Update the service in the project
+		project.Services[svcIdx] = service
+	}
+
+	// Remove the volumes from the services
+	for svcIdx, volIdx := range volumesToBeRemoved {
+		project.Services[svcIdx].Volumes = append(project.Services[svcIdx].Volumes[:volIdx], project.Services[svcIdx].Volumes[volIdx+1:]...)
+	}
+
+	converted = project
+	modified = len(volumesToBeRemoved) > 0
+	return
+}
+
+func listFiles(dir string) (files []string, err error) {
+	err = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		// Skip the directory itself
+		if path == dir {
+			return nil
+		}
+
+		if !info.IsDir() {
+			files = append(files, path)
+		}
+
+		return nil
+	})
+
+	return
 }

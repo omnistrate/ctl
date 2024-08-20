@@ -46,7 +46,7 @@ var (
 // LoginCmd represents the login command
 var LoginCmd = &cobra.Command{
 	Use:          `login`,
-	Short:        "Log in to the Omnistrate platform.",
+	Short:        "Log in to the Omnistrate platform",
 	Long:         `The login command is used to authenticate and log in to the Omnistrate platform.`,
 	Example:      loginExample,
 	RunE:         runLogin,

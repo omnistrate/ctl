@@ -32,7 +32,7 @@ func Test_domain_basic(t *testing.T) {
 	prodDomain := "domain" + uuid.NewString() + ".prod"
 
 	// create dev domain
-	cmd.RootCmd.SetArgs([]string{"create", "domain", devDomainName, "--env", "dev", "--domain", devDomain})
+	cmd.RootCmd.SetArgs([]string{"domain", "create", devDomainName, "--env", "dev", "--domain", devDomain})
 	err = cmd.RootCmd.Execute()
 	if err != nil {
 		require.Condition(func() bool {
@@ -49,7 +49,7 @@ func Test_domain_basic(t *testing.T) {
 	}
 
 	// create prod domain
-	cmd.RootCmd.SetArgs([]string{"create", "domain", prodDomainName, "--env", "prod", "--domain", prodDomain})
+	cmd.RootCmd.SetArgs([]string{"domain", "create", prodDomainName, "--env", "prod", "--domain", prodDomain})
 	err = cmd.RootCmd.Execute()
 	if err != nil {
 		require.Condition(func() bool {
@@ -66,17 +66,17 @@ func Test_domain_basic(t *testing.T) {
 	}
 
 	// PASS: get domains
-	cmd.RootCmd.SetArgs([]string{"get", "domain"})
+	cmd.RootCmd.SetArgs([]string{"domain", "get"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
 	// PASS: get domains by name
-	cmd.RootCmd.SetArgs([]string{"get", "domain", devDomainName, prodDomainName})
+	cmd.RootCmd.SetArgs([]string{"domain", "get", devDomainName, prodDomainName})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
 	// delete domains
-	cmd.RootCmd.SetArgs([]string{"delete", "domain", devDomainName, prodDomainName})
+	cmd.RootCmd.SetArgs([]string{"domain", "delete", devDomainName, prodDomainName})
 	err = cmd.RootCmd.Execute()
 	if err != nil {
 		require.Contains(err.Error(), "domain(s) not found")

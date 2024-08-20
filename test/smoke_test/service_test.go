@@ -1,13 +1,10 @@
-package smoke_test
+package smoke
 
 import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/omnistrate/ctl/cmd"
 	"github.com/omnistrate/ctl/cmd/build"
-	deleteservice "github.com/omnistrate/ctl/cmd/deletec/service"
-	describeservice "github.com/omnistrate/ctl/cmd/describe/service"
-	getservice "github.com/omnistrate/ctl/cmd/get/service"
 	"github.com/omnistrate/ctl/test/testutils"
 	"testing"
 
@@ -44,37 +41,37 @@ func Test_service_basic(t *testing.T) {
 	serviceID2 := build.ServiceID
 
 	// Get services
-	getservice.ServiceCmd.SetArgs([]string{"service"})
-	err = getservice.ServiceCmd.Execute()
+	cmd.RootCmd.SetArgs([]string{"service", "get"})
+	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
 	// Get services by name
-	getservice.ServiceCmd.SetArgs([]string{"service", serviceName1, serviceName2})
-	err = getservice.ServiceCmd.Execute()
+	cmd.RootCmd.SetArgs([]string{"service", "get", serviceName1, serviceName2})
+	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
 	// Get services by ID
-	getservice.ServiceCmd.SetArgs([]string{"service", serviceID1, serviceID2, "--id"})
-	err = getservice.ServiceCmd.Execute()
+	cmd.RootCmd.SetArgs([]string{"service", "get", serviceID1, serviceID2, "--id"})
+	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
 	// Describe services by name
-	describeservice.ServiceCmd.SetArgs([]string{"service", serviceName1, serviceName2})
-	err = describeservice.ServiceCmd.Execute()
+	cmd.RootCmd.SetArgs([]string{"service", "describe", serviceName1, serviceName2})
+	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
 	// Describe services by ID
-	describeservice.ServiceCmd.SetArgs([]string{"service", serviceID1, serviceID2, "--id"})
-	err = describeservice.ServiceCmd.Execute()
+	cmd.RootCmd.SetArgs([]string{"service", "describe", serviceID1, serviceID2, "--id"})
+	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
 	// Delete service by name
-	deleteservice.ServiceCmd.SetArgs([]string{"service", serviceName1})
-	err = deleteservice.ServiceCmd.Execute()
+	cmd.RootCmd.SetArgs([]string{"service", "delete", serviceName1})
+	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
 	// Delete service by ID
-	deleteservice.ServiceCmd.SetArgs([]string{"service", serviceID2, "--id"})
-	err = deleteservice.ServiceCmd.Execute()
+	cmd.RootCmd.SetArgs([]string{"service", "delete", serviceID2, "--id"})
+	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 }
