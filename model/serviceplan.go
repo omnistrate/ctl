@@ -7,7 +7,7 @@ type ServicePlan struct {
 	ServiceName      string `json:"service_name"`
 	Environment      string `json:"environment"`
 	Version          string `json:"version"`
-	VersionName      string `json:"version_name"`
+	ReleaseName      string `json:"release_name"`
 	VersionSetStatus string `json:"version_set_status"`
 	DeploymentType   string `json:"deployment_type"`
 	TenancyType      string `json:"tenancy_type"`

@@ -130,7 +130,7 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 	}
 
 	// Release service plan
-	_, err = dataaccess.ReleaseServicePlan(token, serviceId, planId, targetVersion)
+	_, err = dataaccess.SetDefaultServicePlan(token, serviceId, planId, targetVersion)
 	if err != nil {
 		spinner.Error()
 		sm.Stop()
@@ -165,7 +165,7 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 				ServiceName:      servicePlan.ServiceName,
 				Environment:      envType,
 				Version:          servicePlan.Version,
-				VersionName:      servicePlan.Version, // TODO: Use version name
+				ReleaseName:      servicePlan.VersionName,
 				VersionSetStatus: servicePlan.VersionSetStatus,
 				DeploymentType:   string(servicePlan.DeploymentType),
 				TenancyType:      string(servicePlan.TenancyType),

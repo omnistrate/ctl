@@ -29,7 +29,7 @@ var releaseCmd = &cobra.Command{
 }
 
 func init() {
-	releaseCmd.Flags().String("releaseName", "", "Set custom release name")
+	releaseCmd.Flags().String("release-name", "", "Set custom release name")
 	releaseCmd.Flags().Bool("release-as-preferred", false, "Release the service plan as preferred")
 	releaseCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 	releaseCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
@@ -176,7 +176,7 @@ func runRelease(cmd *cobra.Command, args []string) error {
 				ServiceName:      servicePlan.ServiceName,
 				Environment:      envType,
 				Version:          servicePlan.Version,
-				VersionName:      servicePlan.Version, // TODO: Use version name
+				ReleaseName:      servicePlan.VersionName,
 				VersionSetStatus: servicePlan.VersionSetStatus,
 				DeploymentType:   string(servicePlan.DeploymentType),
 				TenancyType:      string(servicePlan.TenancyType),
