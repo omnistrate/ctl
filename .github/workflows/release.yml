@@ -187,7 +187,9 @@ jobs:
   update-brew-formula:
     environment: Prod
     runs-on: ubuntu-latest
-    needs: build
+    needs: 
+      - build
+      - release-binaries
     permissions:
       contents: read
     
