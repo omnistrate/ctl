@@ -38,6 +38,11 @@ var (
 	releaseDescription string
 	interactive        bool
 
+	image                     string
+	envVars                   []string
+	imageRegistryAuthUsername string
+	imageRegistryAuthPassword string
+
 	validSpecType = []string{DockerComposeSpecType, ServicePlanSpecType}
 )
 
@@ -103,11 +108,13 @@ func init() {
 	BuildCmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "Interactive mode")
 	BuildCmd.Flags().StringVarP(&specType, "spec-type", "s", DockerComposeSpecType, "Spec type")
 
-	err := BuildCmd.MarkFlagRequired("file")
-	if err != nil {
-		return
-	}
-	err = BuildCmd.MarkFlagFilename("file")
+	BuildCmd.Flags().StringVarP(&image, "image", "i", "", "Provide the complete image repository URL with the image name and tag (e.g., docker.io/namespace/my-image:v1.2)")
+	BuildCmd.Flags().StringArrayVarP(&envVars, "env-var", "", nil, "Used together with --image flag. Provide environment variables in the format --env-var KEY1:VALUE1 --env-var KEY2:VALUE2")
+	BuildCmd.Flags().StringVarP(&imageRegistryAuthUsername, "image-registry-auth-username", "", "", "Used together with --image flag. Provide the username to authenticate with the image registry if it's a private registry")
+	BuildCmd.Flags().StringVarP(&imageRegistryAuthPassword, "image-registry-auth-password", "", "", "Used together with --image flag. Provide the password to authenticate with the image registry if it's a private registry")
+
+	BuildCmd.MarkFlagsOneRequired("file", "image")
+	err := BuildCmd.MarkFlagFilename("file")
 	if err != nil {
 		return
 	}
