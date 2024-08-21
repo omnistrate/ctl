@@ -112,12 +112,6 @@ func runPromote(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if spinner != nil {
-		spinner.UpdateMessage("Successfully promoted environment")
-		spinner.Complete()
-		sm.Stop()
-	}
-
 	// Describe the environment
 	environment, err := dataaccess.DescribeServiceEnvironment(token, serviceId, environmentId)
 	if err != nil {
@@ -161,6 +155,18 @@ func runPromote(cmd *cobra.Command, args []string) error {
 		}
 
 		jsonData = append(jsonData, string(data))
+	}
+
+	if len(jsonData) == 0 {
+		err = fmt.Errorf("source environment %s is not linked to any target environments", environment.Name)
+		utils.PrintError(err)
+		return err
+	}
+
+	if spinner != nil {
+		spinner.UpdateMessage("Successfully promoted environment")
+		spinner.Complete()
+		sm.Stop()
 	}
 
 	switch output {
