@@ -80,7 +80,7 @@ func runPromote(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	serviceId, serviceName, environmentId, environmentName, err = getServiceEnvironment(services, serviceId, serviceName, environmentId, environmentName)
+	serviceId, serviceName, environmentId, _, err = getServiceEnvironment(services, serviceId, serviceName, environmentId, environmentName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
