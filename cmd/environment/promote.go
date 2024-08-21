@@ -77,6 +77,7 @@ func runPromote(cmd *cobra.Command, args []string) error {
 	}
 
 	serviceEnvironmentsMap := make(map[string]map[string]bool)
+	var serviceName string
 	for _, service := range services.Services {
 		if string(service.ID) == serviceId || (len(args) == 2 && strings.EqualFold(service.Name, args[0])) {
 			for _, environment := range service.ServiceEnvironments {
@@ -87,6 +88,7 @@ func runPromote(cmd *cobra.Command, args []string) error {
 					serviceEnvironmentsMap[string(service.ID)][string(environment.ID)] = true
 					serviceId = string(service.ID)
 					environmentId = string(environment.ID)
+					serviceName = service.Name
 				}
 			}
 		}
@@ -118,7 +120,7 @@ func runPromote(cmd *cobra.Command, args []string) error {
 	}
 
 	// Describe the environment
-	environment, err := dataaccess.DescribeServiceEnvironment(token, serviceId, string(environmentId))
+	environment, err := dataaccess.DescribeServiceEnvironment(token, serviceId, environmentId)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -131,6 +133,17 @@ func runPromote(cmd *cobra.Command, args []string) error {
 	saasPortalURL := ""
 	if environment.SaasPortalURL != nil {
 		saasPortalURL = *environment.SaasPortalURL
+	}
+
+	// Get source environment name
+	sourceEnvName := ""
+	if !commonutils.CheckIfNilOrEmpty((*string)(environment.SourceEnvironmentID)) {
+		sourceEnv, err := dataaccess.DescribeServiceEnvironment(token, serviceId, string(*environment.SourceEnvironmentID))
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+		sourceEnvName = sourceEnv.Name
 	}
 
 	// Get promote status
