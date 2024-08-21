@@ -41,8 +41,8 @@ func Test_environment_basic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	envName2 := "test"
-	cmd.RootCmd.SetArgs([]string{"environment", "create", envName, "--type=test", "--source=dev", "--service-id=" + serviceID})
+	envName2 := "qa"
+	cmd.RootCmd.SetArgs([]string{"environment", "create", envName2, "--type=qa", "--source=dev", "--service-id=" + serviceID})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 	env2ID := environment.EnvironmentID
@@ -52,7 +52,7 @@ func Test_environment_basic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"environment", "describe", "--service-id", serviceID, "--environment-id", envName2})
+	cmd.RootCmd.SetArgs([]string{"environment", "describe", "--service-id", serviceID, "--environment-id", env2ID})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
@@ -72,6 +72,15 @@ func Test_environment_basic(t *testing.T) {
 	require.NoError(err)
 
 	cmd.RootCmd.SetArgs([]string{"environment", "promote", "--service-id", serviceID, "--environment-id", sourceEnvID})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: describe the environment after promotion
+	cmd.RootCmd.SetArgs([]string{"environment", "describe", serviceName, envName})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	cmd.RootCmd.SetArgs([]string{"environment", "describe", "--service-id", serviceID, "--environment-id", env2ID})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
