@@ -171,13 +171,19 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		sourceEnvIDPtr = nil
 	}
 
+	// Get service auth  if it's private environment
+	var publicKeyPtr *string
+	if visibility == "PRIVATE" {
+		publicKeyPtr = commonutils.ToPtr(utils.GetDefaultServiceAuthPublicKey())
+	}
+
 	request := serviceenvironmentapi.CreateServiceEnvironmentRequest{
 		Name:                    envName,
 		Description:             description,
 		ServiceID:               serviceenvironmentapi.ServiceID(serviceId),
 		Visibility:              serviceenvironmentapi.ServiceVisibility(visibility),
 		Type:                    commonutils.ToPtr(serviceenvironmentapi.EnvironmentType(envType)),
-		ServiceAuthPublicKey:    commonutils.ToPtr("-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEA2lmruvcEDykT6KbyIJHYCGhCoPUGq+XlCfLWJXlowf4=\n-----END PUBLIC KEY-----"),
+		ServiceAuthPublicKey:    publicKeyPtr,
 		DeploymentConfigID:      serviceenvironmentapi.DeploymentConfigID(defaultDeploymentConfigID),
 		AutoApproveSubscription: commonutils.ToPtr(true),
 		SourceEnvironmentID:     (*serviceenvironmentapi.ServiceEnvironmentID)(sourceEnvIDPtr),

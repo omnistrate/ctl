@@ -1,6 +1,7 @@
 package utils
 
 import (
+	_ "embed"
 	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/config"
 	"github.com/spf13/cobra"
@@ -30,6 +31,14 @@ func GetRootDomain() string {
 // GetHostScheme returns the scheme of the Omnistrate server
 func GetHostScheme() string {
 	return utils.GetEnv("OMNISTRATE_HOST_SCHEME", "https")
+}
+
+//go:embed public_key.pem
+var publicKey []byte
+
+// GetDefaultServiceAuthPublicKey returns the default public key for environment creation
+func GetDefaultServiceAuthPublicKey() string {
+	return string(publicKey)
 }
 
 func IsProd() bool {

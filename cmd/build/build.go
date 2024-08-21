@@ -280,7 +280,6 @@ func runBuild(cmd *cobra.Command, args []string) error {
 						Type:                    (*serviceenvironmentapi.EnvironmentType)(commonutils.ToPtr("PROD")),
 						SourceEnvironmentID:     commonutils.ToPtr(serviceenvironmentapi.ServiceEnvironmentID(EnvironmentID)),
 						DeploymentConfigID:      serviceenvironmentapi.DeploymentConfigID(defaultDeploymentConfigID),
-						ServiceAuthPublicKey:    commonutils.ToPtr("-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEA2lmruvcEDykT6KbyIJHYCGhCoPUGq+XlCfLWJXlowf4=\n-----END PUBLIC KEY-----"),
 						AutoApproveSubscription: commonutils.ToPtr(true),
 					}
 
