@@ -18,7 +18,6 @@ func init() {
 	Cmd.AddCommand(listCmd)
 	Cmd.AddCommand(describeCmd)
 	Cmd.AddCommand(deleteCmd)
-	Cmd.AddCommand(promoteCmd)
 
 	Cmd.Example = utils.CombineSubCmdExamples(Cmd)
 }

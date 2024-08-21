@@ -3,7 +3,6 @@ package environment
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/chelnak/ysmrr"
 	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
@@ -31,14 +30,12 @@ var describeCmd = &cobra.Command{
 }
 
 func init() {
-	describeCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 	describeCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	describeCmd.Flags().StringP("environment-id", "", "", "Environment ID. Required if environment name is not provided")
 }
 
 func runDescribe(cmd *cobra.Command, args []string) error {
 	// Get flags
-	output, _ := cmd.Flags().GetString("output")
 	serviceId, _ := cmd.Flags().GetString("service-id")
 	environmentId, _ := cmd.Flags().GetString("environment-id")
 
@@ -59,15 +56,6 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		utils.PrintError(err)
 		return err
-	}
-
-	var sm ysmrr.SpinnerManager
-	var spinner *ysmrr.Spinner
-	if output != "json" {
-		sm = ysmrr.NewSpinnerManager()
-		msg := "Describing environment..."
-		spinner = sm.AddSpinner(msg)
-		sm.Start()
 	}
 
 	// Check if the environment exists
@@ -106,8 +94,6 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 
 	environment, err := dataaccess.DescribeServiceEnvironment(token, serviceId, environmentId)
 	if err != nil {
-		spinner.Error()
-		sm.Stop()
 		utils.PrintError(err)
 		return err
 	}
@@ -149,7 +135,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Format the output
-	formattedEnvironment := model.Environment{
+	formattedEnvironment := model.DetailedEnvironment{
 		EnvironmentID:    string(environment.ID),
 		EnvironmentName:  environment.Name,
 		EnvironmentType:  string(environment.Type),
@@ -157,41 +143,16 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 		ServiceName:      serviceName,
 		SourceEnvName:    sourceEnvName,
 		PromoteStatus:    promoteStatus,
-		SaasPortalStatus: saasPortalStatus,
-		SaasPortalURL:    saasPortalURL,
+		SaaSPortalStatus: saasPortalStatus,
+		SaaSPortalURL:    saasPortalURL,
 	}
 
-	var jsonData []string
 	data, err := json.MarshalIndent(formattedEnvironment, "", "    ")
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
-	jsonData = append(jsonData, string(data))
-
-	// Print output
-	switch output {
-	case "text":
-		err = utils.PrintText(jsonData)
-		if err != nil {
-			return err
-		}
-	case "table":
-		err = utils.PrintTable(jsonData)
-		if err != nil {
-			return err
-		}
-	case "json":
-		_, err = fmt.Fprintf(cmd.OutOrStdout(), "%+v\n", jsonData[0])
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-	default:
-		err = fmt.Errorf("unsupported output format: %s", output)
-		utils.PrintError(err)
-		return err
-	}
+	fmt.Println(string(data))
 
 	return nil
 }

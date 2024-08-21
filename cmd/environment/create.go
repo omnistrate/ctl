@@ -228,7 +228,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Format the output
-	formattedEnvironment := model.Environment{
+	formattedEnvironment := model.DetailedEnvironment{
 		EnvironmentID:    string(environment.ID),
 		EnvironmentName:  environment.Name,
 		EnvironmentType:  string(environment.Type),
@@ -236,8 +236,8 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		ServiceName:      serviceName,
 		SourceEnvName:    sourceEnvName,
 		PromoteStatus:    promoteStatus,
-		SaasPortalStatus: saasPortalStatus,
-		SaasPortalURL:    saasPortalURL,
+		SaaSPortalStatus: saasPortalStatus,
+		SaaSPortalURL:    saasPortalURL,
 	}
 
 	var jsonData []string
