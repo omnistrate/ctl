@@ -33,7 +33,7 @@ func init() {
 }
 
 func runList(cmd *cobra.Command, args []string) error {
-	defer cleanUpListFlagsAndArgs(cmd, &args)
+	defer utils.CleanupArgsAndFlags(cmd, &args)
 
 	// Retrieve command-line flags
 	output, _ := cmd.Flags().GetString("output")
@@ -138,14 +138,4 @@ func formatEnvironment(service *serviceapi.DescribeServiceResult, environment *s
 		ServiceName:     serviceName,
 		SourceEnvName:   sourceEnvName,
 	}, nil
-}
-
-func cleanUpListFlagsAndArgs(cmd *cobra.Command, args *[]string) {
-	// Clean up flags
-	_ = cmd.Flags().Set("output", "text")
-	_ = cmd.Flags().Set("filter", "")
-	_ = cmd.Flags().Set("truncate", "false")
-
-	// Clean up arguments by resetting the slice to nil or an empty slice
-	*args = nil
 }

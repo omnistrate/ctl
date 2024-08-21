@@ -27,13 +27,15 @@ var deleteCmd = &cobra.Command{
 }
 
 func init() {
+	deleteCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 	deleteCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	deleteCmd.Flags().StringP("environment-id", "", "", "Environment ID. Required if environment name is not provided")
 }
 func runDelete(cmd *cobra.Command, args []string) error {
-	defer cleanUpDeleteFlagsAndArgs(cmd, &args)
+	defer utils.CleanupArgsAndFlags(cmd, &args)
 
 	// Retrieve flags
+	output, _ := cmd.Flags().GetString("output")
 	serviceId, _ := cmd.Flags().GetString("service-id")
 	environmentId, _ := cmd.Flags().GetString("environment-id")
 
@@ -59,7 +61,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	// Initialize spinner if output is not JSON
 	var sm ysmrr.SpinnerManager
 	var spinner *ysmrr.Spinner
-	if cmd.Flag("output").Value.String() != "json" {
+	if output != "json" {
 		sm = ysmrr.NewSpinnerManager()
 		spinner = sm.AddSpinner("Deleting environment...")
 		sm.Start()
@@ -104,13 +106,4 @@ func validateDeleteArguments(args []string, serviceId, environmentId string) err
 		return fmt.Errorf("invalid arguments: %s. Need 2 arguments: [service-name] [environment-name]", strings.Join(args, " "))
 	}
 	return nil
-}
-
-func cleanUpDeleteFlagsAndArgs(cmd *cobra.Command, args *[]string) {
-	// Clean up flags
-	_ = cmd.Flags().Set("service-id", "")
-	_ = cmd.Flags().Set("environment-id", "")
-
-	// Clean up arguments by resetting the slice to nil or an empty slice
-	*args = nil
 }

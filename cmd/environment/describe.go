@@ -37,7 +37,7 @@ func init() {
 }
 
 func runDescribe(cmd *cobra.Command, args []string) error {
-	defer cleanUpDescribeFlagsAndArgs(cmd, &args)
+	defer utils.CleanupArgsAndFlags(cmd, &args)
 
 	// Retrieve flags
 	serviceId, _ := cmd.Flags().GetString("service-id")
@@ -158,13 +158,4 @@ func getSaaSPortalURL(environment *serviceenvironmentapi.DescribeServiceEnvironm
 		return *environment.SaasPortalURL
 	}
 	return ""
-}
-
-func cleanUpDescribeFlagsAndArgs(cmd *cobra.Command, args *[]string) {
-	// Clean up flags
-	_ = cmd.Flags().Set("service-id", "")
-	_ = cmd.Flags().Set("environment-id", "")
-
-	// Clean up arguments by resetting the slice to nil or an empty slice
-	*args = nil
 }

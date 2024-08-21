@@ -51,7 +51,7 @@ func init() {
 }
 
 func runCreate(cmd *cobra.Command, args []string) error {
-	defer cleanUpCreateFlagsAndArgs(cmd, &args)
+	defer utils.CleanupArgsAndFlags(cmd, &args)
 
 	// Get flags
 	description, _ := cmd.Flags().GetString("description")
@@ -282,16 +282,4 @@ func getPromoteStatus(token, serviceId string, environment *serviceenvironmentap
 		}
 	}
 	return ""
-}
-
-func cleanUpCreateFlagsAndArgs(cmd *cobra.Command, args *[]string) {
-	// Clean up flags
-	_ = cmd.Flags().Set("description", "")
-	_ = cmd.Flags().Set("type", "")
-	_ = cmd.Flags().Set("source", "")
-	_ = cmd.Flags().Set("output", "text")
-	_ = cmd.Flags().Set("service-id", "")
-
-	// Clean up arguments by resetting the slice to nil or an empty slice
-	*args = nil
 }

@@ -62,7 +62,7 @@ func Test_environment_basic(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: list environments with filter
-	cmd.RootCmd.SetArgs([]string{"environment", "list", "-f=service_name:" + serviceName})
+	cmd.RootCmd.SetArgs([]string{"environment", "list", fmt.Sprintf("-f=service_name:%s", serviceName)})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
