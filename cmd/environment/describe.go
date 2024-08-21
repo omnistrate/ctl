@@ -3,11 +3,11 @@ package environment
 import (
 	"encoding/json"
 	"fmt"
-	commonutils "github.com/omnistrate/commons/pkg/utils"
+	"github.com/chelnak/ysmrr"
+	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"strings"
 )
@@ -35,124 +35,123 @@ func init() {
 }
 
 func runDescribe(cmd *cobra.Command, args []string) error {
-	// Get flags
+	// Retrieve flags
+	output, _ := cmd.Flags().GetString("output")
 	serviceId, _ := cmd.Flags().GetString("service-id")
 	environmentId, _ := cmd.Flags().GetString("environment-id")
 
-	if len(args) == 0 && (serviceId == "" || environmentId == "") {
-		err := fmt.Errorf("please provide the service name and environment name or the service ID and environment ID")
+	// Validate input arguments
+	if err := validateDescribeArguments(args, serviceId, environmentId); err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	if len(args) > 0 && len(args) != 2 {
-		err := fmt.Errorf("invalid arguments: %s. Need 2 arguments: [service-name] [environment-name]", strings.Join(args, " "))
-		utils.PrintError(err)
-		return err
+	// Set service and environment names if provided in args
+	var serviceName, environmentName string
+	if len(args) == 2 {
+		serviceName, environmentName = args[0], args[1]
 	}
 
-	// Validate user is currently logged in
+	// Validate user login
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	// Check if the environment exists
+	// Initialize spinner if output is not JSON
+	var sm ysmrr.SpinnerManager
+	var spinner *ysmrr.Spinner
+	if output != "json" {
+		sm = ysmrr.NewSpinnerManager()
+		spinner = sm.AddSpinner("Describing environment...")
+		sm.Start()
+	}
+
+	// Retrieve service and environment details
 	services, err := dataaccess.ListServices(token)
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	var serviceName string
-	serviceEnvironmentsMap := make(map[string]map[string]bool)
-	for _, service := range services.Services {
-		if string(service.ID) == serviceId || (len(args) == 2 && strings.EqualFold(service.Name, args[0])) {
-			for _, environment := range service.ServiceEnvironments {
-				if string(environment.ID) == environmentId || (len(args) == 2 && strings.EqualFold(environment.Name, args[1])) {
-					if _, ok := serviceEnvironmentsMap[string(service.ID)]; !ok {
-						serviceEnvironmentsMap[string(service.ID)] = make(map[string]bool)
-					}
-					serviceEnvironmentsMap[string(service.ID)][string(environment.ID)] = true
-					serviceId = string(service.ID)
-					environmentId = string(environment.ID)
-				}
-			}
-		}
-	}
-	if len(serviceEnvironmentsMap) == 0 {
-		err = errors.New("environment not found. Please check the input values and try again")
-		utils.PrintError(err)
-		return err
-	}
-	if len(serviceEnvironmentsMap) > 1 || len(serviceEnvironmentsMap[serviceId]) > 1 {
-		err = errors.New("multiple environments found. Please provide the service ID and environment ID instead of the names")
-		utils.PrintError(err)
+	serviceId, serviceName, environmentId, environmentName, err = getServiceEnvironment(services, serviceId, serviceName, environmentId, environmentName)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
+	// Describe the environment
 	environment, err := dataaccess.DescribeServiceEnvironment(token, serviceId, environmentId)
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	saasPortalStatus := ""
-	if environment.SaasPortalStatus != nil {
-		saasPortalStatus = string(*environment.SaasPortalStatus)
-	}
-	saasPortalURL := ""
-	if environment.SaasPortalURL != nil {
-		saasPortalURL = *environment.SaasPortalURL
+	// Format the environment details
+	formattedEnvironment, err := formatEnvironmentDetails(token, serviceId, serviceName, environment)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
 	}
 
-	// Get promote status
-	promoteStatus := ""
-	if !commonutils.CheckIfNilOrEmpty((*string)(environment.SourceEnvironmentID)) {
-		promoteRes, err := dataaccess.PromoteServiceEnvironmentStatus(token, serviceId, string(*environment.SourceEnvironmentID))
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-		for _, res := range promoteRes {
-			if string(res.TargetEnvironmentID) == string(environment.ID) {
-				promoteStatus = res.Status
-				break
-			}
-		}
+	// Handle output based on format
+	if spinner != nil {
+		spinner.UpdateMessage("Environment description retrieved successfully")
+		spinner.Complete()
+		sm.Stop()
 	}
 
-	// Get source environment name
-	sourceEnvName := ""
-	if !commonutils.CheckIfNilOrEmpty((*string)(environment.SourceEnvironmentID)) {
-		sourceEnv, err := dataaccess.DescribeServiceEnvironment(token, serviceId, string(*environment.SourceEnvironmentID))
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-		sourceEnvName = sourceEnv.Name
+	if err = utils.PrintTextTableJsonOutput(output, formattedEnvironment); err != nil {
+		return err
 	}
 
-	// Format the output
+	return nil
+}
+
+// Helper functions
+
+func validateDescribeArguments(args []string, serviceId, environmentId string) error {
+	if len(args) == 0 && (serviceId == "" || environmentId == "") {
+		return fmt.Errorf("please provide the service name and environment name or the service ID and environment ID")
+	}
+	if len(args) > 0 && len(args) != 2 {
+		return fmt.Errorf("invalid arguments: %s. Need 2 arguments: [service-name] [environment-name]", strings.Join(args, " "))
+	}
+	return nil
+}
+
+func formatEnvironmentDetails(token, serviceId, serviceName string, environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) (string, error) {
+	// Example of formatting environment details
 	formattedEnvironment := model.DetailedEnvironment{
 		EnvironmentID:    string(environment.ID),
 		EnvironmentName:  environment.Name,
 		EnvironmentType:  string(environment.Type),
 		ServiceID:        string(environment.ServiceID),
 		ServiceName:      serviceName,
-		SourceEnvName:    sourceEnvName,
-		PromoteStatus:    promoteStatus,
-		SaaSPortalStatus: saasPortalStatus,
-		SaaSPortalURL:    saasPortalURL,
+		SaaSPortalStatus: getSaaSPortalStatus(environment),
+		SaaSPortalURL:    getSaaSPortalURL(environment),
+		PromoteStatus:    getPromoteStatus(token, serviceId, environment),
 	}
 
 	data, err := json.MarshalIndent(formattedEnvironment, "", "    ")
 	if err != nil {
-		utils.PrintError(err)
-		return err
+		return "", err
 	}
-	fmt.Println(string(data))
 
-	return nil
+	return string(data), nil
+}
+
+func getSaaSPortalStatus(environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) string {
+	if environment.SaasPortalStatus != nil {
+		return string(*environment.SaasPortalStatus)
+	}
+	return ""
+}
+
+func getSaaSPortalURL(environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) string {
+	if environment.SaasPortalURL != nil {
+		return *environment.SaasPortalURL
+	}
+	return ""
 }

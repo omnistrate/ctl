@@ -2,7 +2,7 @@ package environment
 
 import (
 	"encoding/json"
-	"fmt"
+	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
@@ -33,121 +33,107 @@ func init() {
 }
 
 func runList(cmd *cobra.Command, args []string) error {
-	// Get flags
-	output, err := cmd.Flags().GetString("output")
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-	filters, err := cmd.Flags().GetStringArray("filter")
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-	truncateNames, err := cmd.Flags().GetBool("truncate")
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
+	// Retrieve command-line flags
+	output, _ := cmd.Flags().GetString("output")
+	filters, _ := cmd.Flags().GetStringArray("filter")
+	truncateNames, _ := cmd.Flags().GetBool("truncate")
 
-	// Parse filters into a map
+	// Parse and validate filters
 	filterMaps, err := utils.ParseFilters(filters, utils.GetSupportedFilterKeys(model.Environment{}))
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	// Validate user is currently logged in
+	// Ensure user is logged in
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	// Get all environments
+	// Retrieve services and environments
 	services, err := dataaccess.ListServices(token)
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	environments := make([]model.Environment, 0)
+	var environments []string
+
+	// Process and filter environments
 	for _, service := range services.Services {
 		for _, environment := range service.ServiceEnvironments {
 			if environment == nil {
 				continue
 			}
-			serviceName := service.Name
-			if truncateNames {
-				serviceName = utils.TruncateString(serviceName, defaultMaxNameLength)
-			}
-			envName := environment.Name
-			if truncateNames {
-				envName = utils.TruncateString(envName, defaultMaxNameLength)
-			}
-			envType := ""
-			if environment.Type != nil {
-				envType = string(*environment.Type)
-			}
-			sourceEnvName := ""
-			if environment.SourceEnvironmentName != nil {
-				sourceEnvName = *environment.SourceEnvironmentName
-			}
-			formattedEnvironment := model.Environment{
-				EnvironmentID:   string(environment.ID),
-				EnvironmentName: envName,
-				EnvironmentType: envType,
-				ServiceID:       string(service.ID),
-				ServiceName:     serviceName,
-				SourceEnvName:   sourceEnvName,
-			}
 
-			// Check if the environment matches the filters
-			ok, err := utils.MatchesFilters(formattedEnvironment, filterMaps)
+			env, err := formatEnvironment(service, environment, truncateNames)
 			if err != nil {
 				utils.PrintError(err)
 				return err
 			}
-			if ok {
-				environments = append(environments, formattedEnvironment)
+
+			match, err := utils.MatchesFilters(env, filterMaps)
+			if err != nil {
+				utils.PrintError(err)
+				return err
+			}
+
+			if match {
+				environments = append(environments, env)
 			}
 		}
 	}
 
-	var jsonData []string
-	for _, environment := range environments {
-		data, err := json.MarshalIndent(environment, "", "    ")
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-
-		jsonData = append(jsonData, string(data))
-	}
-
-	if len(jsonData) == 0 {
+	// Handle case when no environments match
+	if len(environments) == 0 {
 		utils.PrintInfo("No environments found.")
 		return nil
 	}
 
-	switch output {
-	case "text":
-		err = utils.PrintText(jsonData)
-		if err != nil {
-			return err
-		}
-	case "table":
-		err = utils.PrintTable(jsonData)
-		if err != nil {
-			return err
-		}
-	case "json":
-		fmt.Printf("%+v\n", jsonData)
-	default:
-		err = fmt.Errorf("unsupported output format: %s", output)
-		utils.PrintError(err)
+	// Format output as requested
+	err = utils.PrintTextTableJsonArrayOutput(output, environments)
+	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// Helper functions
+
+func formatEnvironment(service *serviceapi.DescribeServiceResult, environment *serviceapi.ServiceEnvironment, truncateNames bool) (string, error) {
+	serviceName := service.Name
+	envName := environment.Name
+
+	if truncateNames {
+		serviceName = utils.TruncateString(serviceName, defaultMaxNameLength)
+		envName = utils.TruncateString(envName, defaultMaxNameLength)
+	}
+
+	envType := ""
+	if environment.Type != nil {
+		envType = string(*environment.Type)
+	}
+
+	sourceEnvName := ""
+	if environment.SourceEnvironmentName != nil {
+		sourceEnvName = *environment.SourceEnvironmentName
+	}
+
+	formattedEnvironment := model.Environment{
+		EnvironmentID:   string(environment.ID),
+		EnvironmentName: envName,
+		EnvironmentType: envType,
+		ServiceID:       string(service.ID),
+		ServiceName:     serviceName,
+		SourceEnvName:   sourceEnvName,
+	}
+
+	data, err := json.MarshalIndent(formattedEnvironment, "", "    ")
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
 }

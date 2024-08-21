@@ -59,88 +59,52 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	serviceId, _ := cmd.Flags().GetString("service-id")
 	envName := args[len(args)-1]
 
-	if len(args) == 1 && serviceId == "" {
-		err := fmt.Errorf("please provide service name or id")
+	// Set service name if provided in args
+	var serviceName string
+	if len(args) == 2 {
+		serviceName = args[0]
+	}
+
+	// Validate input arguments
+	if err := validateCreateArguments(args, serviceId); err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	if len(args) == 2 && serviceId != "" {
-		err := fmt.Errorf("please provide either service name or id, not both")
+	// Validate environment type
+	if err := validateEnvironmentType(envType); err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	if !slices.Contains([]string{"dev", "qa", "staging", "canary", "prod", "private"}, strings.ToLower(envType)) {
-		err := fmt.Errorf("invalid environment type: %s", envType)
-		utils.PrintError(err)
-		return err
-	}
-
-	// Validate user is currently logged in
+	// Validate user is logged in
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
+	// Initialize spinner if output is not JSON
 	var sm ysmrr.SpinnerManager
 	var spinner *ysmrr.Spinner
 	if output != "json" {
 		sm = ysmrr.NewSpinnerManager()
-		msg := "Creating environment..."
-		spinner = sm.AddSpinner(msg)
+		spinner = sm.AddSpinner("Creating environment...")
 		sm.Start()
 	}
 
 	// Check if the service exists
-	searchRes, err := dataaccess.SearchInventory(token, "service:s")
+	serviceId, serviceName, err = getService(token, serviceId, serviceName)
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	serviceFound := false
-	var serviceName string
-	for _, service := range searchRes.ServiceResults {
-		if serviceId == service.ID || (len(args) == 2 && strings.EqualFold(service.Name, args[0])) {
-			serviceFound = true
-			serviceId = service.ID
-			serviceName = service.Name
-			break
-		}
-	}
-
-	if !serviceFound {
-		err = errors.New("service not found")
+	// Check if source environment exists
+	sourceEnvID, err := getSourceEnvironmentID(token, serviceId, sourceEnvName)
+	if err != nil {
 		utils.PrintError(err)
 		return err
-	}
-
-	// Check if source environment exists
-	var sourceEnvID string
-	if sourceEnvName != "" {
-		describeServiceRes, err := dataaccess.DescribeService(token, serviceId)
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-
-		sourceEnvFound := false
-		for _, env := range describeServiceRes.ServiceEnvironments {
-			if strings.EqualFold(env.Name, sourceEnvName) {
-				sourceEnvFound = true
-				sourceEnvName = env.Name
-				sourceEnvID = string(env.ID)
-				break
-			}
-		}
-
-		if !sourceEnvFound {
-			err = errors.New("source environment not found. Please provide a valid source environment name")
-			utils.PrintError(err)
-			return err
-		}
 	}
 
 	// Create the environment
@@ -148,35 +112,113 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		description = fmt.Sprintf("%s environment for service %s", envType, serviceName)
 	}
 
-	visibility := ""
-	switch strings.ToLower(envType) {
-	case "dev", "qa", "staging", "canary", "private":
-		visibility = "PRIVATE"
-	case "prod":
-		visibility = "PUBLIC"
-	default:
-		err = fmt.Errorf("invalid environment type: %s", envType)
-		utils.PrintError(err)
-		return err
-	}
-
+	visibility := getVisibility(envType)
 	defaultDeploymentConfigID, err := dataaccess.GetDefaultDeploymentConfigID(token)
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	sourceEnvIDPtr := commonutils.ToPtr(sourceEnvID)
-	if sourceEnvID == "" {
-		sourceEnvIDPtr = nil
+	publicKeyPtr := getPublicKeyPtr(visibility)
+	environmentID, err := createEnvironment(token, envName, description, serviceId, envType, visibility, string(defaultDeploymentConfigID), sourceEnvID, publicKeyPtr)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
 	}
 
-	// Get service auth  if it's private environment
-	var publicKeyPtr *string
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully created environment")
+
+	// Describe the environment
+	environment, err := dataaccess.DescribeServiceEnvironment(token, serviceId, string(environmentID))
+	if err != nil {
+		return err
+	}
+
+	// Format and print the environment
+	formattedEnvironment, err := formatDetailedEnvironment(token, serviceId, serviceName, sourceEnvName, environment)
+	if err != nil {
+		return err
+	}
+	err = utils.PrintTextTableJsonOutput(output, formattedEnvironment)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Helper functions
+
+func validateCreateArguments(args []string, serviceId string) error {
+	if len(args) == 1 && serviceId == "" {
+		return fmt.Errorf("please provide service name or id")
+	}
+	if len(args) == 2 && serviceId != "" {
+		return fmt.Errorf("please provide either service name or id, not both")
+	}
+	return nil
+}
+
+func validateEnvironmentType(envType string) error {
+	if !slices.Contains([]string{"dev", "qa", "staging", "canary", "prod", "private"}, strings.ToLower(envType)) {
+		return fmt.Errorf("invalid environment type: %s", envType)
+	}
+	return nil
+}
+
+func getService(token, serviceIdArg, serviceNameArg string) (serviceId string, serviceName string, err error) {
+	searchRes, err := dataaccess.SearchInventory(token, "service:s")
+	if err != nil {
+		return "", "", err
+	}
+
+	for _, service := range searchRes.ServiceResults {
+		if serviceId == service.ID || strings.EqualFold(service.Name, serviceName) {
+			return service.ID, service.Name, nil
+		}
+	}
+
+	return "", "", errors.New("service not found")
+}
+
+func getSourceEnvironmentID(token, serviceId, sourceEnvName string) (string, error) {
+	if sourceEnvName == "" {
+		return "", nil
+	}
+
+	describeServiceRes, err := dataaccess.DescribeService(token, serviceId)
+	if err != nil {
+		return "", err
+	}
+
+	for _, env := range describeServiceRes.ServiceEnvironments {
+		if strings.EqualFold(env.Name, sourceEnvName) {
+			return string(env.ID), nil
+		}
+	}
+
+	return "", errors.New("source environment not found. Please provide a valid source environment name")
+}
+
+func getVisibility(envType string) string {
+	switch strings.ToLower(envType) {
+	case "dev", "qa", "staging", "canary", "private":
+		return "PRIVATE"
+	case "prod":
+		return "PUBLIC"
+	default:
+		return ""
+	}
+}
+
+func getPublicKeyPtr(visibility string) *string {
 	if visibility == "PRIVATE" {
-		publicKeyPtr = commonutils.ToPtr(utils.GetDefaultServiceAuthPublicKey())
+		return commonutils.ToPtr(utils.GetDefaultServiceAuthPublicKey())
 	}
+	return nil
+}
 
+func createEnvironment(token, envName, description, serviceId, envType, visibility, defaultDeploymentConfigID, sourceEnvID string, publicKeyPtr *string) (serviceenvironmentapi.ServiceEnvironmentID, error) {
 	request := serviceenvironmentapi.CreateServiceEnvironmentRequest{
 		Name:                    envName,
 		Description:             description,
@@ -186,30 +228,13 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		ServiceAuthPublicKey:    publicKeyPtr,
 		DeploymentConfigID:      serviceenvironmentapi.DeploymentConfigID(defaultDeploymentConfigID),
 		AutoApproveSubscription: commonutils.ToPtr(true),
-		SourceEnvironmentID:     (*serviceenvironmentapi.ServiceEnvironmentID)(sourceEnvIDPtr),
+		SourceEnvironmentID:     (*serviceenvironmentapi.ServiceEnvironmentID)(commonutils.ToPtr(sourceEnvID)),
 	}
 
-	environmentID, err := dataaccess.CreateServiceEnvironment(token, request)
-	if err != nil {
-		spinner.Error()
-		sm.Stop()
-		utils.PrintError(err)
-		return err
-	}
+	return dataaccess.CreateServiceEnvironment(token, request)
+}
 
-	if spinner != nil {
-		spinner.UpdateMessage("Successfully created environment")
-		spinner.Complete()
-		sm.Stop()
-	}
-
-	// Describe the environment
-	environment, err := dataaccess.DescribeServiceEnvironment(token, serviceId, string(environmentID))
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
+func formatDetailedEnvironment(token, serviceId, serviceName, sourceEnvName string, environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) (string, error) {
 	saasPortalStatus := ""
 	if environment.SaasPortalStatus != nil {
 		saasPortalStatus = string(*environment.SaasPortalStatus)
@@ -219,23 +244,8 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		saasPortalURL = *environment.SaasPortalURL
 	}
 
-	// Get promote status
-	promoteStatus := ""
-	if !commonutils.CheckIfNilOrEmpty((*string)(environment.SourceEnvironmentID)) {
-		promoteRes, err := dataaccess.PromoteServiceEnvironmentStatus(token, serviceId, string(*environment.SourceEnvironmentID))
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-		for _, res := range promoteRes {
-			if string(res.TargetEnvironmentID) == string(environment.ID) {
-				promoteStatus = res.Status
-				break
-			}
-		}
-	}
+	promoteStatus := getPromoteStatus(token, serviceId, environment)
 
-	// Format the output
 	formattedEnvironment := model.DetailedEnvironment{
 		EnvironmentID:    string(environment.ID),
 		EnvironmentName:  environment.Name,
@@ -247,39 +257,25 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		SaaSPortalStatus: saasPortalStatus,
 		SaaSPortalURL:    saasPortalURL,
 	}
-	EnvironmentID = string(environment.ID)
 
-	var jsonData []string
 	data, err := json.MarshalIndent(formattedEnvironment, "", "    ")
 	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-	jsonData = append(jsonData, string(data))
-
-	// Print output
-	switch output {
-	case "text":
-		err = utils.PrintText(jsonData)
-		if err != nil {
-			return err
-		}
-	case "table":
-		err = utils.PrintTable(jsonData)
-		if err != nil {
-			return err
-		}
-	case "json":
-		_, err = fmt.Fprintf(cmd.OutOrStdout(), "%+v\n", jsonData[0])
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-	default:
-		err = fmt.Errorf("unsupported output format: %s", output)
-		utils.PrintError(err)
-		return err
+		return "", err
 	}
 
-	return nil
+	return string(data), nil
+}
+
+func getPromoteStatus(token, serviceId string, environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) string {
+	if !commonutils.CheckIfNilOrEmpty((*string)(environment.SourceEnvironmentID)) {
+		promoteRes, err := dataaccess.PromoteServiceEnvironmentStatus(token, serviceId, string(*environment.SourceEnvironmentID))
+		if err == nil {
+			for _, res := range promoteRes {
+				if string(res.TargetEnvironmentID) == string(environment.ID) {
+					return res.Status
+				}
+			}
+		}
+	}
+	return ""
 }
