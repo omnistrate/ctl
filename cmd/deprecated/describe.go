@@ -46,7 +46,7 @@ func run(cmd *cobra.Command, args []string) (err error) {
 
 		// Describe object
 		var svc *serviceapi.DescribeServiceResult
-		svc, err = dataaccess.DescribeService(describeServiceID, token)
+		svc, err = dataaccess.DescribeService(token, describeServiceID)
 		if err != nil {
 			utils.PrintError(err)
 			return

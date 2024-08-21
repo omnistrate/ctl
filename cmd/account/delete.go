@@ -98,7 +98,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 
 	// Delete account
 	for _, accountID := range accountIDs {
-		err = dataaccess.DeleteAccount(accountID, token)
+		err = dataaccess.DeleteAccount(token, accountID)
 		if err != nil {
 			utils.PrintError(err)
 			return err

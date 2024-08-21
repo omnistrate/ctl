@@ -30,6 +30,9 @@ func GetSupportedFilterKeys[T any](obj T) (supportedFilterKeys []string) {
 func ParseFilters(filters []string, supportedFilterKeys []string) (filterMaps []map[string]string, err error) {
 	filterMaps = make([]map[string]string, 0)
 	for _, filter := range filters {
+		if filter == "[]" {
+			continue // Those are empty filters that are reset to default values when clean up args and flags
+		}
 		filterMap := make(map[string]string)
 		filterParts := strings.Split(filter, ",")
 		for _, part := range filterParts {

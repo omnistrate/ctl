@@ -97,7 +97,7 @@ func runRelease(cmd *cobra.Command, args []string) error {
 	}
 
 	servicePlanFound := false
-	describeServiceRes, err := dataaccess.DescribeService(serviceId, token)
+	describeServiceRes, err := dataaccess.DescribeService(token, serviceId)
 	if err != nil {
 		utils.PrintError(err)
 		return err

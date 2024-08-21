@@ -44,3 +44,31 @@ func PrintJSON(res interface{}) {
 	}
 	fmt.Println(string(data))
 }
+
+func PrintTextTableJsonArrayOutput(output string, jsonData []string) error {
+	switch output {
+	case "text":
+		return PrintText(jsonData)
+	case "table":
+		return PrintTable(jsonData)
+	case "json":
+		fmt.Printf("%+v\n", jsonData)
+	default:
+		return fmt.Errorf("unsupported output format: %s", output)
+	}
+	return nil
+}
+
+func PrintTextTableJsonOutput(output string, jsonData string) error {
+	switch output {
+	case "text":
+		return PrintText([]string{jsonData})
+	case "table":
+		return PrintTable([]string{jsonData})
+	case "json":
+		fmt.Printf("%+v\n", jsonData)
+	default:
+		return fmt.Errorf("unsupported output format: %s", output)
+	}
+	return nil
+}

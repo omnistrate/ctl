@@ -57,7 +57,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	var services []*serviceapi.DescribeServiceResult
 	if ID {
 		for _, name := range args {
-			service, err := dataaccess.DescribeService(name, token)
+			service, err := dataaccess.DescribeService(token, name)
 			if err != nil {
 				utils.PrintError(err)
 				return err
@@ -80,7 +80,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 		// Filter services by name
 		for _, s := range listRes.Services {
 			if slices.Contains(args, s.Name) {
-				service, err := dataaccess.DescribeService(string(s.ID), token)
+				service, err := dataaccess.DescribeService(token, string(s.ID))
 				if err != nil {
 					utils.PrintError(err)
 					return err
