@@ -23,6 +23,8 @@ omnistrate environment create [service-name] [environment-name] --type [type] --
 omnistrate environment create [environment-name] --service-id [service-id] --type [type] --source [source]`
 )
 
+var EnvironmentID string
+
 var createCmd = &cobra.Command{
 	Use:          "create [service-name] [environment-name] [flags]",
 	Short:        "Create a environment",
@@ -239,6 +241,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		SaaSPortalStatus: saasPortalStatus,
 		SaaSPortalURL:    saasPortalURL,
 	}
+	EnvironmentID = string(environment.ID)
 
 	var jsonData []string
 	data, err := json.MarshalIndent(formattedEnvironment, "", "    ")
