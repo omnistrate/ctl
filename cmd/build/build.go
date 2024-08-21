@@ -8,6 +8,7 @@ import (
 	"github.com/compose-spec/compose-go/loader"
 	"github.com/compose-spec/compose-go/types"
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
+	composegenapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/compose_gen_api"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
 	commonutils "github.com/omnistrate/commons/pkg/utils"
@@ -38,7 +39,7 @@ var (
 	releaseDescription string
 	interactive        bool
 
-	image                     string
+	imageUrl                  string
 	envVars                   []string
 	imageRegistryAuthUsername string
 	imageRegistryAuthPassword string
@@ -108,12 +109,14 @@ func init() {
 	BuildCmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "Interactive mode")
 	BuildCmd.Flags().StringVarP(&specType, "spec-type", "s", DockerComposeSpecType, "Spec type")
 
-	BuildCmd.Flags().StringVarP(&image, "image", "i", "", "Provide the complete image repository URL with the image name and tag (e.g., docker.io/namespace/my-image:v1.2)")
+	BuildCmd.Flags().StringVarP(&imageUrl, "image", "", "", "Provide the complete image repository URL with the image name and tag (e.g., docker.io/namespace/my-image:v1.2)")
 	BuildCmd.Flags().StringArrayVarP(&envVars, "env-var", "", nil, "Used together with --image flag. Provide environment variables in the format --env-var KEY1:VALUE1 --env-var KEY2:VALUE2")
 	BuildCmd.Flags().StringVarP(&imageRegistryAuthUsername, "image-registry-auth-username", "", "", "Used together with --image flag. Provide the username to authenticate with the image registry if it's a private registry")
 	BuildCmd.Flags().StringVarP(&imageRegistryAuthPassword, "image-registry-auth-password", "", "", "Used together with --image flag. Provide the password to authenticate with the image registry if it's a private registry")
 
+	BuildCmd.MarkFlagsRequiredTogether("image-registry-auth-username", "image-registry-auth-password")
 	BuildCmd.MarkFlagsOneRequired("file", "image")
+	BuildCmd.MarkFlagsMutuallyExclusive("file", "image")
 	err := BuildCmd.MarkFlagFilename("file")
 	if err != nil {
 		return
@@ -130,15 +133,18 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	defer resetBuild()
 
 	// Validate input arguments
-	if len(file) == 0 {
-		err := errors.New("must provide --file or -f")
-		utils.PrintError(err)
-		return err
-	}
+	var fileData []byte
+	if file != "" {
+		if _, err := os.Stat(file); os.IsNotExist(err) {
+			utils.PrintError(err)
+			return err
+		}
 
-	if _, err := os.Stat(file); os.IsNotExist(err) {
-		utils.PrintError(err)
-		return err
+		var err error
+		fileData, err = os.ReadFile(filepath.Clean(file))
+		if err != nil {
+			return err
+		}
 	}
 
 	// Validate user is currently logged in
@@ -146,6 +152,85 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		utils.PrintError(err)
 		return err
+	}
+
+	// Step 0: Generate compose spec from image if image is provided
+	if imageUrl != "" {
+		// Split the image url into registry and image
+		imageParts := strings.Split(imageUrl, "/")
+		if len(imageParts) < 2 {
+			err = errors.New("invalid image format")
+			utils.PrintError(err)
+			return err
+		}
+
+		// Get the image registry and image
+		imageRegistry := imageParts[0]
+		image := strings.Join(imageParts[1:], "/")
+
+		// Check if the image is accessible
+		var userNamePtr, passwordPtr *string
+		if imageRegistryAuthUsername != "" && imageRegistryAuthPassword != "" {
+			userNamePtr = &imageRegistryAuthUsername
+			passwordPtr = &imageRegistryAuthPassword
+		}
+
+		checkImageRequest := composegenapi.CheckIfContainerImageAccessibleRequest{
+			ImageRegistry: imageRegistry,
+			Image:         image,
+			Username:      userNamePtr,
+			Password:      passwordPtr,
+		}
+
+		checkImageRes, err := dataaccess.CheckIfContainerImageAccessible(token, &checkImageRequest)
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+
+		if !checkImageRes.ImageAccessible {
+			err = errors.New("image not accessible")
+			if checkImageRes.ErrorMsg != nil {
+				err = errors.New(*checkImageRes.ErrorMsg)
+			}
+			utils.PrintError(err)
+			return err
+		}
+
+		// Generate compose spec from image
+		var formattedEnvVars []*composegenapi.EnvironmentVariable
+		for _, envVar := range envVars {
+			envVarParts := strings.Split(envVar, ":")
+			if len(envVarParts) != 2 {
+				err = errors.New("invalid environment variable format")
+				utils.PrintError(err)
+				return err
+			}
+			formattedEnvVars = append(formattedEnvVars, &composegenapi.EnvironmentVariable{
+				Key:   envVarParts[0],
+				Value: envVarParts[1],
+			})
+		}
+		generateComposeSpecRequest := composegenapi.GenerateComposeSpecFromContainerImageRequest{
+			ImageRegistry:        imageRegistry,
+			Image:                image,
+			EnvironmentVariables: formattedEnvVars,
+			Username:             userNamePtr,
+			Password:             passwordPtr,
+		}
+
+		generateComposeSpecRes, err := dataaccess.GenerateComposeSpecFromContainerImage(token, &generateComposeSpecRequest)
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+
+		// Decode the base64 encoded file content
+		fileData, err = base64.StdEncoding.DecodeString(generateComposeSpecRes.FileContent)
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
 	}
 
 	// Step 1: Build service
@@ -187,7 +272,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	building := sm1.AddSpinner("Building service...")
 	sm1.Start()
 
-	ServiceID, EnvironmentID, ProductTierID, err = buildService(file, token, name, specType, descriptionPtr, serviceLogoURLPtr,
+	ServiceID, EnvironmentID, ProductTierID, err = buildService(fileData, token, name, specType, descriptionPtr, serviceLogoURLPtr,
 		environmentPtr, environmentTypePtr, release, releaseAsPreferred, releaseNamePtr)
 	if err != nil {
 		building.Error()
@@ -361,18 +446,13 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func buildService(file, token, name, specType string, description, serviceLogoURL, environment, environmentType *string, release,
+func buildService(fileData []byte, token, name, specType string, description, serviceLogoURL, environment, environmentType *string, release,
 	releaseAsPreferred bool, releaseName *string) (serviceID string, environmentID string, productTierID string, err error) {
 	if name == "" {
 		return "", "", "", errors.New("name is required")
 	}
 
 	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())
-	if err != nil {
-		return "", "", "", err
-	}
-
-	fileData, err := os.ReadFile(filepath.Clean(file))
 	if err != nil {
 		return "", "", "", err
 	}
@@ -514,6 +594,11 @@ func resetBuild() {
 	release = false
 	releaseAsPreferred = false
 	interactive = false
+	specType = DockerComposeSpecType
+	imageUrl = ""
+	envVars = nil
+	imageRegistryAuthUsername = ""
+	imageRegistryAuthPassword = ""
 }
 
 func checkIfSaaSPortalReady(serviceEnvironment *serviceenvironmentapi.DescribeServiceEnvironmentResult) bool {
