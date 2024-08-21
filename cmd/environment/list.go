@@ -33,6 +33,8 @@ func init() {
 }
 
 func runList(cmd *cobra.Command, args []string) error {
+	defer cleanUpListFlagsAndArgs(cmd, &args)
+
 	// Retrieve command-line flags
 	output, _ := cmd.Flags().GetString("output")
 	filters, _ := cmd.Flags().GetStringArray("filter")
@@ -80,8 +82,14 @@ func runList(cmd *cobra.Command, args []string) error {
 				return err
 			}
 
+			data, err := json.MarshalIndent(env, "", "    ")
+			if err != nil {
+				utils.PrintError(err)
+				return err
+			}
+
 			if match {
-				environments = append(environments, env)
+				environments = append(environments, string(data))
 			}
 		}
 	}
@@ -103,7 +111,7 @@ func runList(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func formatEnvironment(service *serviceapi.DescribeServiceResult, environment *serviceapi.ServiceEnvironment, truncateNames bool) (string, error) {
+func formatEnvironment(service *serviceapi.DescribeServiceResult, environment *serviceapi.ServiceEnvironment, truncateNames bool) (model.Environment, error) {
 	serviceName := service.Name
 	envName := environment.Name
 
@@ -122,18 +130,22 @@ func formatEnvironment(service *serviceapi.DescribeServiceResult, environment *s
 		sourceEnvName = *environment.SourceEnvironmentName
 	}
 
-	formattedEnvironment := model.Environment{
+	return model.Environment{
 		EnvironmentID:   string(environment.ID),
 		EnvironmentName: envName,
 		EnvironmentType: envType,
 		ServiceID:       string(service.ID),
 		ServiceName:     serviceName,
 		SourceEnvName:   sourceEnvName,
-	}
+	}, nil
+}
 
-	data, err := json.MarshalIndent(formattedEnvironment, "", "    ")
-	if err != nil {
-		return "", err
-	}
-	return string(data), nil
+func cleanUpListFlagsAndArgs(cmd *cobra.Command, args *[]string) {
+	// Clean up flags
+	_ = cmd.Flags().Set("output", "text")
+	_ = cmd.Flags().Set("filter", "")
+	_ = cmd.Flags().Set("truncate", "false")
+
+	// Clean up arguments by resetting the slice to nil or an empty slice
+	*args = nil
 }

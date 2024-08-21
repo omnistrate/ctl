@@ -38,6 +38,8 @@ func init() {
 }
 
 func runPromote(cmd *cobra.Command, args []string) error {
+	defer cleanUpPromoteFlagsAndArgs(cmd, &args)
+
 	// Retrieve flags
 	output, _ := cmd.Flags().GetString("output")
 	serviceId, _ := cmd.Flags().GetString("service-id")
@@ -202,4 +204,14 @@ func formatPromoteStatus(token, serviceId, environmentId, serviceName string, en
 	}
 
 	return formattedPromotions, nil
+}
+
+func cleanUpPromoteFlagsAndArgs(cmd *cobra.Command, args *[]string) {
+	// Clean up flags
+	_ = cmd.Flags().Set("service-id", "")
+	_ = cmd.Flags().Set("environment-id", "")
+	_ = cmd.Flags().Set("output", "text")
+
+	// Clean up arguments by resetting the slice to nil or an empty slice
+	*args = nil
 }
