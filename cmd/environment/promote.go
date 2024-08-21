@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/chelnak/ysmrr"
-	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
@@ -126,64 +125,44 @@ func runPromote(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	saasPortalStatus := ""
-	if environment.SaasPortalStatus != nil {
-		saasPortalStatus = string(*environment.SaasPortalStatus)
-	}
-	saasPortalURL := ""
-	if environment.SaasPortalURL != nil {
-		saasPortalURL = *environment.SaasPortalURL
-	}
-
-	// Get source environment name
-	sourceEnvName := ""
-	if !commonutils.CheckIfNilOrEmpty((*string)(environment.SourceEnvironmentID)) {
-		sourceEnv, err := dataaccess.DescribeServiceEnvironment(token, serviceId, string(*environment.SourceEnvironmentID))
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-		sourceEnvName = sourceEnv.Name
-	}
-
 	// Get promote status
-	promoteStatus := ""
-	if !commonutils.CheckIfNilOrEmpty((*string)(environment.SourceEnvironmentID)) {
-		promoteRes, err := dataaccess.PromoteServiceEnvironmentStatus(token, serviceId, string(*environment.SourceEnvironmentID))
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-		for _, res := range promoteRes {
-			if string(res.TargetEnvironmentID) == string(environment.ID) {
-				promoteStatus = res.Status
-				break
-			}
-		}
-	}
-
-	// Format the output
-	formattedEnvironment := model.DetailedEnvironment{
-		EnvironmentID:    string(environment.ID),
-		EnvironmentName:  environment.Name,
-		EnvironmentType:  string(environment.Type),
-		ServiceID:        string(environment.ServiceID),
-		ServiceName:      serviceName,
-		SourceEnvName:    sourceEnvName,
-		PromoteStatus:    promoteStatus,
-		SaaSPortalStatus: saasPortalStatus,
-		SaaSPortalURL:    saasPortalURL,
-	}
-
-	var jsonData []string
-	data, err := json.MarshalIndent(formattedEnvironment, "", "    ")
+	promotions, err := dataaccess.PromoteServiceEnvironmentStatus(token, serviceId, environmentId)
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
-	jsonData = append(jsonData, string(data))
+	formattedPromotions := make([]model.Promotion, 0)
+	for _, promotion := range promotions {
+		targetEnvID := string(promotion.TargetEnvironmentID)
+		targetEnv, err := dataaccess.DescribeServiceEnvironment(token, serviceId, targetEnvID)
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+		// Format the output
+		formattedPromotion := model.Promotion{
+			ServiceID:             string(environment.ServiceID),
+			ServiceName:           serviceName,
+			SourceEnvironmentID:   string(environment.ID),
+			SourceEnvironmentName: environment.Name,
+			TargetEnvID:           targetEnvID,
+			TargetEnvName:         targetEnv.Name,
+			PromoteStatus:         promotion.Status,
+		}
+		formattedPromotions = append(formattedPromotions, formattedPromotion)
+	}
 
-	// Print output
+	var jsonData []string
+	for _, promotion := range formattedPromotions {
+		data, err := json.MarshalIndent(promotion, "", "    ")
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+
+		jsonData = append(jsonData, string(data))
+	}
+
 	switch output {
 	case "text":
 		err = utils.PrintText(jsonData)
@@ -196,11 +175,7 @@ func runPromote(cmd *cobra.Command, args []string) error {
 			return err
 		}
 	case "json":
-		_, err = fmt.Fprintf(cmd.OutOrStdout(), "%+v\n", jsonData[0])
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
+		fmt.Printf("%+v\n", jsonData)
 	default:
 		err = fmt.Errorf("unsupported output format: %s", output)
 		utils.PrintError(err)
