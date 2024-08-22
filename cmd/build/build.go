@@ -136,7 +136,7 @@ func init() {
 }
 
 func runBuild(cmd *cobra.Command, args []string) error {
-	defer resetBuild()
+	defer utils.CleanupArgsAndFlags(cmd, &args)
 
 	// Validate input arguments
 	var fileData []byte
@@ -591,23 +591,6 @@ func buildService(fileData []byte, token, name, specType string, description, se
 	default:
 		return "", "", "", errors.New("invalid spec type")
 	}
-}
-
-func resetBuild() {
-	file = ""
-	name = ""
-	description = ""
-	serviceLogoURL = ""
-	environment = ""
-	environmentType = ""
-	release = false
-	releaseAsPreferred = false
-	interactive = false
-	specType = DockerComposeSpecType
-	imageUrl = ""
-	envVars = nil
-	imageRegistryAuthUsername = ""
-	imageRegistryAuthPassword = ""
 }
 
 func checkIfSaaSPortalReady(serviceEnvironment *serviceenvironmentapi.DescribeServiceEnvironmentResult) bool {
