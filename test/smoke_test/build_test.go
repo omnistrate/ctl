@@ -337,5 +337,5 @@ func Test_build_service_from_image(t *testing.T) {
 	cmd.RootCmd.SetArgs([]string{"build", "--image", "docker.io/mysql:latest", "--name", serviceName3, "--env-var", "MYSQL_ROOT_PASSWORD:secret", "--env-var", "MYSQL_DATABASE:mydb", "--image-registry-auth-username", "test", "--image-registry-auth-password", "test"})
 	err = cmd.RootCmd.Execute()
 	require.Error(err)
-	require.Contains(err.Error(), "image not accessible")
+	require.Contains(err.Error(), "cannot read image")
 }

@@ -76,7 +76,7 @@ const (
   omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png"
 `
 
-	buildLong = `Build command can be used to build one service plan from docker compose. 
+	buildLong = `Build command can be used to build one service plan from image, docker compose, and service plan spec. 
 It has two main modes of operation:
   - Create a new service plan
   - Update an existing service plan
