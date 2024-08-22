@@ -218,6 +218,9 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		// Parse the environment variables
 		var formattedEnvVars []*composegenapi.EnvironmentVariable
 		for _, envVar := range envVars {
+			if envVar == "" {
+				continue
+			}
 			envVarParts := strings.Split(envVar, "=")
 			if len(envVarParts) != 2 {
 				err = errors.New("invalid environment variable format")
