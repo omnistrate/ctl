@@ -29,7 +29,7 @@ var (
 
 var getCmd = &cobra.Command{
 	Use:     "get",
-	Short:   "Display one or more accounts",
+	Short:   "Display one or more accounts (deprecated)",
 	Long:    `The account get command displays basic information about one or more accounts.`,
 	Example: getExample,
 	RunE:    runGet,

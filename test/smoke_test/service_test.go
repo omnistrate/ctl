@@ -40,13 +40,13 @@ func Test_service_basic(t *testing.T) {
 	require.NoError(err)
 	serviceID2 := build.ServiceID
 
-	// Get services
-	cmd.RootCmd.SetArgs([]string{"service", "get"})
+	// List services
+	cmd.RootCmd.SetArgs([]string{"service", "list"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	// Get services by name
-	cmd.RootCmd.SetArgs([]string{"service", "get", serviceName1, serviceName2})
+	// List services by name
+	cmd.RootCmd.SetArgs([]string{"service", "list", "--filter", fmt.Sprintf("name:%s", serviceName1), "--filter", fmt.Sprintf("name:%s", serviceName2)})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
