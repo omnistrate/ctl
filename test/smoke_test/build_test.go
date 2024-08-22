@@ -325,7 +325,7 @@ func Test_build_service_from_image(t *testing.T) {
 	require.NoError(err)
 
 	serviceName2 := "mysql" + uuid.NewString()
-	cmd.RootCmd.SetArgs([]string{"build", "--image", "docker.io/mysql:latest", "--name", serviceName2, "--env-var", "MYSQL_ROOT_PASSWORD:secret", "--env-var", "MYSQL_DATABASE:mydb"})
+	cmd.RootCmd.SetArgs([]string{"build", "--image", "docker.io/mysql:latest", "--name", serviceName2, "--env-var", "MYSQL_ROOT_PASSWORD=secret", "--env-var", "MYSQL_DATABASE=mydb"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
@@ -334,7 +334,7 @@ func Test_build_service_from_image(t *testing.T) {
 	require.NoError(err)
 
 	serviceName3 := "mysql" + uuid.NewString()
-	cmd.RootCmd.SetArgs([]string{"build", "--image", "docker.io/mysql:latest", "--name", serviceName3, "--env-var", "MYSQL_ROOT_PASSWORD:secret", "--env-var", "MYSQL_DATABASE:mydb", "--image-registry-auth-username", "test", "--image-registry-auth-password", "test"})
+	cmd.RootCmd.SetArgs([]string{"build", "--image", "docker.io/mysql:latest", "--name", serviceName3, "--env-var", "MYSQL_ROOT_PASSWORD=secret", "--env-var", "MYSQL_DATABASE=mydb", "--image-registry-auth-username", "test", "--image-registry-auth-password", "test"})
 	err = cmd.RootCmd.Execute()
 	require.Error(err)
 	require.Contains(err.Error(), "cannot read image")

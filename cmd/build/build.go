@@ -52,7 +52,7 @@ const (
 	ServicePlanSpecType   = "ServicePlanSpec"
 
 	buildExample = `  # Build service with image in dev environment
-  omnistrate-ctl build --image docker.io/mysql:5.7 --name MySQL --env-var MYSQL_ROOT_PASSWORD:password --env-var MYSQL_DATABASE:mydb
+  omnistrate-ctl build --image docker.io/mysql:5.7 --name MySQL --env-var "MYSQL_ROOT_PASSWORD=password" --env-var "MYSQL_DATABASE=mydb""
 
   # Build service with private image in dev environment
   omnistrate-ctl build --image docker.io/namespace/my-image:v1.2 --name "My Service" --image-registry-auth-username username --image-registry-auth-password password --env-var KEY1:VALUE1 --env-var KEY2:VALUE2
@@ -206,7 +206,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		// Generate compose spec from image
 		var formattedEnvVars []*composegenapi.EnvironmentVariable
 		for _, envVar := range envVars {
-			envVarParts := strings.Split(envVar, ":")
+			envVarParts := strings.Split(envVar, "=")
 			if len(envVarParts) != 2 {
 				err = errors.New("invalid environment variable format")
 				utils.PrintError(err)
