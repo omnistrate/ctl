@@ -17,6 +17,7 @@ You can delete, describe, and get services.`,
 func init() {
 	Cmd.AddCommand(describeCmd)
 	Cmd.AddCommand(deleteCmd)
+	Cmd.AddCommand(getCmd)
 	Cmd.AddCommand(listCmd)
 
 	Cmd.Example = utils.CombineSubCmdExamples(Cmd)

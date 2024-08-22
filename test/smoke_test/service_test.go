@@ -50,8 +50,8 @@ func Test_service_basic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	// List services by ID
-	cmd.RootCmd.SetArgs([]string{"service", "list", "--filter", fmt.Sprintf("id:%s", serviceID1), "--filter", fmt.Sprintf("id:%s", serviceID2)})
+	// Get services by ID
+	cmd.RootCmd.SetArgs([]string{"service", "get", serviceID1, serviceID2, "--id"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
