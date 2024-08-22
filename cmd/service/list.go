@@ -124,6 +124,6 @@ func formatService(service *serviceapi.DescribeServiceResult, truncateNames bool
 	return model.Service{
 		ID:           string(service.ID),
 		Name:         serviceName,
-		Environments: environments,
+		Environments: strings.Join(environments, ","),
 	}, nil
 }
