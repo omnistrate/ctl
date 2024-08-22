@@ -17,7 +17,6 @@ These domains are used to access your service in the cloud. You can set up custo
 func init() {
 	Cmd.AddCommand(createCmd)
 	Cmd.AddCommand(deleteCmd)
-	Cmd.AddCommand(getCmd)
 	Cmd.AddCommand(listCmd)
 
 	Cmd.Example = utils.CombineSubCmdExamples(Cmd)
