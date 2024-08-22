@@ -194,6 +194,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
+		// Error out if image is not accessible
 		if !checkImageRes.ImageAccessible {
 			err = errors.New("image not accessible")
 			if checkImageRes.ErrorMsg != nil {
@@ -203,7 +204,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		// Generate compose spec from image
+		// Parse the environment variables
 		var formattedEnvVars []*composegenapi.EnvironmentVariable
 		for _, envVar := range envVars {
 			envVarParts := strings.Split(envVar, "=")
@@ -217,6 +218,8 @@ func runBuild(cmd *cobra.Command, args []string) error {
 				Value: envVarParts[1],
 			})
 		}
+
+		// Generate compose spec from image
 		generateComposeSpecRequest := composegenapi.GenerateComposeSpecFromContainerImageRequest{
 			ImageRegistry:        imageRegistry,
 			Image:                image,
