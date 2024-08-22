@@ -232,7 +232,7 @@ func Test_build_no_file(t *testing.T) {
 	cmd.RootCmd.SetArgs([]string{"build", "--name", "My Service" + uuid.NewString(), "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = cmd.RootCmd.Execute()
 	require.Error(err)
-	require.Contains(err.Error(), "must provide --file or -f")
+	require.Contains(err.Error(), "either file or image is required")
 }
 
 func Test_build_create_no_name(t *testing.T) {
@@ -299,4 +299,43 @@ func Test_build_create_no_service_logo_url(t *testing.T) {
 	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", build.ServiceID})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
+}
+
+func Test_build_service_from_image(t *testing.T) {
+	utils.SmokeTest(t)
+
+	require := require.New(t)
+	defer testutils.Cleanup()
+
+	var err error
+
+	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	require.NoError(err)
+	cmd.RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	serviceName := "mysql" + uuid.NewString()
+	cmd.RootCmd.SetArgs([]string{"build", "--image", "docker.io/mysql:latest", "--name", serviceName})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	cmd.RootCmd.SetArgs([]string{"service", "delete", serviceName})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	serviceName2 := "mysql" + uuid.NewString()
+	cmd.RootCmd.SetArgs([]string{"build", "--image", "docker.io/mysql:latest", "--name", serviceName2, "--env-var", "MYSQL_ROOT_PASSWORD=secret", "--env-var", "MYSQL_DATABASE=mydb"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	cmd.RootCmd.SetArgs([]string{"service", "delete", serviceName2})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	serviceName3 := "mysql" + uuid.NewString()
+	cmd.RootCmd.SetArgs([]string{"build", "--image", "docker.io/mysql:latest", "--name", serviceName3, "--env-var", "MYSQL_ROOT_PASSWORD=secret", "--env-var", "MYSQL_DATABASE=mydb", "--image-registry-auth-username", "test", "--image-registry-auth-password", "test"})
+	err = cmd.RootCmd.Execute()
+	require.Error(err)
+	require.Contains(err.Error(), "cannot read image")
 }
