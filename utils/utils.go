@@ -73,3 +73,10 @@ func CleanupArgsAndFlags(cmd *cobra.Command, args *[]string) {
 	// Clean up arguments by resetting the slice to nil or an empty slice
 	*args = nil
 }
+
+func GetStrValue(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}

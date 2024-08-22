@@ -75,7 +75,7 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the service plan exists
-	serviceId, serviceName, planId, _, err = getServicePlan(token, serviceId, serviceName, planId, planName)
+	serviceId, serviceName, planId, _, _, err = getServicePlan(token, serviceId, serviceName, planId, planName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -133,7 +133,7 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func getServicePlan(token, serviceIdArg, serviceNameArg, planIdArg, planNameArg string) (serviceId string, serviceName string, planId string, planName string, err error) {
+func getServicePlan(token, serviceIdArg, serviceNameArg, planIdArg, planNameArg string) (serviceId, serviceName, planId, planName, environment string, err error) {
 	searchRes, err := dataaccess.SearchInventory(token, "service:s")
 	if err != nil {
 		return
@@ -168,6 +168,7 @@ func getServicePlan(token, serviceIdArg, serviceNameArg, planIdArg, planNameArg 
 			if !strings.EqualFold(servicePlan.Name, planNameArg) && string(servicePlan.ProductTierID) != planIdArg {
 				continue
 			}
+			environment = env.Name
 			planId = string(servicePlan.ProductTierID)
 			servicePlanFound += 1
 		}

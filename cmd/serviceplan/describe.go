@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/chelnak/ysmrr"
-	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
+	tierversionsetapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/tier_version_set_api"
+	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
@@ -79,14 +80,8 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 		sm.Start()
 	}
 
-	// Retrieve service and service plan details
-	services, err := dataaccess.ListServices(token)
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
-
-	serviceId, serviceName, planId, _, err = getServicePlan(services, serviceId, serviceName, planId, planName)
+	// Check if the service plan exists
+	serviceId, serviceName, planId, _, environment, err := getServicePlan(token, serviceId, serviceName, planId, planName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -107,20 +102,23 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Format the service plan details
-	formattedServicePlan, err := formatServicePlanDetails(token, serviceId, serviceName, servicePlan)
+	formattedServicePlan, err := formatServicePlanDetails(token, serviceName, planName, environment, servicePlan)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Handle output based on format
-	if spinner != nil {
-		spinner.UpdateMessage("Service plan description retrieved successfully")
-		spinner.Complete()
-		sm.Stop()
+	utils.HandleSpinnerSuccess(spinner, sm, "Service plan details retrieved successfully")
+
+	// Marshal data
+	data, err := json.MarshalIndent(formattedServicePlan, "", "    ")
+	if err != nil {
+		utils.PrintError(err)
+		return err
 	}
 
-	if err = utils.PrintTextTableJsonOutput(output, formattedServicePlan); err != nil {
+	if err = utils.PrintTextTableJsonOutput(output, string(data)); err != nil {
 		return err
 	}
 
@@ -139,23 +137,64 @@ func validateDescribeArguments(args []string, serviceId, planId string) error {
 	return nil
 }
 
-func formatServicePlanDetails(token, serviceId, serviceName string, environment *serviceenvironmentapi.DescribeServicePlanResult) (string, error) {
-	// Example of formatting environment details
-	formattedServicePlan := model.ServicePlanDetails{
-		EnvironmentID:    string(environment.ID),
-		EnvironmentName:  environment.Name,
-		EnvironmentType:  string(environment.Type),
-		ServiceID:        string(environment.ServiceID),
-		ServiceName:      serviceName,
-		SaaSPortalStatus: getSaaSPortalStatus(environment),
-		SaaSPortalURL:    getSaaSPortalURL(environment),
-		PromoteStatus:    getPromoteStatus(token, serviceId, environment),
-	}
-
-	data, err := json.MarshalIndent(formattedServicePlan, "", "    ")
+func formatServicePlanDetails(token, serviceName, planName, environment string, versionSet *tierversionsetapi.TierVersionSet) (model.ServicePlanDetails, error) {
+	// Get service model
+	serviceModel, err := dataaccess.DescribeServiceModel(token, string(versionSet.ServiceID), string(versionSet.ServiceModelID))
 	if err != nil {
-		return "", err
+		return model.ServicePlanDetails{}, err
 	}
 
-	return string(data), nil
+	// Get product tier
+	productTier, err := dataaccess.DescribeProductTier(token, string(versionSet.ServiceID), string(versionSet.ProductTierID))
+	if err != nil {
+		return model.ServicePlanDetails{}, err
+	}
+
+	// Get resource details
+	var resources []model.Resource
+	for _, resource := range versionSet.Resources {
+		// Get resource details
+		desRes, err := dataaccess.DescribeResource(token, string(versionSet.ServiceID), string(resource.ID), commonutils.ToPtr(string(versionSet.ProductTierID)), &versionSet.Version)
+		if err != nil {
+			return model.ServicePlanDetails{}, err
+		}
+
+		resources = append(resources, model.Resource{
+			ResourceID:                  string(desRes.ID),
+			ResourceName:                desRes.Name,
+			ResourceType:                string(desRes.ResourceType),
+			ActionHooks:                 desRes.ActionHooks,
+			AdditionalSecurityContext:   desRes.AdditionalSecurityContext,
+			BackupConfiguration:         desRes.BackupConfiguration,
+			Capabilities:                desRes.Capabilities,
+			CustomLabels:                desRes.CustomLabels,
+			CustomSysCTLs:               desRes.CustomSysCTLs,
+			CustomULimits:               desRes.CustomULimits,
+			Dependencies:                desRes.Dependencies,
+			EnvironmentVariables:        desRes.EnvironmentVariables,
+			FileSystemConfiguration:     desRes.FileSystemConfiguration,
+			HelmChartConfiguration:      desRes.HelmChartConfiguration,
+			KustomizeConfiguration:      desRes.KustomizeConfiguration,
+			L4LoadBalancerConfiguration: desRes.L4LoadBalancerConfiguration,
+			L7LoadBalancerConfiguration: desRes.L7LoadBalancerConfiguration,
+			OperatorCRDConfiguration:    desRes.OperatorCRDConfiguration,
+		})
+	}
+
+	formattedServicePlan := model.ServicePlanDetails{
+		PlanID:             string(versionSet.ProductTierID),
+		PlanName:           planName,
+		ServiceID:          string(versionSet.ServiceID),
+		ServiceName:        serviceName,
+		Environment:        environment,
+		Version:            versionSet.Version,
+		ReleaseDescription: utils.GetStrValue(versionSet.Name),
+		VersionSetStatus:   versionSet.Status,
+		DeploymentType:     string(productTier.TierType),
+		TenancyType:        string(serviceModel.ModelType),
+		EnabledFeatures:    versionSet.EnabledFeatures,
+		Resources:          resources,
+	}
+
+	return formattedServicePlan, nil
 }

@@ -76,7 +76,7 @@ func runRelease(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if service plan exist
-	serviceId, serviceName, planId, _, err = getServicePlan(token, serviceId, serviceName, planId, planName)
+	serviceId, serviceName, planId, _, _, err = getServicePlan(token, serviceId, serviceName, planId, planName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
