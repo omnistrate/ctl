@@ -42,6 +42,11 @@ func Test_service_plan_basic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
+	// PASS: list service plans
+	cmd.RootCmd.SetArgs([]string{"service-plan", "list", "--filter", fmt.Sprintf("service_name:%s", serviceName), "--filter", "plan_name:postgresql"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
 	// PASS: delete postgresql service plan
 	cmd.RootCmd.SetArgs([]string{"service-plan", "delete", serviceName, "postgresql"})
 	err = cmd.RootCmd.Execute()
@@ -67,6 +72,11 @@ func Test_service_plan_basic(t *testing.T) {
 
 	// PASS: set it as preferred
 	cmd.RootCmd.SetArgs([]string{"service-plan", "set-default", "--service-id", serviceId, "--plan-id", productTierId, "--version=latest"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: list service plans
+	cmd.RootCmd.SetArgs([]string{"service-plan", "list", "--filter", fmt.Sprintf("service_id:%s", serviceId), "--filter", fmt.Sprintf("plan_id:%s", productTierId)})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
