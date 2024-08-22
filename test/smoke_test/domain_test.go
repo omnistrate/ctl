@@ -65,13 +65,13 @@ func Test_domain_basic(t *testing.T) {
 		})
 	}
 
-	// PASS: get domains
-	cmd.RootCmd.SetArgs([]string{"domain", "get"})
+	// PASS: list domains
+	cmd.RootCmd.SetArgs([]string{"domain", "list"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	// PASS: get domains by name
-	cmd.RootCmd.SetArgs([]string{"domain", "get", devDomainName, prodDomainName})
+	// PASS: list domains by name
+	cmd.RootCmd.SetArgs([]string{"domain", "list", "--filter", fmt.Sprintf("name:%s", devDomainName), "--filter", fmt.Sprintf("name:%s", prodDomainName)})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
