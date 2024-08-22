@@ -121,8 +121,6 @@ func init() {
 	BuildCmd.Flags().StringVarP(&imageRegistryAuthPassword, "image-registry-auth-password", "", "", "Used together with --image flag. Provide the password to authenticate with the image registry if it's a private registry")
 
 	BuildCmd.MarkFlagsRequiredTogether("image-registry-auth-username", "image-registry-auth-password")
-	BuildCmd.MarkFlagsOneRequired("file", "image")
-	BuildCmd.MarkFlagsMutuallyExclusive("file", "image")
 	err := BuildCmd.MarkFlagFilename("file")
 	if err != nil {
 		return
@@ -139,6 +137,19 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	defer utils.CleanupArgsAndFlags(cmd, &args)
 
 	// Validate input arguments
+	if file == "" && imageUrl == "" {
+		err := errors.New("either file or image is required")
+		utils.PrintError(err)
+		return err
+	}
+
+	if file != "" && imageUrl != "" {
+		err := errors.New("only one of file or image can be provided")
+		utils.PrintError(err)
+		return err
+	}
+
+	// Load the compose file
 	var fileData []byte
 	if file != "" {
 		if _, err := os.Stat(file); os.IsNotExist(err) {
