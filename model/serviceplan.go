@@ -1,7 +1,7 @@
 package model
 
 type ServicePlan struct {
-	PlanID             string `json:"plan_id,omitempty,omitempty"`
+	PlanID             string `json:"plan_id,omitempty"`
 	PlanName           string `json:"plan_name,omitempty"`
 	ServiceID          string `json:"service_id,omitempty"`
 	ServiceName        string `json:"service_name,omitempty"`
