@@ -24,7 +24,7 @@ var (
 // getCmd represents the describe command
 var getCmd = &cobra.Command{
 	Use:     "get",
-	Short:   "Display one or more domains (deprecated)",
+	Short:   "Display one or more domains (deprecated. Please use 'domain list' instead)",
 	Long:    `The domain get command displays basic information about one or more domains.`,
 	Example: getExample,
 	RunE:    runGet,

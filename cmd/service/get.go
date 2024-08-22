@@ -30,7 +30,7 @@ var (
 
 var getCmd = &cobra.Command{
 	Use:          "get",
-	Short:        "Display one or more services (deprecated)",
+	Short:        "Display one or more services (deprecated. Please use 'service list' instead)",
 	Long:         `The service get command displays basic information about one or more services.`,
 	Example:      getExample,
 	RunE:         runGet,
