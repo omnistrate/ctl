@@ -47,5 +47,4 @@ type Resource struct {
 	L4LoadBalancerConfiguration any    `json:"l4_load_balancer_configuration omitempty"`
 	L7LoadBalancerConfiguration any    `json:"l7_load_balancer_configuration omitempty"`
 	OperatorCRDConfiguration    any    `json:"operator_crd_configuration omitempty"`
-	ProxyType                   string `json:"proxy_type omitempty"`
 }
