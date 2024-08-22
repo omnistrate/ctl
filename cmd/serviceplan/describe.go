@@ -32,8 +32,14 @@ var describeCmd = &cobra.Command{
 }
 
 func init() {
+	describeCmd.Flags().StringP("version", "v", "", "Service plan version (latest|preferred|1.0 etc.)")
 	describeCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	describeCmd.Flags().StringP("plan-id", "", "", "Environment ID. Required if plan name is not provided")
+
+	err := describeCmd.MarkFlagRequired("version")
+	if err != nil {
+		return
+	}
 }
 
 func runDescribe(cmd *cobra.Command, args []string) error {
@@ -42,6 +48,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	// Retrieve flags
 	serviceId, _ := cmd.Flags().GetString("service-id")
 	planId, _ := cmd.Flags().GetString("plan-id")
+	version, _ := cmd.Flags().GetString("version")
 	output := defaultDescribeOutput
 
 	// Validate input arguments
@@ -85,8 +92,15 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Describe the service plan
-	servicePlan, err := dataaccess.DescribeServicePlan(token, serviceId, planId)
+	// Get the target version
+	version, err = getTargetVersion(token, serviceId, planId, version)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+
+	// Describe the version set
+	servicePlan, err := dataaccess.DescribeVersionSet(token, serviceId, planId, version)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -125,9 +139,9 @@ func validateDescribeArguments(args []string, serviceId, planId string) error {
 	return nil
 }
 
-func formatServicePlanDetails(token, serviceId, serviceName string, environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) (string, error) {
+func formatServicePlanDetails(token, serviceId, serviceName string, environment *serviceenvironmentapi.DescribeServicePlanResult) (string, error) {
 	// Example of formatting environment details
-	formattedServicePlan := model.DetailedServicePlan{
+	formattedServicePlan := model.ServicePlanDetails{
 		EnvironmentID:    string(environment.ID),
 		EnvironmentName:  environment.Name,
 		EnvironmentType:  string(environment.Type),

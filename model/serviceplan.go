@@ -24,7 +24,7 @@ type ServicePlanDetails struct {
 	VersionSetStatus   string     `json:"version_set_status,omitempty"`
 	DeploymentType     string     `json:"deployment_type,omitempty"`
 	TenancyType        string     `json:"tenancy_type,omitempty"`
-	EnabledFeatures    string     `json:"enabled_features,omitempty"`
+	EnabledFeatures    any        `json:"enabled_features,omitempty"`
 	Resources          []Resource `json:"resources,omitempty"`
 }
 
