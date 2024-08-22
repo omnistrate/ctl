@@ -232,7 +232,7 @@ func Test_build_no_file(t *testing.T) {
 	cmd.RootCmd.SetArgs([]string{"build", "--name", "My Service" + uuid.NewString(), "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = cmd.RootCmd.Execute()
 	require.Error(err)
-	require.Contains(err.Error(), "must provide --file or -f")
+	require.Contains(err.Error(), "at least one of the flags in the group [file image] is required")
 }
 
 func Test_build_create_no_name(t *testing.T) {
