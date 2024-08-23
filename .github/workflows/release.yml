@@ -365,6 +365,8 @@ jobs:
       - release-binaries
     uses: ./.github/workflows/docs-deploy.yml
     secrets: inherit
+    with:
+        environment: Prod
     
   notification: 
     name: Notify Mattermost
