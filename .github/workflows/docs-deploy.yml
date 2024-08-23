@@ -19,6 +19,9 @@ jobs:
   deploy:
     name: Deploy documentation
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
     concurrency: deploy-documentation-${{ inputs.environment }}
     steps:
       - name: Checkout repository
