@@ -1,7 +1,6 @@
-site_name: " " 
+site_name: "omnistrate-ctl" 
 site_url: https://ctl.omnistrate.cloud/
-site_description: >-
-  Omnistrate CTL Manual
+site_description: "Manual"
 
 # TODO 0.0.0.0
 
