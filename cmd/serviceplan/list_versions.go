@@ -21,7 +21,7 @@ var listVersionsCmd = &cobra.Command{
 	Use:   "list-versions [service-name] [plan-name] [flags]",
 	Short: "List service plan versions for your services",
 	Long: `This command helps you list service plan versions for your services.
-You can filter for specific service plan versions by using the filters flag.`,
+You can filter for specific service plan versions by using the filter flag.`,
 	Example:      listVersionsExample,
 	RunE:         runListVersions,
 	SilenceUsage: true,

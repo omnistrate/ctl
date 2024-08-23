@@ -18,7 +18,9 @@ func init() {
 	Cmd.AddCommand(releaseCmd)
 	Cmd.AddCommand(setDefaultCmd)
 	Cmd.AddCommand(describeCmd)
+	Cmd.AddCommand(describeVersionCmd)
 	Cmd.AddCommand(listCmd)
+	Cmd.AddCommand(listVersionsCmd)
 
 	Cmd.Example = utils.CombineSubCmdExamples(Cmd)
 }

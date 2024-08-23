@@ -20,7 +20,7 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List services for your account",
 	Long: `This command helps you list services for your account.
-You can filter for specific services by using the filters flag.`,
+You can filter for specific services by using the filter flag.`,
 	Example:      listExample,
 	RunE:         runList,
 	SilenceUsage: true,

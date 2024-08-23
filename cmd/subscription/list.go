@@ -20,7 +20,7 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List customer subscriptions to your services",
 	Long: `This command helps you list customer subscriptions to your services.
-You can filter for specific subscriptions by using the filters flag.`,
+You can filter for specific subscriptions by using the filter flag.`,
 	Example:      listExample,
 	RunE:         runList,
 	SilenceUsage: true,
