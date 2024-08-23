@@ -1,26 +1,26 @@
 ## omnistrate-ctl upgrade
 
-Upgrade instance to a newer or older version
+Upgrade Instance Deployments to a newer or older version
 
 ### Synopsis
 
 This command helps you upgrade instances to a newer or older version.
 
 ```
-omnistrate-ctl upgrade [--version VERSION] [flags]
+omnistrate-ctl upgrade --version=[version] [flags]
 ```
 
 ### Examples
 
 ```
   # Upgrade instances to a specific version
-  omnistrate-ctl upgrade <instance1> <instance2> --version 2.0
+  omctl upgrade <instance1> <instance2> --version 2.0
 
   # Upgrade instances to the latest version
-  omnistrate-ctl upgrade <instance1> <instance2> --version latest
+  omctl upgrade <instance1> <instance2> --version latest
 
  # Upgrade instances to the preferred version
-  omnistrate-ctl upgrade <instance1> <instance2> --version preferred
+  omctl upgrade <instance1> <instance2> --version preferred
 ```
 
 ### Options
