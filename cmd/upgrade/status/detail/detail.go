@@ -11,13 +11,13 @@ import (
 
 const (
 	detailExample = `  # Get upgrade status detail
-  omnistrate-ctl upgrade status detail <upgrade>`
+  omctl upgrade status detail <upgrade>`
 )
 
 var output string
 
 var Cmd = &cobra.Command{
-	Use:          "detail",
+	Use:          "detail [upgrade-id] [flags]",
 	Short:        "Get upgrade status detail",
 	Example:      detailExample,
 	RunE:         run,

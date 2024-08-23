@@ -11,12 +11,12 @@ import (
 )
 
 const (
-	listExample = `# List domains
-omnistrate domain list -o=table`
+	listExample = `  # List domains
+  omctl domain list -o=table`
 )
 
 var listCmd = &cobra.Command{
-	Use:   "list",
+	Use:   "list [flags]",
 	Short: "List SaaS Portal custom domains",
 	Long: `This command helps you list SaaS Portal custom domains.
 You can filter for specific domains by using the filter flag.`,

@@ -13,11 +13,11 @@ omnistrate-ctl environment promote [service-name] [environment-name] [flags]
 ### Examples
 
 ```
-# Promote environment
-omnistrate environment promote [service-name] [environment-name]
+  # Promote environment
+  omctl environment promote [service-name] [environment-name]
 
-# Promote environment by ID instead of name
-omnistrate environment promote --service-id [service-id] --environment-id [environment-id]
+  # Promote environment by ID instead of name
+  omctl environment promote --service-id [service-id] --environment-id [environment-id]
 ```
 
 ### Options
@@ -37,5 +37,5 @@ omnistrate environment promote --service-id [service-id] --environment-id [envir
 
 ### SEE ALSO
 
-* [omnistrate-ctl environment](omnistrate-ctl_environment.md)	 - Manage environments for your services
+* [omnistrate-ctl environment](omnistrate-ctl_environment.md)	 - Manage Service Environments for your service
 

@@ -15,21 +15,21 @@ import (
 
 const (
 	upgradeExample = `  # Upgrade instances to a specific version
-  omnistrate-ctl upgrade <instance1> <instance2> --version 2.0
+  omctl upgrade <instance1> <instance2> --version 2.0
 
   # Upgrade instances to the latest version
-  omnistrate-ctl upgrade <instance1> <instance2> --version latest
+  omctl upgrade <instance1> <instance2> --version latest
 
  # Upgrade instances to the preferred version
-  omnistrate-ctl upgrade <instance1> <instance2> --version preferred`
+  omctl upgrade <instance1> <instance2> --version preferred`
 )
 
 var version string
 var output string
 
 var Cmd = &cobra.Command{
-	Use:          "upgrade [--version VERSION]",
-	Short:        "Upgrade instance to a newer or older version",
+	Use:          "upgrade --version=[version]",
+	Short:        "Upgrade Instance Deployments to a newer or older version",
 	Long:         `This command helps you upgrade instances to a newer or older version.`,
 	Example:      upgradeExample,
 	RunE:         run,
@@ -210,7 +210,7 @@ func run(cmd *cobra.Command, args []string) error {
 
 		println("\nCheck the upgrade status using the following command(s):")
 		for _, upgradeRes := range upgrades {
-			fmt.Printf("  omnistrate-ctl upgrade status %s\n", upgradeRes.UpgradePathID)
+			fmt.Printf("  omctl upgrade status %s\n", upgradeRes.UpgradePathID)
 		}
 	case "json":
 		printJSON(upgrades)

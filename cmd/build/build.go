@@ -52,31 +52,31 @@ const (
 	ServicePlanSpecType   = "ServicePlanSpec"
 
 	buildExample = `  # Build service with image in dev environment
-  omnistrate-ctl build --image docker.io/mysql:5.7 --name MySQL --env-var "MYSQL_ROOT_PASSWORD=password" --env-var "MYSQL_DATABASE=mydb""
+  omctl build --image docker.io/mysql:5.7 --name MySQL --env-var "MYSQL_ROOT_PASSWORD=password" --env-var "MYSQL_DATABASE=mydb""
 
   # Build service with private image in dev environment
-  omnistrate-ctl build --image docker.io/namespace/my-image:v1.2 --name "My Service" --image-registry-auth-username username --image-registry-auth-password password --env-var KEY1:VALUE1 --env-var KEY2:VALUE2
+  omctl build --image docker.io/namespace/my-image:v1.2 --name "My Service" --image-registry-auth-username username --image-registry-auth-password password --env-var KEY1:VALUE1 --env-var KEY2:VALUE2
 
   # Build service with compose spec in dev environment
-  omnistrate-ctl build --file docker-compose.yml --name "My Service"
+  omctl build --file docker-compose.yml --name "My Service"
 
   # Build service with compose spec in prod environment
-  omnistrate-ctl build --file docker-compose.yml --name "My Service" --environment prod --environment-type prod
+  omctl build --file docker-compose.yml --name "My Service" --environment prod --environment-type prod
 
   # Build service with compose spec and release the service with a specific release version name
-  omnistrate-ctl build --file docker-compose.yml --name "My Service" --release --release-name "v1.0.0-alpha"
+  omctl build --file docker-compose.yml --name "My Service" --release --release-name "v1.0.0-alpha"
 
   # Build service with compose spec and release the service as preferred with a specific release version name
-  omnistrate-ctl build --file docker-compose.yml --name "My Service" --release-as-preferred --release-name "v1.0.0-alpha"
+  omctl build --file docker-compose.yml --name "My Service" --release-as-preferred --release-name "v1.0.0-alpha"
 
   # Build service with compose spec interactively
-  omnistrate-ctl build --file docker-compose.yml --name "My Service" --interactive
+  omctl build --file docker-compose.yml --name "My Service" --interactive
 
   # Build service with compose spec with service description and service logo
-  omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png"
+  omctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png"
 `
 
-	buildLong = `Build command can be used to build one service plan from image, docker compose, and service plan spec. 
+	buildLong = `Build command can be used to build a service from image, docker compose, and service plan spec. 
 It has two main modes of operation:
   - Create a new service plan
   - Update an existing service plan
@@ -93,8 +93,8 @@ This command has an interactive mode. In this mode, you can choose to promote th
 
 // BuildCmd represents the build command
 var BuildCmd = &cobra.Command{
-	Use:          "build [--file FILE] [--spec-type SPEC_TYPE][--name NAME] [--environment ENVIRONMENT] [--environment-type ENVIRONMENT_TYPE] [--release] [--release-as-preferred][--interactive][--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] ",
-	Short:        "Build one service plan from docker compose",
+	Use:          "build [--file=file] [--spec-type=spec-type][--name=name] [--environment=environment] [--environment-type=environment-type] [--release] [--release-as-preferred][--interactive][--description=description] [--service-logo-url=service-logo-url] [--image=image-url] [--image-registry-auth-username=username] [--image-registry-auth-password=password] [--env-var=\"key=var\"]",
+	Short:        "Build Services from image, compose spec and service plan specs",
 	Long:         buildLong,
 	Example:      buildExample,
 	RunE:         runBuild,
@@ -116,7 +116,7 @@ func init() {
 	BuildCmd.Flags().StringVarP(&specType, "spec-type", "s", DockerComposeSpecType, "Spec type")
 
 	BuildCmd.Flags().StringVarP(&imageUrl, "image", "", "", "Provide the complete image repository URL with the image name and tag (e.g., docker.io/namespace/my-image:v1.2)")
-	BuildCmd.Flags().StringArrayVarP(&envVars, "env-var", "", nil, "Used together with --image flag. Provide environment variables in the format --env-var KEY1:VALUE1 --env-var KEY2:VALUE2")
+	BuildCmd.Flags().StringArrayVarP(&envVars, "env-var", "", nil, "Used together with --image flag. Provide environment variables in the format --env-var key1=var1 --env-var key2=var2")
 	BuildCmd.Flags().StringVarP(&imageRegistryAuthUsername, "image-registry-auth-username", "", "", "Used together with --image flag. Provide the username to authenticate with the image registry if it's a private registry")
 	BuildCmd.Flags().StringVarP(&imageRegistryAuthPassword, "image-registry-auth-password", "", "", "Used together with --image flag. Provide the password to authenticate with the image registry if it's a private registry")
 

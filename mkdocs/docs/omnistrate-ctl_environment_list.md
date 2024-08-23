@@ -1,10 +1,10 @@
 ## omnistrate-ctl environment list
 
-List environments for your services
+List environments for your service
 
 ### Synopsis
 
-This command helps you list environments for your services.
+This command helps you list environments for your service.
 You can filter for specific environments by using the filter flag.
 
 ```
@@ -14,8 +14,8 @@ omnistrate-ctl environment list [flags]
 ### Examples
 
 ```
-# List environments of the service postgres in the prod and dev environment types
-omnistrate environment list -o=table -f="service_name:postgres,environment_type:PROD" -f="service:postgres,environment_type:DEV"
+  # List environments of the service postgres in the prod and dev environment types
+  omctl environment list -o=table -f="service_name:postgres,environment_type:PROD" -f="service:postgres,environment_type:DEV"
 ```
 
 ### Options
@@ -35,5 +35,5 @@ omnistrate environment list -o=table -f="service_name:postgres,environment_type:
 
 ### SEE ALSO
 
-* [omnistrate-ctl environment](omnistrate-ctl_environment.md)	 - Manage environments for your services
+* [omnistrate-ctl environment](omnistrate-ctl_environment.md)	 - Manage Service Environments for your service
 

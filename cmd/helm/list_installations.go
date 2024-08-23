@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	listInstallationsExample = `# List all Helm Packages and the Kubernetes clusters that they are installed on
-omnistrate helm list-installations --host-cluster-id=[host-cluster-id]`
+	listInstallationsExample = `  # List all Helm Packages and the Kubernetes clusters that they are installed on
+  omctl helm list-installations --host-cluster-id=[host-cluster-id]`
 )
 
 type helmPackageInstallationIntermediate struct {

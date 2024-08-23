@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	saveExample = `# Install the Redis Operator Helm Chart
-omnistrate helm save redis --repo-url=https://charts.bitnami.com/bitnami --version=20.0.1 --namespace=redis-operator`
+	saveExample = `  # Install the Redis Operator Helm Chart
+  omctl helm save redis --repo-url=https://charts.bitnami.com/bitnami --version=20.0.1 --namespace=redis-operator`
 )
 
 var saveCmd = &cobra.Command{

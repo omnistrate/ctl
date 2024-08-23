@@ -14,13 +14,13 @@ import (
 )
 
 const (
-	deleteExample = `# Delete instance
-omnistrate instance delete instance-abcd1234`
+	deleteExample = `  # Delete an instance deployment
+  omctl instance delete instance-abcd1234`
 )
 
 var deleteCmd = &cobra.Command{
-	Use:          "delete",
-	Short:        "Delete an instance",
+	Use:          "delete [instance-id] [flags]",
+	Short:        "Delete an instance deployment",
 	Long:         `This command helps you delete an instance from your account.`,
 	Example:      deleteExample,
 	RunE:         runDelete,

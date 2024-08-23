@@ -7,8 +7,8 @@ import (
 
 var Cmd = &cobra.Command{
 	Use:          "account [operation] [flags]",
-	Short:        "Manage your cloud provider accounts",
-	Long:         `This command helps you manage your cloud provider accounts.`,
+	Short:        "Manage your Cloud Provider Accounts",
+	Long:         `This command helps you manage your Cloud Provider Accounts.`,
 	Run:          run,
 	SilenceUsage: true,
 }

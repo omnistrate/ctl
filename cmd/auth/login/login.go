@@ -14,10 +14,10 @@ type loginMethod string
 
 const (
 	loginExample = `  # Login interactively with a single sign-on provider or using email and password
-  omnistrate-ctl login
+  omctl login
 
   # Login with email and password
-  omnistrate-ctl login --email email --password password
+  omctl login --email email --password password
 
   # Login with environment variables
   export OMNISTRATE_USER_NAME=YOUR_EMAIL

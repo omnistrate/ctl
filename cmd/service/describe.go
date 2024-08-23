@@ -13,20 +13,20 @@ import (
 
 const (
 	describeExample = `  # Describe service with name
-  omnistrate-ctl service describe <name>
+  omctl service describe <name>
 
   # Describe service with ID
-  omnistrate-ctl service describe <id> --id
+  omctl service describe <id> --id
 
   # Describe multiple services with names
-  omnistrate-ctl service describe <name1> <name2> <name3>
+  omctl service describe <name1> <name2> <name3>
 
   # Describe multiple services with IDs
-  omnistrate-ctl service describe <id1> <id2> <id3> --id`
+  omctl service describe <id1> <id2> <id3> --id`
 )
 
 var describeCmd = &cobra.Command{
-	Use:          "describe",
+	Use:          "describe [flags]",
 	Short:        "Display details for one or more services",
 	Long:         "Display detailed information about the service by specifying the service name or ID",
 	Example:      describeExample,

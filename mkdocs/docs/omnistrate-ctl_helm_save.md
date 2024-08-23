@@ -13,8 +13,8 @@ omnistrate-ctl helm save chart --repo-url=[repo-url] --version=[version] --names
 ### Examples
 
 ```
-# Install the Redis Operator Helm Chart
-omnistrate helm save redis --repo-url=https://charts.bitnami.com/bitnami --version=20.0.1 --namespace=redis-operator
+  # Install the Redis Operator Helm Chart
+  omctl helm save redis --repo-url=https://charts.bitnami.com/bitnami --version=20.0.1 --namespace=redis-operator
 ```
 
 ### Options
@@ -30,5 +30,5 @@ omnistrate helm save redis --repo-url=https://charts.bitnami.com/bitnami --versi
 
 ### SEE ALSO
 
-* [omnistrate-ctl helm](omnistrate-ctl_helm.md)	 - Manage Helm Charts for your service using this command
+* [omnistrate-ctl helm](omnistrate-ctl_helm.md)	 - Manage Helm Charts for your service
 

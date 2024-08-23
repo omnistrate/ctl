@@ -16,9 +16,9 @@ var (
 // RemoveCmd represents the remove command
 var RemoveCmd = &cobra.Command{
 	Use:          "remove [--service-id SERVICE_ID]",
-	Short:        "Remove a service from the Omnistrate platform (deprecated)",
+	Short:        "Remove a Service (deprecated)",
 	Long:         `The remove command is used to remove a service from the Omnistrate platform by providing the service ID.`,
-	Example:      `  omnistrate-ctl remove --service-id SERVICE_ID`,
+	Example:      `  omctl remove --service-id SERVICE_ID`,
 	RunE:         runRemove,
 	SilenceUsage: true,
 }

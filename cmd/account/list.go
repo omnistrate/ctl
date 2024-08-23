@@ -12,14 +12,14 @@ import (
 )
 
 const (
-	listExample = `# List accounts
-omnistrate account list -o=table`
+	listExample = `  # List accounts
+  omctl account list -o=table`
 )
 
 var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List cloud provider accounts",
-	Long: `This command helps you list cloud provider accounts.
+	Use:   "list [flags]",
+	Short: "List Cloud Provider Accounts",
+	Long: `This command helps you list Cloud Provider Accounts.
 You can filter for specific accounts by using the filter flag.`,
 	Example:      listExample,
 	RunE:         runList,
