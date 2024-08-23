@@ -25,7 +25,7 @@ Create secrets in your repository for your Omnistrate email and password and use
 
 ## Using omnistrate-ctl with Docker
 
-CTL is packaged and released in a docker image and can be used to execute omnistrate-ctl. 
+omnistrate-ctl is packaged and released in a container image that can be used to execute the commands:
 
 ```
 docker run -t ghcr.io/omnistrate/ctl:latest 
