@@ -35,6 +35,8 @@ var describeCmd = &cobra.Command{
 func init() {
 	describeCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	describeCmd.Flags().StringP("plan-id", "", "", "Environment ID. Required if plan name is not provided")
+
+	describeCmd.AddCommand(describeVersionCmd)
 }
 
 func runDescribe(cmd *cobra.Command, args []string) error {
@@ -138,27 +140,59 @@ func formatServicePlanDetails(token, serviceName, planName, environment string, 
 		if err != nil {
 			return model.ServicePlanDetails{}, err
 		}
+		resource := model.Resource{
+			ResourceID:   string(desRes.ID),
+			ResourceName: desRes.Name,
+			ResourceType: string(desRes.ResourceType),
+		}
 
-		resources = append(resources, model.Resource{
-			ResourceID:                  string(desRes.ID),
-			ResourceName:                desRes.Name,
-			ResourceType:                string(desRes.ResourceType),
-			ActionHooks:                 desRes.ActionHooks,
-			AdditionalSecurityContext:   desRes.AdditionalSecurityContext,
-			BackupConfiguration:         desRes.BackupConfiguration,
-			Capabilities:                desRes.Capabilities,
-			CustomLabels:                desRes.CustomLabels,
-			CustomSysCTLs:               desRes.CustomSysCTLs,
-			CustomULimits:               desRes.CustomULimits,
-			Dependencies:                desRes.Dependencies,
-			EnvironmentVariables:        desRes.EnvironmentVariables,
-			FileSystemConfiguration:     desRes.FileSystemConfiguration,
-			HelmChartConfiguration:      desRes.HelmChartConfiguration,
-			KustomizeConfiguration:      desRes.KustomizeConfiguration,
-			L4LoadBalancerConfiguration: desRes.L4LoadBalancerConfiguration,
-			L7LoadBalancerConfiguration: desRes.L7LoadBalancerConfiguration,
-			OperatorCRDConfiguration:    desRes.OperatorCRDConfiguration,
-		})
+		if desRes.ActionHooks != nil {
+			resource.ActionHooks = desRes.ActionHooks
+		}
+		if desRes.AdditionalSecurityContext != nil {
+			resource.AdditionalSecurityContext = desRes.AdditionalSecurityContext
+		}
+		if desRes.BackupConfiguration != nil {
+			resource.BackupConfiguration = desRes.BackupConfiguration
+		}
+		if desRes.Capabilities != nil {
+			resource.Capabilities = desRes.Capabilities
+		}
+		if desRes.CustomLabels != nil {
+			resource.CustomLabels = desRes.CustomLabels
+		}
+		if desRes.CustomSysCTLs != nil {
+			resource.CustomSysCTLs = desRes.CustomSysCTLs
+		}
+		if desRes.CustomULimits != nil {
+			resource.CustomULimits = desRes.CustomULimits
+		}
+		if desRes.Dependencies != nil {
+			resource.Dependencies = desRes.Dependencies
+		}
+		if desRes.EnvironmentVariables != nil {
+			resource.EnvironmentVariables = desRes.EnvironmentVariables
+		}
+		if desRes.FileSystemConfiguration != nil {
+			resource.FileSystemConfiguration = desRes.FileSystemConfiguration
+		}
+		if desRes.HelmChartConfiguration != nil {
+			resource.HelmChartConfiguration = desRes.HelmChartConfiguration
+		}
+		if desRes.KustomizeConfiguration != nil {
+			resource.KustomizeConfiguration = desRes.KustomizeConfiguration
+		}
+		if desRes.L4LoadBalancerConfiguration != nil {
+			resource.L4LoadBalancerConfiguration = desRes.L4LoadBalancerConfiguration
+		}
+		if desRes.L7LoadBalancerConfiguration != nil {
+			resource.L7LoadBalancerConfiguration = desRes.L7LoadBalancerConfiguration
+		}
+		if desRes.OperatorCRDConfiguration != nil {
+			resource.OperatorCRDConfiguration = desRes.OperatorCRDConfiguration
+		}
+
+		resources = append(resources)
 	}
 
 	formattedServicePlan := model.ServicePlanDetails{
