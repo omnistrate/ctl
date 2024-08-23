@@ -1,10 +1,10 @@
 ## omnistrate-ctl build
 
-Build one service plan from docker compose
+Build Services from image, compose spec and service plan specs
 
 ### Synopsis
 
-Build command can be used to build one service plan from image, docker compose, and service plan spec. 
+Build command can be used to build a service from image, docker compose, and service plan spec. 
 It has two main modes of operation:
   - Create a new service plan
   - Update an existing service plan

@@ -41,5 +41,5 @@ omnistrate-ctl service delete [service-name] [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl service](omnistrate-ctl_service.md)	 - Manage services for your account
+* [omnistrate-ctl service](omnistrate-ctl_service.md)	 - Manage Services for your account
 

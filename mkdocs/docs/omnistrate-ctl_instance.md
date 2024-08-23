@@ -1,6 +1,6 @@
 ## omnistrate-ctl instance
 
-Manage instance deployment for your service
+Manage Instance Deployments for your service
 
 ### Synopsis
 

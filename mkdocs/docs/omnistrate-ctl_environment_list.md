@@ -35,5 +35,5 @@ omnistrate-ctl environment list [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl environment](omnistrate-ctl_environment.md)	 - Manage environments for your service
+* [omnistrate-ctl environment](omnistrate-ctl_environment.md)	 - Manage Service Environments for your service
 

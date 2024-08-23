@@ -1,6 +1,6 @@
 ## omnistrate-ctl service
 
-Manage services for your account
+Manage Services for your account
 
 ### Synopsis
 

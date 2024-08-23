@@ -39,5 +39,5 @@ omnistrate-ctl service-plan release [service-name] [plan-name] [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage service plans for your service
+* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage Service Plans for your service
 

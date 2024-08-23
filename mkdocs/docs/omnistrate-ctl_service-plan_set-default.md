@@ -33,5 +33,5 @@ omnistrate-ctl service-plan set-default [service-name] [plan-name] --version=VER
 
 ### SEE ALSO
 
-* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage service plans for your service
+* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage Service Plans for your service
 

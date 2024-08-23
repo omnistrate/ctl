@@ -1,6 +1,6 @@
 ## omnistrate-ctl service-plan
 
-Manage service plans for your service
+Manage Service Plans for your service
 
 ### Synopsis
 

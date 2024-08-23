@@ -1,10 +1,10 @@
 ## omnistrate-ctl subscription
 
-Manage subscriptions for your service
+Manage Customer Subscriptions for your service
 
 ### Synopsis
 
-This command helps you manage subscriptions for your service.
+This command helps you manage customer subscriptions for your service.
 
 ```
 omnistrate-ctl subscription [operation] [flags]
@@ -38,5 +38,5 @@ omnistrate-ctl subscription [operation] [flags]
 
 * [omnistrate-ctl](omnistrate-ctl.md)	 - Manage your Omnistrate SaaS from the command line
 * [omnistrate-ctl subscription describe](omnistrate-ctl_subscription_describe.md)	 - Describe a customer subscription to your service
-* [omnistrate-ctl subscription list](omnistrate-ctl_subscription_list.md)	 - List customer subscriptions to your services
+* [omnistrate-ctl subscription list](omnistrate-ctl_subscription_list.md)	 - List Customer Subscriptions to your services
 

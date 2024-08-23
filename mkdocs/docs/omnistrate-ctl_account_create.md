@@ -37,5 +37,5 @@ omnistrate-ctl account create --name=[name] [--aws-account-id=account-id] [--gcp
 
 ### SEE ALSO
 
-* [omnistrate-ctl account](omnistrate-ctl_account.md)	 - Manage your cloud provider accounts
+* [omnistrate-ctl account](omnistrate-ctl_account.md)	 - Manage your Cloud Provider Accounts
 

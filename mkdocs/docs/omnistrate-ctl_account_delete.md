@@ -41,5 +41,5 @@ omnistrate-ctl account delete [account-name] [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl account](omnistrate-ctl_account.md)	 - Manage your cloud provider accounts
+* [omnistrate-ctl account](omnistrate-ctl_account.md)	 - Manage your Cloud Provider Accounts
 

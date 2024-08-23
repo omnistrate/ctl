@@ -1,6 +1,6 @@
 ## omnistrate-ctl list
 
-List all available services (deprecated)
+List Services (deprecated)
 
 ### Synopsis
 

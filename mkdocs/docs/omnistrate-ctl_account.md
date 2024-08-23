@@ -1,6 +1,6 @@
 ## omnistrate-ctl account
 
-Manage your cloud provider accounts
+Manage your Cloud Provider Accounts
 
 ### Synopsis
 
@@ -67,5 +67,5 @@ omnistrate-ctl account [operation] [flags]
 * [omnistrate-ctl account create](omnistrate-ctl_account_create.md)	 - Create an account
 * [omnistrate-ctl account delete](omnistrate-ctl_account_delete.md)	 - Delete one or more accounts
 * [omnistrate-ctl account describe](omnistrate-ctl_account_describe.md)	 - Display details for one or more accounts
-* [omnistrate-ctl account list](omnistrate-ctl_account_list.md)	 - List cloud provider accounts
+* [omnistrate-ctl account list](omnistrate-ctl_account_list.md)	 - List Cloud Provider Accounts
 

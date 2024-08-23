@@ -1,6 +1,6 @@
 ## omnistrate-ctl remove
 
-Remove a service from the Omnistrate platform (deprecated)
+Remove a Service (deprecated)
 
 ### Synopsis
 

@@ -1,6 +1,6 @@
 ## omnistrate-ctl environment
 
-Manage environments for your service
+Manage Service Environments for your service
 
 ### Synopsis
 

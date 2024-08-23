@@ -26,19 +26,19 @@ omnistrate-ctl [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl account](omnistrate-ctl_account.md)	 - Manage your cloud provider accounts
-* [omnistrate-ctl build](omnistrate-ctl_build.md)	 - Build one service plan from docker compose
-* [omnistrate-ctl describe](omnistrate-ctl_describe.md)	 - Describe a service (deprecated)
+* [omnistrate-ctl account](omnistrate-ctl_account.md)	 - Manage your Cloud Provider Accounts
+* [omnistrate-ctl build](omnistrate-ctl_build.md)	 - Build Services from image, compose spec and service plan specs
+* [omnistrate-ctl describe](omnistrate-ctl_describe.md)	 - Describe a Service (deprecated)
 * [omnistrate-ctl domain](omnistrate-ctl_domain.md)	 - Manage Customer Domains for your service
-* [omnistrate-ctl environment](omnistrate-ctl_environment.md)	 - Manage environments for your service
+* [omnistrate-ctl environment](omnistrate-ctl_environment.md)	 - Manage Service Environments for your service
 * [omnistrate-ctl helm](omnistrate-ctl_helm.md)	 - Manage Helm Charts for your service
-* [omnistrate-ctl instance](omnistrate-ctl_instance.md)	 - Manage instance deployment for your service
-* [omnistrate-ctl list](omnistrate-ctl_list.md)	 - List all available services (deprecated)
+* [omnistrate-ctl instance](omnistrate-ctl_instance.md)	 - Manage Instance Deployments for your service
+* [omnistrate-ctl list](omnistrate-ctl_list.md)	 - List Services (deprecated)
 * [omnistrate-ctl login](omnistrate-ctl_login.md)	 - Log in to the Omnistrate platform
 * [omnistrate-ctl logout](omnistrate-ctl_logout.md)	 - Logout
-* [omnistrate-ctl remove](omnistrate-ctl_remove.md)	 - Remove a service from the Omnistrate platform (deprecated)
-* [omnistrate-ctl service](omnistrate-ctl_service.md)	 - Manage services for your account
-* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage service plans for your service
-* [omnistrate-ctl subscription](omnistrate-ctl_subscription.md)	 - Manage subscriptions for your service
-* [omnistrate-ctl upgrade](omnistrate-ctl_upgrade.md)	 - Upgrade instance to a newer or older version
+* [omnistrate-ctl remove](omnistrate-ctl_remove.md)	 - Remove a Service (deprecated)
+* [omnistrate-ctl service](omnistrate-ctl_service.md)	 - Manage Services for your account
+* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage Service Plans for your service
+* [omnistrate-ctl subscription](omnistrate-ctl_subscription.md)	 - Manage Customer Subscriptions for your service
+* [omnistrate-ctl upgrade](omnistrate-ctl_upgrade.md)	 - Upgrade Instance Deployments to a newer or older version
 

@@ -1,6 +1,6 @@
 ## omnistrate-ctl upgrade
 
-Upgrade instance to a newer or older version
+Upgrade Instance Deployments to a newer or older version
 
 ### Synopsis
 
