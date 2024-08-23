@@ -15,16 +15,16 @@ import (
 
 const (
 	describeVersionExample = `# Describe a service plan version
-omnistrate service-plan describe version [service-name] [plan-name] --version [version]
+omnistrate service-plan describe-version [service-name] [plan-name] --version [version]
 
 # Describe a service plan version by ID instead of name
-omnistrate service-plan describe version --service-id [service-id] --plan-id [plan-id] --version [version]`
+omnistrate service-plan describe-version --service-id [service-id] --plan-id [plan-id] --version [version]`
 
 	defaultDescribeVersionOutput = "json"
 )
 
 var describeVersionCmd = &cobra.Command{
-	Use:          "version [service-name] [plan-name] [flags]",
+	Use:          "describe-version [service-name] [plan-name] [flags]",
 	Short:        "Describe a service plan version",
 	Long:         `This command helps you describe a service plan version in your service.`,
 	Example:      describeVersionExample,

@@ -53,12 +53,12 @@ func Test_service_plan_basic(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: list service plan versions
-	cmd.RootCmd.SetArgs([]string{"service-plan", "list", "version", serviceName, "postgresql", "--filter", "service_name:postgresql", "--filter", "plan_name:postgresql"})
+	cmd.RootCmd.SetArgs([]string{"service-plan", "list-versions", serviceName, "postgresql", "--filter", "service_name:postgresql", "--filter", "plan_name:postgresql"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
 	// PASS: describe service plan version
-	cmd.RootCmd.SetArgs([]string{"service-plan", "describe", "version", serviceName, "postgresql", "--version=latest"})
+	cmd.RootCmd.SetArgs([]string{"service-plan", "describe-version", serviceName, "postgresql", "--version=latest"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
@@ -101,12 +101,12 @@ func Test_service_plan_basic(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: list service plan versions
-	cmd.RootCmd.SetArgs([]string{"service-plan", "list", "version", "--service-id", serviceId, "--plan-id", productTierId})
+	cmd.RootCmd.SetArgs([]string{"service-plan", "list-versions", "--service-id", serviceId, "--plan-id", productTierId})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
 	// PASS: describe service plan version
-	cmd.RootCmd.SetArgs([]string{"service-plan", "describe", "version", "--service-id", serviceId, "--plan-id", productTierId, "--version=preferred"})
+	cmd.RootCmd.SetArgs([]string{"service-plan", "describe-version", "--service-id", serviceId, "--plan-id", productTierId, "--version=preferred"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 

@@ -35,8 +35,6 @@ var describeCmd = &cobra.Command{
 func init() {
 	describeCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	describeCmd.Flags().StringP("plan-id", "", "", "Environment ID. Required if plan name is not provided")
-
-	describeCmd.AddCommand(describeVersionCmd)
 }
 
 func runDescribe(cmd *cobra.Command, args []string) error {
