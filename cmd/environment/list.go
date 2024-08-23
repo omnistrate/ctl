@@ -11,15 +11,15 @@ import (
 )
 
 const (
-	listExample = `# List environments of the service postgres in the prod and dev environment types
-omnistrate environment list -o=table -f="service_name:postgres,environment_type:PROD" -f="service:postgres,environment_type:DEV"`
+	listExample = `  # List environments of the service postgres in the prod and dev environment types
+  omctl environment list -o=table -f="service_name:postgres,environment_type:PROD" -f="service:postgres,environment_type:DEV"`
 	defaultMaxNameLength = 30 // Maximum length of the name column in the table
 )
 
 var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List environments for your services",
-	Long: `This command helps you list environments for your services.
+	Use:   "list [flags]",
+	Short: "List environments for your service",
+	Long: `This command helps you list environments for your service.
 You can filter for specific environments by using the filter flag.`,
 	Example:      listExample,
 	RunE:         runList,

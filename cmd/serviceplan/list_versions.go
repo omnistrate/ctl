@@ -13,14 +13,14 @@ import (
 )
 
 const (
-	listVersionsExample = `# List service plan versions of the service postgres in the prod and dev environments
-omnistrate service-plan list-versions postgres postgres -o=table -f="service_name:postgres,environment:prod" -f="service:postgres,environment:dev"`
+	listVersionsExample = `  # List service plan versions of the service postgres in the prod and dev environments
+  omctl service-plan list-versions postgres postgres -o=table -f="service_name:postgres,environment:prod" -f="service:postgres,environment:dev"`
 )
 
 var listVersionsCmd = &cobra.Command{
 	Use:   "list-versions [service-name] [plan-name] [flags]",
-	Short: "List service plan versions for your services",
-	Long: `This command helps you list service plan versions for your services.
+	Short: "List service plan versions for your service",
+	Long: `This command helps you list service plan versions for your service.
 You can filter for specific service plan versions by using the filter flag.`,
 	Example:      listVersionsExample,
 	RunE:         runListVersions,

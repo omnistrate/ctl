@@ -13,20 +13,20 @@ import (
 
 const (
 	describeExample = `  # Describe account with name
-  omnistrate-ctl account describe <name>
+  omctl account describe <name>
 
   # Describe account with ID
-  omnistrate-ctl account describe <id> --id
+  omctl account describe <id> --id
   
   # Describe multiple accounts with names
-  omnistrate-ctl account describe <name1> <name2> <name3>
+  omctl account describe <name1> <name2> <name3>
 
   # Describe multiple accounts with IDs
-  omnistrate-ctl account describe <id1> <id2> <id3> --id`
+  omctl account describe <id1> <id2> <id3> --id`
 )
 
 var describeCmd = &cobra.Command{
-	Use:     "describe",
+	Use:     "describe [account-name] [flags]",
 	Short:   "Display details for one or more accounts",
 	Long:    "Display detailed information about the account by specifying the account name or ID",
 	Example: describeExample,

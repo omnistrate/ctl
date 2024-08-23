@@ -11,14 +11,14 @@ import (
 
 var (
 	deleteExample = `  # Delete domain with name
-  omnistrate-ctl delete domain <name>
+  omctl delete domain <name>
 
   # Delete multiple domains with names
-  omnistrate-ctl delete domain <name1> <name2> <name3>`
+  omctl delete domain <name1> <name2> <name3>`
 )
 
 var deleteCmd = &cobra.Command{
-	Use:          "delete",
+	Use:          "delete [name]",
 	Short:        "Delete one or more domains",
 	Long:         `Delete domain by specifying name.`,
 	Example:      deleteExample,

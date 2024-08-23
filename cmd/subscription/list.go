@@ -11,14 +11,14 @@ import (
 )
 
 const (
-	listExample = `# List subscriptions of the service postgres and mysql in the prod environment
-omnistrate subscription list -o=table -f="service_name:postgres,environment:PROD" -f="service:mysql,environment:PROD"`
+	listExample = `  # List subscriptions of the service postgres and mysql in the prod environment
+  omctl subscription list -o=table -f="service_name:postgres,environment:PROD" -f="service:mysql,environment:PROD"`
 	defaultMaxNameLength = 30 // Maximum length of the name column in the table
 )
 
 var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List customer subscriptions to your services",
+	Use:   "list [flags]",
+	Short: "List Customer Subscriptions to your services",
 	Long: `This command helps you list customer subscriptions to your services.
 You can filter for specific subscriptions by using the filter flag.`,
 	Example:      listExample,

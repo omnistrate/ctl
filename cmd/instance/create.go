@@ -16,14 +16,14 @@ import (
 )
 
 const (
-	createExample = `# Create an instance deployment
-omnistrate instance create --service=mysql --environment=dev --plan=mysql --version=latest --resource=mySQL --cloud-provider=aws --region=ca-central-1 --param '{"databaseName":"default","password":"a_secure_password","rootPassword":"a_secure_root_password","username":"user"}'`
+	createExample = `  # Create an instance deployment
+  omctl instance create --service=mysql --environment=dev --plan=mysql --version=latest --resource=mySQL --cloud-provider=aws --region=ca-central-1 --param '{"databaseName":"default","password":"a_secure_password","rootPassword":"a_secure_root_password","username":"user"}'`
 )
 
 var InstanceID string
 
 var createCmd = &cobra.Command{
-	Use:          "create",
+	Use:          "create --service=[service] --environment=[environment] --plan=[plan] --version=[version] --resource=[resource] --cloud-provider=[aws|gcp] --region=[region] [--param=param] [--param-file=file-path]",
 	Short:        "Create an instance deployment",
 	Long:         `This command helps you create an instance deployment for your service.`,
 	Example:      createExample,

@@ -1,6 +1,6 @@
 ## omnistrate-ctl describe
 
-Describe a service (deprecated)
+Describe a Service (deprecated)
 
 ```
 omnistrate-ctl describe [flags]

@@ -1,10 +1,10 @@
 ## omnistrate-ctl service-plan list
 
-List service plans for your services
+List service plans for your service
 
 ### Synopsis
 
-This command helps you list service plans for your services.
+This command helps you list service plans for your service.
 You can filter for specific service plans by using the filter flag.
 
 ```
@@ -14,8 +14,8 @@ omnistrate-ctl service-plan list [flags]
 ### Examples
 
 ```
-# List service plans of the service postgres in the prod and dev environments
-omnistrate service-plan list -o=table -f="service_name:postgres,environment:prod" -f="service:postgres,environment:dev"
+  # List service plans of the service postgres in the prod and dev environments
+  omctl service-plan list -o=table -f="service_name:postgres,environment:prod" -f="service:postgres,environment:dev"
 ```
 
 ### Options
@@ -35,5 +35,5 @@ omnistrate service-plan list -o=table -f="service_name:postgres,environment:prod
 
 ### SEE ALSO
 
-* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage service plans for your services
+* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage Service Plans for your service
 

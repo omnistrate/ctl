@@ -14,11 +14,11 @@ import (
 )
 
 const (
-	describeExample = `# Describe service plan
-omnistrate service-plan describe [service-name] [plan-name]
+	describeExample = `  # Describe service plan
+  omctl service-plan describe [service-name] [plan-name]
 
-# Describe service plan by ID instead of name
-omnistrate service-plan describe --service-id [service-id] --plan-id [plan-id]`
+  # Describe service plan by ID instead of name
+  omctl service-plan describe --service-id [service-id] --plan-id [plan-id]`
 
 	defaultDescribeOutput = "json"
 )

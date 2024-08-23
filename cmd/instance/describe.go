@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	describeExample = `# Describe instance
-omnistrate instance describe instance-abcd1234`
+	describeExample = `  # Describe an instance deployment
+  omctl instance describe instance-abcd1234`
 )
 
 var describeCmd = &cobra.Command{

@@ -13,11 +13,11 @@ omnistrate-ctl service-plan describe-version [service-name] [plan-name] [flags]
 ### Examples
 
 ```
-# Describe a service plan version
-omnistrate service-plan describe-version [service-name] [plan-name] --version [version]
+  # Describe a service plan version
+  omctl service-plan describe-version [service-name] [plan-name] --version [version]
 
-# Describe a service plan version by ID instead of name
-omnistrate service-plan describe-version --service-id [service-id] --plan-id [plan-id] --version [version]
+  # Describe a service plan version by ID instead of name
+  omctl service-plan describe-version --service-id [service-id] --plan-id [plan-id] --version [version]
 ```
 
 ### Options
@@ -31,5 +31,5 @@ omnistrate service-plan describe-version --service-id [service-id] --plan-id [pl
 
 ### SEE ALSO
 
-* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage service plans for your services
+* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage Service Plans for your service
 

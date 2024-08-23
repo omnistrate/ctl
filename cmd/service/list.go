@@ -11,13 +11,13 @@ import (
 )
 
 const (
-	listExample = `# List services
-omnistrate service list -o=table`
+	listExample = `  # List services
+  omctl service list -o=table`
 	defaultMaxNameLength = 30 // Maximum length of the name column in the table
 )
 
 var listCmd = &cobra.Command{
-	Use:   "list",
+	Use:   "list [flags]",
 	Short: "List services for your account",
 	Long: `This command helps you list services for your account.
 You can filter for specific services by using the filter flag.`,
