@@ -363,7 +363,7 @@ jobs:
       - release-package-multi-arch
       - update-brew-formula
       - release-binaries
-    uses: ./.github/workflows/fly-deploy.yml
+    uses: ./.github/workflows/docs-deploy.yml
     secrets: inherit
     
   notification: 
