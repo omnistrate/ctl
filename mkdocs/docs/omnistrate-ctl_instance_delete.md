@@ -7,7 +7,7 @@ Delete an instance
 This command helps you delete an instance from your account.
 
 ```
-omnistrate-ctl instance delete [flags]
+omnistrate-ctl instance delete [instance-id] [flags]
 ```
 
 ### Examples

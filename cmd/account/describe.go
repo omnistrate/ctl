@@ -26,7 +26,7 @@ const (
 )
 
 var describeCmd = &cobra.Command{
-	Use:     "describe",
+	Use:     "describe [account-name] [flags]",
 	Short:   "Display details for one or more accounts",
 	Long:    "Display detailed information about the account by specifying the account name or ID",
 	Example: describeExample,

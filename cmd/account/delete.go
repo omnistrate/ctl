@@ -24,7 +24,7 @@ var (
 )
 
 var deleteCmd = &cobra.Command{
-	Use:          "delete",
+	Use:          "delete [account-name] [flags]",
 	Short:        "Delete one or more accounts",
 	Long:         `Delete account with name or ID. Use --id to specify ID. If not specified, name is assumed. If multiple accounts are found with the same name, all of them will be deleted.`,
 	Example:      deleteExample,

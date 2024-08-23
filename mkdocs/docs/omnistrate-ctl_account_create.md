@@ -7,7 +7,7 @@ Create an account
 Create an account with the specified name and cloud provider details.
 
 ```
-omnistrate-ctl account create [flags]
+omnistrate-ctl account create --name=[name] [--aws-account-id=account-id] [--gcp-project-id=project-id] [--gcp-project-number=project-number] [flags]
 ```
 
 ### Examples

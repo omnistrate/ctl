@@ -7,7 +7,7 @@ Delete one or more accounts
 Delete account with name or ID. Use --id to specify ID. If not specified, name is assumed. If multiple accounts are found with the same name, all of them will be deleted.
 
 ```
-omnistrate-ctl account delete [flags]
+omnistrate-ctl account delete [account-name] [flags]
 ```
 
 ### Examples

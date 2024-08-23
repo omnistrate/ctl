@@ -18,7 +18,7 @@ const (
 var output string
 
 var Cmd = &cobra.Command{
-	Use:          "status",
+	Use:          "status [upgrade-id] [flags]",
 	Short:        "Get upgrade status",
 	Example:      statusExample,
 	RunE:         run,

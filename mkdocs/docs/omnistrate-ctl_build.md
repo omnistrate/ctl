@@ -19,7 +19,7 @@ If the identifiers match an existing service plan, it will update that plan. Oth
 This command has an interactive mode. In this mode, you can choose to promote the service plan to production by interacting with the prompts.
 
 ```
-omnistrate-ctl build [--file FILE] [--spec-type SPEC_TYPE][--name NAME] [--environment ENVIRONMENT] [--environment-type ENVIRONMENT_TYPE] [--release] [--release-as-preferred][--interactive][--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL]  [flags]
+omnistrate-ctl build [--file=file] [--spec-type=spec-type][--name=name] [--environment=environment] [--environment-type=environment-type] [--release] [--release-as-preferred][--interactive][--description=description] [--service-logo-url=service-logo-url] [--image=image-url] [--image-registry-auth-username=username] [--image-registry-auth-password=password] [--env-var="key=var"] [flags]
 ```
 
 ### Examples
@@ -55,7 +55,7 @@ omnistrate-ctl build [--file FILE] [--spec-type SPEC_TYPE][--name NAME] [--envir
 
 ```
       --description string                    Description of the service
-      --env-var stringArray                   Used together with --image flag. Provide environment variables in the format --env-var KEY1:VALUE1 --env-var KEY2:VALUE2
+      --env-var stringArray                   Used together with --image flag. Provide environment variables in the format --env-var key1=var1 --env-var key2=var2
       --environment string                    Name of the environment to build the service in (default "Dev")
       --environment-type string               Type of environment. Valid options include: 'dev', 'prod', 'qa', 'canary', 'staging', 'private') (default "dev")
   -f, --file string                           Path to the docker compose file

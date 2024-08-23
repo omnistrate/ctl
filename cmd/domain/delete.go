@@ -18,7 +18,7 @@ var (
 )
 
 var deleteCmd = &cobra.Command{
-	Use:          "delete",
+	Use:          "delete [name]",
 	Short:        "Delete one or more domains",
 	Long:         `Delete domain by specifying name.`,
 	Example:      deleteExample,

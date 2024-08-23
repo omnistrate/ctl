@@ -7,7 +7,7 @@ Delete one or more services
 Delete service with name or ID. Use --id to specify ID. If not specified, name is assumed.
 
 ```
-omnistrate-ctl service delete [flags]
+omnistrate-ctl service delete [service-name] [flags]
 ```
 
 ### Examples

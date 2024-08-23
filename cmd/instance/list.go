@@ -17,7 +17,7 @@ const (
 )
 
 var listCmd = &cobra.Command{
-	Use:   "list",
+	Use:   "list [flags]",
 	Short: "List instance deployments for your services",
 	Long: `This command helps you list instance deployments for your services.
 You can filter for specific instances by using the filter flag.`,

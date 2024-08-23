@@ -7,7 +7,7 @@ Upgrade instance to a newer or older version
 This command helps you upgrade instances to a newer or older version.
 
 ```
-omnistrate-ctl upgrade [--version VERSION] [flags]
+omnistrate-ctl upgrade --version=[version] [flags]
 ```
 
 ### Examples

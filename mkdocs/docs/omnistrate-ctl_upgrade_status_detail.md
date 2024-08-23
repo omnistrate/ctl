@@ -3,7 +3,7 @@
 Get upgrade status detail
 
 ```
-omnistrate-ctl upgrade status detail [flags]
+omnistrate-ctl upgrade status detail [upgrade-id] [flags]
 ```
 
 ### Examples

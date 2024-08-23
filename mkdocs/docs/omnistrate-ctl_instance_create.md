@@ -7,7 +7,7 @@ Create an instance deployment
 This command helps you create an instance deployment for your service.
 
 ```
-omnistrate-ctl instance create [flags]
+omnistrate-ctl instance create --service=[service] --environment=[environment] --plan=[plan] --version=[version] --resource=[resource] --cloud-provider=[aws|gcp] --region=[region] [--param=param] [--param-file=file-path] [flags]
 ```
 
 ### Examples

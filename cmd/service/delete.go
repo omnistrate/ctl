@@ -25,7 +25,7 @@ var (
 )
 
 var deleteCmd = &cobra.Command{
-	Use:          "delete",
+	Use:          "delete [service-name] [flags]",
 	Short:        "Delete one or more services",
 	Long:         `Delete service with name or ID. Use --id to specify ID. If not specified, name is assumed.`,
 	Example:      deleteExample,

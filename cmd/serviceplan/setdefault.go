@@ -20,7 +20,7 @@ const (
 )
 
 var setDefaultCmd = &cobra.Command{
-	Use:   "set-default [service-name] [plan-name] [--version=VERSION] [flags]",
+	Use:   "set-default [service-name] [plan-name] --version=VERSION [flags]",
 	Short: "Set a service plan as default",
 	Long: `This command helps you set a service plan as default for your service.
 By setting a service plan as default, you can ensure that new instances of the service are created with the default plan.`,
@@ -34,6 +34,11 @@ func init() {
 	setDefaultCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 	setDefaultCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	setDefaultCmd.Flags().StringP("plan-id", "", "", "Plan ID. Required if plan name is not provided")
+
+	err := setDefaultCmd.MarkFlagRequired("version")
+	if err != nil {
+		return
+	}
 }
 
 func runSetDefault(cmd *cobra.Command, args []string) error {

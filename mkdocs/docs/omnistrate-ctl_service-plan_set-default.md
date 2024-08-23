@@ -8,7 +8,7 @@ This command helps you set a service plan as default for your service.
 By setting a service plan as default, you can ensure that new instances of the service are created with the default plan.
 
 ```
-omnistrate-ctl service-plan set-default [service-name] [plan-name] [--version=VERSION] [flags]
+omnistrate-ctl service-plan set-default [service-name] [plan-name] --version=VERSION [flags]
 ```
 
 ### Examples

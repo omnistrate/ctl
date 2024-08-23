@@ -17,7 +17,7 @@ const (
 )
 
 var listCmd = &cobra.Command{
-	Use:   "list",
+	Use:   "list [flags]",
 	Short: "List environments for your services",
 	Long: `This command helps you list environments for your services.
 You can filter for specific environments by using the filter flag.`,

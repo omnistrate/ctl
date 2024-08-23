@@ -7,7 +7,7 @@ Display details for one or more accounts
 Display detailed information about the account by specifying the account name or ID
 
 ```
-omnistrate-ctl account describe [flags]
+omnistrate-ctl account describe [account-name] [flags]
 ```
 
 ### Examples

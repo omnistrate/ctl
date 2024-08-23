@@ -17,7 +17,7 @@ const (
 )
 
 var listCmd = &cobra.Command{
-	Use:   "list",
+	Use:   "list [flags]",
 	Short: "List customer subscriptions to your services",
 	Long: `This command helps you list customer subscriptions to your services.
 You can filter for specific subscriptions by using the filter flag.`,

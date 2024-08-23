@@ -7,7 +7,7 @@ Delete one or more domains
 Delete domain by specifying name.
 
 ```
-omnistrate-ctl domain delete [flags]
+omnistrate-ctl domain delete [name] [flags]
 ```
 
 ### Examples

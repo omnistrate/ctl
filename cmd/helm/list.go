@@ -15,7 +15,7 @@ const (
 )
 
 var listCmd = &cobra.Command{
-	Use:          "list",
+	Use:          "list [flags]",
 	Short:        "List all Helm packages that are saved",
 	Long:         `This command helps you list all the Helm packages that are saved.`,
 	Example:      listExample,

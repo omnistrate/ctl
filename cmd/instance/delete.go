@@ -19,7 +19,7 @@ const (
 )
 
 var deleteCmd = &cobra.Command{
-	Use:          "delete",
+	Use:          "delete [instance-id] [flags]",
 	Short:        "Delete an instance",
 	Long:         `This command helps you delete an instance from your account.`,
 	Example:      deleteExample,

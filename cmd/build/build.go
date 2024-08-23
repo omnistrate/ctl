@@ -93,7 +93,7 @@ This command has an interactive mode. In this mode, you can choose to promote th
 
 // BuildCmd represents the build command
 var BuildCmd = &cobra.Command{
-	Use:          "build [--file FILE] [--spec-type SPEC_TYPE][--name NAME] [--environment ENVIRONMENT] [--environment-type ENVIRONMENT_TYPE] [--release] [--release-as-preferred][--interactive][--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL] ",
+	Use:          "build [--file=file] [--spec-type=spec-type][--name=name] [--environment=environment] [--environment-type=environment-type] [--release] [--release-as-preferred][--interactive][--description=description] [--service-logo-url=service-logo-url] [--image=image-url] [--image-registry-auth-username=username] [--image-registry-auth-password=password] [--env-var=\"key=var\"]",
 	Short:        "Build one service plan from docker compose",
 	Long:         buildLong,
 	Example:      buildExample,
@@ -116,7 +116,7 @@ func init() {
 	BuildCmd.Flags().StringVarP(&specType, "spec-type", "s", DockerComposeSpecType, "Spec type")
 
 	BuildCmd.Flags().StringVarP(&imageUrl, "image", "", "", "Provide the complete image repository URL with the image name and tag (e.g., docker.io/namespace/my-image:v1.2)")
-	BuildCmd.Flags().StringArrayVarP(&envVars, "env-var", "", nil, "Used together with --image flag. Provide environment variables in the format --env-var KEY1:VALUE1 --env-var KEY2:VALUE2")
+	BuildCmd.Flags().StringArrayVarP(&envVars, "env-var", "", nil, "Used together with --image flag. Provide environment variables in the format --env-var key1=var1 --env-var key2=var2")
 	BuildCmd.Flags().StringVarP(&imageRegistryAuthUsername, "image-registry-auth-username", "", "", "Used together with --image flag. Provide the username to authenticate with the image registry if it's a private registry")
 	BuildCmd.Flags().StringVarP(&imageRegistryAuthPassword, "image-registry-auth-password", "", "", "Used together with --image flag. Provide the password to authenticate with the image registry if it's a private registry")
 
