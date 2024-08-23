@@ -1,4 +1,4 @@
-# CTL Integration
+# omnistrate-ctl integration with CI/CD tools
 
 Omnistrate CTL has a number of features that enable it to be seamlessly integrated with scripted and automated environments such as CI.
 

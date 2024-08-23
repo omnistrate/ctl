@@ -41,9 +41,8 @@ validation:
   absolute_links: ignore
 
 nav:
-  - Docs homepage: 'https://docs.omnistrate.com/'
-  - Install omnistrate-ctl: 'install.md'
-  - Integrate with omnistrate-ctl: "integrating.md"
+  - Install: 'install.md'
+  - Integrate: "integrating.md"
   - Commands:
     - omnistrate-ctl account: 'omnistrate-ctl_account.md'
     - omnistrate-ctl build: 'omnistrate-ctl_build.md'
