@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/chelnak/ysmrr"
+	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
 	"github.com/omnistrate/ctl/dataaccess"
-	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 	"strings"
@@ -37,35 +37,35 @@ func init() {
 }
 
 func runRelease(cmd *cobra.Command, args []string) error {
-	// Get flags
+	defer utils.CleanupArgsAndFlags(cmd, &args)
+
+	// Retrieve flags
 	releaseDescription, _ := cmd.Flags().GetString("release-description")
 	releaseAsPreferred, _ := cmd.Flags().GetBool("release-as-preferred")
 	output, _ := cmd.Flags().GetString("output")
 	serviceId, _ := cmd.Flags().GetString("service-id")
 	planId, _ := cmd.Flags().GetString("plan-id")
 
-	if len(args) == 0 {
-		// Check if service ID and plan ID are provided
-		if serviceId == "" || planId == "" {
-			err := fmt.Errorf("please provide the service name and plan name or the service ID and plan ID")
-			utils.PrintError(err)
-			return err
-		}
-	}
-
-	if len(args) > 0 && len(args) != 2 {
-		err := fmt.Errorf("invalid arguments: %s. Need 2 arguments: [service-name] [plan-name]", strings.Join(args, " "))
+	// Validate input arguments
+	if err := validateReleaseArguments(args, serviceId, planId); err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	// Validate user is currently logged in
+	// Set service and plan names if provided in args
+	var serviceName, planName string
+	if len(args) == 2 {
+		serviceName, planName = args[0], args[1]
+	}
+
+	// Validate user login
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
+	// Initialize spinner if output is not JSON
 	var sm ysmrr.SpinnerManager
 	var spinner *ysmrr.Spinner
 	if output != "json" {
@@ -75,67 +75,30 @@ func runRelease(cmd *cobra.Command, args []string) error {
 		sm.Start()
 	}
 
-	// Get service ID and plan ID
-	searchRes, err := dataaccess.SearchInventory(token, "service:s")
+	// Check if service plan exist
+	serviceId, _, planId, _, _, err = getServicePlan(token, serviceId, serviceName, planId, planName)
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	serviceFound := false
-	for _, service := range searchRes.ServiceResults {
-		if (len(args) > 0 && strings.EqualFold(service.Name, args[0])) || service.ID == serviceId {
-			serviceId = service.ID
-			serviceFound = true
-		}
-	}
-
-	if !serviceFound {
-		err = fmt.Errorf("service not found. Please check input values and try again")
-		utils.PrintError(err)
-		return err
-	}
-
-	servicePlanFound := false
-	describeServiceRes, err := dataaccess.DescribeService(token, serviceId)
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-	for _, env := range describeServiceRes.ServiceEnvironments {
-		for _, servicePlan := range env.ServicePlans {
-			if (len(args) > 0 && strings.EqualFold(servicePlan.Name, args[1])) || string(servicePlan.ProductTierID) == planId {
-				planId = string(servicePlan.ProductTierID)
-				servicePlanFound = true
-			}
-		}
-	}
-
-	if !servicePlanFound {
-		err = fmt.Errorf("service plan not found. Please check input values and try again")
-		utils.PrintError(err)
-		return err
-	}
-
-	// Find service api id
+	// Get service api id
 	productTier, err := dataaccess.DescribeProductTier(token, serviceId, planId)
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
+
 	serviceModel, err := dataaccess.DescribeServiceModel(token, serviceId, string(productTier.ServiceModelID))
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
+
 	serviceApiId := string(serviceModel.ServiceAPIID)
 
 	// Release service plan
-	var releaseDescriptionPtr *string
-	if releaseDescription != "" {
-		releaseDescriptionPtr = &releaseDescription
-	}
-	err = dataaccess.ReleaseServicePlan(token, serviceId, serviceApiId, planId, releaseDescriptionPtr, releaseAsPreferred)
+	err = dataaccess.ReleaseServicePlan(token, serviceId, serviceApiId, planId, getReleaseDescription(releaseDescription), releaseAsPreferred)
 	if err != nil {
 		spinner.Error()
 		sm.Stop()
@@ -143,78 +106,63 @@ func runRelease(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if output != "json" {
-		spinner.UpdateMessage("Successfully released service plan")
-		spinner.Complete()
-		sm.Stop()
-	}
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully released service plan")
 
-	// Search it in the inventory
-	searchRes, err = dataaccess.SearchInventory(token, fmt.Sprintf("serviceplan:%s", planId))
+	// Get the service plan details
+	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("serviceplan:%s", planId))
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	latestVersion, err := dataaccess.FindLatestVersion(token, serviceId, planId)
+	targetVersion, err := dataaccess.FindLatestVersion(token, serviceId, planId)
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	var formattedServicePlan model.ServicePlan
+	var targetServicePlan *inventoryapi.ServicePlanSearchRecord
 	for _, servicePlan := range searchRes.ServicePlanResults {
-		if string(servicePlan.ServiceID) == serviceId && servicePlan.ID == planId && servicePlan.Version == latestVersion {
-			versionName := ""
-			if servicePlan.VersionName != nil {
-				versionName = *servicePlan.VersionName
-			}
-			formattedServicePlan = model.ServicePlan{
-				PlanID:             servicePlan.ID,
-				PlanName:           servicePlan.Name,
-				ServiceID:          string(servicePlan.ServiceID),
-				ServiceName:        servicePlan.ServiceName,
-				Environment:        servicePlan.ServiceEnvironmentName,
-				Version:            servicePlan.Version,
-				ReleaseDescription: versionName,
-				VersionSetStatus:   servicePlan.VersionSetStatus,
-				DeploymentType:     string(servicePlan.DeploymentType),
-				TenancyType:        string(servicePlan.TenancyType),
-			}
+		if string(servicePlan.ServiceID) != serviceId && servicePlan.ID != planId && servicePlan.Version != targetVersion {
+			continue
 		}
+		targetServicePlan = servicePlan
 	}
 
-	var jsonData []string
+	// Format output
+	formattedServicePlan, err := formatServicePlanVersion(targetServicePlan, false)
+	if err != nil {
+		return err
+	}
+
+	// Marshal data
 	data, err := json.MarshalIndent(formattedServicePlan, "", "    ")
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
-	jsonData = append(jsonData, string(data))
 
 	// Print output
-	switch output {
-	case "text":
-		err = utils.PrintText(jsonData)
-		if err != nil {
-			return err
-		}
-	case "table":
-		err = utils.PrintTable(jsonData)
-		if err != nil {
-			return err
-		}
-	case "json":
-		_, err = fmt.Fprintf(cmd.OutOrStdout(), "%+v\n", jsonData[0])
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-	default:
-		err = fmt.Errorf("unsupported output format: %s", output)
-		utils.PrintError(err)
+	if err = utils.PrintTextTableJsonOutput(output, string(data)); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func validateReleaseArguments(args []string, serviceId, planId string) error {
+	if len(args) == 0 && (serviceId == "" || planId == "") {
+		return fmt.Errorf("please provide the service name and service plan name or the service ID and service plan ID")
+	}
+	if len(args) > 0 && len(args) != 2 {
+		return fmt.Errorf("invalid arguments: %s. Need 2 arguments: [service-name] [plan-name]", strings.Join(args, " "))
+	}
+	return nil
+}
+
+func getReleaseDescription(releaseDescription string) *string {
+	if releaseDescription == "" {
+		return nil
+	}
+	return &releaseDescription
 }

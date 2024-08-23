@@ -19,7 +19,7 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List SaaS Portal custom domains",
 	Long: `This command helps you list SaaS Portal custom domains.
-You can filter for specific domains by using the filters flag.`,
+You can filter for specific domains by using the filter flag.`,
 	Example:      listExample,
 	RunE:         runList,
 	SilenceUsage: true,

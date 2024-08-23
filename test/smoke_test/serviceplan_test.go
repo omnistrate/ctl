@@ -42,6 +42,26 @@ func Test_service_plan_basic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
+	// PASS: list service plans
+	cmd.RootCmd.SetArgs([]string{"service-plan", "list", "--filter", fmt.Sprintf("service_name:%s", serviceName), "--filter", "plan_name:postgresql"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: describe service plan
+	cmd.RootCmd.SetArgs([]string{"service-plan", "describe", serviceName, "postgresql"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: list service plan versions
+	cmd.RootCmd.SetArgs([]string{"service-plan", "list-versions", serviceName, "postgresql", "--filter", "service_name:postgresql", "--filter", "plan_name:postgresql"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: describe service plan version
+	cmd.RootCmd.SetArgs([]string{"service-plan", "describe-version", serviceName, "postgresql", "--version=latest"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
 	// PASS: delete postgresql service plan
 	cmd.RootCmd.SetArgs([]string{"service-plan", "delete", serviceName, "postgresql"})
 	err = cmd.RootCmd.Execute()
@@ -67,6 +87,26 @@ func Test_service_plan_basic(t *testing.T) {
 
 	// PASS: set it as preferred
 	cmd.RootCmd.SetArgs([]string{"service-plan", "set-default", "--service-id", serviceId, "--plan-id", productTierId, "--version=latest"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: list service plans
+	cmd.RootCmd.SetArgs([]string{"service-plan", "list", "--filter", fmt.Sprintf("service_id:%s", serviceId), "--filter", fmt.Sprintf("plan_id:%s", productTierId)})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: describe service plan
+	cmd.RootCmd.SetArgs([]string{"service-plan", "describe", "--service-id", serviceId, "--plan-id", productTierId})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: list service plan versions
+	cmd.RootCmd.SetArgs([]string{"service-plan", "list-versions", "--service-id", serviceId, "--plan-id", productTierId})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: describe service plan version
+	cmd.RootCmd.SetArgs([]string{"service-plan", "describe-version", "--service-id", serviceId, "--plan-id", productTierId, "--version=preferred"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 

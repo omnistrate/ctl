@@ -68,13 +68,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the environment exists
-	services, err := dataaccess.ListServices(token)
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
-
-	serviceId, _, environmentId, _, err = getServiceEnvironment(services, serviceId, serviceName, environmentId, environmentName)
+	serviceId, _, environmentId, _, err = getServiceEnvironment(token, serviceId, serviceName, environmentId, environmentName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -87,11 +81,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	// Handle success message
-	if spinner != nil {
-		spinner.UpdateMessage("Successfully deleted environment")
-		spinner.Complete()
-		sm.Stop()
-	}
+	utils.HandleSpinnerSuccess(spinner, sm, "Environment deleted successfully")
 
 	return nil
 }

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/chelnak/ysmrr"
-	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
@@ -74,13 +73,7 @@ func runPromote(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the environment exists
-	services, err := dataaccess.ListServices(token)
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
-
-	serviceId, serviceName, environmentId, _, err = getServiceEnvironment(services, serviceId, serviceName, environmentId, environmentName)
+	serviceId, serviceName, environmentId, _, err = getServiceEnvironment(token, serviceId, serviceName, environmentId, environmentName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -107,11 +100,7 @@ func runPromote(cmd *cobra.Command, args []string) error {
 	}
 
 	// Handle output based on format
-	if spinner != nil {
-		spinner.UpdateMessage("Successfully promoted environment")
-		spinner.Complete()
-		sm.Stop()
-	}
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully promoted environment")
 
 	if err = utils.PrintTextTableJsonArrayOutput(output, formattedPromotions); err != nil {
 		return err
@@ -132,7 +121,12 @@ func validatePromoteArguments(args []string, serviceId, environmentId string) er
 	return nil
 }
 
-func getServiceEnvironment(services *serviceapi.ListServiceResult, serviceIdArg, serviceNameArg, environmentIdArg, environmentNameArg string) (serviceId, serviceName, environmentId, environmentName string, err error) {
+func getServiceEnvironment(token, serviceIdArg, serviceNameArg, environmentIdArg, environmentNameArg string) (serviceId, serviceName, environmentId, environmentName string, err error) {
+	services, err := dataaccess.ListServices(token)
+	if err != nil {
+		return
+	}
+
 	serviceEnvironmentsMap := make(map[string]map[string]bool)
 
 	for _, service := range services.Services {

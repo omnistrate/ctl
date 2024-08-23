@@ -20,7 +20,7 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List cloud provider accounts",
 	Long: `This command helps you list cloud provider accounts.
-You can filter for specific accounts by using the filters flag.`,
+You can filter for specific accounts by using the filter flag.`,
 	Example:      listExample,
 	RunE:         runList,
 	SilenceUsage: true,

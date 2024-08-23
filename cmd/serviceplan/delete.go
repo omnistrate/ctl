@@ -5,7 +5,6 @@ import (
 	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"strings"
 )
@@ -34,33 +33,33 @@ func init() {
 }
 
 func runDelete(cmd *cobra.Command, args []string) error {
-	// Get flags
+	defer utils.CleanupArgsAndFlags(cmd, &args)
+
+	// Retrieve flags
 	output, _ := cmd.Flags().GetString("output")
 	serviceId, _ := cmd.Flags().GetString("service-id")
 	planId, _ := cmd.Flags().GetString("plan-id")
 
-	if len(args) == 0 {
-		// Check if service ID and plan ID are provided
-		if serviceId == "" || planId == "" {
-			err := fmt.Errorf("please provide the service name and plan name or the service ID and plan ID")
-			utils.PrintError(err)
-			return err
-		}
-	}
-
-	if len(args) > 0 && len(args) != 2 {
-		err := fmt.Errorf("invalid arguments: %s. Need 2 arguments: [service-name] [plan-name]", strings.Join(args, " "))
+	// Validate input arguments
+	if err := validateDeleteArguments(args, serviceId, planId); err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	// Validate user is currently logged in
+	// Set service and plan names if provided in args
+	var serviceName, planName string
+	if len(args) == 2 {
+		serviceName, planName = args[0], args[1]
+	}
+
+	// Validate user login
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
+	// Initialize spinner if output is not JSON
 	var sm ysmrr.SpinnerManager
 	var spinner *ysmrr.Spinner
 	if output != "json" {
@@ -71,48 +70,30 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the service plan exists
-	searchRes, err := dataaccess.SearchInventory(token, "serviceplan:pt")
+	serviceId, _, planId, _, _, err = getServicePlan(token, serviceId, serviceName, planId, planName)
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	servicePlansMap := make(map[string]map[string]bool)
-	for _, plan := range searchRes.ServicePlanResults {
-		if (string(plan.ServiceID) == serviceId || (len(args) == 2 && strings.EqualFold(plan.ServiceName, args[0]))) &&
-			(plan.ID == planId || (len(args) == 2 && strings.EqualFold(plan.Name, args[1]))) {
-			if _, ok := servicePlansMap[string(plan.ServiceID)]; !ok {
-				servicePlansMap[string(plan.ServiceID)] = make(map[string]bool)
-			}
-			servicePlansMap[string(plan.ServiceID)][plan.ID] = true
-			serviceId = string(plan.ServiceID)
-			planId = plan.ID
-		}
-	}
-	if len(servicePlansMap) == 0 {
-		err = errors.New("service plan not found. Please check the input values and try again")
-		utils.PrintError(err)
-		return err
-	}
-	if len(servicePlansMap) > 1 || len(servicePlansMap[serviceId]) > 1 {
-		err = errors.New("multiple service plans found. Please provide the service ID and plan ID instead of the names")
-		utils.PrintError(err)
-		return err
-	}
-
-	err = dataaccess.DeleteServicePlan(token, serviceId, planId)
+	// Delete service plan
+	err = dataaccess.DeleteProductTier(token, serviceId, planId)
 	if err != nil {
-		spinner.Error()
-		sm.Stop()
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	if output != "json" {
-		spinner.UpdateMessage("Successfully deleted service plan")
-		spinner.Complete()
-		sm.Stop()
-	}
+	utils.HandleSpinnerSuccess(spinner, sm, "Service plan deleted successfully")
 
+	return nil
+}
+
+func validateDeleteArguments(args []string, serviceId, planId string) error {
+	if len(args) == 0 && (serviceId == "" || planId == "") {
+		return fmt.Errorf("please provide the service name and plan name or the service ID and plan ID")
+	}
+	if len(args) > 0 && len(args) != 2 {
+		return fmt.Errorf("invalid arguments: %s. Need 2 arguments: [service-name] [plan-name]", strings.Join(args, " "))
+	}
 	return nil
 }

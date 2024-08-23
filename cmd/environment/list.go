@@ -20,7 +20,7 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List environments for your services",
 	Long: `This command helps you list environments for your services.
-You can filter for specific environments by using the filters flag.`,
+You can filter for specific environments by using the filter flag.`,
 	Example:      listExample,
 	RunE:         runList,
 	SilenceUsage: true,
