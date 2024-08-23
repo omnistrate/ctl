@@ -3,16 +3,35 @@
 name: Deploy documentation
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        type: environment
+        default: 'Prod'
+        required: true
   workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
 
 jobs:
   deploy:
     name: Deploy documentation
     runs-on: ubuntu-latest
-    concurrency: deploy-documentation
+    concurrency: deploy-documentation-${{ inputs.environment }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --config fly.docs.toml --remote-only
+      - name: Checkout repository
+        timeout-minutes: 5
+        uses: actions/checkout@v4
+      
+      - name: Setup flyctl
+        timeout-minutes: 5
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+
+      - name: Deploy to Fly
+        timeout-minutes: 30
+        run: flyctl deploy --config fly.docs.toml --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
