@@ -1,0 +1,18 @@
+# See https://fly.io/docs/app-guides/continuous-deployment-with-github-actions/
+
+name: Deploy documentation
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  deploy:
+    name: Deploy documentation
+    runs-on: ubuntu-latest
+    concurrency: deploy-documentation
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --config fly.docs.toml --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
