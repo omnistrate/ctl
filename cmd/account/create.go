@@ -11,10 +11,10 @@ import (
 
 const (
 	createExample = `  # Create aws account
-  omnistrate-ctl account create <name> --aws-account-id <aws-account-id>
+  omctl account create <name> --aws-account-id <aws-account-id>
 
   # Create gcp account
-  omnistrate-ctl account create <name> --gcp-project-id <gcp-project-id> --gcp-project-number <gcp-project-number>`
+  omctl account create <name> --gcp-project-id <gcp-project-id> --gcp-project-number <gcp-project-number>`
 )
 
 var createCmd = &cobra.Command{

@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	listExample = `# List accounts
-omnistrate account list -o=table`
+	listExample = `  # List accounts
+  omctl account list -o=table`
 )
 
 var listCmd = &cobra.Command{

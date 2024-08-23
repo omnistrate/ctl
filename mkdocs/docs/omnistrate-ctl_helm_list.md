@@ -13,8 +13,8 @@ omnistrate-ctl helm list [flags]
 ### Examples
 
 ```
-# List all Helm packages that are saved
-omnistrate helm list
+  # List all Helm packages that are saved
+  omctl helm list
 ```
 
 ### Options

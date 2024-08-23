@@ -14,20 +14,20 @@ omnistrate-ctl helm [operation] [flags]
 ### Examples
 
 ```
-# Delete a Helm package
-omnistrate helm delete redis --version=20.0.1
+  # Delete a Helm package
+  omctl helm delete redis --version=20.0.1
 
-# Describe the Redis Operator Helm Chart
-omnistrate helm describe redis --version=20.0.1
+  # Describe the Redis Operator Helm Chart
+  omctl helm describe redis --version=20.0.1
 
-# List all Helm packages that are saved
-omnistrate helm list
+  # List all Helm packages that are saved
+  omctl helm list
 
-# List all Helm Packages and the Kubernetes clusters that they are installed on
-omnistrate helm list-installations --host-cluster-id=[host-cluster-id]
+  # List all Helm Packages and the Kubernetes clusters that they are installed on
+  omctl helm list-installations --host-cluster-id=[host-cluster-id]
 
-# Install the Redis Operator Helm Chart
-omnistrate helm save redis --repo-url=https://charts.bitnami.com/bitnami --version=20.0.1 --namespace=redis-operator
+  # Install the Redis Operator Helm Chart
+  omctl helm save redis --repo-url=https://charts.bitnami.com/bitnami --version=20.0.1 --namespace=redis-operator
 
 
 ```

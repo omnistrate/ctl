@@ -12,7 +12,7 @@ var LogoutCmd = &cobra.Command{
 	Use:          "logout",
 	Short:        "Logout",
 	Long:         `The logout command is used to log out from the Omnistrate platform.`,
-	Example:      `  omnistrate-ctl logout`,
+	Example:      `  omctl logout`,
 	RunE:         runLogout,
 	SilenceUsage: true,
 }

@@ -14,8 +14,8 @@ omnistrate-ctl service-plan list-versions [service-name] [plan-name] [flags]
 ### Examples
 
 ```
-# List service plan versions of the service postgres in the prod and dev environments
-omnistrate service-plan list-versions postgres postgres -o=table -f="service_name:postgres,environment:prod" -f="service:postgres,environment:dev"
+  # List service plan versions of the service postgres in the prod and dev environments
+  omctl service-plan list-versions postgres postgres -o=table -f="service_name:postgres,environment:prod" -f="service:postgres,environment:dev"
 ```
 
 ### Options

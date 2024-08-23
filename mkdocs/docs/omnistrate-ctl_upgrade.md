@@ -14,13 +14,13 @@ omnistrate-ctl upgrade [--version VERSION] [flags]
 
 ```
   # Upgrade instances to a specific version
-  omnistrate-ctl upgrade <instance1> <instance2> --version 2.0
+  omctl upgrade <instance1> <instance2> --version 2.0
 
   # Upgrade instances to the latest version
-  omnistrate-ctl upgrade <instance1> <instance2> --version latest
+  omctl upgrade <instance1> <instance2> --version latest
 
  # Upgrade instances to the preferred version
-  omnistrate-ctl upgrade <instance1> <instance2> --version preferred
+  omctl upgrade <instance1> <instance2> --version preferred
 ```
 
 ### Options

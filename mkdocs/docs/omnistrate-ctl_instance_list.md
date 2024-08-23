@@ -14,8 +14,8 @@ omnistrate-ctl instance list [flags]
 ### Examples
 
 ```
-# List instances of the service postgres in the prod and dev environments
-omnistrate instance list -o=table -f="service:postgres,environment:Production" -f="service:postgres,environment:Dev"
+  # List instances of the service postgres in the prod and dev environments
+  omctl instance list -o=table -f="service:postgres,environment:Production" -f="service:postgres,environment:Dev"
 ```
 
 ### Options

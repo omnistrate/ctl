@@ -13,7 +13,7 @@ omnistrate-ctl remove [--service-id SERVICE_ID] [flags]
 ### Examples
 
 ```
-  omnistrate-ctl remove --service-id SERVICE_ID
+  omctl remove --service-id SERVICE_ID
 ```
 
 ### Options

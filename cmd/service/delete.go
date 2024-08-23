@@ -12,16 +12,16 @@ import (
 
 var (
 	deleteExample = `  # Delete service with name
-  omnistrate-ctl service delete <name>
+  omctl service delete <name>
 
   # Delete service with ID
-  omnistrate-ctl service delete <ID> --id
+  omctl service delete <ID> --id
 
   # Delete multiple services with names
-  omnistrate-ctl service delete <name1> <name2> <name3>
+  omctl service delete <name1> <name2> <name3>
 
   # Delete multiple services with IDs
-  omnistrate-ctl service delete <ID1> <ID2> <ID3> --id`
+  omctl service delete <ID1> <ID2> <ID3> --id`
 )
 
 var deleteCmd = &cobra.Command{

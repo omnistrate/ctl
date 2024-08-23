@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	listExample = `# List domains
-omnistrate domain list -o=table`
+	listExample = `  # List domains
+  omctl domain list -o=table`
 )
 
 var listCmd = &cobra.Command{

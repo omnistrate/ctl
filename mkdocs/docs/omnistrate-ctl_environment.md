@@ -13,32 +13,32 @@ omnistrate-ctl environment [operation] [flags]
 ### Examples
 
 ```
-# Create environment
-omnistrate environment create [service-name] [environment-name] --type [type] --source [source]
+  # Create environment
+  omctl environment create [service-name] [environment-name] --type [type] --source [source]
 
-# Create environment by ID instead of name
-omnistrate environment create [environment-name] --service-id [service-id] --type [type] --source [source]
+  # Create environment by ID instead of name
+  omctl environment create [environment-name] --service-id [service-id] --type [type] --source [source]
 
-# Delete environment
-omnistrate environment delete [service-name] [environment-name]
+  # Delete environment
+  omctl environment delete [service-name] [environment-name]
 
-# Delete environment by ID instead of name
-omnistrate environment delete --service-id [service-id] --environment-id [environment-id]
+  # Delete environment by ID instead of name
+  omctl environment delete --service-id [service-id] --environment-id [environment-id]
 
-# Describe environment
-omnistrate environment describe [service-name] [environment-name]
+  # Describe environment
+  omctl environment describe [service-name] [environment-name]
 
-# Describe environment by ID instead of name
-omnistrate environment describe --service-id [service-id] --environment-id [environment-id]
+  # Describe environment by ID instead of name
+  omctl environment describe --service-id [service-id] --environment-id [environment-id]
 
-# List environments of the service postgres in the prod and dev environment types
-omnistrate environment list -o=table -f="service_name:postgres,environment_type:PROD" -f="service:postgres,environment_type:DEV"
+  # List environments of the service postgres in the prod and dev environment types
+  omctl environment list -o=table -f="service_name:postgres,environment_type:PROD" -f="service:postgres,environment_type:DEV"
 
-# Promote environment
-omnistrate environment promote [service-name] [environment-name]
+  # Promote environment
+  omctl environment promote [service-name] [environment-name]
 
-# Promote environment by ID instead of name
-omnistrate environment promote --service-id [service-id] --environment-id [environment-id]
+  # Promote environment by ID instead of name
+  omctl environment promote --service-id [service-id] --environment-id [environment-id]
 
 
 ```

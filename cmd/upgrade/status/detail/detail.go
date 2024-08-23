@@ -11,7 +11,7 @@ import (
 
 const (
 	detailExample = `  # Get upgrade status detail
-  omnistrate-ctl upgrade status detail <upgrade>`
+  omctl upgrade status detail <upgrade>`
 )
 
 var output string

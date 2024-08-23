@@ -14,10 +14,10 @@ omnistrate-ctl domain delete [flags]
 
 ```
   # Delete domain with name
-  omnistrate-ctl delete domain <name>
+  omctl delete domain <name>
 
   # Delete multiple domains with names
-  omnistrate-ctl delete domain <name1> <name2> <name3>
+  omctl delete domain <name1> <name2> <name3>
 ```
 
 ### Options

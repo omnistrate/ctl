@@ -13,17 +13,17 @@ omnistrate-ctl instance [operation] [flags]
 ### Examples
 
 ```
-# Create an instance deployment
-omnistrate instance create --service=mysql --environment=dev --plan=mysql --version=latest --resource=mySQL --cloud-provider=aws --region=ca-central-1 --param '{"databaseName":"default","password":"a_secure_password","rootPassword":"a_secure_root_password","username":"user"}'
+  # Create an instance deployment
+  omctl instance create --service=mysql --environment=dev --plan=mysql --version=latest --resource=mySQL --cloud-provider=aws --region=ca-central-1 --param '{"databaseName":"default","password":"a_secure_password","rootPassword":"a_secure_root_password","username":"user"}'
 
-# Delete instance
-omnistrate instance delete instance-abcd1234
+  # Delete instance
+  omctl instance delete instance-abcd1234
 
-# Describe instance
-omnistrate instance describe instance-abcd1234
+  # Describe instance
+  omctl instance describe instance-abcd1234
 
-# List instances of the service postgres in the prod and dev environments
-omnistrate instance list -o=table -f="service:postgres,environment:Production" -f="service:postgres,environment:Dev"
+  # List instances of the service postgres in the prod and dev environments
+  omctl instance list -o=table -f="service:postgres,environment:Production" -f="service:postgres,environment:Dev"
 
 
 ```

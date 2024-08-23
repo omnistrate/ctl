@@ -13,7 +13,7 @@ omnistrate-ctl list [flags]
 ### Examples
 
 ```
-  omnistrate-ctl list
+  omctl list
 ```
 
 ### Options

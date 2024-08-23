@@ -12,7 +12,7 @@ import (
 
 const (
 	statusExample = `  # Get upgrade status
-  omnistrate-ctl upgrade status <upgrade>`
+  omctl upgrade status <upgrade>`
 )
 
 var output string
@@ -114,7 +114,7 @@ func run(cmd *cobra.Command, args []string) error {
 
 		println("\nTo get more details, run the following command(s):")
 		for _, r := range res {
-			println(fmt.Sprintf("  omnistrate-ctl upgrade status detail %s", r.UpgradeID))
+			println(fmt.Sprintf("  omctl upgrade status detail %s", r.UpgradeID))
 		}
 	case "table":
 		err = utils.PrintTable(jsonData)
@@ -124,7 +124,7 @@ func run(cmd *cobra.Command, args []string) error {
 
 		println("\nTo get more details, run the following command(s):")
 		for _, r := range res {
-			println(fmt.Sprintf("  omnistrate-ctl upgrade status detail %s", r.UpgradeID))
+			println(fmt.Sprintf("  omctl upgrade status detail %s", r.UpgradeID))
 		}
 	case "json":
 		fmt.Printf("%+v\n", jsonData)

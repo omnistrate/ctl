@@ -13,8 +13,8 @@ omnistrate-ctl instance delete [flags]
 ### Examples
 
 ```
-# Delete instance
-omnistrate instance delete instance-abcd1234
+  # Delete instance
+  omctl instance delete instance-abcd1234
 ```
 
 ### Options

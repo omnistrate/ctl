@@ -26,28 +26,28 @@ omnistrate-ctl build [--file FILE] [--spec-type SPEC_TYPE][--name NAME] [--envir
 
 ```
   # Build service with image in dev environment
-  omnistrate-ctl build --image docker.io/mysql:5.7 --name MySQL --env-var "MYSQL_ROOT_PASSWORD=password" --env-var "MYSQL_DATABASE=mydb""
+  omctl build --image docker.io/mysql:5.7 --name MySQL --env-var "MYSQL_ROOT_PASSWORD=password" --env-var "MYSQL_DATABASE=mydb""
 
   # Build service with private image in dev environment
-  omnistrate-ctl build --image docker.io/namespace/my-image:v1.2 --name "My Service" --image-registry-auth-username username --image-registry-auth-password password --env-var KEY1:VALUE1 --env-var KEY2:VALUE2
+  omctl build --image docker.io/namespace/my-image:v1.2 --name "My Service" --image-registry-auth-username username --image-registry-auth-password password --env-var KEY1:VALUE1 --env-var KEY2:VALUE2
 
   # Build service with compose spec in dev environment
-  omnistrate-ctl build --file docker-compose.yml --name "My Service"
+  omctl build --file docker-compose.yml --name "My Service"
 
   # Build service with compose spec in prod environment
-  omnistrate-ctl build --file docker-compose.yml --name "My Service" --environment prod --environment-type prod
+  omctl build --file docker-compose.yml --name "My Service" --environment prod --environment-type prod
 
   # Build service with compose spec and release the service with a specific release version name
-  omnistrate-ctl build --file docker-compose.yml --name "My Service" --release --release-name "v1.0.0-alpha"
+  omctl build --file docker-compose.yml --name "My Service" --release --release-name "v1.0.0-alpha"
 
   # Build service with compose spec and release the service as preferred with a specific release version name
-  omnistrate-ctl build --file docker-compose.yml --name "My Service" --release-as-preferred --release-name "v1.0.0-alpha"
+  omctl build --file docker-compose.yml --name "My Service" --release-as-preferred --release-name "v1.0.0-alpha"
 
   # Build service with compose spec interactively
-  omnistrate-ctl build --file docker-compose.yml --name "My Service" --interactive
+  omctl build --file docker-compose.yml --name "My Service" --interactive
 
   # Build service with compose spec with service description and service logo
-  omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png"
+  omctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png"
 
 ```
 

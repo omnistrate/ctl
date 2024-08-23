@@ -15,31 +15,31 @@ omnistrate-ctl service [operation] [flags]
 
 ```
   # Delete service with name
-  omnistrate-ctl service delete <name>
+  omctl service delete <name>
 
   # Delete service with ID
-  omnistrate-ctl service delete <ID> --id
+  omctl service delete <ID> --id
 
   # Delete multiple services with names
-  omnistrate-ctl service delete <name1> <name2> <name3>
+  omctl service delete <name1> <name2> <name3>
 
   # Delete multiple services with IDs
-  omnistrate-ctl service delete <ID1> <ID2> <ID3> --id
+  omctl service delete <ID1> <ID2> <ID3> --id
 
   # Describe service with name
-  omnistrate-ctl service describe <name>
+  omctl service describe <name>
 
   # Describe service with ID
-  omnistrate-ctl service describe <id> --id
+  omctl service describe <id> --id
 
   # Describe multiple services with names
-  omnistrate-ctl service describe <name1> <name2> <name3>
+  omctl service describe <name1> <name2> <name3>
 
   # Describe multiple services with IDs
-  omnistrate-ctl service describe <id1> <id2> <id3> --id
+  omctl service describe <id1> <id2> <id3> --id
 
-# List services
-omnistrate service list -o=table
+  # List services
+  omctl service list -o=table
 
 
 ```

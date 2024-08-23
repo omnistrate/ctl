@@ -13,11 +13,11 @@ omnistrate-ctl subscription [operation] [flags]
 ### Examples
 
 ```
-# Describe subscription
-omnistrate subscription describe subscription-abcd1234
+  # Describe subscription
+  omctl subscription describe subscription-abcd1234
 
-# List subscriptions of the service postgres and mysql in the prod environment
-omnistrate subscription list -o=table -f="service_name:postgres,environment:PROD" -f="service:mysql,environment:PROD"
+  # List subscriptions of the service postgres and mysql in the prod environment
+  omctl subscription list -o=table -f="service_name:postgres,environment:PROD" -f="service:mysql,environment:PROD"
 
 
 ```

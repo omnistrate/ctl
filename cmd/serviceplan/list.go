@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	listExample = `# List service plans of the service postgres in the prod and dev environments
-omnistrate service-plan list -o=table -f="service_name:postgres,environment:prod" -f="service:postgres,environment:dev"`
+	listExample = `  # List service plans of the service postgres in the prod and dev environments
+  omctl service-plan list -o=table -f="service_name:postgres,environment:prod" -f="service:postgres,environment:dev"`
 	defaultMaxNameLength = 30 // Maximum length of the name column in the table
 )
 
