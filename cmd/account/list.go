@@ -18,7 +18,7 @@ const (
 
 var listCmd = &cobra.Command{
 	Use:   "list [flags]",
-	Short: "List cloud provider accounts",
+	Short: "List Cloud Provider Accounts",
 	Long: `This command helps you list cloud provider accounts.
 You can filter for specific accounts by using the filter flag.`,
 	Example:      listExample,

@@ -7,7 +7,7 @@ import (
 
 var Cmd = &cobra.Command{
 	Use:          "service-plan [operation] [flags]",
-	Short:        "Manage service plans for your service",
+	Short:        "Manage Service Plans for your service",
 	Long:         `This command helps you manage the service plans for your service.`,
 	Run:          run,
 	SilenceUsage: true,

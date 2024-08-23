@@ -7,7 +7,7 @@ import (
 
 var Cmd = &cobra.Command{
 	Use:          "environment [operation] [flags]",
-	Short:        "Manage environments for your service",
+	Short:        "Manage Service Environments for your service",
 	Long:         `This command helps you manage the environments for your service.`,
 	Run:          run,
 	SilenceUsage: true,

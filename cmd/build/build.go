@@ -76,7 +76,7 @@ const (
   omctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png"
 `
 
-	buildLong = `Build command can be used to build one service plan from image, docker compose, and service plan spec. 
+	buildLong = `Build command can be used to build a service from image, docker compose, and service plan spec. 
 It has two main modes of operation:
   - Create a new service plan
   - Update an existing service plan
@@ -94,7 +94,7 @@ This command has an interactive mode. In this mode, you can choose to promote th
 // BuildCmd represents the build command
 var BuildCmd = &cobra.Command{
 	Use:          "build [--file=file] [--spec-type=spec-type][--name=name] [--environment=environment] [--environment-type=environment-type] [--release] [--release-as-preferred][--interactive][--description=description] [--service-logo-url=service-logo-url] [--image=image-url] [--image-registry-auth-username=username] [--image-registry-auth-password=password] [--env-var=\"key=var\"]",
-	Short:        "Build one service plan from docker compose",
+	Short:        "Build Services from image, compose spec and service plan specs",
 	Long:         buildLong,
 	Example:      buildExample,
 	RunE:         runBuild,

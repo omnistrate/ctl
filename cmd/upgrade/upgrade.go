@@ -29,7 +29,7 @@ var output string
 
 var Cmd = &cobra.Command{
 	Use:          "upgrade --version=[version]",
-	Short:        "Upgrade instance to a newer or older version",
+	Short:        "Upgrade Instance Deployments to a newer or older version",
 	Long:         `This command helps you upgrade instances to a newer or older version.`,
 	Example:      upgradeExample,
 	RunE:         run,
