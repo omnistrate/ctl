@@ -199,7 +199,7 @@ func formatServicePlanVersionDetails(token, serviceName, planName, environment s
 			resource.OperatorCRDConfiguration = desRes.OperatorCRDConfiguration
 		}
 
-		resources = append(resources)
+		resources = append(resources, resource)
 	}
 
 	formattedServicePlan := model.ServicePlanVersionDetails{
