@@ -4,7 +4,7 @@ List Cloud Provider Accounts
 
 ### Synopsis
 
-This command helps you list cloud provider accounts.
+This command helps you list Cloud Provider Accounts.
 You can filter for specific accounts by using the filter flag.
 
 ```

@@ -4,7 +4,7 @@ Manage your Cloud Provider Accounts
 
 ### Synopsis
 
-This command helps you manage your cloud provider accounts.
+This command helps you manage your Cloud Provider Accounts.
 
 ```
 omnistrate-ctl account [operation] [flags]
