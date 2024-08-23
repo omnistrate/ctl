@@ -41,8 +41,8 @@ validation:
   absolute_links: ignore
 
 nav:
-  - Install: 'install.md'
-  - Integrate: "integrating.md"
+  - Install CTL: 'install.md'
+  - Integrate CTL: "integrating.md"
   - Commands:
     - omnistrate-ctl account: 'omnistrate-ctl_account.md'
     - omnistrate-ctl build: 'omnistrate-ctl_build.md'

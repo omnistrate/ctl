@@ -356,4 +356,29 @@ jobs:
         run: cosign sign --yes ${TAGS}
         env:
           TAGS: ${{ steps.meta.outputs.tags }}
-          
+
+  update-docs: 
+    name: Upldate CTL documents
+    needs: 
+      - release-package-multi-arch
+      - update-brew-formula
+      - release-binaries
+    uses: ./.github/workflows/fly-deploy.yml
+    secrets: inherit
+    
+  notification: 
+    name: Notify Mattermost
+    runs-on: ubuntu-latest
+    needs: 
+      - release-package-multi-arch
+      - update-brew-formula
+      - release-binaries
+      - update-docs
+    steps:
+        - name: Mattermost Notification
+          uses: tferreira/matterfy@v1.9
+          with:
+            type: ${{ job.status }}
+            job_name: '*Deploy to Prod*'
+            url: ${{ secrets.MATTERMOST_DEPLOYMENT_NOTIFICATION_WEBHOOK }}
+    

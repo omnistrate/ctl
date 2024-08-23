@@ -1,5 +1,5 @@
 # CTL Reference
 
-* [Install](./install.md)
-* [Integrating](./integrating.md)
+* [Install CTL](./install.md)
+* [Integrate CTL](./integrating.md)
 * [Commands](./omnistrate-ctl.md)
