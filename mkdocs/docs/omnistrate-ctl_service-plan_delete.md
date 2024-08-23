@@ -13,11 +13,11 @@ omnistrate-ctl service-plan delete [service-name] [plan-name] [flags]
 ### Examples
 
 ```
-  # Delete service plan
-  omctl service-plan delete [service-name] [plan-name]
+# Delete service plan
+omnistrate service-plan delete [service-name] [plan-name]
 
-  # Delete service plan by ID instead of name
-  omctl service-plan delete --service-id [service-id] --plan-id [plan-id]
+# Delete service plan by ID instead of name
+omnistrate service-plan delete --service-id [service-id] --plan-id [plan-id]
 ```
 
 ### Options
@@ -37,5 +37,5 @@ omnistrate-ctl service-plan delete [service-name] [plan-name] [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage Service Plans for your service
+* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage service plans for your services
 

@@ -1,6 +1,6 @@
 ## omnistrate-ctl subscription list
 
-List Customer Subscriptions to your services
+List customer subscriptions to your services
 
 ### Synopsis
 
@@ -14,8 +14,8 @@ omnistrate-ctl subscription list [flags]
 ### Examples
 
 ```
-  # List subscriptions of the service postgres and mysql in the prod environment
-  omctl subscription list -o=table -f="service_name:postgres,environment:PROD" -f="service:mysql,environment:PROD"
+# List subscriptions of the service postgres and mysql in the prod environment
+omnistrate subscription list -o=table -f="service_name:postgres,environment:PROD" -f="service:mysql,environment:PROD"
 ```
 
 ### Options
@@ -35,5 +35,5 @@ omnistrate-ctl subscription list [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl subscription](omnistrate-ctl_subscription.md)	 - Manage Customer Subscriptions for your service
+* [omnistrate-ctl subscription](omnistrate-ctl_subscription.md)	 - Manage subscriptions for your services
 

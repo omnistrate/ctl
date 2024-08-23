@@ -3,14 +3,14 @@
 Get upgrade status
 
 ```
-omnistrate-ctl upgrade status [upgrade-id] [flags]
+omnistrate-ctl upgrade status [flags]
 ```
 
 ### Examples
 
 ```
   # Get upgrade status
-  omctl upgrade status <upgrade>
+  omnistrate-ctl upgrade status <upgrade>
 ```
 
 ### Options
@@ -28,6 +28,6 @@ omnistrate-ctl upgrade status [upgrade-id] [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl upgrade](omnistrate-ctl_upgrade.md)	 - Upgrade Instance Deployments to a newer or older version
+* [omnistrate-ctl upgrade](omnistrate-ctl_upgrade.md)	 - Upgrade instance to a newer or older version
 * [omnistrate-ctl upgrade status detail](omnistrate-ctl_upgrade_status_detail.md)	 - Get upgrade status detail
 

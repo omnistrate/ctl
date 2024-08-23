@@ -1,10 +1,10 @@
 ## omnistrate-ctl service-plan list-versions
 
-List service plan versions for your service
+List service plan versions for your services
 
 ### Synopsis
 
-This command helps you list service plan versions for your service.
+This command helps you list service plan versions for your services.
 You can filter for specific service plan versions by using the filter flag.
 
 ```
@@ -14,8 +14,8 @@ omnistrate-ctl service-plan list-versions [service-name] [plan-name] [flags]
 ### Examples
 
 ```
-  # List service plan versions of the service postgres in the prod and dev environments
-  omctl service-plan list-versions postgres postgres -o=table -f="service_name:postgres,environment:prod" -f="service:postgres,environment:dev"
+# List service plan versions of the service postgres in the prod and dev environments
+omnistrate service-plan list-versions postgres postgres -o=table -f="service_name:postgres,environment:prod" -f="service:postgres,environment:dev"
 ```
 
 ### Options
@@ -37,5 +37,5 @@ omnistrate-ctl service-plan list-versions [service-name] [plan-name] [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage Service Plans for your service
+* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage service plans for your services
 

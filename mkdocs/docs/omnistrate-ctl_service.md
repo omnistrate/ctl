@@ -1,6 +1,6 @@
 ## omnistrate-ctl service
 
-Manage Services for your account
+Manage services for your account
 
 ### Synopsis
 
@@ -15,31 +15,31 @@ omnistrate-ctl service [operation] [flags]
 
 ```
   # Delete service with name
-  omctl service delete <name>
+  omnistrate-ctl service delete <name>
 
   # Delete service with ID
-  omctl service delete <ID> --id
+  omnistrate-ctl service delete <ID> --id
 
   # Delete multiple services with names
-  omctl service delete <name1> <name2> <name3>
+  omnistrate-ctl service delete <name1> <name2> <name3>
 
   # Delete multiple services with IDs
-  omctl service delete <ID1> <ID2> <ID3> --id
+  omnistrate-ctl service delete <ID1> <ID2> <ID3> --id
 
   # Describe service with name
-  omctl service describe <name>
+  omnistrate-ctl service describe <name>
 
   # Describe service with ID
-  omctl service describe <id> --id
+  omnistrate-ctl service describe <id> --id
 
   # Describe multiple services with names
-  omctl service describe <name1> <name2> <name3>
+  omnistrate-ctl service describe <name1> <name2> <name3>
 
   # Describe multiple services with IDs
-  omctl service describe <id1> <id2> <id3> --id
+  omnistrate-ctl service describe <id1> <id2> <id3> --id
 
-  # List services
-  omctl service list -o=table
+# List services
+omnistrate service list -o=table
 
 
 ```

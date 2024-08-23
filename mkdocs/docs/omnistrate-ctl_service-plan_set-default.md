@@ -8,17 +8,17 @@ This command helps you set a service plan as default for your service.
 By setting a service plan as default, you can ensure that new instances of the service are created with the default plan.
 
 ```
-omnistrate-ctl service-plan set-default [service-name] [plan-name] --version=VERSION [flags]
+omnistrate-ctl service-plan set-default [service-name] [plan-name] [--version=VERSION] [flags]
 ```
 
 ### Examples
 
 ```
-  # Set service plan as default
-  omctl service-plan set-default [service-name] [plan-name] --version [version]
+# Set service plan as default
+omnistrate service-plan set-default [service-name] [plan-name] --version [version]
 
-  # Set  service plan as default by ID instead of name
-  omctl service-plan set-default --service-id [service-id] --plan-id [plan-id] --version [version]
+# Set  service plan as default by ID instead of name
+omnistrate service-plan set-default --service-id [service-id] --plan-id [plan-id] --version [version]
 ```
 
 ### Options
@@ -33,5 +33,5 @@ omnistrate-ctl service-plan set-default [service-name] [plan-name] --version=VER
 
 ### SEE ALSO
 
-* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage Service Plans for your service
+* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage service plans for your services
 

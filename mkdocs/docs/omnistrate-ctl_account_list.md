@@ -1,6 +1,6 @@
 ## omnistrate-ctl account list
 
-List Cloud Provider Accounts
+List cloud provider accounts
 
 ### Synopsis
 
@@ -14,8 +14,8 @@ omnistrate-ctl account list [flags]
 ### Examples
 
 ```
-  # List accounts
-  omctl account list -o=table
+# List accounts
+omnistrate account list -o=table
 ```
 
 ### Options
@@ -34,5 +34,5 @@ omnistrate-ctl account list [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl account](omnistrate-ctl_account.md)	 - Manage your Cloud Provider Accounts
+* [omnistrate-ctl account](omnistrate-ctl_account.md)	 - Manage your cloud provider accounts
 

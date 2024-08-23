@@ -13,11 +13,11 @@ omnistrate-ctl environment delete [service-name] [environment-name] [flags]
 ### Examples
 
 ```
-  # Delete environment
-  omctl environment delete [service-name] [environment-name]
+# Delete environment
+omnistrate environment delete [service-name] [environment-name]
 
-  # Delete environment by ID instead of name
-  omctl environment delete --service-id [service-id] --environment-id [environment-id]
+# Delete environment by ID instead of name
+omnistrate environment delete --service-id [service-id] --environment-id [environment-id]
 ```
 
 ### Options
@@ -37,5 +37,5 @@ omnistrate-ctl environment delete [service-name] [environment-name] [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl environment](omnistrate-ctl_environment.md)	 - Manage Service Environments for your service
+* [omnistrate-ctl environment](omnistrate-ctl_environment.md)	 - Manage environments for your services
 

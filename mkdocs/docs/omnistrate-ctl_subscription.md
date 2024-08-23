@@ -1,10 +1,10 @@
 ## omnistrate-ctl subscription
 
-Manage Customer Subscriptions for your service
+Manage subscriptions for your services
 
 ### Synopsis
 
-This command helps you manage customer subscriptions for your service.
+This command helps you manage subscriptions for your services.
 
 ```
 omnistrate-ctl subscription [operation] [flags]
@@ -13,11 +13,11 @@ omnistrate-ctl subscription [operation] [flags]
 ### Examples
 
 ```
-  # Describe subscription
-  omctl subscription describe subscription-abcd1234
+# Describe subscription
+omnistrate subscription describe subscription-abcd1234
 
-  # List subscriptions of the service postgres and mysql in the prod environment
-  omctl subscription list -o=table -f="service_name:postgres,environment:PROD" -f="service:mysql,environment:PROD"
+# List subscriptions of the service postgres and mysql in the prod environment
+omnistrate subscription list -o=table -f="service_name:postgres,environment:PROD" -f="service:mysql,environment:PROD"
 
 
 ```
@@ -38,5 +38,5 @@ omnistrate-ctl subscription [operation] [flags]
 
 * [omnistrate-ctl](omnistrate-ctl.md)	 - Manage your Omnistrate SaaS from the command line
 * [omnistrate-ctl subscription describe](omnistrate-ctl_subscription_describe.md)	 - Describe a customer subscription to your service
-* [omnistrate-ctl subscription list](omnistrate-ctl_subscription_list.md)	 - List Customer Subscriptions to your services
+* [omnistrate-ctl subscription list](omnistrate-ctl_subscription_list.md)	 - List customer subscriptions to your services
 

@@ -13,11 +13,11 @@ omnistrate-ctl environment create [service-name] [environment-name] [flags]
 ### Examples
 
 ```
-  # Create environment
-  omctl environment create [service-name] [environment-name] --type [type] --source [source]
+# Create environment
+omnistrate environment create [service-name] [environment-name] --type [type] --source [source]
 
-  # Create environment by ID instead of name
-  omctl environment create [environment-name] --service-id [service-id] --type [type] --source [source]
+# Create environment by ID instead of name
+omnistrate environment create [environment-name] --service-id [service-id] --type [type] --source [source]
 ```
 
 ### Options
@@ -39,5 +39,5 @@ omnistrate-ctl environment create [service-name] [environment-name] [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl environment](omnistrate-ctl_environment.md)	 - Manage Service Environments for your service
+* [omnistrate-ctl environment](omnistrate-ctl_environment.md)	 - Manage environments for your services
 
