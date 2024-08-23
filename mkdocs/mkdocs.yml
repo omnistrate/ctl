@@ -86,6 +86,10 @@ nav:
       - service-plan:
           - title: 'service-plan'
             link: 'omnistrate-ctl_service-plan.md'
+          - list: 'omnistrate-ctl_service-plan_list.md'
+          - describe: 'omnistrate-ctl_service-plan_describe.md'
+          - list-versions: 'omnistrate-ctl_service-plan_list-versions.md'
+          - describe-version: 'omnistrate-ctl_service-plan_describe-version.md'
           - delete: 'omnistrate-ctl_service-plan_delete.md'
           - release: 'omnistrate-ctl_service-plan_release.md'
           - set-default: 'omnistrate-ctl_service-plan_set-default.md'
