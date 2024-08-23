@@ -1,6 +1,6 @@
 ## omnistrate-ctl helm
 
-Manage Helm Charts for your service using this command
+Manage Helm Charts for your service
 
 ### Synopsis
 

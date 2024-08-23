@@ -1,6 +1,6 @@
 ## omnistrate-ctl instance delete
 
-Delete an instance
+Delete an instance deployment
 
 ### Synopsis
 
@@ -13,7 +13,7 @@ omnistrate-ctl instance delete [instance-id] [flags]
 ### Examples
 
 ```
-  # Delete instance
+  # Delete an instance deployment
   omctl instance delete instance-abcd1234
 ```
 
@@ -33,5 +33,5 @@ omnistrate-ctl instance delete [instance-id] [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl instance](omnistrate-ctl_instance.md)	 - Manage instance deployment for your service using this command
+* [omnistrate-ctl instance](omnistrate-ctl_instance.md)	 - Manage instance deployment for your service
 

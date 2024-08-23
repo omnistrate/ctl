@@ -1,10 +1,10 @@
 ## omnistrate-ctl environment
 
-Manage environments for your services
+Manage environments for your service
 
 ### Synopsis
 
-This command helps you manage the environments for your services.
+This command helps you manage the environments for your service.
 
 ```
 omnistrate-ctl environment [operation] [flags]
@@ -61,6 +61,6 @@ omnistrate-ctl environment [operation] [flags]
 * [omnistrate-ctl environment create](omnistrate-ctl_environment_create.md)	 - Create a environment
 * [omnistrate-ctl environment delete](omnistrate-ctl_environment_delete.md)	 - Delete a environment
 * [omnistrate-ctl environment describe](omnistrate-ctl_environment_describe.md)	 - Describe a environment
-* [omnistrate-ctl environment list](omnistrate-ctl_environment_list.md)	 - List environments for your services
+* [omnistrate-ctl environment list](omnistrate-ctl_environment_list.md)	 - List environments for your service
 * [omnistrate-ctl environment promote](omnistrate-ctl_environment_promote.md)	 - Promote a environment
 

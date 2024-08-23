@@ -37,5 +37,5 @@ omnistrate-ctl environment promote [service-name] [environment-name] [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl environment](omnistrate-ctl_environment.md)	 - Manage environments for your services
+* [omnistrate-ctl environment](omnistrate-ctl_environment.md)	 - Manage environments for your service
 

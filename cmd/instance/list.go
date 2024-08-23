@@ -11,15 +11,15 @@ import (
 )
 
 const (
-	listExample = `  # List instances of the service postgres in the prod and dev environments
+	listExample = `  # List instance deployments of the service postgres in the prod and dev environments
   omctl instance list -o=table -f="service:postgres,environment:Production" -f="service:postgres,environment:Dev"`
 	defaultMaxNameLength = 30 // Maximum length of the name column in the table
 )
 
 var listCmd = &cobra.Command{
 	Use:   "list [flags]",
-	Short: "List instance deployments for your services",
-	Long: `This command helps you list instance deployments for your services.
+	Short: "List instance deployments for your service",
+	Long: `This command helps you list instance deployments for your service.
 You can filter for specific instances by using the filter flag.`,
 	Example:      listExample,
 	RunE:         runList,

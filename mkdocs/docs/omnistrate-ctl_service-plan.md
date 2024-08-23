@@ -1,10 +1,10 @@
 ## omnistrate-ctl service-plan
 
-Manage service plans for your services
+Manage service plans for your service
 
 ### Synopsis
 
-This command helps you manage the service plans for your services.
+This command helps you manage the service plans for your service.
 
 ```
 omnistrate-ctl service-plan [operation] [flags]
@@ -70,8 +70,8 @@ omnistrate-ctl service-plan [operation] [flags]
 * [omnistrate-ctl service-plan delete](omnistrate-ctl_service-plan_delete.md)	 - Delete a service plan
 * [omnistrate-ctl service-plan describe](omnistrate-ctl_service-plan_describe.md)	 - Describe a service plan
 * [omnistrate-ctl service-plan describe-version](omnistrate-ctl_service-plan_describe-version.md)	 - Describe a service plan version
-* [omnistrate-ctl service-plan list](omnistrate-ctl_service-plan_list.md)	 - List service plans for your services
-* [omnistrate-ctl service-plan list-versions](omnistrate-ctl_service-plan_list-versions.md)	 - List service plan versions for your services
+* [omnistrate-ctl service-plan list](omnistrate-ctl_service-plan_list.md)	 - List service plans for your service
+* [omnistrate-ctl service-plan list-versions](omnistrate-ctl_service-plan_list-versions.md)	 - List service plan versions for your service
 * [omnistrate-ctl service-plan release](omnistrate-ctl_service-plan_release.md)	 - Release a service plan
 * [omnistrate-ctl service-plan set-default](omnistrate-ctl_service-plan_set-default.md)	 - Set a service plan as default
 

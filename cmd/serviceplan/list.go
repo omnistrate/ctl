@@ -19,8 +19,8 @@ const (
 
 var listCmd = &cobra.Command{
 	Use:   "list [flags]",
-	Short: "List service plans for your services",
-	Long: `This command helps you list service plans for your services.
+	Short: "List service plans for your service",
+	Long: `This command helps you list service plans for your service.
 You can filter for specific service plans by using the filter flag.`,
 	Example:      listExample,
 	RunE:         runList,

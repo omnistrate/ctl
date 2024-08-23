@@ -7,8 +7,8 @@ import (
 
 var Cmd = &cobra.Command{
 	Use:          "subscription [operation] [flags]",
-	Short:        "Manage subscriptions for your services",
-	Long:         `This command helps you manage subscriptions for your services.`,
+	Short:        "Manage subscriptions for your service",
+	Long:         `This command helps you manage subscriptions for your service.`,
 	Run:          run,
 	SilenceUsage: true,
 }

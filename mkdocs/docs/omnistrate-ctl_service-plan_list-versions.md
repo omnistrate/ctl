@@ -1,10 +1,10 @@
 ## omnistrate-ctl service-plan list-versions
 
-List service plan versions for your services
+List service plan versions for your service
 
 ### Synopsis
 
-This command helps you list service plan versions for your services.
+This command helps you list service plan versions for your service.
 You can filter for specific service plan versions by using the filter flag.
 
 ```
@@ -37,5 +37,5 @@ omnistrate-ctl service-plan list-versions [service-name] [plan-name] [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage service plans for your services
+* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage service plans for your service
 

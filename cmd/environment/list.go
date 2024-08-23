@@ -18,8 +18,8 @@ const (
 
 var listCmd = &cobra.Command{
 	Use:   "list [flags]",
-	Short: "List environments for your services",
-	Long: `This command helps you list environments for your services.
+	Short: "List environments for your service",
+	Long: `This command helps you list environments for your service.
 You can filter for specific environments by using the filter flag.`,
 	Example:      listExample,
 	RunE:         runList,

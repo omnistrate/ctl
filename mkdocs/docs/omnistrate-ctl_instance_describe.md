@@ -13,7 +13,7 @@ omnistrate-ctl instance describe [instance-id] [flags]
 ### Examples
 
 ```
-  # Describe instance
+  # Describe an instance deployment
   omctl instance describe instance-abcd1234
 ```
 
@@ -31,5 +31,5 @@ omnistrate-ctl instance describe [instance-id] [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl instance](omnistrate-ctl_instance.md)	 - Manage instance deployment for your service using this command
+* [omnistrate-ctl instance](omnistrate-ctl_instance.md)	 - Manage instance deployment for your service
 

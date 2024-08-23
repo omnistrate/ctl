@@ -30,15 +30,15 @@ omnistrate-ctl [flags]
 * [omnistrate-ctl build](omnistrate-ctl_build.md)	 - Build one service plan from docker compose
 * [omnistrate-ctl describe](omnistrate-ctl_describe.md)	 - Describe a service (deprecated)
 * [omnistrate-ctl domain](omnistrate-ctl_domain.md)	 - Manage Customer Domains for your service
-* [omnistrate-ctl environment](omnistrate-ctl_environment.md)	 - Manage environments for your services
-* [omnistrate-ctl helm](omnistrate-ctl_helm.md)	 - Manage Helm Charts for your service using this command
-* [omnistrate-ctl instance](omnistrate-ctl_instance.md)	 - Manage instance deployment for your service using this command
+* [omnistrate-ctl environment](omnistrate-ctl_environment.md)	 - Manage environments for your service
+* [omnistrate-ctl helm](omnistrate-ctl_helm.md)	 - Manage Helm Charts for your service
+* [omnistrate-ctl instance](omnistrate-ctl_instance.md)	 - Manage instance deployment for your service
 * [omnistrate-ctl list](omnistrate-ctl_list.md)	 - List all available services (deprecated)
 * [omnistrate-ctl login](omnistrate-ctl_login.md)	 - Log in to the Omnistrate platform
 * [omnistrate-ctl logout](omnistrate-ctl_logout.md)	 - Logout
 * [omnistrate-ctl remove](omnistrate-ctl_remove.md)	 - Remove a service from the Omnistrate platform (deprecated)
 * [omnistrate-ctl service](omnistrate-ctl_service.md)	 - Manage services for your account
-* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage service plans for your services
-* [omnistrate-ctl subscription](omnistrate-ctl_subscription.md)	 - Manage subscriptions for your services
+* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage service plans for your service
+* [omnistrate-ctl subscription](omnistrate-ctl_subscription.md)	 - Manage subscriptions for your service
 * [omnistrate-ctl upgrade](omnistrate-ctl_upgrade.md)	 - Upgrade instance to a newer or older version
 

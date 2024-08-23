@@ -36,5 +36,5 @@ omnistrate-ctl instance create --service=[service] --environment=[environment] -
 
 ### SEE ALSO
 
-* [omnistrate-ctl instance](omnistrate-ctl_instance.md)	 - Manage instance deployment for your service using this command
+* [omnistrate-ctl instance](omnistrate-ctl_instance.md)	 - Manage instance deployment for your service
 

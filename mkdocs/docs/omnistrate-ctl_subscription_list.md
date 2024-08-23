@@ -35,5 +35,5 @@ omnistrate-ctl subscription list [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl subscription](omnistrate-ctl_subscription.md)	 - Manage subscriptions for your services
+* [omnistrate-ctl subscription](omnistrate-ctl_subscription.md)	 - Manage subscriptions for your service
 

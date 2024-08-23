@@ -1,10 +1,10 @@
 ## omnistrate-ctl subscription
 
-Manage subscriptions for your services
+Manage subscriptions for your service
 
 ### Synopsis
 
-This command helps you manage subscriptions for your services.
+This command helps you manage subscriptions for your service.
 
 ```
 omnistrate-ctl subscription [operation] [flags]

@@ -37,5 +37,5 @@ omnistrate-ctl service-plan delete [service-name] [plan-name] [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage service plans for your services
+* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage service plans for your service
 

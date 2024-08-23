@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	describeExample = `  # Describe instance
+	describeExample = `  # Describe an instance deployment
   omctl instance describe instance-abcd1234`
 )
 
