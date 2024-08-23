@@ -78,3 +78,23 @@ func DescribeVersionSet(token, serviceID, productTierID, version string) (*tierv
 
 	return res, nil
 }
+
+func SetDefaultServicePlan(token, serviceId, productTierId, version string) (tierVersionSet *tierversionsetapi.TierVersionSet, err error) {
+	versionSet, err := httpclientwrapper.NewVersionSet(utils.GetHostScheme(), utils.GetHost())
+	if err != nil {
+		return
+	}
+
+	request := &tierversionsetapi.PromoteTierVersionSetRequest{
+		Token:         token,
+		ServiceID:     tierversionsetapi.ServiceID(serviceId),
+		ProductTierID: tierversionsetapi.ProductTierID(productTierId),
+		Version:       version,
+	}
+
+	if tierVersionSet, err = versionSet.PromoteTierVersionSet(context.Background(), request); err != nil {
+		return
+	}
+
+	return
+}

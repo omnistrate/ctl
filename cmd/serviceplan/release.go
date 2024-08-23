@@ -76,7 +76,7 @@ func runRelease(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if service plan exist
-	serviceId, serviceName, planId, _, _, err = getServicePlan(token, serviceId, serviceName, planId, planName)
+	serviceId, _, planId, _, _, err = getServicePlan(token, serviceId, serviceName, planId, planName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -130,7 +130,7 @@ func runRelease(cmd *cobra.Command, args []string) error {
 	}
 
 	// Format output
-	formattedServicePlan, err := formatServicePlan(targetServicePlan, false)
+	formattedServicePlan, err := formatServicePlanVersion(targetServicePlan, false)
 	if err != nil {
 		return err
 	}

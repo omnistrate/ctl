@@ -1,6 +1,28 @@
 package model
 
 type ServicePlan struct {
+	PlanID         string `json:"plan_id,omitempty"`
+	PlanName       string `json:"plan_name,omitempty"`
+	ServiceID      string `json:"service_id,omitempty"`
+	ServiceName    string `json:"service_name,omitempty"`
+	Environment    string `json:"environment,omitempty"`
+	DeploymentType string `json:"deployment_type,omitempty"`
+	TenancyType    string `json:"tenancy_type,omitempty"`
+}
+
+type ServicePlanDetails struct {
+	PlanID          string     `json:"plan_id,omitempty"`
+	PlanName        string     `json:"plan_name,omitempty"`
+	ServiceID       string     `json:"service_id,omitempty"`
+	ServiceName     string     `json:"service_name,omitempty"`
+	Environment     string     `json:"environment,omitempty"`
+	DeploymentType  string     `json:"deployment_type,omitempty"`
+	TenancyType     string     `json:"tenancy_type,omitempty"`
+	EnabledFeatures any        `json:"enabled_features,omitempty"`
+	Resources       []Resource `json:"resources,omitempty"`
+}
+
+type ServicePlanVersion struct {
 	PlanID             string `json:"plan_id,omitempty"`
 	PlanName           string `json:"plan_name,omitempty"`
 	ServiceID          string `json:"service_id,omitempty"`
@@ -9,11 +31,9 @@ type ServicePlan struct {
 	Version            string `json:"version,omitempty"`
 	ReleaseDescription string `json:"release_description,omitempty"`
 	VersionSetStatus   string `json:"version_set_status,omitempty"`
-	DeploymentType     string `json:"deployment_type,omitempty"`
-	TenancyType        string `json:"tenancy_type,omitempty"`
 }
 
-type ServicePlanDetails struct {
+type ServicePlanVersionDetails struct {
 	PlanID             string     `json:"plan_id,omitempty"`
 	PlanName           string     `json:"plan_name,omitempty"`
 	ServiceID          string     `json:"service_id,omitempty"`
@@ -22,8 +42,6 @@ type ServicePlanDetails struct {
 	Version            string     `json:"version,omitempty"`
 	ReleaseDescription string     `json:"release_description,omitempty"`
 	VersionSetStatus   string     `json:"version_set_status,omitempty"`
-	DeploymentType     string     `json:"deployment_type,omitempty"`
-	TenancyType        string     `json:"tenancy_type,omitempty"`
 	EnabledFeatures    any        `json:"enabled_features,omitempty"`
 	Resources          []Resource `json:"resources,omitempty"`
 }
