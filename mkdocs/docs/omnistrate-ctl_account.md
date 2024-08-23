@@ -1,6 +1,6 @@
 ## omnistrate-ctl account
 
-Manage your cloud provider accounts
+Manage your Cloud Provider Accounts
 
 ### Synopsis
 
@@ -14,37 +14,37 @@ omnistrate-ctl account [operation] [flags]
 
 ```
   # Create aws account
-  omnistrate-ctl account create <name> --aws-account-id <aws-account-id>
+  omctl account create <name> --aws-account-id <aws-account-id>
 
   # Create gcp account
-  omnistrate-ctl account create <name> --gcp-project-id <gcp-project-id> --gcp-project-number <gcp-project-number>
+  omctl account create <name> --gcp-project-id <gcp-project-id> --gcp-project-number <gcp-project-number>
 
   # Delete account with name
-  omnistrate-ctl account delete <name>
+  omctl account delete <name>
 
   # Delete account with ID
-  omnistrate-ctl account delete <id> --id
+  omctl account delete <id> --id
 
   # Delete multiple accounts with names
-  omnistrate-ctl account delete <name1> <name2> <name3>
+  omctl account delete <name1> <name2> <name3>
 
   # Delete multiple accounts with IDs
-  omnistrate-ctl account delete <id1> <id2> <id3> --id
+  omctl account delete <id1> <id2> <id3> --id
 
   # Describe account with name
-  omnistrate-ctl account describe <name>
+  omctl account describe <name>
 
   # Describe account with ID
-  omnistrate-ctl account describe <id> --id
+  omctl account describe <id> --id
   
   # Describe multiple accounts with names
-  omnistrate-ctl account describe <name1> <name2> <name3>
+  omctl account describe <name1> <name2> <name3>
 
   # Describe multiple accounts with IDs
-  omnistrate-ctl account describe <id1> <id2> <id3> --id
+  omctl account describe <id1> <id2> <id3> --id
 
-# List accounts
-omnistrate account list -o=table
+  # List accounts
+  omctl account list -o=table
 
 
 ```
@@ -67,5 +67,5 @@ omnistrate account list -o=table
 * [omnistrate-ctl account create](omnistrate-ctl_account_create.md)	 - Create an account
 * [omnistrate-ctl account delete](omnistrate-ctl_account_delete.md)	 - Delete one or more accounts
 * [omnistrate-ctl account describe](omnistrate-ctl_account_describe.md)	 - Display details for one or more accounts
-* [omnistrate-ctl account list](omnistrate-ctl_account_list.md)	 - List cloud provider accounts
+* [omnistrate-ctl account list](omnistrate-ctl_account_list.md)	 - List Cloud Provider Accounts
 

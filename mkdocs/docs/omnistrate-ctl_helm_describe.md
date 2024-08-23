@@ -13,8 +13,8 @@ omnistrate-ctl helm describe chart --version=[version] [flags]
 ### Examples
 
 ```
-# Describe the Redis Operator Helm Chart
-omnistrate helm describe redis --version=20.0.1
+  # Describe the Redis Operator Helm Chart
+  omctl helm describe redis --version=20.0.1
 ```
 
 ### Options
@@ -27,5 +27,5 @@ omnistrate helm describe redis --version=20.0.1
 
 ### SEE ALSO
 
-* [omnistrate-ctl helm](omnistrate-ctl_helm.md)	 - Manage Helm Charts for your service using this command
+* [omnistrate-ctl helm](omnistrate-ctl_helm.md)	 - Manage Helm Charts for your service
 

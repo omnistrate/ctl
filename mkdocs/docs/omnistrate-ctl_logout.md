@@ -13,7 +13,7 @@ omnistrate-ctl logout [flags]
 ### Examples
 
 ```
-  omnistrate-ctl logout
+  omctl logout
 ```
 
 ### Options

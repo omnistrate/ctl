@@ -14,8 +14,8 @@ omnistrate-ctl service list [flags]
 ### Examples
 
 ```
-# List services
-omnistrate service list -o=table
+  # List services
+  omctl service list -o=table
 ```
 
 ### Options
@@ -35,5 +35,5 @@ omnistrate service list -o=table
 
 ### SEE ALSO
 
-* [omnistrate-ctl service](omnistrate-ctl_service.md)	 - Manage services for your account
+* [omnistrate-ctl service](omnistrate-ctl_service.md)	 - Manage Services for your account
 
