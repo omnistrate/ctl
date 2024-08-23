@@ -141,6 +141,7 @@ check-dependencies:
 .PHONY: gen-doc
 gen-doc:
 	echo "Generating docs"
+	rm mkdocs/docs/omnistrate-ctl*.md # remove old docs
 	go run doc-gen/main.go
 
 .PHONY: docker

@@ -26,14 +26,8 @@ omnistrate-ctl domain [operation] [flags]
   # Delete multiple domains with names
   omnistrate-ctl delete domain <name1> <name2> <name3>
 
-  # Get all domains
-  omnistrate-ctl domain get
-
-  # Get domain with name
-  omnistrate-ctl domain get <name>
-
-  # Get multiple domains
-  omnistrate-ctl domain get <name1> <name2> <name3>
+# List domains
+omnistrate domain list -o=table
 
 
 ```
@@ -55,5 +49,5 @@ omnistrate-ctl domain [operation] [flags]
 * [omnistrate-ctl](omnistrate-ctl.md)	 - Manage your Omnistrate SaaS from the command line
 * [omnistrate-ctl domain create](omnistrate-ctl_domain_create.md)	 - Create a domain
 * [omnistrate-ctl domain delete](omnistrate-ctl_domain_delete.md)	 - Delete one or more domains
-* [omnistrate-ctl domain get](omnistrate-ctl_domain_get.md)	 - Display one or more domains
+* [omnistrate-ctl domain list](omnistrate-ctl_domain_list.md)	 - List SaaS Portal custom domains
 

@@ -5,7 +5,7 @@ List customer subscriptions to your services
 ### Synopsis
 
 This command helps you list customer subscriptions to your services.
-You can filter for specific subscriptions by using the filters flag.
+You can filter for specific subscriptions by using the filter flag.
 
 ```
 omnistrate-ctl subscription list [flags]

@@ -19,6 +19,24 @@ omnistrate service-plan delete [service-name] [plan-name]
 # Delete service plan by ID instead of name
 omnistrate service-plan delete --service-id [service-id] --plan-id [plan-id]
 
+# Describe service plan
+omnistrate service-plan describe [service-name] [plan-name]
+
+# Describe service plan by ID instead of name
+omnistrate service-plan describe --service-id [service-id] --plan-id [plan-id]
+
+# Describe a service plan version
+omnistrate service-plan describe-version [service-name] [plan-name] --version [version]
+
+# Describe a service plan version by ID instead of name
+omnistrate service-plan describe-version --service-id [service-id] --plan-id [plan-id] --version [version]
+
+# List service plans of the service postgres in the prod and dev environments
+omnistrate service-plan list -o=table -f="service_name:postgres,environment:prod" -f="service:postgres,environment:dev"
+
+# List service plan versions of the service postgres in the prod and dev environments
+omnistrate service-plan list-versions postgres postgres -o=table -f="service_name:postgres,environment:prod" -f="service:postgres,environment:dev"
+
 # Release service plan
 omnistrate service-plan release [service-name] [plan-name]
 
@@ -50,6 +68,10 @@ omnistrate service-plan set-default --service-id [service-id] --plan-id [plan-id
 
 * [omnistrate-ctl](omnistrate-ctl.md)	 - Manage your Omnistrate SaaS from the command line
 * [omnistrate-ctl service-plan delete](omnistrate-ctl_service-plan_delete.md)	 - Delete a service plan
+* [omnistrate-ctl service-plan describe](omnistrate-ctl_service-plan_describe.md)	 - Describe a service plan
+* [omnistrate-ctl service-plan describe-version](omnistrate-ctl_service-plan_describe-version.md)	 - Describe a service plan version
+* [omnistrate-ctl service-plan list](omnistrate-ctl_service-plan_list.md)	 - List service plans for your services
+* [omnistrate-ctl service-plan list-versions](omnistrate-ctl_service-plan_list-versions.md)	 - List service plan versions for your services
 * [omnistrate-ctl service-plan release](omnistrate-ctl_service-plan_release.md)	 - Release a service plan
 * [omnistrate-ctl service-plan set-default](omnistrate-ctl_service-plan_set-default.md)	 - Set a service plan as default
 

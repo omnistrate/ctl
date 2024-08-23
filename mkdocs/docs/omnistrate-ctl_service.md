@@ -38,20 +38,8 @@ omnistrate-ctl service [operation] [flags]
   # Describe multiple services with IDs
   omnistrate-ctl service describe <id1> <id2> <id3> --id
 
-  # Get all services
-  omnistrate-ctl service get
-
-  # Get service with name
-  omnistrate-ctl service get <name>
-
-  # Get multiple services with names
-  omnistrate-ctl service get <name1> <name2> <name3>
-
-  # Get service with ID
-  omnistrate-ctl service get <id> --id
-
-  # Get multiple services with IDs
-  omnistrate-ctl service get <id1> <id2> <id3> --id
+# List services
+omnistrate service list -o=table
 
 
 ```
@@ -73,5 +61,5 @@ omnistrate-ctl service [operation] [flags]
 * [omnistrate-ctl](omnistrate-ctl.md)	 - Manage your Omnistrate SaaS from the command line
 * [omnistrate-ctl service delete](omnistrate-ctl_service_delete.md)	 - Delete one or more services
 * [omnistrate-ctl service describe](omnistrate-ctl_service_describe.md)	 - Display details for one or more services
-* [omnistrate-ctl service get](omnistrate-ctl_service_get.md)	 - Display one or more services
+* [omnistrate-ctl service list](omnistrate-ctl_service_list.md)	 - List services for your account
 
