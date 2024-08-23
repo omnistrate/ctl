@@ -61,7 +61,7 @@ nav:
           - delete: 'omnistrate-ctl_environment_delete.md'
           - describe: 'omnistrate-ctl_environment_describe.md'
           - list: 'omnistrate-ctl_environment_list.md'
-          - promote: 'omnistrate-ctl_environment_delete.md'
+          - promote: 'omnistrate-ctl_environment_promote.md'
       - build: 'omnistrate-ctl_build.md'
       - domain:
           - title: 'domain'
