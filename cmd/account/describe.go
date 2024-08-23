@@ -60,7 +60,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	var accounts []*accountconfigapi.DescribeAccountConfigResult
 	for _, name := range args {
 		if ID {
-			account, err := dataaccess.DescribeAccount(name, token)
+			account, err := dataaccess.DescribeAccount(token, name)
 			if err != nil {
 				utils.PrintError(err)
 				return err

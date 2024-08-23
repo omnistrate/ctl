@@ -25,7 +25,7 @@ func ListDomains(token string) (*saasportalapi.ListSaaSPortalCustomDomainsResult
 	return res, nil
 }
 
-func DeleteDomain(environmentType, token string) error {
+func DeleteDomain(token, environmentType string) error {
 	service, err := httpclientwrapper.NewSaaSPortal(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return err

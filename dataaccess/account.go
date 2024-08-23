@@ -44,7 +44,7 @@ func ListAccounts(token string, cloudProvider string) (*accountconfigapi.ListAcc
 	return res, nil
 }
 
-func DeleteAccount(accountConfigId, token string) error {
+func DeleteAccount(token, accountConfigId string) error {
 	service, err := httpclientwrapper.NewAccountConfig(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return err

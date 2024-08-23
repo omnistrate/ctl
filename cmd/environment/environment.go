@@ -1,4 +1,4 @@
-package account
+package environment
 
 import (
 	"github.com/omnistrate/ctl/utils"
@@ -6,9 +6,9 @@ import (
 )
 
 var Cmd = &cobra.Command{
-	Use:          "account [operation] [flags]",
-	Short:        "Manage your cloud provider accounts",
-	Long:         `This command helps you manage your cloud provider accounts.`,
+	Use:          "environment [operation] [flags]",
+	Short:        "Manage environments for your services",
+	Long:         `This command helps you manage the environments for your services.`,
 	Run:          run,
 	SilenceUsage: true,
 }
@@ -18,6 +18,7 @@ func init() {
 	Cmd.AddCommand(listCmd)
 	Cmd.AddCommand(describeCmd)
 	Cmd.AddCommand(deleteCmd)
+	Cmd.AddCommand(promoteCmd)
 
 	Cmd.Example = utils.CombineSubCmdExamples(Cmd)
 }

@@ -40,13 +40,13 @@ func Test_account_basic(t *testing.T) {
 	require.Error(err)
 	require.Contains(err.Error(), "unauthorized: only root users can onboard accounts")
 
-	// PASS: get accounts
-	cmd.RootCmd.SetArgs([]string{"account", "get"})
+	// PASS: list accounts
+	cmd.RootCmd.SetArgs([]string{"account", "list"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	// PASS: get accounts by name
-	cmd.RootCmd.SetArgs([]string{"account", "get", awsAccountName, gcpAccountName})
+	// PASS: list accounts by name
+	cmd.RootCmd.SetArgs([]string{"account", "list", "--filter", fmt.Sprintf("name:%s", awsAccountName), "--filter", fmt.Sprintf("name:%s", gcpAccountName)})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 

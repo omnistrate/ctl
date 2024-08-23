@@ -80,7 +80,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 
 	// Delete domain
 	for _, environmentType := range environmentTypes {
-		err = dataaccess.DeleteDomain(environmentType, token)
+		err = dataaccess.DeleteDomain(token, environmentType)
 		if err != nil {
 			utils.PrintError(err)
 			return err

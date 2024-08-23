@@ -45,7 +45,7 @@ func runRemove(cmd *cobra.Command, args []string) error {
 	}
 
 	// Remove service
-	err = dataaccess.DeleteService(removeServiceID, token)
+	err = dataaccess.DeleteService(token, removeServiceID)
 	if err != nil {
 		utils.PrintError(err)
 		return err

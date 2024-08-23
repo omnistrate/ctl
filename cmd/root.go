@@ -10,6 +10,7 @@ import (
 	"github.com/omnistrate/ctl/cmd/build"
 	"github.com/omnistrate/ctl/cmd/deprecated"
 	"github.com/omnistrate/ctl/cmd/domain"
+	"github.com/omnistrate/ctl/cmd/environment"
 	"github.com/omnistrate/ctl/cmd/helm"
 	"github.com/omnistrate/ctl/cmd/instance"
 	"github.com/omnistrate/ctl/cmd/service"
@@ -101,6 +102,7 @@ func init() {
 	RootCmd.AddCommand(instance.Cmd)
 	RootCmd.AddCommand(serviceplan.Cmd)
 	RootCmd.AddCommand(subscription.Cmd)
+	RootCmd.AddCommand(environment.Cmd)
 
 	// Deprecated
 	RootCmd.AddCommand(deprecated.DescribeCmd)
