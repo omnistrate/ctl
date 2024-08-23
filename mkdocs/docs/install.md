@@ -2,10 +2,11 @@
 
 Omnistrate CTL is a command line tool designed to streamline the creation, deployment, and management of your Omnistrate SaaS. Use it to build services from docker-compose files, manage service plans, and interact with the Omnistrate platform efficiently.
 
-## Obtaining CTL
+## Obtaining omnistrate-ctl
 
 We provide CTL in the following formats:
-### CTL Binaries
+
+### Install from Binaries
 To run the CTL in your local environment, you can use the CTL binaries.
 To obtain the latest version of the CTL binaries, execute the following command in your terminal:
 
@@ -41,7 +42,7 @@ Please refer to the [Using CTL with Docker](#using-ctl-with-docker) section for 
 To integrate CTL into your GitHub workflows, you can use the GitHub Action: [Setup Omnistrate CTL](https://github.com/marketplace/actions/setup-omnistrate-ctl).
 Using the GitHub Action you can execute any command on the CTL to automate your deployment workflow in GitHub.
 
-## Login to Omnistrate platform
+## Login to Omnistrate
 
 To start using CTL, you first need to log in to the Omnistrate platform. You can do this by running either of the following command:
 

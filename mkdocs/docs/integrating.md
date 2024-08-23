@@ -2,7 +2,7 @@
 
 Omnistrate CTL has a number of features that enable it to be seamlessly integrated with scripted and automated environments such as CI.
 
-## Using CTL with GitHub Actions
+## Using omnistrate-ctl with GitHub Actions
 
 Create secrets in your repository for your Omnistrate email and password and use omnistrate-ctl from your Github workflows. 
 
@@ -23,7 +23,7 @@ Create secrets in your repository for your Omnistrate email and password and use
     omctl --version
 ```
 
-## Using CTL with Docker
+## Using omnistrate-ctl with Docker
 
 CTL is packaged and released in a docker image and can be used to execute omnistrate-ctl. 
 
