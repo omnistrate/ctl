@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/omnistrate/ctl/cmd/account"
 	"github.com/omnistrate/ctl/cmd/auth/login"
 	"github.com/omnistrate/ctl/cmd/auth/logout"
@@ -15,7 +17,6 @@ import (
 	"github.com/omnistrate/ctl/cmd/serviceplan"
 	"github.com/omnistrate/ctl/cmd/subscription"
 	"github.com/omnistrate/ctl/cmd/upgrade"
-	"os"
 
 	"github.com/fatih/color"
 	"github.com/mitchellh/go-wordwrap"
@@ -38,7 +39,9 @@ var RootCmd = &cobra.Command{
 Omnistrate CTL is a command line tool designed to streamline the creation, deployment, and management of your Omnistrate SaaS. Use it to build services from docker-compose files, manage service plans, and interact with the Omnistrate platform efficiently.
 
 For additional support, please refer to the CTL reference documentation at https://docs.omnistrate.com/getting-started/ctl-reference/.`, 80),
-	Run: runRoot,
+	Run:               runRoot,
+	DisableAutoGenTag: true,
+	Aliases:           []string{"omctl"},
 }
 
 func runRoot(cmd *cobra.Command, args []string) {

@@ -164,3 +164,14 @@ clean:
 	rm ./test-report.json
 	rm ./security-report.html
 	rm ./docs
+
+.PHONY: docker-build-docs
+docker-build-docs:
+	@echo "Building mkdocs-ctl-manual docker image"
+	@docker build -t mkdocs-ctl-manual -f ./build/Dockerfile.docs .
+
+.PHONY: docker-run-docs
+docker-run-docs:
+	@make docker-build-docs
+	@echo "Starting mkdocs-ctl-manual on port 8001"
+	@docker run -it --rm -p 8001:8001 mkdocs-ctl-manual

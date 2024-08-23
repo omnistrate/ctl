@@ -1,0 +1,75 @@
+## omnistrate-ctl build
+
+Build one service plan from docker compose
+
+### Synopsis
+
+Build command can be used to build one service plan from docker compose. 
+It has two main modes of operation:
+  - Create a new service plan
+  - Update an existing service plan
+
+Below info served as service plan identifiers:
+  - service name (--name, required)
+  - environment name (--environment, optional, default: Dev)
+  - environment type (--environment-type, optional, default: dev)
+  - service plan name (the name field of x-omnistrate-service-plan tag in compose spec file, required)
+If the identifiers match an existing service plan, it will update that plan. Otherwise, it'll create a new service plan. 
+
+This command has an interactive mode. In this mode, you can choose to promote the service plan to production by interacting with the prompts.
+
+```
+omnistrate-ctl build [--file FILE] [--spec-type SPEC_TYPE][--name NAME] [--environment ENVIRONMENT] [--environment-type ENVIRONMENT_TYPE] [--release] [--release-as-preferred][--interactive][--description DESCRIPTION] [--service-logo-url SERVICE_LOGO_URL]  [flags]
+```
+
+### Examples
+
+```
+  # Build in dev environment
+  omnistrate-ctl build --file docker-compose.yml --name "My Service"
+
+  # Build in prod environment
+  omnistrate-ctl build --file docker-compose.yml --name "My Service" --environment prod --environment-type prod
+
+  # Build and release the service with a specific release version name
+  omnistrate-ctl build --file docker-compose.yml --name "My Service" --release --release-name "v1.0.0-alpha"
+
+  # Build and release the service as preferred with a specific release version name
+  omnistrate-ctl build --file docker-compose.yml --name "My Service" --release-as-preferred --release-name "v1.0.0-alpha"
+
+  # Build interactively
+  omnistrate-ctl build --file docker-compose.yml --name "My Service" --interactive
+
+  # Build with service description and service logo
+  omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png"
+
+```
+
+### Options
+
+```
+      --description string           Description of the service
+      --environment string           Name of the environment to build the service in (default "Dev")
+      --environment-type string      Type of environment. Valid options include: 'dev', 'prod', 'qa', 'canary', 'staging', 'private') (default "dev")
+  -f, --file string                  Path to the docker compose file
+  -h, --help                         help for build
+  -i, --interactive                  Interactive mode
+  -n, --name string                  Name of the service
+      --release                      Release the service after building it
+      --release-as-preferred         Release the service as preferred after building it
+      --release-description string   Custom description of the release version
+      --release-name string          Custom description of the release version. Deprecated: use --release-description instead
+      --service-logo-url string      URL to the service logo
+  -s, --spec-type string             Spec type (default "DockerCompose")
+```
+
+### Options inherited from parent commands
+
+```
+  -v, --version   Print the version number of omnistrate-ctl
+```
+
+### SEE ALSO
+
+* [omnistrate-ctl](omnistrate-ctl.md)	 - Manage your Omnistrate SaaS from the command line
+
