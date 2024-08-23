@@ -30,6 +30,7 @@ omnistrate-ctl [flags]
 * [omnistrate-ctl build](omnistrate-ctl_build.md)	 - Build one service plan from docker compose
 * [omnistrate-ctl describe](omnistrate-ctl_describe.md)	 - Describe a service (deprecated)
 * [omnistrate-ctl domain](omnistrate-ctl_domain.md)	 - Manage Customer Domains for your service
+* [omnistrate-ctl environment](omnistrate-ctl_environment.md)	 - Manage environments for your services
 * [omnistrate-ctl helm](omnistrate-ctl_helm.md)	 - Manage Helm Charts for your service using this command
 * [omnistrate-ctl instance](omnistrate-ctl_instance.md)	 - Manage instance deployment for your service using this command
 * [omnistrate-ctl list](omnistrate-ctl_list.md)	 - List all available services (deprecated)

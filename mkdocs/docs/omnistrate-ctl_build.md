@@ -4,7 +4,7 @@ Build one service plan from docker compose
 
 ### Synopsis
 
-Build command can be used to build one service plan from docker compose. 
+Build command can be used to build one service plan from image, docker compose, and service plan spec. 
 It has two main modes of operation:
   - Create a new service plan
   - Update an existing service plan
@@ -25,22 +25,28 @@ omnistrate-ctl build [--file FILE] [--spec-type SPEC_TYPE][--name NAME] [--envir
 ### Examples
 
 ```
-  # Build in dev environment
+  # Build service with image in dev environment
+  omnistrate-ctl build --image docker.io/mysql:5.7 --name MySQL --env-var "MYSQL_ROOT_PASSWORD=password" --env-var "MYSQL_DATABASE=mydb""
+
+  # Build service with private image in dev environment
+  omnistrate-ctl build --image docker.io/namespace/my-image:v1.2 --name "My Service" --image-registry-auth-username username --image-registry-auth-password password --env-var KEY1:VALUE1 --env-var KEY2:VALUE2
+
+  # Build service with compose spec in dev environment
   omnistrate-ctl build --file docker-compose.yml --name "My Service"
 
-  # Build in prod environment
+  # Build service with compose spec in prod environment
   omnistrate-ctl build --file docker-compose.yml --name "My Service" --environment prod --environment-type prod
 
-  # Build and release the service with a specific release version name
+  # Build service with compose spec and release the service with a specific release version name
   omnistrate-ctl build --file docker-compose.yml --name "My Service" --release --release-name "v1.0.0-alpha"
 
-  # Build and release the service as preferred with a specific release version name
+  # Build service with compose spec and release the service as preferred with a specific release version name
   omnistrate-ctl build --file docker-compose.yml --name "My Service" --release-as-preferred --release-name "v1.0.0-alpha"
 
-  # Build interactively
+  # Build service with compose spec interactively
   omnistrate-ctl build --file docker-compose.yml --name "My Service" --interactive
 
-  # Build with service description and service logo
+  # Build service with compose spec with service description and service logo
   omnistrate-ctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png"
 
 ```
@@ -48,19 +54,23 @@ omnistrate-ctl build [--file FILE] [--spec-type SPEC_TYPE][--name NAME] [--envir
 ### Options
 
 ```
-      --description string           Description of the service
-      --environment string           Name of the environment to build the service in (default "Dev")
-      --environment-type string      Type of environment. Valid options include: 'dev', 'prod', 'qa', 'canary', 'staging', 'private') (default "dev")
-  -f, --file string                  Path to the docker compose file
-  -h, --help                         help for build
-  -i, --interactive                  Interactive mode
-  -n, --name string                  Name of the service
-      --release                      Release the service after building it
-      --release-as-preferred         Release the service as preferred after building it
-      --release-description string   Custom description of the release version
-      --release-name string          Custom description of the release version. Deprecated: use --release-description instead
-      --service-logo-url string      URL to the service logo
-  -s, --spec-type string             Spec type (default "DockerCompose")
+      --description string                    Description of the service
+      --env-var stringArray                   Used together with --image flag. Provide environment variables in the format --env-var KEY1:VALUE1 --env-var KEY2:VALUE2
+      --environment string                    Name of the environment to build the service in (default "Dev")
+      --environment-type string               Type of environment. Valid options include: 'dev', 'prod', 'qa', 'canary', 'staging', 'private') (default "dev")
+  -f, --file string                           Path to the docker compose file
+  -h, --help                                  help for build
+      --image string                          Provide the complete image repository URL with the image name and tag (e.g., docker.io/namespace/my-image:v1.2)
+      --image-registry-auth-password string   Used together with --image flag. Provide the password to authenticate with the image registry if it's a private registry
+      --image-registry-auth-username string   Used together with --image flag. Provide the username to authenticate with the image registry if it's a private registry
+  -i, --interactive                           Interactive mode
+  -n, --name string                           Name of the service
+      --release                               Release the service after building it
+      --release-as-preferred                  Release the service as preferred after building it
+      --release-description string            Custom description of the release version
+      --release-name string                   Custom description of the release version. Deprecated: use --release-description instead
+      --service-logo-url string               URL to the service logo
+  -s, --spec-type string                      Spec type (default "DockerCompose")
 ```
 
 ### Options inherited from parent commands

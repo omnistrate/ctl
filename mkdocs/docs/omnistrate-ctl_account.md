@@ -43,20 +43,8 @@ omnistrate-ctl account [operation] [flags]
   # Describe multiple accounts with IDs
   omnistrate-ctl account describe <id1> <id2> <id3> --id
 
-  # Get all accounts
-  omnistrate-ctl account get
-
-  # Get account with name
-  omnistrate-ctl account get <name>
-
-  # Get multiple accounts
-  omnistrate-ctl account get <name1> <name2> <name3>
-
-  # Get account with ID
-  omnistrate-ctl account get <id> --id
-
-  # Get multiple accounts with IDs
-  omnistrate-ctl account get <id1> <id2> <id3> --id
+# List accounts
+omnistrate account list -o=table
 
 
 ```
@@ -79,5 +67,5 @@ omnistrate-ctl account [operation] [flags]
 * [omnistrate-ctl account create](omnistrate-ctl_account_create.md)	 - Create an account
 * [omnistrate-ctl account delete](omnistrate-ctl_account_delete.md)	 - Delete one or more accounts
 * [omnistrate-ctl account describe](omnistrate-ctl_account_describe.md)	 - Display details for one or more accounts
-* [omnistrate-ctl account get](omnistrate-ctl_account_get.md)	 - Display one or more accounts
+* [omnistrate-ctl account list](omnistrate-ctl_account_list.md)	 - List cloud provider accounts
 

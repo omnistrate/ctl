@@ -5,7 +5,7 @@ List instance deployments for your services
 ### Synopsis
 
 This command helps you list instance deployments for your services.
-You can filter for specific instances by using the filters flag.
+You can filter for specific instances by using the filter flag.
 
 ```
 omnistrate-ctl instance list [flags]
