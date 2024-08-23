@@ -4,10 +4,10 @@ name: Fly Deploy
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
 jobs:
   deploy:
     name: Deploy app
