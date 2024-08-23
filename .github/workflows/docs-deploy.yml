@@ -32,7 +32,6 @@ jobs:
         timeout-minutes: 5
         uses: superfly/flyctl-actions/setup-flyctl@master
 
-
       - name: Deploy to Fly
         timeout-minutes: 30
         run: flyctl deploy --config fly.docs.toml --remote-only
