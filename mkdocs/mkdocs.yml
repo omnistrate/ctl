@@ -44,10 +44,26 @@ nav:
   - Install CTL: 'install.md'
   - Integrate CTL: "integrating.md"
   - Commands:
-      - auth:
-          - login: 'omnistrate-ctl_auth_login.md'
-          - logout: 'omnistrate-ctl_auth_logout.md'
       - build: 'omnistrate-ctl_build.md'
+      - service:
+          - delete: 'omnistrate-ctl_service_delete.md'
+          - list: 'omnistrate-ctl_service_list.md'
+          - describe: 'omnistrate-ctl_service_describe.md'
+      - service-plan:
+          - delete: 'omnistrate-ctl_service-plan_delete.md'
+          - release: 'omnistrate-ctl_service-plan_release.md'
+          - set-default: 'omnistrate-ctl_service-plan_set-default.md'
+      - subscription:
+          - list: 'omnistrate-ctl_subscription_list.md'
+          - describe: 'omnistrate-ctl_subscription_describe.md'
+      - instance:
+          - create: 'omnistrate-ctl_instance_create.md'
+          - list: 'omnistrate-ctl_instance_list.md'
+          - describe: 'omnistrate-ctl_instance_describe.md'
+          - delete: 'omnistrate-ctl_instance_delete.md'
+      - upgrade:
+          - status: 'omnistrate-ctl_upgrade_status.md'
+          - status detail: 'omnistrate-ctl_upgrade_status-detail.md'
       - account:
         - create: 'omnistrate-ctl_account_create.md'
         - list: 'omnistrate-ctl_account_list.md'
@@ -64,11 +80,9 @@ nav:
           - list-installations: 'omnistrate-ctl_helm_list-installations.md'
           - describe: 'omnistrate-ctl_helm_describe.md'
           - delete: 'omnistrate-ctl_helm_delete.md'
-      - instance: 'omnistrate-ctl_instance.md'
-      - service: 'omnistrate-ctl_service.md'
-      - service-plan: 'omnistrate-ctl_service-plan.md'
-      - subscription: 'omnistrate-ctl_subscription.md'
-      - upgrade: 'omnistrate-ctl_upgrade.md'
+      - auth:
+          - login: 'omnistrate-ctl_auth_login.md'
+          - logout: 'omnistrate-ctl_auth_logout.md'
 
 extra_css:
   - stylesheets/extra.css
