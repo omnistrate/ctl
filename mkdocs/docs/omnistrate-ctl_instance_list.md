@@ -1,10 +1,10 @@
 ## omnistrate-ctl instance list
 
-List instance deployments for your service
+List instance deployments for your services
 
 ### Synopsis
 
-This command helps you list instance deployments for your service.
+This command helps you list instance deployments for your services.
 You can filter for specific instances by using the filter flag.
 
 ```
@@ -14,8 +14,8 @@ omnistrate-ctl instance list [flags]
 ### Examples
 
 ```
-  # List instance deployments of the service postgres in the prod and dev environments
-  omctl instance list -o=table -f="service:postgres,environment:Production" -f="service:postgres,environment:Dev"
+# List instances of the service postgres in the prod and dev environments
+omnistrate instance list -o=table -f="service:postgres,environment:Production" -f="service:postgres,environment:Dev"
 ```
 
 ### Options
@@ -35,5 +35,5 @@ omnistrate-ctl instance list [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl instance](omnistrate-ctl_instance.md)	 - Manage Instance Deployments for your service
+* [omnistrate-ctl instance](omnistrate-ctl_instance.md)	 - Manage instance deployment for your service using this command
 

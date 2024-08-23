@@ -13,11 +13,11 @@ omnistrate-ctl service-plan describe [service-name] [plan-name] [flags]
 ### Examples
 
 ```
-  # Describe service plan
-  omctl service-plan describe [service-name] [plan-name]
+# Describe service plan
+omnistrate service-plan describe [service-name] [plan-name]
 
-  # Describe service plan by ID instead of name
-  omctl service-plan describe --service-id [service-id] --plan-id [plan-id]
+# Describe service plan by ID instead of name
+omnistrate service-plan describe --service-id [service-id] --plan-id [plan-id]
 ```
 
 ### Options
@@ -36,5 +36,5 @@ omnistrate-ctl service-plan describe [service-name] [plan-name] [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage Service Plans for your service
+* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage service plans for your services
 

@@ -15,19 +15,19 @@ omnistrate-ctl domain [operation] [flags]
 
 ```
   # Create a custom domain for dev environment
-  omctl domain create dev --domain abc.dev --environment-type dev
+  omnistrate-ctl domain create dev --domain abc.dev --environment-type dev
 
   # Create a custom domain for prod environment
-  omctl domain create abc.cloud --domain abc.cloud --environment-type prod
+  omnistrate-ctl domain create abc.cloud --domain abc.cloud --environment-type prod
 
   # Delete domain with name
-  omctl delete domain <name>
+  omnistrate-ctl delete domain <name>
 
   # Delete multiple domains with names
-  omctl delete domain <name1> <name2> <name3>
+  omnistrate-ctl delete domain <name1> <name2> <name3>
 
-  # List domains
-  omctl domain list -o=table
+# List domains
+omnistrate domain list -o=table
 
 
 ```

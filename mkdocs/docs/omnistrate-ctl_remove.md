@@ -1,6 +1,6 @@
 ## omnistrate-ctl remove
 
-Remove a Service (deprecated)
+Remove a service from the Omnistrate platform (deprecated)
 
 ### Synopsis
 
@@ -13,7 +13,7 @@ omnistrate-ctl remove [--service-id SERVICE_ID] [flags]
 ### Examples
 
 ```
-  omctl remove --service-id SERVICE_ID
+  omnistrate-ctl remove --service-id SERVICE_ID
 ```
 
 ### Options

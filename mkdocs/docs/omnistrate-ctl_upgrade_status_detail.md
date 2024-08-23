@@ -3,14 +3,14 @@
 Get upgrade status detail
 
 ```
-omnistrate-ctl upgrade status detail [upgrade-id] [flags]
+omnistrate-ctl upgrade status detail [flags]
 ```
 
 ### Examples
 
 ```
   # Get upgrade status detail
-  omctl upgrade status detail <upgrade>
+  omnistrate-ctl upgrade status detail <upgrade>
 ```
 
 ### Options

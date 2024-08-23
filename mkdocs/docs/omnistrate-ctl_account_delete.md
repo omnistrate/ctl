@@ -7,23 +7,23 @@ Delete one or more accounts
 Delete account with name or ID. Use --id to specify ID. If not specified, name is assumed. If multiple accounts are found with the same name, all of them will be deleted.
 
 ```
-omnistrate-ctl account delete [account-name] [flags]
+omnistrate-ctl account delete [flags]
 ```
 
 ### Examples
 
 ```
   # Delete account with name
-  omctl account delete <name>
+  omnistrate-ctl account delete <name>
 
   # Delete account with ID
-  omctl account delete <id> --id
+  omnistrate-ctl account delete <id> --id
 
   # Delete multiple accounts with names
-  omctl account delete <name1> <name2> <name3>
+  omnistrate-ctl account delete <name1> <name2> <name3>
 
   # Delete multiple accounts with IDs
-  omctl account delete <id1> <id2> <id3> --id
+  omnistrate-ctl account delete <id1> <id2> <id3> --id
 ```
 
 ### Options
@@ -41,5 +41,5 @@ omnistrate-ctl account delete [account-name] [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl account](omnistrate-ctl_account.md)	 - Manage your Cloud Provider Accounts
+* [omnistrate-ctl account](omnistrate-ctl_account.md)	 - Manage your cloud provider accounts
 

@@ -1,6 +1,6 @@
 ## omnistrate-ctl list
 
-List Services (deprecated)
+List all available services (deprecated)
 
 ### Synopsis
 
@@ -13,7 +13,7 @@ omnistrate-ctl list [flags]
 ### Examples
 
 ```
-  omctl list
+  omnistrate-ctl list
 ```
 
 ### Options

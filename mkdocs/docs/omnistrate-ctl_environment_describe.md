@@ -13,11 +13,11 @@ omnistrate-ctl environment describe [service-name] [environment-name] [flags]
 ### Examples
 
 ```
-  # Describe environment
-  omctl environment describe [service-name] [environment-name]
+# Describe environment
+omnistrate environment describe [service-name] [environment-name]
 
-  # Describe environment by ID instead of name
-  omctl environment describe --service-id [service-id] --environment-id [environment-id]
+# Describe environment by ID instead of name
+omnistrate environment describe --service-id [service-id] --environment-id [environment-id]
 ```
 
 ### Options
@@ -36,5 +36,5 @@ omnistrate-ctl environment describe [service-name] [environment-name] [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl environment](omnistrate-ctl_environment.md)	 - Manage Service Environments for your service
+* [omnistrate-ctl environment](omnistrate-ctl_environment.md)	 - Manage environments for your services
 

@@ -13,8 +13,8 @@ omnistrate-ctl helm list-installations --host-cluster-id=[host-cluster-id] [flag
 ### Examples
 
 ```
-  # List all Helm Packages and the Kubernetes clusters that they are installed on
-  omctl helm list-installations --host-cluster-id=[host-cluster-id]
+# List all Helm Packages and the Kubernetes clusters that they are installed on
+omnistrate helm list-installations --host-cluster-id=[host-cluster-id]
 ```
 
 ### Options
@@ -33,5 +33,5 @@ omnistrate-ctl helm list-installations --host-cluster-id=[host-cluster-id] [flag
 
 ### SEE ALSO
 
-* [omnistrate-ctl helm](omnistrate-ctl_helm.md)	 - Manage Helm Charts for your service
+* [omnistrate-ctl helm](omnistrate-ctl_helm.md)	 - Manage Helm Charts for your service using this command
 

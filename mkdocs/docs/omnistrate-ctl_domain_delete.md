@@ -7,17 +7,17 @@ Delete one or more domains
 Delete domain by specifying name.
 
 ```
-omnistrate-ctl domain delete [name] [flags]
+omnistrate-ctl domain delete [flags]
 ```
 
 ### Examples
 
 ```
   # Delete domain with name
-  omctl delete domain <name>
+  omnistrate-ctl delete domain <name>
 
   # Delete multiple domains with names
-  omctl delete domain <name1> <name2> <name3>
+  omnistrate-ctl delete domain <name1> <name2> <name3>
 ```
 
 ### Options

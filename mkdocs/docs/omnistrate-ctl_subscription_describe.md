@@ -13,8 +13,8 @@ omnistrate-ctl subscription describe [subscription-id] [flags]
 ### Examples
 
 ```
-  # Describe subscription
-  omctl subscription describe subscription-abcd1234
+# Describe subscription
+omnistrate subscription describe subscription-abcd1234
 ```
 
 ### Options
@@ -31,5 +31,5 @@ omnistrate-ctl subscription describe [subscription-id] [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl subscription](omnistrate-ctl_subscription.md)	 - Manage Customer Subscriptions for your service
+* [omnistrate-ctl subscription](omnistrate-ctl_subscription.md)	 - Manage subscriptions for your services
 

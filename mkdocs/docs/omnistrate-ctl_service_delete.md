@@ -7,23 +7,23 @@ Delete one or more services
 Delete service with name or ID. Use --id to specify ID. If not specified, name is assumed.
 
 ```
-omnistrate-ctl service delete [service-name] [flags]
+omnistrate-ctl service delete [flags]
 ```
 
 ### Examples
 
 ```
   # Delete service with name
-  omctl service delete <name>
+  omnistrate-ctl service delete <name>
 
   # Delete service with ID
-  omctl service delete <ID> --id
+  omnistrate-ctl service delete <ID> --id
 
   # Delete multiple services with names
-  omctl service delete <name1> <name2> <name3>
+  omnistrate-ctl service delete <name1> <name2> <name3>
 
   # Delete multiple services with IDs
-  omctl service delete <ID1> <ID2> <ID3> --id
+  omnistrate-ctl service delete <ID1> <ID2> <ID3> --id
 ```
 
 ### Options
@@ -41,5 +41,5 @@ omnistrate-ctl service delete [service-name] [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl service](omnistrate-ctl_service.md)	 - Manage Services for your account
+* [omnistrate-ctl service](omnistrate-ctl_service.md)	 - Manage services for your account
 
