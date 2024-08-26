@@ -1,16 +1,16 @@
 package upgrade
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/cmd/upgrade/status"
 	"github.com/omnistrate/ctl/dataaccess"
+	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"os"
 	"strings"
-	"text/tabwriter"
 )
 
 const (
@@ -202,63 +202,39 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	// Print output
-	switch output {
-	case "text":
+	upgradeData := make([]string, 0)
+	for upgradeArgs, upgradeRes := range upgrades {
+		formattedUpgrade := model.Upgrade{
+			UpgradeID:     upgradeRes.UpgradePathID,
+			SourceVersion: upgradeArgs.SourceVersion,
+			TargetVersion: upgradeArgs.TargetVersion,
+			InstanceIDs:   strings.Join(upgradeRes.InstanceIDs, ","),
+		}
+
+		data, err := json.MarshalIndent(formattedUpgrade, "", "    ")
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+
+		upgradeData = append(upgradeData, string(data))
+	}
+
+	if output != "json" {
 		println("\nThe following upgrades have been scheduled:")
+	}
 
-		printTable(upgrades)
+	err = utils.PrintTextTableJsonArrayOutput(output, upgradeData)
+	if err != nil {
+		return err
+	}
 
+	if output != "json" {
 		println("\nCheck the upgrade status using the following command(s):")
 		for _, upgradeRes := range upgrades {
 			fmt.Printf("  omctl upgrade status %s\n", upgradeRes.UpgradePathID)
 		}
-	case "json":
-		printJSON(upgrades)
-	default:
-		err = fmt.Errorf("invalid output format %s", output)
-		utils.PrintError(err)
-		return err
 	}
 
 	return nil
-}
-
-func printTable(upgrades map[Args]*Res) {
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-
-	_, err := fmt.Fprintln(w, "Upgrade ID\tSource Version\tTarget Version\tInstance IDs")
-	if err != nil {
-		return
-	}
-
-	for args, res := range upgrades {
-		_, err = fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
-			res.UpgradePathID,
-			args.SourceVersion,
-			args.TargetVersion,
-			strings.Join(res.InstanceIDs, ", "),
-		)
-		if err != nil {
-			return
-		}
-	}
-
-	err = w.Flush()
-	if err != nil {
-		utils.PrintError(err)
-	}
-}
-
-func printJSON(upgrades map[Args]*Res) {
-	slices := make([]interface{}, 0)
-	for args, res := range upgrades {
-		slices = append(slices, map[string]interface{}{
-			"upgrade_id":     res.UpgradePathID,
-			"source_version": args.SourceVersion,
-			"target_version": args.TargetVersion,
-			"instance_ids":   res.InstanceIDs,
-		})
-	}
-
-	utils.PrintJSON(slices)
 }

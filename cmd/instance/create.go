@@ -225,13 +225,12 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	var resourceKey, resourceName string
+	var resourceKey string
 	found = false
 	for _, resourceEntity := range offering.ResourceParameters {
 		if strings.EqualFold(resourceEntity.Name, resource) {
 			found = true
 			resourceKey = resourceEntity.URLKey
-			resourceName = resourceEntity.Name
 		}
 	}
 
@@ -276,16 +275,44 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		sm.Stop()
 	}
 
+	// Search for the instance
+	searchRes, err = dataaccess.SearchInventory(token, fmt.Sprintf("resourceinstance:%s", *instance.ID))
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	if len(searchRes.ResourceInstanceResults) == 0 {
+		err = errors.New("failed to find the created instance")
+		utils.PrintError(err)
+		return err
+	}
+
+	planName := ""
+	if searchRes.ResourceInstanceResults[0].ProductTierName != nil {
+		planName = *searchRes.ResourceInstanceResults[0].ProductTierName
+	}
+
+	planVersion := ""
+	if searchRes.ResourceInstanceResults[0].ProductTierVersion != nil {
+		planVersion = *searchRes.ResourceInstanceResults[0].ProductTierVersion
+	}
+
+	subscriptionID = ""
+	if searchRes.ResourceInstanceResults[0].SubscriptionID != nil {
+		subscriptionID = string(*searchRes.ResourceInstanceResults[0].SubscriptionID)
+	}
+
 	formattedInstance := model.Instance{
 		InstanceID:     *instance.ID,
-		Service:        res.ConsumptionDescribeServiceOfferingResult.ServiceName,
-		Environment:    offering.ServiceEnvironmentName,
-		Plan:           offering.ProductTierName,
-		Version:        offering.ProductTierVersion,
-		Resource:       resourceName,
-		CloudProvider:  cloudProvider,
-		Region:         region,
-		Status:         "DEPLOYING",
+		Service:        searchRes.ResourceInstanceResults[0].ServiceName,
+		Environment:    searchRes.ResourceInstanceResults[0].ServiceEnvironmentName,
+		Plan:           planName,
+		Version:        planVersion,
+		Resource:       searchRes.ResourceInstanceResults[0].ResourceName,
+		CloudProvider:  string(searchRes.ResourceInstanceResults[0].CloudProvider),
+		Region:         searchRes.ResourceInstanceResults[0].RegionCode,
+		Status:         string(searchRes.ResourceInstanceResults[0].Status),
 		SubscriptionID: subscriptionID,
 	}
 	InstanceID = formattedInstance.InstanceID

@@ -1,5 +1,12 @@
 package model
 
+type Upgrade struct {
+	UpgradeID     string `json:"upgrade_id"`
+	SourceVersion string `json:"source_version"`
+	TargetVersion string `json:"target_version"`
+	InstanceIDs   string `json:"instance_ids"`
+}
+
 type UpgradeStatus struct {
 	UpgradeID  string `json:"upgrade_id"`
 	Total      int    `json:"total"`
