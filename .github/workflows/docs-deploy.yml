@@ -19,6 +19,9 @@ jobs:
   deploy:
     name: Deploy documentation
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
     concurrency: deploy-documentation-${{ inputs.environment }}
     steps:
       - name: Checkout repository
@@ -28,7 +31,6 @@ jobs:
       - name: Setup flyctl
         timeout-minutes: 5
         uses: superfly/flyctl-actions/setup-flyctl@master
-
 
       - name: Deploy to Fly
         timeout-minutes: 30

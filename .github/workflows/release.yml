@@ -273,7 +273,7 @@ jobs:
   release-package-multi-arch:
     environment: Prod
     runs-on: ubicloud-standard-8
-    needs: sanity-check
+    needs: update-brew-formula
     permissions:
       contents: read
       packages: write
