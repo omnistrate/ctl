@@ -111,7 +111,7 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 
 	var targetServicePlan *inventoryapi.ServicePlanSearchRecord
 	for _, servicePlan := range searchRes.ServicePlanResults {
-		if string(servicePlan.ServiceID) != serviceId && servicePlan.ID != planId && servicePlan.Version != targetVersion {
+		if string(servicePlan.ServiceID) != serviceId || servicePlan.ID != planId || servicePlan.Version != targetVersion {
 			continue
 		}
 		targetServicePlan = servicePlan
