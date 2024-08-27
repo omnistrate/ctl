@@ -23,8 +23,8 @@ const (
 
 var describeCmd = &cobra.Command{
 	Use:          "describe [service-name] [plan-name] [flags]",
-	Short:        "Describe a service plan",
-	Long:         `This command helps you describe a service plan in your service.`,
+	Short:        "Describe a Service Plan",
+	Long:         `This command helps you get details of a Service Plan for your service.`,
 	Example:      describeExample,
 	RunE:         runDescribe,
 	SilenceUsage: true,

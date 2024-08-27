@@ -20,8 +20,8 @@ const (
 
 var releaseCmd = &cobra.Command{
 	Use:          "release [service-name] [plan-name] [flags]",
-	Short:        "Release a service plan",
-	Long:         `This command helps you release a service plan from your service.`,
+	Short:        "Release a Service Plan",
+	Long:         `This command helps you release a Service Plan for your service. You can specify a custom release description and set the service plan as preferred if needed.`,
 	Example:      releaseExample,
 	RunE:         runRelease,
 	SilenceUsage: true,

@@ -19,8 +19,8 @@ const (
 
 var deleteCmd = &cobra.Command{
 	Use:          "delete [service-name] [plan-name] [flags]",
-	Short:        "Delete a service plan",
-	Long:         `This command helps you delete a service plan from your service.`,
+	Short:        "Delete a Service Plan",
+	Long:         `This command helps you delete a Service Plan from your service.`,
 	Example:      deleteExample,
 	RunE:         runDelete,
 	SilenceUsage: true,

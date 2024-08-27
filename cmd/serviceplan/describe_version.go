@@ -22,8 +22,8 @@ const (
 
 var describeVersionCmd = &cobra.Command{
 	Use:          "describe-version [service-name] [plan-name] [flags]",
-	Short:        "Describe a service plan version",
-	Long:         `This command helps you describe a service plan version in your service.`,
+	Short:        "Describe a specific version of a Service Plan",
+	Long:         `This command helps you get details of a specific version of a Service Plan for your service. You can get environment, enabled features, and resource configuration details for the version.`,
 	Example:      describeVersionExample,
 	RunE:         runDescribeVersion,
 	SilenceUsage: true,

@@ -20,9 +20,9 @@ const (
 
 var setDefaultCmd = &cobra.Command{
 	Use:   "set-default [service-name] [plan-name] --version=[version] [flags]",
-	Short: "Set a service plan as default",
-	Long: `This command helps you set a service plan as default for your service.
-By setting a service plan as default, you can ensure that new instances of the service are created with the default plan.`,
+	Short: "Set a Version of a Service Plan as Default(Preferred)",
+	Long: `This command helps you set a Version of a Service Plan as the default (preferred) version for your service.
+By setting it as default, new instance deployments from your customers will be created with this version by default.`,
 	Example:      setDefaultExample,
 	RunE:         runSetDefault,
 	SilenceUsage: true,
