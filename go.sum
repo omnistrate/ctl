@@ -96,8 +96,12 @@ github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
 github.com/omnistrate/api-design v0.6.568 h1:nkOHwQBABlzdXoYiRrmMK5lUagJguhd5XsNYEVtssX8=
 github.com/omnistrate/api-design v0.6.568/go.mod h1:2V24ConRlbSFsd1VSNyvjV1FFuf/zGVbeauPFX7JTao=
+github.com/omnistrate/api-design v0.6.569 h1:3z37/CVIsa0/71xeZfUmG5Zn+Qf8pQHAgdZhvzLvCtY=
+github.com/omnistrate/api-design v0.6.569/go.mod h1:2V24ConRlbSFsd1VSNyvjV1FFuf/zGVbeauPFX7JTao=
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240820225231-f556eb1fdb56 h1:nE/4Lu9TV+dZ2hZnbTijxSTX8z31uovuFMIp0ikAHsw=
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240820225231-f556eb1fdb56/go.mod h1:xMTkwU92CrJ/lx1qyxE2fU2m0JLsKbvObRym+nP4ENg=
+github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240827002934-401ce0be70d4 h1:VAULNkwhcmTLyWQhTYPrj1CzAkW3qKOLBycBOargaXg=
+github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240827002934-401ce0be70d4/go.mod h1:xMTkwU92CrJ/lx1qyxE2fU2m0JLsKbvObRym+nP4ENg=
 github.com/omnistrate/commons/pkg/constants v0.0.0-20240826200901-a7da1566918b h1:leSSC5VRWbn2e4Inl1EdgGQHpwalAquSwBNhJx4nMCg=
 github.com/omnistrate/commons/pkg/constants v0.0.0-20240826200901-a7da1566918b/go.mod h1:okYQlNYHtWts036uSo4UprIiYXWFu/pAo49v9oDLnG4=
 github.com/omnistrate/commons/pkg/utils v0.0.0-20240816220514-e12d0d8f0c53 h1:1QTCAFDnRCyE22pPvTm+DiUntPll2OrizV7Cw3jyB/Y=

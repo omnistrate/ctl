@@ -47,11 +47,11 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 	// Retrieve flags
 	version, _ := cmd.Flags().GetString("version")
 	output, _ := cmd.Flags().GetString("output")
-	serviceId, _ := cmd.Flags().GetString("service-id")
-	planId, _ := cmd.Flags().GetString("plan-id")
+	serviceID, _ := cmd.Flags().GetString("service-id")
+	planID, _ := cmd.Flags().GetString("plan-id")
 
 	// Validate input arguments
-	if err := validateSetDefaultArguments(args, serviceId, planId); err != nil {
+	if err := validateSetDefaultArguments(args, serviceID, planID); err != nil {
 		utils.PrintError(err)
 		return err
 	}
@@ -80,21 +80,21 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the service plan exists
-	serviceId, _, planId, _, _, err = getServicePlan(token, serviceId, serviceName, planId, planName)
+	serviceID, _, planID, _, _, err = getServicePlan(token, serviceID, serviceName, planID, planName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Get the target version
-	targetVersion, err := getTargetVersion(token, serviceId, planId, version)
+	targetVersion, err := getTargetVersion(token, serviceID, planID, version)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Set the default service plan
-	_, err = dataaccess.SetDefaultServicePlan(token, serviceId, planId, targetVersion)
+	_, err = dataaccess.SetDefaultServicePlan(token, serviceID, planID, targetVersion)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -103,7 +103,7 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully set default service plan")
 
 	// Get the service plan details
-	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("serviceplan:%s", planId))
+	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("serviceplan:%s", planID))
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -111,7 +111,7 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 
 	var targetServicePlan *inventoryapi.ServicePlanSearchRecord
 	for _, servicePlan := range searchRes.ServicePlanResults {
-		if string(servicePlan.ServiceID) != serviceId || servicePlan.ID != planId || servicePlan.Version != targetVersion {
+		if string(servicePlan.ServiceID) != serviceID || servicePlan.ID != planID || servicePlan.Version != targetVersion {
 			continue
 		}
 		targetServicePlan = servicePlan
@@ -138,7 +138,7 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func getServicePlan(token, serviceIdArg, serviceNameArg, planIdArg, planNameArg string) (serviceId, serviceName, planId, planName, environment string, err error) {
+func getServicePlan(token, serviceIDArg, serviceNameArg, planIDArg, planNameArg string) (serviceID, serviceName, planID, planName, environment string, err error) {
 	searchRes, err := dataaccess.SearchInventory(token, "service:s")
 	if err != nil {
 		return
@@ -146,10 +146,10 @@ func getServicePlan(token, serviceIdArg, serviceNameArg, planIdArg, planNameArg 
 
 	serviceFound := 0
 	for _, service := range searchRes.ServiceResults {
-		if !strings.EqualFold(service.Name, serviceNameArg) && service.ID != serviceIdArg {
+		if !strings.EqualFold(service.Name, serviceNameArg) && service.ID != serviceIDArg {
 			continue
 		}
-		serviceId = service.ID
+		serviceID = service.ID
 		serviceFound += 1
 	}
 
@@ -164,17 +164,17 @@ func getServicePlan(token, serviceIdArg, serviceNameArg, planIdArg, planNameArg 
 	}
 
 	servicePlanFound := 0
-	describeServiceRes, err := dataaccess.DescribeService(token, serviceId)
+	describeServiceRes, err := dataaccess.DescribeService(token, serviceID)
 	if err != nil {
 		return
 	}
 	for _, env := range describeServiceRes.ServiceEnvironments {
 		for _, servicePlan := range env.ServicePlans {
-			if !strings.EqualFold(servicePlan.Name, planNameArg) && string(servicePlan.ProductTierID) != planIdArg {
+			if !strings.EqualFold(servicePlan.Name, planNameArg) && string(servicePlan.ProductTierID) != planIDArg {
 				continue
 			}
 			environment = env.Name
-			planId = string(servicePlan.ProductTierID)
+			planID = string(servicePlan.ProductTierID)
 			servicePlanFound += 1
 		}
 	}
@@ -211,8 +211,8 @@ func getTargetVersion(token, serviceID, productTierID, version string) (targetVe
 	return
 }
 
-func validateSetDefaultArguments(args []string, serviceId, planId string) error {
-	if len(args) == 0 && (serviceId == "" || planId == "") {
+func validateSetDefaultArguments(args []string, serviceID, planID string) error {
+	if len(args) == 0 && (serviceID == "" || planID == "") {
 		return fmt.Errorf("please provide the service name and plan name or the service ID and plan ID")
 	}
 	if len(args) > 0 && len(args) != 2 {

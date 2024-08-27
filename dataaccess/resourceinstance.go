@@ -26,3 +26,85 @@ func DescribeResourceInstance(token string, serviceID, environmentID, instanceID
 	}
 	return res, nil
 }
+
+func RestartResourceInstance(token string, serviceID, environmentID, resourceID, instanceID string) error {
+	instance, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
+	if err != nil {
+		return err
+	}
+
+	request := inventoryapi.FleetRestartResourceInstanceRequest{
+		Token:         token,
+		ServiceID:     inventoryapi.ServiceID(serviceID),
+		EnvironmentID: inventoryapi.ServiceEnvironmentID(environmentID),
+		InstanceID:    inventoryapi.ResourceInstanceID(instanceID),
+		ResourceID:    inventoryapi.ResourceID(resourceID),
+	}
+
+	err = instance.RestartResourceInstance(context.Background(), &request)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func StartResourceInstance(token string, serviceID, environmentID, resourceID, instanceID string) error {
+	instance, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
+	if err != nil {
+		return err
+	}
+
+	request := inventoryapi.FleetStartResourceInstanceRequest{
+		Token:         token,
+		ServiceID:     inventoryapi.ServiceID(serviceID),
+		EnvironmentID: inventoryapi.ServiceEnvironmentID(environmentID),
+		InstanceID:    inventoryapi.ResourceInstanceID(instanceID),
+		ResourceID:    inventoryapi.ResourceID(resourceID),
+	}
+
+	err = instance.StartResourceInstance(context.Background(), &request)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func StopResourceInstance(token string, serviceID, environmentID, resourceID, instanceID string) error {
+	instance, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
+	if err != nil {
+		return err
+	}
+
+	request := inventoryapi.FleetStopResourceInstanceRequest{
+		Token:         token,
+		ServiceID:     inventoryapi.ServiceID(serviceID),
+		EnvironmentID: inventoryapi.ServiceEnvironmentID(environmentID),
+		InstanceID:    inventoryapi.ResourceInstanceID(instanceID),
+		ResourceID:    inventoryapi.ResourceID(resourceID),
+	}
+
+	err = instance.StopResourceInstance(context.Background(), &request)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdateResourceInstance(token string, request inventoryapi.FleetUpdateResourceInstanceRequest) error {
+	instance, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
+	if err != nil {
+		return err
+	}
+
+	request.Token = token
+
+	err = instance.UpdateResourceInstance(context.Background(), &request)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

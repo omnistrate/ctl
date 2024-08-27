@@ -7,7 +7,7 @@ import (
 	"github.com/omnistrate/ctl/utils"
 )
 
-func DescribeInstance(token, serviceId, serviceEnvironmentId, instanceId string) (instance *inventoryapi.ResourceInstance, err error) {
+func DescribeInstance(token, serviceID, serviceEnvironmentID, instanceID string) (instance *inventoryapi.ResourceInstance, err error) {
 	fleetService, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return
@@ -15,9 +15,9 @@ func DescribeInstance(token, serviceId, serviceEnvironmentId, instanceId string)
 
 	request := &inventoryapi.DescribeResourceInstanceRequestInternal{
 		Token:         token,
-		ServiceID:     inventoryapi.ServiceID(serviceId),
-		EnvironmentID: inventoryapi.ServiceEnvironmentID(serviceEnvironmentId),
-		InstanceID:    inventoryapi.ResourceInstanceID(instanceId),
+		ServiceID:     inventoryapi.ServiceID(serviceID),
+		EnvironmentID: inventoryapi.ServiceEnvironmentID(serviceEnvironmentID),
+		InstanceID:    inventoryapi.ResourceInstanceID(instanceID),
 	}
 
 	if instance, err = fleetService.DescribeResourceInstance(context.Background(), request); err != nil {
@@ -42,7 +42,7 @@ func CreateInstance(token string, request inventoryapi.FleetCreateResourceInstan
 	return
 }
 
-func DeleteInstance(token, serviceId, serviceEnvironmentId, resourceId, instanceId string) (err error) {
+func DeleteInstance(token, serviceID, serviceEnvironmentID, resourceID, instanceID string) (err error) {
 	fleetService, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return
@@ -50,10 +50,10 @@ func DeleteInstance(token, serviceId, serviceEnvironmentId, resourceId, instance
 
 	request := &inventoryapi.FleetDeleteResourceInstanceRequest{
 		Token:         token,
-		ServiceID:     inventoryapi.ServiceID(serviceId),
-		EnvironmentID: inventoryapi.ServiceEnvironmentID(serviceEnvironmentId),
-		InstanceID:    inventoryapi.ResourceInstanceID(instanceId),
-		ResourceID:    inventoryapi.ResourceID(resourceId),
+		ServiceID:     inventoryapi.ServiceID(serviceID),
+		EnvironmentID: inventoryapi.ServiceEnvironmentID(serviceEnvironmentID),
+		InstanceID:    inventoryapi.ResourceInstanceID(instanceID),
+		ResourceID:    inventoryapi.ResourceID(resourceID),
 	}
 
 	if err = fleetService.DeleteResourceInstance(context.Background(), request); err != nil {

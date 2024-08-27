@@ -36,11 +36,11 @@ func runDelete(cmd *cobra.Command, args []string) error {
 
 	// Retrieve flags
 	output, _ := cmd.Flags().GetString("output")
-	serviceId, _ := cmd.Flags().GetString("service-id")
-	environmentId, _ := cmd.Flags().GetString("environment-id")
+	serviceID, _ := cmd.Flags().GetString("service-id")
+	environmentID, _ := cmd.Flags().GetString("environment-id")
 
 	// Validate input arguments
-	if err := validateDeleteArguments(args, serviceId, environmentId); err != nil {
+	if err := validateDeleteArguments(args, serviceID, environmentID); err != nil {
 		utils.PrintError(err)
 		return err
 	}
@@ -68,14 +68,14 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the environment exists
-	serviceId, _, environmentId, _, err = getServiceEnvironment(token, serviceId, serviceName, environmentId, environmentName)
+	serviceID, _, environmentID, _, err = getServiceEnvironment(token, serviceID, serviceName, environmentID, environmentName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Delete the environment
-	if err = dataaccess.DeleteServiceEnvironment(token, serviceId, environmentId); err != nil {
+	if err = dataaccess.DeleteServiceEnvironment(token, serviceID, environmentID); err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
@@ -88,8 +88,8 @@ func runDelete(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func validateDeleteArguments(args []string, serviceId, environmentId string) error {
-	if len(args) == 0 && (serviceId == "" || environmentId == "") {
+func validateDeleteArguments(args []string, serviceID, environmentID string) error {
+	if len(args) == 0 && (serviceID == "" || environmentID == "") {
 		return fmt.Errorf("please provide the service name and environment name or the service ID and environment ID")
 	}
 	if len(args) > 0 && len(args) != 2 {

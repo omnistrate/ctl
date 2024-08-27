@@ -43,11 +43,11 @@ func runRelease(cmd *cobra.Command, args []string) error {
 	releaseDescription, _ := cmd.Flags().GetString("release-description")
 	releaseAsPreferred, _ := cmd.Flags().GetBool("release-as-preferred")
 	output, _ := cmd.Flags().GetString("output")
-	serviceId, _ := cmd.Flags().GetString("service-id")
-	planId, _ := cmd.Flags().GetString("plan-id")
+	serviceID, _ := cmd.Flags().GetString("service-id")
+	planID, _ := cmd.Flags().GetString("plan-id")
 
 	// Validate input arguments
-	if err := validateReleaseArguments(args, serviceId, planId); err != nil {
+	if err := validateReleaseArguments(args, serviceID, planID); err != nil {
 		utils.PrintError(err)
 		return err
 	}
@@ -75,30 +75,30 @@ func runRelease(cmd *cobra.Command, args []string) error {
 		sm.Start()
 	}
 
-	// Check if service plan exist
-	serviceId, _, planId, _, _, err = getServicePlan(token, serviceId, serviceName, planId, planName)
+	// Check if service plan exists
+	serviceID, _, planID, _, _, err = getServicePlan(token, serviceID, serviceName, planID, planName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Get service api id
-	productTier, err := dataaccess.DescribeProductTier(token, serviceId, planId)
+	productTier, err := dataaccess.DescribeProductTier(token, serviceID, planID)
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	serviceModel, err := dataaccess.DescribeServiceModel(token, serviceId, string(productTier.ServiceModelID))
+	serviceModel, err := dataaccess.DescribeServiceModel(token, serviceID, string(productTier.ServiceModelID))
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	serviceApiId := string(serviceModel.ServiceAPIID)
+	serviceAPIID := string(serviceModel.ServiceAPIID)
 
 	// Release service plan
-	err = dataaccess.ReleaseServicePlan(token, serviceId, serviceApiId, planId, getReleaseDescription(releaseDescription), releaseAsPreferred)
+	err = dataaccess.ReleaseServicePlan(token, serviceID, serviceAPIID, planID, getReleaseDescription(releaseDescription), releaseAsPreferred)
 	if err != nil {
 		spinner.Error()
 		sm.Stop()
@@ -109,13 +109,13 @@ func runRelease(cmd *cobra.Command, args []string) error {
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully released service plan")
 
 	// Get the service plan details
-	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("serviceplan:%s", planId))
+	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("serviceplan:%s", planID))
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	targetVersion, err := dataaccess.FindLatestVersion(token, serviceId, planId)
+	targetVersion, err := dataaccess.FindLatestVersion(token, serviceID, planID)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -123,7 +123,7 @@ func runRelease(cmd *cobra.Command, args []string) error {
 
 	var targetServicePlan *inventoryapi.ServicePlanSearchRecord
 	for _, servicePlan := range searchRes.ServicePlanResults {
-		if string(servicePlan.ServiceID) != serviceId || servicePlan.ID != planId || servicePlan.Version != targetVersion {
+		if string(servicePlan.ServiceID) != serviceID || servicePlan.ID != planID || servicePlan.Version != targetVersion {
 			continue
 		}
 		targetServicePlan = servicePlan
@@ -150,8 +150,8 @@ func runRelease(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func validateReleaseArguments(args []string, serviceId, planId string) error {
-	if len(args) == 0 && (serviceId == "" || planId == "") {
+func validateReleaseArguments(args []string, serviceID, planID string) error {
+	if len(args) == 0 && (serviceID == "" || planID == "") {
 		return fmt.Errorf("please provide the service name and service plan name or the service ID and service plan ID")
 	}
 	if len(args) > 0 && len(args) != 2 {

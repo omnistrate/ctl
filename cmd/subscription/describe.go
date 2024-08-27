@@ -29,7 +29,7 @@ func init() {
 
 func runDescribe(cmd *cobra.Command, args []string) error {
 	// Get flags
-	subscriptionId := args[0]
+	subscriptionID := args[0]
 
 	// Validate user is currently logged in
 	token, err := utils.GetToken()
@@ -39,7 +39,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the subscription exists
-	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("subscription:%s", subscriptionId))
+	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("subscription:%s", subscriptionID))
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -47,13 +47,13 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 
 	var found bool
 	for _, subscription := range searchRes.SubscriptionResults {
-		if subscription.ID == subscriptionId {
+		if subscription.ID == subscriptionID {
 			found = true
 			break
 		}
 	}
 	if !found {
-		err = fmt.Errorf("%s not found. Please check the subscription ID and try again", subscriptionId)
+		err = fmt.Errorf("%s not found. Please check the subscription ID and try again", subscriptionID)
 		utils.PrintError(err)
 		return nil
 	}

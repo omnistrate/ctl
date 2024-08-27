@@ -9,7 +9,7 @@ import (
 	"github.com/omnistrate/ctl/utils"
 )
 
-func DeleteProductTier(token, serviceId, productTierId string) (err error) {
+func DeleteProductTier(token, serviceID, productTierID string) (err error) {
 	service, err := httpclientwrapper.NewProductTier(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return
@@ -17,8 +17,8 @@ func DeleteProductTier(token, serviceId, productTierId string) (err error) {
 
 	request := &producttierapi.DeleteProductTierRequest{
 		Token:     token,
-		ServiceID: producttierapi.ServiceID(serviceId),
-		ID:        producttierapi.ProductTierID(productTierId),
+		ServiceID: producttierapi.ServiceID(serviceID),
+		ID:        producttierapi.ProductTierID(productTierID),
 	}
 
 	if err = service.DeleteProductTier(context.Background(), request); err != nil {
@@ -28,7 +28,7 @@ func DeleteProductTier(token, serviceId, productTierId string) (err error) {
 	return
 }
 
-func DescribeProductTier(token, serviceId, productTierId string) (productTier *producttierapi.DescribeProductTierResult, err error) {
+func DescribeProductTier(token, serviceID, productTierID string) (productTier *producttierapi.DescribeProductTierResult, err error) {
 	service, err := httpclientwrapper.NewProductTier(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return
@@ -36,8 +36,8 @@ func DescribeProductTier(token, serviceId, productTierId string) (productTier *p
 
 	request := &producttierapi.DescribeProductTierRequest{
 		Token:     token,
-		ServiceID: producttierapi.ServiceID(serviceId),
-		ID:        producttierapi.ProductTierID(productTierId),
+		ServiceID: producttierapi.ServiceID(serviceID),
+		ID:        producttierapi.ProductTierID(productTierID),
 	}
 
 	productTier, err = service.DescribeProductTier(context.Background(), request)
@@ -48,7 +48,7 @@ func DescribeProductTier(token, serviceId, productTierId string) (productTier *p
 	return
 }
 
-func ListProductTiers(token, serviceId string) (productTiers []*producttierapi.DescribeProductTierResult, err error) {
+func ListProductTiers(token, serviceID string) (productTiers []*producttierapi.DescribeProductTierResult, err error) {
 	service, err := httpclientwrapper.NewProductTier(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return
@@ -56,16 +56,16 @@ func ListProductTiers(token, serviceId string) (productTiers []*producttierapi.D
 
 	request := &producttierapi.ListProductTiersRequest{
 		Token:     token,
-		ServiceID: producttierapi.ServiceID(serviceId),
+		ServiceID: producttierapi.ServiceID(serviceID),
 	}
 
-	productTierIds, err := service.ListProductTier(context.Background(), request)
+	productTierIDs, err := service.ListProductTier(context.Background(), request)
 	if err != nil {
 		return
 	}
 
-	for _, productTierId := range productTierIds.Ids {
-		productTier, err := DescribeProductTier(token, serviceId, string(productTierId))
+	for _, productTierID := range productTierIDs.Ids {
+		productTier, err := DescribeProductTier(token, serviceID, string(productTierID))
 		if err != nil {
 			return nil, err
 		}
@@ -75,7 +75,7 @@ func ListProductTiers(token, serviceId string) (productTiers []*producttierapi.D
 	return
 }
 
-func ReleaseServicePlan(token, serviceId, serviceApiId, productTierId string, versionSetName *string, isPreferred bool) (err error) {
+func ReleaseServicePlan(token, serviceID, serviceAPIID, productTierID string, versionSetName *string, isPreferred bool) (err error) {
 	serviceApi, err := httpclientwrapper.NewServiceAPI(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return
@@ -83,9 +83,9 @@ func ReleaseServicePlan(token, serviceId, serviceApiId, productTierId string, ve
 
 	request := &serviceapiapi.ReleaseServiceAPIRequest{
 		Token:          token,
-		ServiceID:      serviceapiapi.ServiceID(serviceId),
-		ID:             serviceapiapi.ServiceAPIID(serviceApiId),
-		ProductTierID:  commonutils.ToPtr(serviceapiapi.ProductTierID(productTierId)),
+		ServiceID:      serviceapiapi.ServiceID(serviceID),
+		ID:             serviceapiapi.ServiceAPIID(serviceAPIID),
+		ProductTierID:  commonutils.ToPtr(serviceapiapi.ProductTierID(productTierID)),
 		VersionSetName: versionSetName,
 		VersionSetType: commonutils.ToPtr("Major"),
 		IsPreferred:    isPreferred,

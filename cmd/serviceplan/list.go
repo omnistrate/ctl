@@ -122,7 +122,7 @@ func runList(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func formatServicePlan(serviceId, serviceName, envName string, servicePlan *serviceapi.ServicePlan, truncateNames bool) (model.ServicePlan, error) {
+func formatServicePlan(serviceID, serviceName, envName string, servicePlan *serviceapi.ServicePlan, truncateNames bool) (model.ServicePlan, error) {
 	planName := servicePlan.Name
 
 	if truncateNames {
@@ -134,7 +134,7 @@ func formatServicePlan(serviceId, serviceName, envName string, servicePlan *serv
 	return model.ServicePlan{
 		PlanID:         string(servicePlan.ProductTierID),
 		PlanName:       planName,
-		ServiceID:      serviceId,
+		ServiceID:      serviceID,
 		ServiceName:    serviceName,
 		Environment:    envName,
 		DeploymentType: string(servicePlan.TierType),

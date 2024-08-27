@@ -39,14 +39,14 @@ func runListVersions(cmd *cobra.Command, args []string) error {
 	defer utils.CleanupArgsAndFlags(cmd, &args)
 
 	// Retrieve command-line flags
-	serviceId, _ := cmd.Flags().GetString("service-id")
-	planId, _ := cmd.Flags().GetString("plan-id")
+	serviceID, _ := cmd.Flags().GetString("service-id")
+	planID, _ := cmd.Flags().GetString("plan-id")
 	output, _ := cmd.Flags().GetString("output")
 	filters, _ := cmd.Flags().GetStringArray("filter")
 	truncateNames, _ := cmd.Flags().GetBool("truncate")
 
 	// Validate input arguments
-	if err := validateListVersionsArguments(args, serviceId, planId); err != nil {
+	if err := validateListVersionsArguments(args, serviceID, planID); err != nil {
 		utils.PrintError(err)
 		return err
 	}
@@ -81,14 +81,14 @@ func runListVersions(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the service plan exists
-	_, _, planId, _, _, err = getServicePlan(token, serviceId, serviceName, planId, planName)
+	_, _, planID, _, _, err = getServicePlan(token, serviceID, serviceName, planID, planName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Search service plans versions
-	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("serviceplan:%s", planId))
+	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("serviceplan:%s", planID))
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -168,8 +168,8 @@ func formatServicePlanVersion(servicePlan *inventoryapi.ServicePlanSearchRecord,
 	}, nil
 }
 
-func validateListVersionsArguments(args []string, serviceId, planId string) error {
-	if len(args) == 0 && (serviceId == "" || planId == "") {
+func validateListVersionsArguments(args []string, serviceID, planID string) error {
+	if len(args) == 0 && (serviceID == "" || planID == "") {
 		return fmt.Errorf("please provide the service name and service plan name or the service ID and service plan ID")
 	}
 	if len(args) > 0 && len(args) != 2 {

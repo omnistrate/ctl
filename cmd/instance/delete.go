@@ -1,7 +1,6 @@
 package instance
 
 import (
-	"fmt"
 	"github.com/chelnak/ysmrr"
 	"github.com/cqroot/prompt"
 	"github.com/cqroot/prompt/input"
@@ -34,13 +33,16 @@ func init() {
 }
 
 func runDelete(cmd *cobra.Command, args []string) error {
-	instanceId := args[0]
+	defer utils.CleanupArgsAndFlags(cmd, &args)
 
-	// Get flags
+	// Retrieve args
+	instanceID := args[0]
+
+	// Retrieve flags
 	output, _ := cmd.Flags().GetString("output")
 	yes, _ := cmd.Flags().GetBool("yes")
 
-	// Validate user is currently logged in
+	// Validate user login
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)
@@ -68,6 +70,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	// Initialize spinner if output is not JSON
 	var sm ysmrr.SpinnerManager
 	var spinner *ysmrr.Spinner
 	if output != "json" {
@@ -77,48 +80,21 @@ func runDelete(cmd *cobra.Command, args []string) error {
 		sm.Start()
 	}
 
-	// Check if the instance exists
-	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("resourceinstance:%s", instanceId))
+	// Check if instance exists
+	serviceID, environmentID, resourceID, _, err := getInstance(token, instanceID)
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	var found bool
-	var serviceId, environmentId, resourceId string
-	for _, instance := range searchRes.ResourceInstanceResults {
-		if instance.ID == instanceId {
-			serviceId = string(instance.ServiceID)
-			environmentId = string(instance.ServiceEnvironmentID)
-			if instance.ResourceID == nil {
-				err = fmt.Errorf("resource ID not returned for instance %s", instanceId)
-				utils.PrintError(err)
-				return err
-			}
-			resourceId = string(*instance.ResourceID)
-			found = true
-			break
-		}
-	}
-	if !found {
-		err = fmt.Errorf("%s not found. Please check the instance ID and try again", instanceId)
-		utils.PrintError(err)
-		return nil
-	}
-
-	err = dataaccess.DeleteInstance(token, serviceId, environmentId, resourceId, instanceId)
+	// Delete the instance
+	err = dataaccess.DeleteInstance(token, serviceID, environmentID, resourceID, instanceID)
 	if err != nil {
-		spinner.Error()
-		sm.Stop()
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	if output != "json" {
-		spinner.UpdateMessage("Successfully deleted instance")
-		spinner.Complete()
-		sm.Stop()
-	}
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully deleted instance")
 
 	return nil
 }
