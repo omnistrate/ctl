@@ -2,12 +2,16 @@ package smoke
 
 import (
 	"fmt"
+	"github.com/cenkalti/backoff/v4"
+	"github.com/omnistrate/commons/pkg/constants"
 	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/cmd"
 	"github.com/omnistrate/ctl/cmd/instance"
 	"github.com/omnistrate/ctl/test/testutils"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	"testing"
+	"time"
 )
 
 func TestInstanceBasic(t *testing.T) {
@@ -62,6 +66,52 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(t, err)
 
+	err = WaitForInstanceToReachStatus(instanceID1, string(constants.Running), 300*time.Second)
+	require.NoError(t, err)
+
+	// PASS: stop instance 1
+	cmd.RootCmd.SetArgs([]string{"instance", "stop", instanceID1})
+	err = cmd.RootCmd.Execute()
+	require.NoError(t, err)
+
+	err = WaitForInstanceToReachStatus(instanceID1, string(constants.Stopped), 300*time.Second)
+	require.NoError(t, err)
+
+	// PASS: start instance 1
+	cmd.RootCmd.SetArgs([]string{"instance", "start", instanceID1})
+	err = cmd.RootCmd.Execute()
+	require.NoError(t, err)
+
+	err = WaitForInstanceToReachStatus(instanceID1, string(constants.Running), 300*time.Second)
+	require.NoError(t, err)
+
+	// PASS: restart instance 1
+	cmd.RootCmd.SetArgs([]string{"instance", "restart", instanceID1})
+	err = cmd.RootCmd.Execute()
+	require.NoError(t, err)
+
+	time.Sleep(5 * time.Second)
+	err = WaitForInstanceToReachStatus(instanceID1, string(constants.Running), 300*time.Second)
+	require.NoError(t, err)
+
+	// PASS: update instance 1
+	cmd.RootCmd.SetArgs([]string{"instance", "update", instanceID1, "--param", `{"databaseName":"default","password":"updated_password","rootPassword":"updated_root_password","username":"user"}`})
+	err = cmd.RootCmd.Execute()
+	require.NoError(t, err)
+
+	time.Sleep(5 * time.Second)
+	err = WaitForInstanceToReachStatus(instanceID1, string(constants.Running), 300*time.Second)
+	require.NoError(t, err)
+
+	// PASS: update instance 2
+	cmd.RootCmd.SetArgs([]string{"instance", "update", instanceID2, "--param-file", "paramfiles/instance_update_param.json"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(t, err)
+
+	time.Sleep(5 * time.Second)
+	err = WaitForInstanceToReachStatus(instanceID2, string(constants.Running), 300*time.Second)
+	require.NoError(t, err)
+
 	//// PASS: instance list
 	// cmd.RootCmd.SetArgs([]string{"instance", "list"})
 	// err = cmd.RootCmd.Execute()
@@ -81,4 +131,44 @@ func TestInstanceBasic(t *testing.T) {
 	cmd.RootCmd.SetArgs([]string{"instance", "delete", instanceID2, "--yes"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(t, err)
+}
+
+func WaitForInstanceToReachStatus(instanceID, status string, timeout time.Duration) error {
+	b := &backoff.ExponentialBackOff{
+		InitialInterval:     1 * time.Second,
+		RandomizationFactor: backoff.DefaultRandomizationFactor,
+		Multiplier:          backoff.DefaultMultiplier,
+		MaxInterval:         1 * time.Second,
+		MaxElapsedTime:      timeout,
+		Stop:                backoff.Stop,
+		Clock:               backoff.SystemClock,
+	}
+	b.Reset()
+	ticker := backoff.NewTicker(b)
+
+	for range ticker.C {
+		cmd.RootCmd.SetArgs([]string{"instance", "describe", instanceID})
+		err := cmd.RootCmd.Execute()
+		if err != nil {
+			return err
+		}
+		currentStatus := instance.InstanceStatus
+
+		if currentStatus == status {
+			ticker.Stop()
+			return nil
+		}
+
+		if currentStatus == string(constants.Failed) {
+			ticker.Stop()
+			return errors.New("instance deployment failed")
+		}
+
+		if currentStatus == string(constants.Cancelled) {
+			ticker.Stop()
+			return errors.New("instance deployment cancelled")
+		}
+	}
+
+	return errors.New("instance did not reach the expected status")
 }

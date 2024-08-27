@@ -65,6 +65,9 @@ func init() {
 	if err := createCmd.MarkFlagFilename("param-file"); err != nil {
 		return
 	}
+	createCmd.MarkFlagsMutuallyExclusive("param", "param-file")
+
+	createCmd.Args = cobra.NoArgs // Require no arguments
 }
 
 func runCreate(cmd *cobra.Command, args []string) error {
@@ -185,24 +188,11 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 	offering := res.ConsumptionDescribeServiceOfferingResult.Offerings[0]
 
-	// Read parameters from file if provided
-	if paramFile != "" {
-		fileContent, err := os.ReadFile(paramFile)
-		if err != nil {
-			utils.HandleSpinnerError(spinner, sm, err)
-			return err
-		}
-		param = string(fileContent)
-	}
-
-	// Extract parameters from json format param
-	var formattedParams map[string]interface{}
-	if param != "" {
-		err = json.Unmarshal([]byte(param), &formattedParams)
-		if err != nil {
-			utils.HandleSpinnerError(spinner, sm, err)
-			return err
-		}
+	// Format parameters
+	formattedParams, err := formatParams(param, paramFile)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
 	}
 
 	var resourceKey string
@@ -293,6 +283,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	formattedInstance := formatInstance(searchRes.ResourceInstanceResults[0], false)
 	InstanceID = formattedInstance.InstanceID
 
+	// Marshal instance to JSON
 	data, err := json.MarshalIndent(formattedInstance, "", "    ")
 	if err != nil {
 		utils.PrintError(err)
@@ -374,4 +365,25 @@ func formatInstance(instance *inventoryapi.ResourceInstanceSearchRecord, truncat
 	}
 
 	return formattedInstance
+}
+
+func formatParams(param, paramFile string) (formattedParams map[string]string, err error) {
+	// Read parameters from file if provided
+	if paramFile != "" {
+		fileContent, err := os.ReadFile(paramFile)
+		if err != nil {
+			return
+		}
+		param = string(fileContent)
+	}
+
+	// Extract parameters from json format param
+	if param != "" {
+		err = json.Unmarshal([]byte(param), &formattedParams)
+		if err != nil {
+			return
+		}
+	}
+
+	return
 }

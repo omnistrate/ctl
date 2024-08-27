@@ -17,6 +17,8 @@ const (
 	defaultDescribeOutput = "json"
 )
 
+var InstanceStatus string
+
 var describeCmd = &cobra.Command{
 	Use:          "describe [instance-id]",
 	Short:        "Describe an instance deployment for your service",
@@ -70,6 +72,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully created instance")
+	InstanceStatus = string(instance.ConsumptionResourceInstanceResult.Status)
 
 	// Marshal instance to JSON
 	data, err := json.MarshalIndent(instance, "", "    ")

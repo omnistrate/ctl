@@ -6,14 +6,13 @@ import (
 	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
 const (
 	restartExample = `  # Restart an instance deployment
   omctl instance restart instance-abcd1234`
-
-	defaultRestartOutput = "json"
 )
 
 var restartCmd = &cobra.Command{
@@ -26,6 +25,7 @@ var restartCmd = &cobra.Command{
 }
 
 func init() {
+	restartCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 	restartCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 }
 
@@ -34,7 +34,13 @@ func runRestart(cmd *cobra.Command, args []string) error {
 
 	// Retrieve args
 	instanceID := args[0]
-	output := defaultRestartOutput
+
+	// Retrieve flags
+	output, err := cmd.Flags().GetString("output")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
 
 	// Validate user login
 	token, err := utils.GetToken()
@@ -61,23 +67,41 @@ func runRestart(cmd *cobra.Command, args []string) error {
 	}
 
 	// Restart instance
-	err = dataaccess.RestartResourceInstance(token, serviceID, environmentID, instanceID)
+	err = dataaccess.RestartResourceInstance(token, serviceID, environmentID, resourceID, instanceID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	utils.HandleSpinnerSuccess(spinner, sm, "Successfully created instance")
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully restarted instance")
+
+	// Search for the instance
+	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("resourceinstance:%s", instanceID))
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	if len(searchRes.ResourceInstanceResults) == 0 {
+		err = errors.New("failed to find the restarted instance")
+		utils.PrintError(err)
+		return err
+	}
+
+	// Format instance
+	formattedInstance := formatInstance(searchRes.ResourceInstanceResults[0], false)
 
 	// Marshal instance to JSON
-	data, err := json.MarshalIndent(instance, "", "    ")
+	data, err := json.MarshalIndent(formattedInstance, "", "    ")
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
 	// Print output
-	fmt.Println(string(data))
+	if err = utils.PrintTextTableJsonOutput(output, string(data)); err != nil {
+		return err
+	}
 
 	return nil
 }
