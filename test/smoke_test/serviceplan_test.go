@@ -53,7 +53,7 @@ func Test_service_plan_basic(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: list service plan versions
-	cmd.RootCmd.SetArgs([]string{"service-plan", "list-versions", serviceName, "postgresql", "--filter", "service_name:postgresql", "--filter", "plan_name:postgresql"})
+	cmd.RootCmd.SetArgs([]string{"service-plan", "list-versions", serviceName, "postgresql", "--filter", "service_name:postgresql", "--filter", "plan_name:postgresql", "--latest-n=1"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
@@ -101,7 +101,7 @@ func Test_service_plan_basic(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: list service plan versions
-	cmd.RootCmd.SetArgs([]string{"service-plan", "list-versions", "--service-id", serviceID, "--plan-id", productTierID})
+	cmd.RootCmd.SetArgs([]string{"service-plan", "list-versions", "--service-id", serviceID, "--plan-id", productTierID, "--latest-n=1"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
