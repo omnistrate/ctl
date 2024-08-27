@@ -128,6 +128,10 @@ func runCreate(cmd *cobra.Command, args []string) error {
 
 	// Print output
 	err = utils.PrintTextTableJsonOutput(output, account)
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
 
 	// Print next step
 	dataaccess.PrintNextStepVerifyAccountMsg(account)

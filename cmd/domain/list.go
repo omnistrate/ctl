@@ -12,7 +12,7 @@ import (
 
 const (
 	listExample = `  # List domains
-  omctl domain list -o=table`
+  omctl domain list`
 )
 
 var listCmd = &cobra.Command{

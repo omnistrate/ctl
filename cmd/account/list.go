@@ -100,6 +100,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	// Format output as requested
 	err = utils.PrintTextTableJsonArrayOutput(output, formattedAccounts)
 	if err != nil {
+		utils.PrintError(err)
 		return err
 	}
 

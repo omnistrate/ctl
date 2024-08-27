@@ -20,7 +20,7 @@ const (
 var describeCmd = &cobra.Command{
 	Use:     "describe [account-name] [flags]",
 	Short:   "Describe a Cloud Provider Account",
-	Long:    "This command helps you describe a Cloud Provider Account from your account list.",
+	Long:    "This command helps you get details of a cloud provider account.",
 	Example: describeExample,
 	RunE:    runDescribe,
 	PostRun: func(cmd *cobra.Command, args []string) {
@@ -58,7 +58,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate input args
-	err = validateDescribeArguments(args, id)
+	err = validateDescribeArguments(args, id, output)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -105,13 +105,17 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func validateDescribeArguments(args []string, accountIDArg string) error {
+func validateDescribeArguments(args []string, accountIDArg, output string) error {
 	if len(args) == 0 && accountIDArg == "" {
 		return errors.New("account name or ID must be provided")
 	}
 
 	if len(args) != 0 && accountIDArg != "" {
 		return errors.New("only one of account name or ID can be provided")
+	}
+
+	if output != "json" {
+		return errors.New("only json output is supported")
 	}
 
 	return nil

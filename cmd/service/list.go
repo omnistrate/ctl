@@ -12,7 +12,7 @@ import (
 
 const (
 	listExample = `  # List services
-  omctl service list -o=table`
+  omctl service list`
 	defaultMaxNameLength = 30 // Maximum length of the name column in the table
 )
 
