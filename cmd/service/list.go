@@ -29,6 +29,8 @@ func init() {
 	listCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 	listCmd.Flags().StringArrayP("filter", "f", []string{}, "Filter to apply to the list of services. E.g.: key1:value1,key2:value2, which filters services where key1 equals value1 and key2 equals value2. Allow use of multiple filters to form the logical OR operation. Supported keys: "+strings.Join(utils.GetSupportedFilterKeys(model.Service{}), ",")+". Check the examples for more details.")
 	listCmd.Flags().Bool("truncate", false, "Truncate long names in the output")
+	
+	listCmd.Args = cobra.NoArgs
 }
 
 func runList(cmd *cobra.Command, args []string) error {
