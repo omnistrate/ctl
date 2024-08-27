@@ -29,6 +29,12 @@ omnistrate-ctl service-plan describe-version [service-name] [plan-name] [flags]
   -v, --version string      Service plan version (latest|preferred|1.0 etc.)
 ```
 
+### Options inherited from parent commands
+
+```
+  -o, --output string   Output format (text|table|json) (default "table")
+```
+
 ### SEE ALSO
 
 * [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage Service Plans for your service

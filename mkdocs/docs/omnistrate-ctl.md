@@ -20,8 +20,9 @@ omnistrate-ctl [flags]
 ### Options
 
 ```
-  -h, --help      help for omnistrate-ctl
-  -v, --version   Print the version number of omnistrate-ctl
+  -h, --help            help for omnistrate-ctl
+  -o, --output string   Output format (text|table|json) (default "table")
+  -v, --version         Print the version number of omnistrate-ctl
 ```
 
 ### SEE ALSO

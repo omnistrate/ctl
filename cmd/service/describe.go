@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/chelnak/ysmrr"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/ctl/dataaccess"
@@ -28,9 +29,10 @@ var describeCmd = &cobra.Command{
 }
 
 func init() {
-	describeCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
+	describeCmd.Args = cobra.MaximumNArgs(1) // Require at most one argument
 
 	describeCmd.Flags().String("id", "", "Service ID")
+	describeCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported.") // Override inherited flag
 }
 
 func runDescribe(cmd *cobra.Command, args []string) error {
@@ -48,9 +50,14 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 		utils.PrintError(err)
 		return err
 	}
+	output, err := cmd.Flags().GetString("output")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
 
 	// Validate input args
-	err = validateDescribeInput(name, id)
+	err = validateDescribeArguments(name, id)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -63,10 +70,20 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// Initialize spinner if output is not JSON
+	var sm ysmrr.SpinnerManager
+	var spinner *ysmrr.Spinner
+	if output != "json" {
+		sm = ysmrr.NewSpinnerManager()
+		msg := "Describing service..."
+		spinner = sm.AddSpinner(msg)
+		sm.Start()
+	}
+
 	// Check if service exists
 	id, name, err = getService(token, name, id)
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
@@ -74,9 +91,11 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	var service *serviceapi.DescribeServiceResult
 	service, err = dataaccess.DescribeService(token, id)
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
+
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully described service")
 
 	// Print output
 	err = utils.PrintTextTableJsonOutput("json", service)
@@ -124,7 +143,7 @@ func getService(token, serviceNameArg, serviceIDArg string) (serviceID, serviceN
 	return
 }
 
-func validateDescribeInput(serviceNameArg, serviceIDArg string) error {
+func validateDescribeArguments(serviceNameArg, serviceIDArg string) error {
 	if serviceNameArg == "" && serviceIDArg == "" {
 		return errors.New("service name or ID must be provided")
 	}

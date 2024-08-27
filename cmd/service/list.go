@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/chelnak/ysmrr"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
@@ -47,17 +48,27 @@ func runList(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Ensure user is logged in
+	// Validate user login
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
+	// Initialize spinner if output is not JSON
+	var sm ysmrr.SpinnerManager
+	var spinner *ysmrr.Spinner
+	if output != "json" {
+		sm = ysmrr.NewSpinnerManager()
+		msg := "Listing services..."
+		spinner = sm.AddSpinner(msg)
+		sm.Start()
+	}
+
 	// Retrieve services and services
 	listRes, err := dataaccess.ListServices(token)
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
@@ -67,13 +78,13 @@ func runList(cmd *cobra.Command, args []string) error {
 	for _, service := range listRes.Services {
 		formattedService, err := formatService(service, truncateNames)
 		if err != nil {
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 
 		match, err := utils.MatchesFilters(formattedService, filterMaps)
 		if err != nil {
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 
@@ -84,13 +95,16 @@ func runList(cmd *cobra.Command, args []string) error {
 
 	// Handle case when no services match
 	if len(formattedServices) == 0 {
-		utils.PrintInfo("No services found.")
+		utils.HandleSpinnerSuccess(spinner, sm, "No services found")
 		return nil
+	} else {
+		utils.HandleSpinnerSuccess(spinner, sm, "Successfully retrieved services")
 	}
 
 	// Format output as requested
 	err = utils.PrintTextTableJsonArrayOutput(output, formattedServices)
 	if err != nil {
+		utils.PrintError(err)
 		return err
 	}
 
