@@ -27,13 +27,13 @@ var updateCmd = &cobra.Command{
 
 func init() {
 	updateCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
-	createCmd.Flags().String("param", "", "Parameters for the instance deployment")
-	createCmd.Flags().String("param-file", "", "Json file containing parameters for the instance deployment")
+	updateCmd.Flags().String("param", "", "Parameters for the instance deployment")
+	updateCmd.Flags().String("param-file", "", "Json file containing parameters for the instance deployment")
 
-	if err := createCmd.MarkFlagFilename("param-file"); err != nil {
+	if err := updateCmd.MarkFlagFilename("param-file"); err != nil {
 		return
 	}
-	createCmd.MarkFlagsMutuallyExclusive("param", "param-file")
+	updateCmd.MarkFlagsMutuallyExclusive("param", "param-file")
 
 	updateCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 }
