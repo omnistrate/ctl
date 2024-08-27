@@ -1,6 +1,7 @@
 package instance
 
 import (
+	"encoding/json"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
@@ -71,7 +72,7 @@ func runList(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	formattedInstances := make([]model.Instance, 0)
+	instances := make([]model.Instance, 0)
 	for _, instance := range searchRes.ResourceInstanceResults {
 		if instance == nil {
 			continue
@@ -87,17 +88,28 @@ func runList(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		if ok {
-			formattedInstances = append(formattedInstances, formattedInstance)
+			instances = append(instances, formattedInstance)
 		}
 	}
 
-	if len(formattedInstances) == 0 {
+	var jsonData []string
+	for _, instance := range instances {
+		data, err := json.MarshalIndent(instance, "", "    ")
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+
+		jsonData = append(jsonData, string(data))
+	}
+
+	if len(jsonData) == 0 {
 		utils.PrintInfo("No instances found.")
 		return nil
 	}
 
 	// Print output
-	err = utils.PrintTextTableJsonArrayOutput(output, formattedInstances)
+	err = utils.PrintTextTableJsonArrayOutput(output, jsonData)
 	if err != nil {
 		return err
 	}

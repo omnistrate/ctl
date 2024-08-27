@@ -1,6 +1,7 @@
 package helm
 
 import (
+	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
@@ -34,6 +35,7 @@ func init() {
 func runDelete(cmd *cobra.Command, args []string) error {
 	chart := args[0]
 	version, _ := cmd.Flags().GetString("version")
+	output, _ := cmd.Flags().GetString("output")
 
 	// Validate user is currently logged in
 	token, err := utils.GetToken()
@@ -42,13 +44,24 @@ func runDelete(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// Initialize spinner if output is not JSON
+	var sm ysmrr.SpinnerManager
+	var spinner *ysmrr.Spinner
+	if output != "json" {
+		sm = ysmrr.NewSpinnerManager()
+		msg := "Deleting Helm package..."
+		spinner = sm.AddSpinner(msg)
+		sm.Start()
+	}
+
+	// Delete Helm package
 	err = dataaccess.DeleteHelmChart(token, chart, version)
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	utils.PrintSuccess("Helm package deleted successfully")
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully deleted Helm package")
 
 	return nil
 }
