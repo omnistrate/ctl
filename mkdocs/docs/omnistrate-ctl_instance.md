@@ -25,6 +25,18 @@ omnistrate-ctl instance [operation] [flags]
   # List instance deployments of the service postgres in the prod and dev environments
   omctl instance list -o=table -f="service:postgres,environment:Production" -f="service:postgres,environment:Dev"
 
+  # Restart an instance deployment
+  omctl instance restart instance-abcd1234
+
+  # Start an instance deployment
+  omctl instance start instance-abcd1234
+
+  # Stop an instance deployment
+  omctl instance stop instance-abcd1234
+
+  # Update an instance deployment
+  omctl instance update instance-abcd1234
+
 
 ```
 
@@ -47,4 +59,8 @@ omnistrate-ctl instance [operation] [flags]
 * [omnistrate-ctl instance delete](omnistrate-ctl_instance_delete.md)	 - Delete an instance deployment
 * [omnistrate-ctl instance describe](omnistrate-ctl_instance_describe.md)	 - Describe an instance deployment for your service
 * [omnistrate-ctl instance list](omnistrate-ctl_instance_list.md)	 - List instance deployments for your service
+* [omnistrate-ctl instance restart](omnistrate-ctl_instance_restart.md)	 - Restart an instance deployment for your service
+* [omnistrate-ctl instance start](omnistrate-ctl_instance_start.md)	 - Start an instance deployment for your service
+* [omnistrate-ctl instance stop](omnistrate-ctl_instance_stop.md)	 - Stop an instance deployment for your service
+* [omnistrate-ctl instance update](omnistrate-ctl_instance_update.md)	 - Update an instance deployment for your service
 
