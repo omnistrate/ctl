@@ -1,8 +1,8 @@
 package account
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/chelnak/ysmrr"
 	accountconfigapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/account_config_api"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
@@ -13,7 +13,7 @@ import (
 
 const (
 	listExample = `  # List accounts
-  omctl account list -o=table`
+  omctl account list`
 )
 
 var listCmd = &cobra.Command{
@@ -27,7 +27,6 @@ You can filter for specific accounts by using the filter flag.`,
 }
 
 func init() {
-	listCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 	listCmd.Flags().StringArrayP("filter", "f", []string{}, "Filter to apply to the list of accounts. E.g.: key1:value1,key2:value2, which filters accounts where key1 equals value1 and key2 equals value2. Allow use of multiple filters to form the logical OR operation. Supported keys: "+strings.Join(utils.GetSupportedFilterKeys(model.Account{}), ",")+". Check the examples for more details.")
 }
 
@@ -45,55 +44,61 @@ func runList(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Ensure user is logged in
+	// Validate user login
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
+	// Initialize spinner if output is not JSON
+	var sm ysmrr.SpinnerManager
+	var spinner *ysmrr.Spinner
+	if output != "json" {
+		sm = ysmrr.NewSpinnerManager()
+		msg := "Retrieving accounts..."
+		spinner = sm.AddSpinner(msg)
+		sm.Start()
+	}
+
 	// Retrieve accounts and accounts
 	listRes, err := dataaccess.ListAccounts(token, "all")
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	var accountsData []string
+	var formattedAccounts []model.Account
 
 	// Process and filter accounts
 	for _, account := range listRes.AccountConfigs {
 		formattedAccount, err := formatAccount(account)
 		if err != nil {
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 
 		match, err := utils.MatchesFilters(formattedAccount, filterMaps)
 		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-
-		data, err := json.MarshalIndent(formattedAccount, "", "    ")
-		if err != nil {
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 
 		if match {
-			accountsData = append(accountsData, string(data))
+			formattedAccounts = append(formattedAccounts, formattedAccount)
 		}
 	}
 
 	// Handle case when no accounts match
-	if len(accountsData) == 0 {
-		utils.PrintInfo("No accounts found.")
+	if len(formattedAccounts) == 0 {
+		utils.HandleSpinnerSuccess(spinner, sm, "No accounts found")
 		return nil
+	} else {
+		utils.HandleSpinnerSuccess(spinner, sm, "Successfully retrieved accounts")
 	}
 
 	// Format output as requested
-	err = utils.PrintTextTableJsonArrayOutput(output, accountsData)
+	err = utils.PrintTextTableJsonArrayOutput(output, formattedAccounts)
 	if err != nil {
 		return err
 	}

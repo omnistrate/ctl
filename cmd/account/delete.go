@@ -1,111 +1,110 @@
 package account
 
 import (
+	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"slices"
-	"strings"
 )
 
 var (
 	deleteExample = `  # Delete account with name
-  omctl account delete <name>
+  omctl account delete [account-name]
 
   # Delete account with ID
-  omctl account delete <id> --id
-
-  # Delete multiple accounts with names
-  omctl account delete <name1> <name2> <name3>
-
-  # Delete multiple accounts with IDs
-  omctl account delete <id1> <id2> <id3> --id`
+  omctl account delete --id=[account-ID]`
 )
 
 var deleteCmd = &cobra.Command{
 	Use:          "delete [account-name] [flags]",
-	Short:        "Delete one or more accounts",
-	Long:         `Delete account with name or ID. Use --id to specify ID. If not specified, name is assumed. If multiple accounts are found with the same name, all of them will be deleted.`,
+	Short:        "Delete an account",
+	Long:         `This command helps you delete an account by specifying the account name or ID`,
 	Example:      deleteExample,
 	RunE:         runDelete,
 	SilenceUsage: true,
 }
 
 func init() {
-	deleteCmd.Args = cobra.MinimumNArgs(1) // Require at least one argument
+	deleteCmd.Args = cobra.MaximumNArgs(1) // Require at most one argument
 
-	deleteCmd.Flags().Bool("id", false, "Specify account ID instead of name")
+	deleteCmd.Flags().String("id", "", "Account ID")
 }
 
 func runDelete(cmd *cobra.Command, args []string) error {
+	defer utils.CleanupArgsAndFlags(cmd, &args)
+
+	// Retrieve args
+	var name string
+	if len(args) > 0 {
+		name = args[0]
+	}
+
+	// Retrieve flags
+	id, err := cmd.Flags().GetString("id")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+	output, err := cmd.Flags().GetString("output")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	// Validate input args
+	err = validateDeleteArguments(args, id)
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	// Validate user login
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	var ID bool
-	ID, err = cmd.Flags().GetBool("id")
+	// Initialize spinner if output is not JSON
+	var sm ysmrr.SpinnerManager
+	var spinner *ysmrr.Spinner
+	if output != "json" {
+		sm = ysmrr.NewSpinnerManager()
+		msg := "Deleting account..."
+		spinner = sm.AddSpinner(msg)
+		sm.Start()
+	}
+
+	// Check if account exists
+	id, name, err = getAccount(token, name, id)
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	accountIDs := make([]string, 0)
-	if ID {
-		accountIDs = args
-	} else {
-		// List accounts
-		listRes, err := dataaccess.ListAccounts(token, "all")
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-
-		// Filter accounts by name
-		found := make(map[string]int)
-		for _, name := range args {
-			found[name] = 0
-		}
-
-		for _, s := range listRes.AccountConfigs {
-			if slices.Contains(args, s.Name) {
-				accountIDs = append(accountIDs, string(s.ID))
-				found[s.Name] += 1
-			}
-		}
-
-		accountsNotFound := make([]string, 0)
-		for name, count := range found {
-			if count == 0 {
-				accountsNotFound = append(accountsNotFound, name)
-			}
-		}
-
-		if len(accountsNotFound) > 0 {
-			err = errors.New("account(s) not found: " + strings.Join(accountsNotFound, ", "))
-			utils.PrintError(err)
-			return err
-		}
-
-		for name, count := range found {
-			if count > 1 {
-				utils.PrintWarning("Multiple accounts found with name: " + name + ". Deleting all of them.")
-			}
-		}
-	}
-
 	// Delete account
-	for _, accountID := range accountIDs {
-		err = dataaccess.DeleteAccount(token, accountID)
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
+	err = dataaccess.DeleteAccount(token, id)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
 	}
 
-	utils.PrintSuccess("Account(s) deleted successfully")
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully deleted account")
+
+	return nil
+}
+
+// Helper functions
+
+func validateDeleteArguments(args []string, accountIDArg string) error {
+	if len(args) == 0 && accountIDArg == "" {
+		return errors.New("account name or ID must be provided")
+	}
+
+	if len(args) != 0 && accountIDArg != "" {
+		return errors.New("only one of account name or ID can be provided")
+	}
 
 	return nil
 }

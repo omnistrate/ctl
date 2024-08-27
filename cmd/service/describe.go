@@ -9,6 +9,7 @@ import (
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"strings"
 )
 
 const (
@@ -110,6 +111,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 // Helper functions
 
 func getService(token, serviceNameArg, serviceIDArg string) (serviceID, serviceName string, err error) {
+	count := 0
 	if serviceNameArg != "" {
 		var searchRes *inventoryapi.SearchInventoryResult
 		searchRes, err = dataaccess.SearchInventory(token, fmt.Sprintf("service:%s", serviceNameArg))
@@ -118,10 +120,10 @@ func getService(token, serviceNameArg, serviceIDArg string) (serviceID, serviceN
 		}
 
 		for _, service := range searchRes.ServiceResults {
-			if service.Name == serviceNameArg {
+			if strings.EqualFold(service.Name, serviceNameArg) {
 				serviceID = service.ID
 				serviceName = service.Name
-				return
+				count++
 			}
 		}
 	} else {
@@ -132,12 +134,21 @@ func getService(token, serviceNameArg, serviceIDArg string) (serviceID, serviceN
 		}
 
 		for _, service := range searchRes.ServiceResults {
-			if service.ID == serviceIDArg {
+			if strings.EqualFold(service.ID, serviceIDArg) {
 				serviceID = service.ID
 				serviceName = service.Name
-				return
+				count++
 			}
 		}
+	}
+
+	if count == 0 {
+		err = errors.New("service not found")
+		return
+	}
+
+	if count > 1 {
+		err = errors.New("multiple services found with the same name. Please provide the service ID")
 	}
 
 	return
