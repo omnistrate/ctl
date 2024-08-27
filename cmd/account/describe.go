@@ -19,8 +19,8 @@ const (
 
 var describeCmd = &cobra.Command{
 	Use:     "describe [account-name] [flags]",
-	Short:   "Describe an account",
-	Long:    "This command helps you describe an account.",
+	Short:   "Describe a Cloud Provider Account",
+	Long:    "This command helps you describe a Cloud Provider Account from your account list.",
 	Example: describeExample,
 	RunE:    runDescribe,
 	PostRun: func(cmd *cobra.Command, args []string) {

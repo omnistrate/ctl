@@ -18,8 +18,8 @@ var (
 
 var deleteCmd = &cobra.Command{
 	Use:          "delete [account-name] [flags]",
-	Short:        "Delete an account",
-	Long:         `This command helps you delete an account by specifying the account name or ID`,
+	Short:        "Delete a Cloud Provider Account",
+	Long:         `This command helps you delete a Cloud Provider Account from your account list.`,
 	Example:      deleteExample,
 	RunE:         runDelete,
 	SilenceUsage: true,
