@@ -1,7 +1,6 @@
 package service
 
 import (
-	"encoding/json"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
@@ -61,7 +60,7 @@ func runList(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	var servicesData []string
+	var formattedServices []model.Service
 
 	// Process and filter services
 	for _, service := range listRes.Services {
@@ -77,25 +76,19 @@ func runList(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		data, err := json.MarshalIndent(formattedService, "", "    ")
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-
 		if match {
-			servicesData = append(servicesData, string(data))
+			formattedServices = append(formattedServices, formattedService)
 		}
 	}
 
 	// Handle case when no services match
-	if len(servicesData) == 0 {
+	if len(formattedServices) == 0 {
 		utils.PrintInfo("No services found.")
 		return nil
 	}
 
 	// Format output as requested
-	err = utils.PrintTextTableJsonArrayOutput(output, servicesData)
+	err = utils.PrintTextTableJsonArrayOutput(output, formattedServices)
 	if err != nil {
 		return err
 	}

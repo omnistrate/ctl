@@ -45,14 +45,34 @@ func PrintJSON(res interface{}) {
 	fmt.Println(string(data))
 }
 
-func PrintTextTableJsonArrayOutput(output string, jsonData []string) error {
+func PrintTextTableJsonArrayOutput[T any](output string, objects []T) error {
 	switch output {
 	case "text":
-		return PrintText(jsonData)
+		dataArray := make([]string, 0)
+		for _, obj := range objects {
+			data, err := json.MarshalIndent(obj, "", "    ")
+			if err != nil {
+				return err
+			}
+			dataArray = append(dataArray, string(data))
+		}
+		return PrintText(dataArray)
 	case "table":
-		return PrintTable(jsonData)
+		dataArray := make([]string, 0)
+		for _, obj := range objects {
+			data, err := json.MarshalIndent(obj, "", "    ")
+			if err != nil {
+				return err
+			}
+			dataArray = append(dataArray, string(data))
+		}
+		return PrintTable(dataArray)
 	case "json":
-		fmt.Printf("%+v\n", jsonData)
+		data, err := json.MarshalIndent(objects, "", "    ")
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%s\n", data)
 	default:
 		return fmt.Errorf("unsupported output format: %s", output)
 	}
