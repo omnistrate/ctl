@@ -77,3 +77,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 
 	return nil
 }
+
+func getInstance(token, instanceId string) (serviceId, environmentId, err error) {
+
+}
