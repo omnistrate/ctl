@@ -31,7 +31,7 @@ var releaseCmd = &cobra.Command{
 func init() {
 	releaseCmd.Flags().String("release-description", "", "Set custom release description for this release version")
 	releaseCmd.Flags().Bool("release-as-preferred", false, "Release the service plan as preferred")
-	releaseCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
+
 	releaseCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	releaseCmd.Flags().StringP("plan-id", "", "", "Plan ID. Required if plan name is not provided")
 }

@@ -1,7 +1,6 @@
 package instance
 
 import (
-	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -22,8 +21,6 @@ func init() {
 	Cmd.AddCommand(stopCmd)
 	Cmd.AddCommand(restartCmd)
 	Cmd.AddCommand(updateCmd)
-
-	Cmd.Example = utils.CombineSubCmdExamples(Cmd)
 }
 
 func run(cmd *cobra.Command, args []string) {

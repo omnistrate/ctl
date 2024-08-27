@@ -31,7 +31,7 @@ By setting a service plan as default, you can ensure that new instances of the s
 
 func init() {
 	setDefaultCmd.Flags().String("version", "", "Specify the version number to set the default to. Use 'latest' to set the latest version as default.")
-	setDefaultCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
+
 	setDefaultCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	setDefaultCmd.Flags().StringP("plan-id", "", "", "Plan ID. Required if plan name is not provided")
 

@@ -1,7 +1,6 @@
 package instance
 
 import (
-	"encoding/json"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
@@ -26,7 +25,7 @@ You can filter for specific instances by using the filter flag.`,
 }
 
 func init() {
-	listCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
+
 	listCmd.Flags().StringArrayP("filter", "f", []string{}, "Filter to apply to the list of instances. E.g.: key1:value1,key2:value2, which filters instances where key1 equals value1 and key2 equals value2. Allow use of multiple filters to form the logical OR operation. Supported keys: "+strings.Join(utils.GetSupportedFilterKeys(model.Instance{}), ",")+". Check the examples for more details.")
 	listCmd.Flags().Bool("truncate", false, "Truncate long names in the output")
 }
@@ -72,7 +71,7 @@ func runList(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	instances := make([]model.Instance, 0)
+	formattedInstances := make([]model.Instance, 0)
 	for _, instance := range searchRes.ResourceInstanceResults {
 		if instance == nil {
 			continue
@@ -88,28 +87,17 @@ func runList(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		if ok {
-			instances = append(instances, formattedInstance)
+			formattedInstances = append(formattedInstances, formattedInstance)
 		}
 	}
 
-	var jsonData []string
-	for _, instance := range instances {
-		data, err := json.MarshalIndent(instance, "", "    ")
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-
-		jsonData = append(jsonData, string(data))
-	}
-
-	if len(jsonData) == 0 {
+	if len(formattedInstances) == 0 {
 		utils.PrintInfo("No instances found.")
 		return nil
 	}
 
 	// Print output
-	err = utils.PrintTextTableJsonArrayOutput(output, jsonData)
+	err = utils.PrintTextTableJsonArrayOutput(output, formattedInstances)
 	if err != nil {
 		return err
 	}

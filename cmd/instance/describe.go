@@ -1,7 +1,7 @@
 package instance
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/chelnak/ysmrr"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
@@ -13,8 +13,6 @@ import (
 const (
 	describeExample = `  # Describe an instance deployment
   omctl instance describe instance-abcd1234`
-
-	defaultDescribeOutput = "json"
 )
 
 var InstanceStatus string
@@ -37,7 +35,20 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 
 	// Retrieve args
 	instanceID := args[0]
-	output := defaultDescribeOutput
+
+	// Retrieve flags
+	output, err := cmd.Flags().GetString("output")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	// Validate output flag
+	if output != "json" {
+		err = errors.New("only json output is supported")
+		utils.PrintError(err)
+		return err
+	}
 
 	// Validate user login
 	token, err := utils.GetToken()
@@ -59,7 +70,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	// Check if instance exists
 	serviceID, environmentID, _, _, err := getInstance(token, instanceID)
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
@@ -74,15 +85,12 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully created instance")
 	InstanceStatus = string(instance.ConsumptionResourceInstanceResult.Status)
 
-	// Marshal instance to JSON
-	data, err := json.MarshalIndent(instance, "", "    ")
+	// Print output
+	err = utils.PrintTextTableJsonOutput(output, instance)
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
-
-	// Print output
-	fmt.Println(string(data))
 
 	return nil
 }

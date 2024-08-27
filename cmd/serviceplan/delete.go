@@ -27,7 +27,7 @@ var deleteCmd = &cobra.Command{
 }
 
 func init() {
-	deleteCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
+
 	deleteCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	deleteCmd.Flags().StringP("plan-id", "", "", "Plan ID. Required if plan name is not provided")
 }

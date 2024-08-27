@@ -42,7 +42,6 @@ func init() {
 	createCmd.Flags().String("param", "", "Parameters for the instance deployment")
 	createCmd.Flags().String("param-file", "", "Json file containing parameters for the instance deployment")
 	createCmd.Flags().StringP("subscription-id", "", "", "Subscription ID to use for the instance deployment. If not provided, instance deployment will be created in your own subscription.")
-	createCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 
 	if err := createCmd.MarkFlagRequired("service"); err != nil {
 		return
@@ -257,15 +256,8 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	formattedInstance := formatInstance(searchRes.ResourceInstanceResults[0], false)
 	InstanceID = formattedInstance.InstanceID
 
-	// Marshal instance to JSON
-	data, err := json.MarshalIndent(formattedInstance, "", "    ")
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
 	// Print output
-	if err = utils.PrintTextTableJsonOutput(output, string(data)); err != nil {
+	if err = utils.PrintTextTableJsonOutput(output, formattedInstance); err != nil {
 		return err
 	}
 
