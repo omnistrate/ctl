@@ -1,7 +1,6 @@
 package serviceplan
 
 import (
-	"encoding/json"
 	"github.com/chelnak/ysmrr"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/ctl/dataaccess"
@@ -72,7 +71,7 @@ func runList(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	var servicePlans []string
+	var formattedServicePlans []model.ServicePlan
 
 	// Process and filter service plans
 	for _, service := range listRes.Services {
@@ -90,29 +89,23 @@ func runList(cmd *cobra.Command, args []string) error {
 					return err
 				}
 
-				data, err := json.MarshalIndent(formattedServicePlan, "", "    ")
-				if err != nil {
-					utils.HandleSpinnerError(spinner, sm, err)
-					return err
-				}
-
 				if match {
-					servicePlans = append(servicePlans, string(data))
+					formattedServicePlans = append(formattedServicePlans, formattedServicePlan)
 				}
 			}
 		}
 	}
 
 	// Handle case when no service plans match
-	if len(servicePlans) == 0 {
+	if len(formattedServicePlans) == 0 {
 		utils.HandleSpinnerSuccess(spinner, sm, "No service plans found.")
 		return nil
+	} else {
+		utils.HandleSpinnerSuccess(spinner, sm, "Service plans retrieved successfully.")
 	}
 
-	utils.HandleSpinnerSuccess(spinner, sm, "Service plans retrieved successfully")
-
 	// Format output as requested
-	err = utils.PrintTextTableJsonArrayOutput(output, servicePlans)
+	err = utils.PrintTextTableJsonArrayOutput(output, formattedServicePlans)
 	if err != nil {
 		return err
 	}

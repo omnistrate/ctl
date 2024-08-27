@@ -1,7 +1,6 @@
 package serviceplan
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/chelnak/ysmrr"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
@@ -13,14 +12,14 @@ import (
 
 const (
 	setDefaultExample = `  # Set service plan as default
-  omctl service-plan set-default [service-name] [plan-name] --version [version]
+  omctl service-plan set-default [service-name] [plan-name] --version=[version]
 
   # Set  service plan as default by ID instead of name
-  omctl service-plan set-default --service-id [service-id] --plan-id [plan-id] --version [version]`
+  omctl service-plan set-default --service-id=[service-id] --plan-id=[plan-id] --version=[version]`
 )
 
 var setDefaultCmd = &cobra.Command{
-	Use:   "set-default [service-name] [plan-name] --version=VERSION [flags]",
+	Use:   "set-default [service-name] [plan-name] --version=[version] [flags]",
 	Short: "Set a service plan as default",
 	Long: `This command helps you set a service plan as default for your service.
 By setting a service plan as default, you can ensure that new instances of the service are created with the default plan.`,
@@ -118,20 +117,13 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 	}
 
 	// Format output
-	formattedServicePlan, err := formatServicePlanVersion(targetServicePlan, false)
+	formattedServicePlanVersion, err := formatServicePlanVersion(targetServicePlan, false)
 	if err != nil {
-		return err
-	}
-
-	// Marshal data
-	data, err := json.MarshalIndent(formattedServicePlan, "", "    ")
-	if err != nil {
-		utils.PrintError(err)
 		return err
 	}
 
 	// Print output
-	if err = utils.PrintTextTableJsonOutput(output, string(data)); err != nil {
+	if err = utils.PrintTextTableJsonOutput(output, formattedServicePlanVersion); err != nil {
 		return err
 	}
 

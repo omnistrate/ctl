@@ -20,7 +20,6 @@ func init() {
 	Cmd.AddCommand(describeVersionCmd)
 	Cmd.AddCommand(listCmd)
 	Cmd.AddCommand(listVersionsCmd)
-
 }
 
 func run(cmd *cobra.Command, args []string) {

@@ -1,7 +1,6 @@
 package serviceplan
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/chelnak/ysmrr"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
@@ -101,7 +100,7 @@ func runListVersions(cmd *cobra.Command, args []string) error {
 	// Filter out the latest N versions if latestN flag is provided
 	latestNServicePlanVersions := filterLatestNVersions(searchRes.ServicePlanResults, latestN)
 
-	var servicePlanVersions []string
+	var formattedServicePlanVersions []model.ServicePlanVersion
 
 	// Process and filter service plans
 	for _, servicePlanVersion := range latestNServicePlanVersions {
@@ -117,19 +116,13 @@ func runListVersions(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		data, err := json.MarshalIndent(formattedServicePlanVersion, "", "    ")
-		if err != nil {
-			utils.HandleSpinnerError(spinner, sm, err)
-			return err
-		}
-
 		if match {
-			servicePlanVersions = append(servicePlanVersions, string(data))
+			formattedServicePlanVersions = append(formattedServicePlanVersions, formattedServicePlanVersion)
 		}
 	}
 
 	// Handle case when no service plans match
-	if len(servicePlanVersions) == 0 {
+	if len(formattedServicePlanVersions) == 0 {
 		utils.HandleSpinnerSuccess(spinner, sm, "No service plan versions found.")
 		return nil
 	}
@@ -137,7 +130,7 @@ func runListVersions(cmd *cobra.Command, args []string) error {
 	utils.HandleSpinnerSuccess(spinner, sm, "Service plan versions retrieved successfully")
 
 	// Format output as requested
-	err = utils.PrintTextTableJsonArrayOutput(output, servicePlanVersions)
+	err = utils.PrintTextTableJsonArrayOutput(output, formattedServicePlanVersions)
 	if err != nil {
 		return err
 	}

@@ -1,7 +1,6 @@
 package serviceplan
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/chelnak/ysmrr"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
@@ -12,11 +11,11 @@ import (
 )
 
 const (
-	releaseExample = `  # Release service plan
+	releaseExample = `  # Release service plan by name
   omctl service-plan release [service-name] [plan-name]
 
-  # Release service plan by ID instead of name
-  omctl service-plan release --service-id [service-id] --plan-id [plan-id]`
+  # Release service plan by ID
+  omctl service-plan release --service-id=[service-id] --plan-id=[plan-id]`
 )
 
 var releaseCmd = &cobra.Command{
@@ -135,15 +134,8 @@ func runRelease(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Marshal data
-	data, err := json.MarshalIndent(formattedServicePlan, "", "    ")
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
 	// Print output
-	if err = utils.PrintTextTableJsonOutput(output, string(data)); err != nil {
+	if err = utils.PrintTextTableJsonOutput(output, formattedServicePlan); err != nil {
 		return err
 	}
 

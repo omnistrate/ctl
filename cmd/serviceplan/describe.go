@@ -1,7 +1,7 @@
 package serviceplan
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/chelnak/ysmrr"
 	producttierapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/product_tier_api"
@@ -19,8 +19,6 @@ const (
 
   # Describe service plan by ID instead of name
   omctl service-plan describe --service-id [service-id] --plan-id [plan-id]`
-
-	defaultDescribeOutput = "json"
 )
 
 var describeCmd = &cobra.Command{
@@ -33,6 +31,7 @@ var describeCmd = &cobra.Command{
 }
 
 func init() {
+	describeCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported")
 	describeCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	describeCmd.Flags().StringP("plan-id", "", "", "Environment ID. Required if plan name is not provided")
 }
@@ -43,10 +42,10 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	// Retrieve flags
 	serviceID, _ := cmd.Flags().GetString("service-id")
 	planID, _ := cmd.Flags().GetString("plan-id")
-	output := defaultDescribeOutput
+	output, _ := cmd.Flags().GetString("output")
 
 	// Validate input arguments
-	if err := validateDescribeArguments(args, serviceID, planID); err != nil {
+	if err := validateDescribeArguments(args, serviceID, planID, output); err != nil {
 		utils.PrintError(err)
 		return err
 	}
@@ -97,14 +96,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	// Handle output based on format
 	utils.HandleSpinnerSuccess(spinner, sm, "Service plan details retrieved successfully")
 
-	// Marshal data
-	data, err := json.MarshalIndent(formattedServicePlan, "", "    ")
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
-	if err = utils.PrintTextTableJsonOutput(output, string(data)); err != nil {
+	if err = utils.PrintTextTableJsonOutput(output, formattedServicePlan); err != nil {
 		return err
 	}
 
@@ -113,12 +105,15 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func validateDescribeArguments(args []string, serviceID, planID string) error {
+func validateDescribeArguments(args []string, serviceID, planID, output string) error {
 	if len(args) == 0 && (serviceID == "" || planID == "") {
 		return fmt.Errorf("please provide the service name and service plan name or the service ID and service plan ID")
 	}
 	if len(args) > 0 && len(args) != 2 {
 		return fmt.Errorf("invalid arguments: %s. Need 2 arguments: [service-name] [plan-name]", strings.Join(args, " "))
+	}
+	if output != "json" {
+		return errors.New("only json output is supported")
 	}
 	return nil
 }
