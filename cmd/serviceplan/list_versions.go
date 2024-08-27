@@ -9,7 +9,9 @@ import (
 	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
+	"slices"
 	"strings"
+	"time"
 )
 
 const (
@@ -30,6 +32,7 @@ You can filter for specific service plan versions by using the filter flag.`,
 func init() {
 	listVersionsCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	listVersionsCmd.Flags().StringP("plan-id", "", "", "Environment ID. Required if plan name is not provided")
+	listVersionsCmd.Flags().IntP("latest-n", "", -1, "List only the latest N service plan versions")
 	listVersionsCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 	listVersionsCmd.Flags().StringArrayP("filter", "f", []string{}, "Filter to apply to the list of service plan versions. E.g.: key1:value1,key2:value2, which filters service plans where key1 equals value1 and key2 equals value2. Allow use of multiple filters to form the logical OR operation. Supported keys: "+strings.Join(utils.GetSupportedFilterKeys(model.ServicePlanVersion{}), ",")+". Check the examples for more details.")
 	listVersionsCmd.Flags().Bool("truncate", false, "Truncate long names in the output")
@@ -41,6 +44,7 @@ func runListVersions(cmd *cobra.Command, args []string) error {
 	// Retrieve command-line flags
 	serviceID, _ := cmd.Flags().GetString("service-id")
 	planID, _ := cmd.Flags().GetString("plan-id")
+	latestN, _ := cmd.Flags().GetInt("latest-n")
 	output, _ := cmd.Flags().GetString("output")
 	filters, _ := cmd.Flags().GetStringArray("filter")
 	truncateNames, _ := cmd.Flags().GetBool("truncate")
@@ -94,10 +98,13 @@ func runListVersions(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// Filter out the latest N versions if latestN flag is provided
+	latestNServicePlanVersions := filterLatestNVersions(searchRes.ServicePlanResults, latestN)
+
 	var servicePlanVersions []string
 
 	// Process and filter service plans
-	for _, servicePlanVersion := range searchRes.ServicePlanResults {
+	for _, servicePlanVersion := range latestNServicePlanVersions {
 		formattedServicePlanVersion, err := formatServicePlanVersion(servicePlanVersion, truncateNames)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
@@ -176,4 +183,35 @@ func validateListVersionsArguments(args []string, serviceID, planID string) erro
 		return fmt.Errorf("invalid arguments: %s. Need 2 arguments: [service-name] [plan-name]", strings.Join(args, " "))
 	}
 	return nil
+}
+
+func filterLatestNVersions(servicePlans []*inventoryapi.ServicePlanSearchRecord, latestN int) []*inventoryapi.ServicePlanSearchRecord {
+	if latestN == -1 {
+		return servicePlans
+	}
+
+	slices.SortFunc(servicePlans, func(a, b *inventoryapi.ServicePlanSearchRecord) int {
+		if a.ReleasedAt != nil && b.ReleasedAt != nil {
+			ta, _ := time.Parse(time.RFC3339, *a.ReleasedAt)
+			tb, _ := time.Parse(time.RFC3339, *b.ReleasedAt)
+			if ta.After(tb) {
+				return -1
+			} else if ta.Before(tb) {
+				return 1
+			} else {
+				return 0
+			}
+		} else if a.ReleasedAt == nil && b.ReleasedAt != nil {
+			return 1
+		} else if a.ReleasedAt != nil && b.ReleasedAt == nil {
+			return -1
+		}
+
+		return 0
+	})
+
+	if len(servicePlans) <= latestN {
+		return servicePlans
+	}
+	return servicePlans[:latestN]
 }

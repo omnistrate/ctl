@@ -370,7 +370,8 @@ func formatInstance(instance *inventoryapi.ResourceInstanceSearchRecord, truncat
 func formatParams(param, paramFile string) (formattedParams map[string]string, err error) {
 	// Read parameters from file if provided
 	if paramFile != "" {
-		fileContent, err := os.ReadFile(paramFile)
+		var fileContent []byte
+		fileContent, err = os.ReadFile(paramFile)
 		if err != nil {
 			return
 		}
