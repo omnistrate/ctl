@@ -23,6 +23,7 @@ omnistrate-ctl service-plan list-versions [service-name] [plan-name] [flags]
 ```
   -f, --filter stringArray   Filter to apply to the list of service plan versions. E.g.: key1:value1,key2:value2, which filters service plans where key1 equals value1 and key2 equals value2. Allow use of multiple filters to form the logical OR operation. Supported keys: plan_id,plan_name,service_id,service_name,environment,version,release_description,version_set_status. Check the examples for more details.
   -h, --help                 help for list-versions
+      --latest-n int         List only the latest N service plan versions (default -1)
   -o, --output string        Output format (text|table|json) (default "text")
       --plan-id string       Environment ID. Required if plan name is not provided
       --service-id string    Service ID. Required if service name is not provided
