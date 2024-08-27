@@ -135,10 +135,10 @@ func TestInstanceBasic(t *testing.T) {
 
 func WaitForInstanceToReachStatus(instanceID, status string, timeout time.Duration) error {
 	b := &backoff.ExponentialBackOff{
-		InitialInterval:     1 * time.Second,
+		InitialInterval:     10 * time.Second,
 		RandomizationFactor: backoff.DefaultRandomizationFactor,
 		Multiplier:          backoff.DefaultMultiplier,
-		MaxInterval:         1 * time.Second,
+		MaxInterval:         10 * time.Second,
 		MaxElapsedTime:      timeout,
 		Stop:                backoff.Stop,
 		Clock:               backoff.SystemClock,
