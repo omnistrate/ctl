@@ -254,31 +254,6 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if searchRes.ResourceInstanceResults[0].ProductTierName != nil {
-		plan = *searchRes.ResourceInstanceResults[0].ProductTierName
-	}
-
-	if searchRes.ResourceInstanceResults[0].ProductTierVersion != nil {
-		version = *searchRes.ResourceInstanceResults[0].ProductTierVersion
-	}
-
-	if searchRes.ResourceInstanceResults[0].SubscriptionID != nil {
-		subscriptionID = string(*searchRes.ResourceInstanceResults[0].SubscriptionID)
-	}
-
-	// Search for the instance
-	searchRes, err = dataaccess.SearchInventory(token, fmt.Sprintf("resourceinstance:%s", *instance.ID))
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
-	if len(searchRes.ResourceInstanceResults) == 0 {
-		err = errors.New("failed to find the created instance")
-		utils.PrintError(err)
-		return err
-	}
-
 	// Format instance
 	formattedInstance := formatInstance(searchRes.ResourceInstanceResults[0], false)
 	InstanceID = formattedInstance.InstanceID
