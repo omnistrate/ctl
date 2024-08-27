@@ -20,14 +20,14 @@ omnistrate-ctl helm list [flags]
 ### Options
 
 ```
-  -h, --help            help for list
-  -o, --output string   Output format (text|table|json) (default "text")
+  -h, --help   help for list
 ```
 
 ### Options inherited from parent commands
 
 ```
-  -v, --version   Print the version number of omnistrate-ctl
+  -o, --output string   Output format (text|table|json) (default "table")
+  -v, --version         Print the version number of omnistrate-ctl
 ```
 
 ### SEE ALSO
