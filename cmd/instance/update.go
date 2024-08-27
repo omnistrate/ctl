@@ -33,7 +33,6 @@ func init() {
 	if err := updateCmd.MarkFlagFilename("param-file"); err != nil {
 		return
 	}
-	updateCmd.MarkFlagsMutuallyExclusive("param", "param-file")
 
 	updateCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 }

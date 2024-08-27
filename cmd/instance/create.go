@@ -65,7 +65,6 @@ func init() {
 	if err := createCmd.MarkFlagFilename("param-file"); err != nil {
 		return
 	}
-	createCmd.MarkFlagsMutuallyExclusive("param", "param-file")
 
 	createCmd.Args = cobra.NoArgs // Require no arguments
 }
