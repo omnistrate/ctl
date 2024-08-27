@@ -40,12 +40,12 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	defer utils.CleanupArgsAndFlags(cmd, &args)
 
 	// Retrieve flags
-	serviceId, _ := cmd.Flags().GetString("service-id")
-	environmentId, _ := cmd.Flags().GetString("environment-id")
+	serviceID, _ := cmd.Flags().GetString("service-id")
+	environmentID, _ := cmd.Flags().GetString("environment-id")
 	output := defaultDescribeOutput
 
 	// Validate input arguments
-	if err := validateDescribeArguments(args, serviceId, environmentId); err != nil {
+	if err := validateDescribeArguments(args, serviceID, environmentID); err != nil {
 		utils.PrintError(err)
 		return err
 	}
@@ -73,21 +73,21 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Retrieve service and environment details
-	serviceId, serviceName, environmentId, _, err = getServiceEnvironment(token, serviceId, serviceName, environmentId, environmentName)
+	serviceID, serviceName, environmentID, _, err = getServiceEnvironment(token, serviceID, serviceName, environmentID, environmentName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Describe the environment
-	environment, err := dataaccess.DescribeServiceEnvironment(token, serviceId, environmentId)
+	environment, err := dataaccess.DescribeServiceEnvironment(token, serviceID, environmentID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Format the environment details
-	formattedEnvironment, err := formatEnvironmentDetails(token, serviceId, serviceName, environment)
+	formattedEnvironment, err := formatEnvironmentDetails(token, serviceID, serviceName, environment)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -109,8 +109,8 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func validateDescribeArguments(args []string, serviceId, environmentId string) error {
-	if len(args) == 0 && (serviceId == "" || environmentId == "") {
+func validateDescribeArguments(args []string, serviceID, environmentID string) error {
+	if len(args) == 0 && (serviceID == "" || environmentID == "") {
 		return fmt.Errorf("please provide the service name and environment name or the service ID and environment ID")
 	}
 	if len(args) > 0 && len(args) != 2 {
@@ -119,7 +119,7 @@ func validateDescribeArguments(args []string, serviceId, environmentId string) e
 	return nil
 }
 
-func formatEnvironmentDetails(token, serviceId, serviceName string, environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) (string, error) {
+func formatEnvironmentDetails(token, serviceID, serviceName string, environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) (string, error) {
 	// Example of formatting environment details
 	formattedEnvironment := model.DetailedEnvironment{
 		EnvironmentID:    string(environment.ID),
@@ -129,7 +129,7 @@ func formatEnvironmentDetails(token, serviceId, serviceName string, environment 
 		ServiceName:      serviceName,
 		SaaSPortalStatus: getSaaSPortalStatus(environment),
 		SaaSPortalURL:    getSaaSPortalURL(environment),
-		PromoteStatus:    getPromoteStatus(token, serviceId, environment),
+		PromoteStatus:    getPromoteStatus(token, serviceID, environment),
 	}
 
 	data, err := json.MarshalIndent(formattedEnvironment, "", "    ")

@@ -65,10 +65,14 @@ func init() {
 	if err := createCmd.MarkFlagFilename("param-file"); err != nil {
 		return
 	}
+
+	createCmd.Args = cobra.NoArgs // Require no arguments
 }
 
 func runCreate(cmd *cobra.Command, args []string) error {
-	// Get flags
+	defer utils.CleanupArgsAndFlags(cmd, &args)
+
+	// Retrieve flags
 	service, err := cmd.Flags().GetString("service")
 	if err != nil {
 		utils.PrintError(err)
@@ -125,13 +129,14 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Validate user is currently logged in
+	// Validate user login
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
+	// Initialize spinner if output is not JSON
 	var sm ysmrr.SpinnerManager
 	var spinner *ysmrr.Spinner
 	if output != "json" {
@@ -141,33 +146,10 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		sm.Start()
 	}
 
-	// Get resource
-	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("resource:%s", resource))
+	// Check if resource exists
+	serviceID, _, productTierID, _, err := getResource(token, service, environment, plan, resource)
 	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
-	var serviceID, productTierID string
-	found := false
-	for _, res := range searchRes.ResourceResults {
-		if res == nil {
-			continue
-		}
-		if strings.EqualFold(res.Name, resource) &&
-			strings.EqualFold(res.ServiceName, service) &&
-			strings.EqualFold(res.ProductTierName, plan) &&
-			strings.EqualFold(res.ServiceEnvironmentName, environment) {
-			found = true
-			serviceID = string(res.ServiceID)
-			productTierID = string(res.ProductTierID)
-			break
-		}
-	}
-
-	if !found {
-		err = fmt.Errorf("target resource not found. Please check input values and try again")
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
@@ -176,13 +158,13 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	case "latest":
 		version, err = dataaccess.FindLatestVersion(token, serviceID, productTierID)
 		if err != nil {
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 	case "preferred":
 		version, err = dataaccess.FindPreferredVersion(token, serviceID, productTierID)
 		if err != nil {
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 	}
@@ -193,40 +175,27 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		if strings.Contains(err.Error(), "Version set not found") {
 			err = errors.New(fmt.Sprintf("version %s not found", version))
 		}
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Describe service offering
 	res, err := dataaccess.DescribeServiceOffering(token, serviceID, productTierID, version)
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 	offering := res.ConsumptionDescribeServiceOfferingResult.Offerings[0]
 
-	// Read parameters from file if provided
-	if paramFile != "" {
-		fileContent, err := os.ReadFile(paramFile)
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-		param = string(fileContent)
-	}
-
-	// Extract parameters from json format param
-	var formattedParams map[string]interface{}
-	if param != "" {
-		err = json.Unmarshal([]byte(param), &formattedParams)
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
+	// Format parameters
+	formattedParams, err := formatParams(param, paramFile)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
 	}
 
 	var resourceKey string
-	found = false
+	found := false
 	for _, resourceEntity := range offering.ResourceParameters {
 		if strings.EqualFold(resourceEntity.Name, resource) {
 			found = true
@@ -236,7 +205,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 
 	if !found {
 		err = fmt.Errorf("resource %s not found in the service offering", resource)
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
@@ -259,24 +228,20 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 	instance, err := dataaccess.CreateInstance(token, request)
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	if res == nil || instance.ID == nil {
 		err = errors.New("failed to create instance")
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	if spinner != nil {
-		spinner.UpdateMessage("Successfully created instance")
-		spinner.Complete()
-		sm.Stop()
-	}
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully created instance")
 
 	// Search for the instance
-	searchRes, err = dataaccess.SearchInventory(token, fmt.Sprintf("resourceinstance:%s", *instance.ID))
+	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("resourceinstance:%s", *instance.ID))
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -288,66 +253,112 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	planName := ""
-	if searchRes.ResourceInstanceResults[0].ProductTierName != nil {
-		planName = *searchRes.ResourceInstanceResults[0].ProductTierName
-	}
-
-	planVersion := ""
-	if searchRes.ResourceInstanceResults[0].ProductTierVersion != nil {
-		planVersion = *searchRes.ResourceInstanceResults[0].ProductTierVersion
-	}
-
-	subscriptionID = ""
-	if searchRes.ResourceInstanceResults[0].SubscriptionID != nil {
-		subscriptionID = string(*searchRes.ResourceInstanceResults[0].SubscriptionID)
-	}
-
-	formattedInstance := model.Instance{
-		InstanceID:     *instance.ID,
-		Service:        searchRes.ResourceInstanceResults[0].ServiceName,
-		Environment:    searchRes.ResourceInstanceResults[0].ServiceEnvironmentName,
-		Plan:           planName,
-		Version:        planVersion,
-		Resource:       searchRes.ResourceInstanceResults[0].ResourceName,
-		CloudProvider:  string(searchRes.ResourceInstanceResults[0].CloudProvider),
-		Region:         searchRes.ResourceInstanceResults[0].RegionCode,
-		Status:         string(searchRes.ResourceInstanceResults[0].Status),
-		SubscriptionID: subscriptionID,
-	}
+	// Format instance
+	formattedInstance := formatInstance(searchRes.ResourceInstanceResults[0], false)
 	InstanceID = formattedInstance.InstanceID
 
-	var jsonData []string
+	// Marshal instance to JSON
 	data, err := json.MarshalIndent(formattedInstance, "", "    ")
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
-	jsonData = append(jsonData, string(data))
 
 	// Print output
-	switch output {
-	case "text":
-		err = utils.PrintText(jsonData)
-		if err != nil {
-			return err
-		}
-	case "table":
-		err = utils.PrintTable(jsonData)
-		if err != nil {
-			return err
-		}
-	case "json":
-		_, err = fmt.Fprintf(cmd.OutOrStdout(), "%+v\n", jsonData[0])
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-	default:
-		err = fmt.Errorf("unsupported output format: %s", output)
-		utils.PrintError(err)
+	if err = utils.PrintTextTableJsonOutput(output, string(data)); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// Helper functions
+
+func getResource(token, serviceNameArg, environmentArg, planNameArg, resourceNameArg string) (serviceID, environmentID, productTierID, resourceID string, err error) {
+	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("resource:%s", resourceNameArg))
+	if err != nil {
+		return
+	}
+
+	found := false
+	for _, res := range searchRes.ResourceResults {
+		if res == nil {
+			continue
+		}
+		if strings.EqualFold(res.Name, resourceNameArg) &&
+			strings.EqualFold(res.ServiceName, serviceNameArg) &&
+			strings.EqualFold(res.ProductTierName, planNameArg) &&
+			strings.EqualFold(res.ServiceEnvironmentName, environmentArg) {
+			found = true
+			serviceID = string(res.ServiceID)
+			environmentID = string(res.ServiceEnvironmentID)
+			productTierID = string(res.ProductTierID)
+			resourceID = res.ID
+			break
+		}
+	}
+
+	if !found {
+		err = fmt.Errorf("target resource not found. Please check input values and try again")
+		return
+	}
+
+	return
+}
+
+func formatInstance(instance *inventoryapi.ResourceInstanceSearchRecord, truncateNames bool) model.Instance {
+	planName := ""
+	if instance.ProductTierName != nil {
+		planName = *instance.ProductTierName
+	}
+	planVersion := ""
+	if instance.ProductTierVersion != nil {
+		planVersion = *instance.ProductTierVersion
+	}
+	serviceName := instance.ServiceName
+	if truncateNames {
+		serviceName = utils.TruncateString(serviceName, defaultMaxNameLength)
+		planName = utils.TruncateString(planName, defaultMaxNameLength)
+	}
+	subscriptionID := ""
+	if instance.SubscriptionID != nil {
+		subscriptionID = string(*instance.SubscriptionID)
+	}
+
+	formattedInstance := model.Instance{
+		InstanceID:     instance.ID,
+		Service:        serviceName,
+		Environment:    instance.ServiceEnvironmentName,
+		Plan:           planName,
+		Version:        planVersion,
+		Resource:       instance.ResourceName,
+		CloudProvider:  string(instance.CloudProvider),
+		Region:         instance.RegionCode,
+		Status:         string(instance.Status),
+		SubscriptionID: subscriptionID,
+	}
+
+	return formattedInstance
+}
+
+func formatParams(param, paramFile string) (formattedParams map[string]string, err error) {
+	// Read parameters from file if provided
+	if paramFile != "" {
+		var fileContent []byte
+		fileContent, err = os.ReadFile(paramFile)
+		if err != nil {
+			return
+		}
+		param = string(fileContent)
+	}
+
+	// Extract parameters from json format param
+	if param != "" {
+		err = json.Unmarshal([]byte(param), &formattedParams)
+		if err != nil {
+			return
+		}
+	}
+
+	return
 }

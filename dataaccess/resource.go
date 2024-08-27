@@ -7,7 +7,7 @@ import (
 	"github.com/omnistrate/ctl/utils"
 )
 
-func DescribeResource(token, serviceId, resourceId string, productTierId, productTierVersion *string) (resource *resourceapi.DescribeResourceResult, err error) {
+func DescribeResource(token, serviceID, resourceID string, productTierID, productTierVersion *string) (resource *resourceapi.DescribeResourceResult, err error) {
 	service, err := httpclientwrapper.NewResource(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return
@@ -15,10 +15,10 @@ func DescribeResource(token, serviceId, resourceId string, productTierId, produc
 
 	request := &resourceapi.DescribeResourceRequest{
 		Token:              token,
-		ServiceID:          resourceapi.ServiceID(serviceId),
-		ID:                 resourceapi.ResourceID(resourceId),
+		ServiceID:          resourceapi.ServiceID(serviceID),
+		ID:                 resourceapi.ResourceID(resourceID),
 		ProductTierVersion: productTierVersion,
-		ProductTierID:      (*resourceapi.ProductTierID)(productTierId),
+		ProductTierID:      (*resourceapi.ProductTierID)(productTierID),
 	}
 
 	if resource, err = service.DescribeResource(context.Background(), request); err != nil {

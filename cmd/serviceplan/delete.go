@@ -37,11 +37,11 @@ func runDelete(cmd *cobra.Command, args []string) error {
 
 	// Retrieve flags
 	output, _ := cmd.Flags().GetString("output")
-	serviceId, _ := cmd.Flags().GetString("service-id")
-	planId, _ := cmd.Flags().GetString("plan-id")
+	serviceID, _ := cmd.Flags().GetString("service-id")
+	planID, _ := cmd.Flags().GetString("plan-id")
 
 	// Validate input arguments
-	if err := validateDeleteArguments(args, serviceId, planId); err != nil {
+	if err := validateDeleteArguments(args, serviceID, planID); err != nil {
 		utils.PrintError(err)
 		return err
 	}
@@ -70,14 +70,14 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the service plan exists
-	serviceId, _, planId, _, _, err = getServicePlan(token, serviceId, serviceName, planId, planName)
+	serviceID, _, planID, _, _, err = getServicePlan(token, serviceID, serviceName, planID, planName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Delete service plan
-	err = dataaccess.DeleteProductTier(token, serviceId, planId)
+	err = dataaccess.DeleteProductTier(token, serviceID, planID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -88,8 +88,8 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func validateDeleteArguments(args []string, serviceId, planId string) error {
-	if len(args) == 0 && (serviceId == "" || planId == "") {
+func validateDeleteArguments(args []string, serviceID, planID string) error {
+	if len(args) == 0 && (serviceID == "" || planID == "") {
 		return fmt.Errorf("please provide the service name and plan name or the service ID and plan ID")
 	}
 	if len(args) > 0 && len(args) != 2 {

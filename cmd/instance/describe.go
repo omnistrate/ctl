@@ -3,6 +3,7 @@ package instance
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/chelnak/ysmrr"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
@@ -12,7 +13,11 @@ import (
 const (
 	describeExample = `  # Describe an instance deployment
   omctl instance describe instance-abcd1234`
+
+	defaultDescribeOutput = "json"
 )
+
+var InstanceStatus string
 
 var describeCmd = &cobra.Command{
 	Use:          "describe [instance-id]",
@@ -28,52 +33,86 @@ func init() {
 }
 
 func runDescribe(cmd *cobra.Command, args []string) error {
-	// Get flags
-	instanceId := args[0]
+	defer utils.CleanupArgsAndFlags(cmd, &args)
 
-	// Validate user is currently logged in
+	// Retrieve args
+	instanceID := args[0]
+	output := defaultDescribeOutput
+
+	// Validate user login
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	// Check if the instance exists
-	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("resourceinstance:%s", instanceId))
+	// Initialize spinner if output is not JSON
+	var sm ysmrr.SpinnerManager
+	var spinner *ysmrr.Spinner
+	if output != "json" {
+		sm = ysmrr.NewSpinnerManager()
+		msg := "Describing instance..."
+		spinner = sm.AddSpinner(msg)
+		sm.Start()
+	}
+
+	// Check if instance exists
+	serviceID, environmentID, _, _, err := getInstance(token, instanceID)
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	var found bool
-	var serviceId, environmentId string
-	for _, instance := range searchRes.ResourceInstanceResults {
-		if instance.ID == instanceId {
-			serviceId = string(instance.ServiceID)
-			environmentId = string(instance.ServiceEnvironmentID)
-			found = true
-			break
-		}
-	}
-	if !found {
-		err = fmt.Errorf("%s not found. Please check the instance ID and try again", instanceId)
-		utils.PrintError(err)
-		return nil
-	}
-
+	// Describe instance
 	var instance *inventoryapi.ResourceInstance
-	instance, err = dataaccess.DescribeInstance(token, serviceId, environmentId, instanceId)
+	instance, err = dataaccess.DescribeInstance(token, serviceID, environmentID, instanceID)
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully created instance")
+	InstanceStatus = string(instance.ConsumptionResourceInstanceResult.Status)
+
+	// Marshal instance to JSON
 	data, err := json.MarshalIndent(instance, "", "    ")
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
+
+	// Print output
 	fmt.Println(string(data))
 
 	return nil
+}
+
+// Helper functions
+
+func getInstance(token, instanceID string) (serviceID, environmentID, productTierID, resourceID string, err error) {
+	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("resourceinstance:%s", instanceID))
+	if err != nil {
+		return
+	}
+
+	var found bool
+	for _, instance := range searchRes.ResourceInstanceResults {
+		if instance.ID == instanceID {
+			serviceID = string(instance.ServiceID)
+			environmentID = string(instance.ServiceEnvironmentID)
+			productTierID = string(instance.ProductTierID)
+			if instance.ResourceID != nil {
+				resourceID = string(*instance.ResourceID)
+			}
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		err = fmt.Errorf("%s not found. Please check the instance ID and try again", instanceID)
+		return
+	}
+
+	return
 }

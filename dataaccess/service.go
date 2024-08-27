@@ -36,7 +36,7 @@ func ListServices(token string) (*serviceapi.ListServiceResult, error) {
 	return res, nil
 }
 
-func DescribeService(token, serviceId string) (*serviceapi.DescribeServiceResult, error) {
+func DescribeService(token, serviceID string) (*serviceapi.DescribeServiceResult, error) {
 	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return nil, err
@@ -44,7 +44,7 @@ func DescribeService(token, serviceId string) (*serviceapi.DescribeServiceResult
 
 	request := serviceapi.DescribeServiceRequest{
 		Token: token,
-		ID:    serviceapi.ServiceID(serviceId),
+		ID:    serviceapi.ServiceID(serviceID),
 	}
 
 	res, err := service.DescribeService(context.Background(), &request)
@@ -54,7 +54,7 @@ func DescribeService(token, serviceId string) (*serviceapi.DescribeServiceResult
 	return res, nil
 }
 
-func DeleteService(token, serviceId string) error {
+func DeleteService(token, serviceID string) error {
 	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return err
@@ -62,7 +62,7 @@ func DeleteService(token, serviceId string) error {
 
 	request := serviceapi.DeleteServiceRequest{
 		Token: token,
-		ID:    serviceapi.ServiceID(serviceId),
+		ID:    serviceapi.ServiceID(serviceID),
 	}
 
 	err = service.DeleteService(context.Background(), &request)

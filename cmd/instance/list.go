@@ -2,7 +2,6 @@ package instance
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
@@ -33,7 +32,9 @@ func init() {
 }
 
 func runList(cmd *cobra.Command, args []string) error {
-	// Get flags
+	defer utils.CleanupArgsAndFlags(cmd, &args)
+
+	// Retrieve flags
 	output, err := cmd.Flags().GetString("output")
 	if err != nil {
 		utils.PrintError(err)
@@ -76,35 +77,9 @@ func runList(cmd *cobra.Command, args []string) error {
 		if instance == nil {
 			continue
 		}
-		planName := ""
-		if instance.ProductTierName != nil {
-			planName = *instance.ProductTierName
-		}
-		planVersion := ""
-		if instance.ProductTierVersion != nil {
-			planVersion = *instance.ProductTierVersion
-		}
-		serviceName := instance.ServiceName
-		if truncateNames {
-			serviceName = utils.TruncateString(serviceName, defaultMaxNameLength)
-			planName = utils.TruncateString(planName, defaultMaxNameLength)
-		}
-		subscriptionID := ""
-		if instance.SubscriptionID != nil {
-			subscriptionID = string(*instance.SubscriptionID)
-		}
-		formattedInstance := model.Instance{
-			InstanceID:     instance.ID,
-			Service:        serviceName,
-			Environment:    instance.ServiceEnvironmentName,
-			Plan:           planName,
-			Version:        planVersion,
-			Resource:       instance.ResourceName,
-			CloudProvider:  string(instance.CloudProvider),
-			Region:         instance.RegionCode,
-			Status:         string(instance.Status),
-			SubscriptionID: subscriptionID,
-		}
+
+		// Format instance
+		formattedInstance := formatInstance(instance, truncateNames)
 
 		// Check if the instance matches the filters
 		ok, err := utils.MatchesFilters(formattedInstance, filterMaps)
@@ -133,22 +108,9 @@ func runList(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	switch output {
-	case "text":
-		err = utils.PrintText(jsonData)
-		if err != nil {
-			return err
-		}
-	case "table":
-		err = utils.PrintTable(jsonData)
-		if err != nil {
-			return err
-		}
-	case "json":
-		fmt.Printf("%+v\n", jsonData)
-	default:
-		err = fmt.Errorf("unsupported output format: %s", output)
-		utils.PrintError(err)
+	// Print output
+	err = utils.PrintTextTableJsonArrayOutput(output, jsonData)
+	if err != nil {
 		return err
 	}
 

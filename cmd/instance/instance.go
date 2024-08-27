@@ -18,6 +18,10 @@ func init() {
 	Cmd.AddCommand(describeCmd)
 	Cmd.AddCommand(deleteCmd)
 	Cmd.AddCommand(listCmd)
+	Cmd.AddCommand(startCmd)
+	Cmd.AddCommand(stopCmd)
+	Cmd.AddCommand(restartCmd)
+	Cmd.AddCommand(updateCmd)
 
 	Cmd.Example = utils.CombineSubCmdExamples(Cmd)
 }

@@ -96,14 +96,14 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		request.Description = "GCP Account" + gcpProjectID
 	}
 
-	accountConfigId, err := dataaccess.CreateAccount(request)
+	accountConfigID, err := dataaccess.CreateAccount(request)
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 	utils.PrintSuccess("Account created successfully")
 
-	account, err := dataaccess.DescribeAccount(token, string(accountConfigId))
+	account, err := dataaccess.DescribeAccount(token, string(accountConfigID))
 	if err != nil {
 		utils.PrintError(err)
 		return err

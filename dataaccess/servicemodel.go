@@ -7,7 +7,7 @@ import (
 	"github.com/omnistrate/ctl/utils"
 )
 
-func DescribeServiceModel(token, serviceId, serviceModelId string) (serviceModel *servicemodelapi.DescribeServiceModelResult, err error) {
+func DescribeServiceModel(token, serviceID, serviceModelID string) (serviceModel *servicemodelapi.DescribeServiceModelResult, err error) {
 	fleetService, err := httpclientwrapper.NewServiceModel(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
 		return
@@ -15,8 +15,8 @@ func DescribeServiceModel(token, serviceId, serviceModelId string) (serviceModel
 
 	request := &servicemodelapi.DescribeServiceModelRequest{
 		Token:     token,
-		ServiceID: servicemodelapi.ServiceID(serviceId),
-		ID:        servicemodelapi.ServiceModelID(serviceModelId),
+		ServiceID: servicemodelapi.ServiceID(serviceID),
+		ID:        servicemodelapi.ServiceModelID(serviceModelID),
 	}
 
 	serviceModel, err = fleetService.DescribeServiceModel(context.Background(), request)
