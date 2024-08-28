@@ -35,9 +35,9 @@ func init() {
 	createCmd.Flags().String("gcp-project-number", "", "GCP project number")
 
 	// TODO: Uncomment the following lines to add validation to the flags
-	//createCmd.MarkFlagsMutuallyExclusive("aws-account-id", "gcp-project-id")
-	//createCmd.MarkFlagsOneRequired("aws-account-id", "gcp-project-id")
-	//createCmd.MarkFlagsRequiredTogether("gcp-project-id", "gcp-project-number")
+	// createCmd.MarkFlagsMutuallyExclusive("aws-account-id", "gcp-project-id")
+	// createCmd.MarkFlagsOneRequired("aws-account-id", "gcp-project-id")
+	// createCmd.MarkFlagsRequiredTogether("gcp-project-id", "gcp-project-number")
 }
 
 func runCreate(cmd *cobra.Command, args []string) error {
