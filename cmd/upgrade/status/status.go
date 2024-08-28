@@ -1,8 +1,8 @@
 package status
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/cmd/upgrade/status/detail"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
@@ -12,14 +12,12 @@ import (
 
 const (
 	statusExample = `  # Get upgrade status
-  omctl upgrade status <upgrade>`
+  omctl upgrade status [upgrade-id]`
 )
-
-var output string
 
 var Cmd = &cobra.Command{
 	Use:          "status [upgrade-id] [flags]",
-	Short:        "Get upgrade status",
+	Short:        "Get Upgrade status",
 	Example:      statusExample,
 	RunE:         run,
 	SilenceUsage: true,
@@ -30,28 +28,47 @@ func init() {
 
 	Cmd.Args = cobra.MinimumNArgs(1)
 
-	Cmd.Flags().StringVarP(&output, "output", "o", "text", "Output format (text|table|json)")
 }
 
 func run(cmd *cobra.Command, args []string) error {
+	defer utils.CleanupArgsAndFlags(cmd, &args)
+
+	// Retrieve flags
+	output, err := cmd.Flags().GetString("output")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	// Validate user login
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	res := make([]*model.UpgradeStatus, 0)
+	// Initialize spinner if output is not json
+	var sm ysmrr.SpinnerManager
+	var spinner *ysmrr.Spinner
+	if output != "json" {
+		sm = ysmrr.NewSpinnerManager()
+		msg := "Retrieving upgrade status..."
+		spinner = sm.AddSpinner(msg)
+		sm.Start()
+	}
+
+	formattedUpgradeStatuses := make([]*model.UpgradeStatus, 0)
 
 	for _, upgradePathID := range args {
 		searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("upgradepath:%s", upgradePathID))
 		if err != nil {
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 
 		if len(searchRes.UpgradePathResults) == 0 {
 			err = fmt.Errorf("%s not found", upgradePathID)
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 
@@ -68,17 +85,17 @@ func run(cmd *cobra.Command, args []string) error {
 
 		if !found {
 			err = fmt.Errorf("%s not found", upgradePathID)
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 
 		upgrade, err := dataaccess.DescribeUpgradePath(token, serviceID, productTierID, upgradePathID)
 		if err != nil {
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 
-		res = append(res, &model.UpgradeStatus{
+		formattedUpgradeStatuses = append(formattedUpgradeStatuses, &model.UpgradeStatus{
 			UpgradeID:  upgradePathID,
 			Total:      upgrade.TotalCount,
 			Pending:    upgrade.PendingCount,
@@ -89,49 +106,25 @@ func run(cmd *cobra.Command, args []string) error {
 		})
 	}
 
-	var jsonData []string
-	for _, instance := range res {
-		data, err := json.MarshalIndent(instance, "", "    ")
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-
-		jsonData = append(jsonData, string(data))
-	}
-
-	if len(jsonData) == 0 {
-		utils.PrintInfo("No upgrades found.")
+	if len(formattedUpgradeStatuses) == 0 {
+		utils.HandleSpinnerSuccess(spinner, sm, "No upgrades found")
 		return nil
+	} else {
+		utils.HandleSpinnerSuccess(spinner, sm, "Upgrade status retrieved")
 	}
 
-	switch output {
-	case "text":
-		err = utils.PrintText(jsonData)
-		if err != nil {
-			return err
-		}
-
-		println("\nTo get more details, run the following command(s):")
-		for _, r := range res {
-			println(fmt.Sprintf("  omctl upgrade status detail %s", r.UpgradeID))
-		}
-	case "table":
-		err = utils.PrintTable(jsonData)
-		if err != nil {
-			return err
-		}
-
-		println("\nTo get more details, run the following command(s):")
-		for _, r := range res {
-			println(fmt.Sprintf("  omctl upgrade status detail %s", r.UpgradeID))
-		}
-	case "json":
-		fmt.Printf("%+v\n", jsonData)
-	default:
-		err = fmt.Errorf("invalid output format: %s", output)
+	// Print output
+	err = utils.PrintTextTableJsonArrayOutput(output, formattedUpgradeStatuses)
+	if err != nil {
 		utils.PrintError(err)
 		return err
+	}
+
+	if output != "json" {
+		println("\nTo get more details, run the following command(s):")
+		for _, s := range formattedUpgradeStatuses {
+			println(fmt.Sprintf("  omctl upgrade status detail %s", s.UpgradeID))
+		}
 	}
 
 	return nil

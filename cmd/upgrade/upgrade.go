@@ -1,7 +1,6 @@
 package upgrade
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/cmd/upgrade/status"
@@ -15,22 +14,19 @@ import (
 
 const (
 	upgradeExample = `  # Upgrade instances to a specific version
-  omctl upgrade <instance1> <instance2> --version 2.0
+  omctl upgrade [instance1] [instance2] --version=2.0
 
   # Upgrade instances to the latest version
-  omctl upgrade <instance1> <instance2> --version latest
+  omctl upgrade [instance1] [instance2] --version=latest
 
  # Upgrade instances to the preferred version
-  omctl upgrade <instance1> <instance2> --version preferred`
+  omctl upgrade [instance1] [instance2] --version=preferred`
 )
-
-var version string
-var output string
 
 var Cmd = &cobra.Command{
 	Use:          "upgrade --version=[version]",
 	Short:        "Upgrade Instance Deployments to a newer or older version",
-	Long:         `This command helps you upgrade instances to a newer or older version.`,
+	Long:         `This command helps you upgrade Instance Deployments to a newer or older version.`,
 	Example:      upgradeExample,
 	RunE:         run,
 	SilenceUsage: true,
@@ -41,8 +37,7 @@ func init() {
 
 	Cmd.Args = cobra.MinimumNArgs(1)
 
-	Cmd.Flags().StringVarP(&version, "version", "", "", "Specify the version number to upgrade to. Use 'latest' to upgrade to the latest version. Use 'preferred' to upgrade to the preferred version.")
-	Cmd.Flags().StringVarP(&output, "output", "o", "text", "Output format (text|table|json)")
+	Cmd.Flags().StringP("version", "", "", "Specify the version number to upgrade to. Use 'latest' to upgrade to the latest version. Use 'preferred' to upgrade to the preferred version.")
 
 	err := Cmd.MarkFlagRequired("version")
 	if err != nil {
@@ -63,12 +58,29 @@ type Res struct {
 }
 
 func run(cmd *cobra.Command, args []string) error {
+	defer utils.CleanupArgsAndFlags(cmd, &args)
+
+	// Retrieve flags
+	version, err := cmd.Flags().GetString("version")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	output, err := cmd.Flags().GetString("output")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	// Validate user login
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
+	// Initialize spinner if output is not json
 	var sm ysmrr.SpinnerManager
 	var spinner *ysmrr.Spinner
 	if output != "json" {
@@ -86,13 +98,13 @@ func run(cmd *cobra.Command, args []string) error {
 		// Check if the instance exists
 		searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("resourceinstance:%s", instanceID))
 		if err != nil {
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 
 		if searchRes == nil || len(searchRes.ResourceInstanceResults) == 0 {
 			err = fmt.Errorf("%s not found. Please check the instance ID and try again", instanceID)
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 
@@ -109,14 +121,14 @@ func run(cmd *cobra.Command, args []string) error {
 		}
 		if !found {
 			err = fmt.Errorf("%s not found. Please check the instance ID and try again", instanceID)
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return nil
 		}
 
 		// Find the source version of the instance
 		describeRes, err := dataaccess.DescribeResourceInstance(token, serviceID, environmentID, instanceID)
 		if err != nil {
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 		sourceVersion = describeRes.TierVersion
@@ -126,13 +138,13 @@ func run(cmd *cobra.Command, args []string) error {
 		case "latest":
 			targetVersion, err = dataaccess.FindLatestVersion(token, serviceID, productTierID)
 			if err != nil {
-				utils.PrintError(err)
+				utils.HandleSpinnerError(spinner, sm, err)
 				return err
 			}
 		case "preferred":
 			targetVersion, err = dataaccess.FindPreferredVersion(token, serviceID, productTierID)
 			if err != nil {
-				utils.PrintError(err)
+				utils.HandleSpinnerError(spinner, sm, err)
 				return err
 			}
 		default:
@@ -145,14 +157,14 @@ func run(cmd *cobra.Command, args []string) error {
 			if strings.Contains(err.Error(), "Version set not found") {
 				err = errors.New(fmt.Sprintf("version %s not found", version))
 			}
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 
 		// Check if the target is the same as the source
 		if sourceVersion == targetVersion {
 			err = fmt.Errorf("source version %s is the same as target version for %s", sourceVersion, instanceID)
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 
@@ -189,20 +201,17 @@ func run(cmd *cobra.Command, args []string) error {
 	for upgradeArgs, upgradeRes := range upgrades {
 		upgradePathID, err := dataaccess.CreateUpgradePath(token, upgradeArgs.ServiceID, upgradeArgs.ProductTierID, upgradeArgs.SourceVersion, upgradeArgs.TargetVersion, upgradeRes.InstanceIDs)
 		if err != nil {
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 
 		upgrades[upgradeArgs].UpgradePathID = string(upgradePathID)
 	}
 
-	if spinner != nil {
-		spinner.Complete()
-		sm.Stop()
-	}
+	utils.HandleSpinnerSuccess(spinner, sm, "Upgrade scheduled successfully")
 
 	// Print output
-	upgradeData := make([]string, 0)
+	formattedUpgrades := make([]model.Upgrade, 0)
 	for upgradeArgs, upgradeRes := range upgrades {
 		formattedUpgrade := model.Upgrade{
 			UpgradeID:     upgradeRes.UpgradePathID,
@@ -211,20 +220,14 @@ func run(cmd *cobra.Command, args []string) error {
 			InstanceIDs:   strings.Join(upgradeRes.InstanceIDs, ","),
 		}
 
-		data, err := json.MarshalIndent(formattedUpgrade, "", "    ")
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-
-		upgradeData = append(upgradeData, string(data))
+		formattedUpgrades = append(formattedUpgrades, formattedUpgrade)
 	}
 
 	if output != "json" {
 		println("\nThe following upgrades have been scheduled:")
 	}
 
-	err = utils.PrintTextTableJsonArrayOutput(output, upgradeData)
+	err = utils.PrintTextTableJsonArrayOutput(output, formattedUpgrades)
 	if err != nil {
 		return err
 	}
