@@ -1,8 +1,7 @@
 package helm
 
 import (
-	"encoding/json"
-	"fmt"
+	"github.com/chelnak/ysmrr"
 	helmpackageapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/helm_package_api"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
@@ -23,10 +22,6 @@ var listCmd = &cobra.Command{
 	SilenceUsage: true,
 }
 
-func init() {
-	listCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
-}
-
 func runList(cmd *cobra.Command, args []string) error {
 	// Get flags
 	output, _ := cmd.Flags().GetString("output")
@@ -38,45 +33,34 @@ func runList(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// Initialize spinner if output is not JSON
+	var sm ysmrr.SpinnerManager
+	var spinner *ysmrr.Spinner
+	if output != "json" {
+		sm = ysmrr.NewSpinnerManager()
+		msg := "Listing Helm packages..."
+		spinner = sm.AddSpinner(msg)
+		sm.Start()
+	}
+
+	// Retrieve Helm packages
 	var helmPackageResult *helmpackageapi.ListHelmPackagesResult
 	helmPackageResult, err = dataaccess.ListHelmCharts(token)
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	var jsonData []string
-	for _, helmPackage := range helmPackageResult.HelmPackages {
-		data, err := json.MarshalIndent(helmPackage, "", "    ")
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-
-		jsonData = append(jsonData, string(data))
-	}
-
-	if len(jsonData) == 0 {
-		utils.PrintInfo("No Helm packages found.")
+	if len(helmPackageResult.HelmPackages) == 0 {
+		utils.HandleSpinnerSuccess(spinner, sm, "No Helm packages found")
 		return nil
+	} else {
+		utils.HandleSpinnerSuccess(spinner, sm, "Successfully retrieved Helm packages")
 	}
 
-	switch output {
-	case "text":
-		err = utils.PrintText(jsonData)
-		if err != nil {
-			return err
-		}
-	case "table":
-		err = utils.PrintTable(jsonData)
-		if err != nil {
-			return err
-		}
-	case "json":
-		fmt.Printf("%+v\n", jsonData)
-
-	default:
-		err = fmt.Errorf("unsupported output format: %s", output)
+	// Print output
+	err = utils.PrintTextTableJsonArrayOutput(output, helmPackageResult.HelmPackages)
+	if err != nil {
 		utils.PrintError(err)
 		return err
 	}

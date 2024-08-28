@@ -11,27 +11,6 @@ These domains are used to access your service in the cloud. You can set up custo
 omnistrate-ctl domain [operation] [flags]
 ```
 
-### Examples
-
-```
-  # Create a custom domain for dev environment
-  omctl domain create dev --domain abc.dev --environment-type dev
-
-  # Create a custom domain for prod environment
-  omctl domain create abc.cloud --domain abc.cloud --environment-type prod
-
-  # Delete domain with name
-  omctl delete domain <name>
-
-  # Delete multiple domains with names
-  omctl delete domain <name1> <name2> <name3>
-
-  # List domains
-  omctl domain list -o=table
-
-
-```
-
 ### Options
 
 ```
@@ -41,7 +20,8 @@ omnistrate-ctl domain [operation] [flags]
 ### Options inherited from parent commands
 
 ```
-  -v, --version   Print the version number of omnistrate-ctl
+  -o, --output string   Output format (text|table|json) (default "table")
+  -v, --version         Print the version number of omnistrate-ctl
 ```
 
 ### SEE ALSO

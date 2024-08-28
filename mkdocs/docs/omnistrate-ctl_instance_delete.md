@@ -20,15 +20,15 @@ omnistrate-ctl instance delete [instance-id] [flags]
 ### Options
 
 ```
-  -h, --help            help for delete
-  -o, --output string   Output format (text|table|json) (default "text")
-  -y, --yes             Pre-approve the deletion of the instance without prompting for confirmation
+  -h, --help   help for delete
+  -y, --yes    Pre-approve the deletion of the instance without prompting for confirmation
 ```
 
 ### Options inherited from parent commands
 
 ```
-  -v, --version   Print the version number of omnistrate-ctl
+  -o, --output string   Output format (text|table|json) (default "table")
+  -v, --version         Print the version number of omnistrate-ctl
 ```
 
 ### SEE ALSO

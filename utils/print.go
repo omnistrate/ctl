@@ -45,28 +45,53 @@ func PrintJSON(res interface{}) {
 	fmt.Println(string(data))
 }
 
-func PrintTextTableJsonArrayOutput(output string, jsonData []string) error {
+func PrintTextTableJsonArrayOutput[T any](output string, objects []T) error {
 	switch output {
 	case "text":
-		return PrintText(jsonData)
+		dataArray := make([]string, 0)
+		for _, obj := range objects {
+			data, err := json.MarshalIndent(obj, "", "    ")
+			if err != nil {
+				return err
+			}
+			dataArray = append(dataArray, string(data))
+		}
+		return PrintText(dataArray)
 	case "table":
-		return PrintTable(jsonData)
+		dataArray := make([]string, 0)
+		for _, obj := range objects {
+			data, err := json.MarshalIndent(obj, "", "    ")
+			if err != nil {
+				return err
+			}
+			dataArray = append(dataArray, string(data))
+		}
+		return PrintTable(dataArray)
 	case "json":
-		fmt.Printf("%+v\n", jsonData)
+		data, err := json.MarshalIndent(objects, "", "    ")
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%s\n", data)
 	default:
 		return fmt.Errorf("unsupported output format: %s", output)
 	}
 	return nil
 }
 
-func PrintTextTableJsonOutput(output string, jsonData string) error {
+func PrintTextTableJsonOutput[T any](output string, object T) error {
+	data, err := json.MarshalIndent(object, "", "    ")
+	if err != nil {
+		return err
+	}
+
 	switch output {
 	case "text":
-		return PrintText([]string{jsonData})
+		return PrintText([]string{string(data)})
 	case "table":
-		return PrintTable([]string{jsonData})
+		return PrintTable([]string{string(data)})
 	case "json":
-		fmt.Printf("%+v\n", jsonData)
+		fmt.Printf("%s\n", data)
 	default:
 		return fmt.Errorf("unsupported output format: %s", output)
 	}

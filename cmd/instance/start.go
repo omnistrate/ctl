@@ -1,7 +1,6 @@
 package instance
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/dataaccess"
@@ -25,7 +24,7 @@ var startCmd = &cobra.Command{
 }
 
 func init() {
-	startCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
+
 	startCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 }
 
@@ -91,15 +90,8 @@ func runStart(cmd *cobra.Command, args []string) error {
 	// Format instance
 	formattedInstance := formatInstance(searchRes.ResourceInstanceResults[0], false)
 
-	// Marshal instance to JSON
-	data, err := json.MarshalIndent(formattedInstance, "", "    ")
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
 	// Print output
-	if err = utils.PrintTextTableJsonOutput(output, string(data)); err != nil {
+	if err = utils.PrintTextTableJsonOutput(output, formattedInstance); err != nil {
 		return err
 	}
 

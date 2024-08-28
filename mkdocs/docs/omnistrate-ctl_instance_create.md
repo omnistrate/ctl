@@ -23,7 +23,6 @@ omnistrate-ctl instance create --service=[service] --environment=[environment] -
       --cloud-provider string    Cloud provider (aws|gcp)
       --environment string       Environment name
   -h, --help                     help for create
-  -o, --output string            Output format (text|table|json) (default "text")
       --param string             Parameters for the instance deployment
       --param-file string        Json file containing parameters for the instance deployment
       --plan string              Service plan name
@@ -32,6 +31,12 @@ omnistrate-ctl instance create --service=[service] --environment=[environment] -
       --service string           Service name
       --subscription-id string   Subscription ID to use for the instance deployment. If not provided, instance deployment will be created in your own subscription.
       --version string           Service plan version (latest|preferred|1.0 etc.) (default "preferred")
+```
+
+### Options inherited from parent commands
+
+```
+  -o, --output string   Output format (text|table|json) (default "table")
 ```
 
 ### SEE ALSO

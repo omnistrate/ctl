@@ -1,7 +1,6 @@
 package instance
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/chelnak/ysmrr"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
@@ -26,7 +25,7 @@ var updateCmd = &cobra.Command{
 }
 
 func init() {
-	updateCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
+
 	updateCmd.Flags().String("param", "", "Parameters for the instance deployment")
 	updateCmd.Flags().String("param-file", "", "Json file containing parameters for the instance deployment")
 
@@ -122,15 +121,8 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 	// Format instance
 	formattedInstance := formatInstance(searchRes.ResourceInstanceResults[0], false)
 
-	// Marshal instance to JSON
-	data, err := json.MarshalIndent(formattedInstance, "", "    ")
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
 	// Print output
-	if err = utils.PrintTextTableJsonOutput(output, string(data)); err != nil {
+	if err = utils.PrintTextTableJsonOutput(output, formattedInstance); err != nil {
 		return err
 	}
 

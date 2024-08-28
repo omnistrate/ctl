@@ -14,23 +14,23 @@ const (
   omctl environment delete [service-name] [environment-name]
 
   # Delete environment by ID instead of name
-  omctl environment delete --service-id [service-id] --environment-id [environment-id]`
+  omctl environment delete --service-id=[service-id] --environment-id=[environment-id]`
 )
 
 var deleteCmd = &cobra.Command{
 	Use:          "delete [service-name] [environment-name] [flags]",
-	Short:        "Delete a environment",
-	Long:         `This command helps you delete a environment in your service.`,
+	Short:        "Delete a Service Environment",
+	Long:         `This command helps you delete an environment from your service.`,
 	Example:      deleteExample,
 	RunE:         runDelete,
 	SilenceUsage: true,
 }
 
 func init() {
-	deleteCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 	deleteCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	deleteCmd.Flags().StringP("environment-id", "", "", "Environment ID. Required if environment name is not provided")
 }
+
 func runDelete(cmd *cobra.Command, args []string) error {
 	defer utils.CleanupArgsAndFlags(cmd, &args)
 
@@ -81,7 +81,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	// Handle success message
-	utils.HandleSpinnerSuccess(spinner, sm, "Environment deleted successfully")
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully deleted environment")
 
 	return nil
 }

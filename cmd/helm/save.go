@@ -3,6 +3,7 @@ package helm
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
@@ -30,7 +31,6 @@ func init() {
 	saveCmd.Flags().String("version", "", "Helm Chart version")
 	saveCmd.Flags().String("namespace", "", "Helm Chart namespace")
 	saveCmd.Flags().String("values-file", "", "Helm Chart values file containing custom values defined as a JSON")
-	saveCmd.Flags().StringP("output", "o", "text", "Output format (text|json)")
 
 	err := saveCmd.MarkFlagRequired("repo-url")
 	if err != nil {
@@ -64,23 +64,33 @@ func runSave(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// Initialize spinner if output is not JSON
+	var sm ysmrr.SpinnerManager
+	var spinner *ysmrr.Spinner
+	if output != "json" {
+		sm = ysmrr.NewSpinnerManager()
+		msg := "Saving Helm Chart..."
+		spinner = sm.AddSpinner(msg)
+		sm.Start()
+	}
+
 	var values map[string]any
 	if len(valuesFile) > 0 {
 		// Read Values file as a JSON
 		if _, err = os.Stat(valuesFile); os.IsNotExist(err) {
 			err = fmt.Errorf("can't load values file from non existent path: %s", valuesFile)
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 
 		var data []byte
 		if data, err = os.ReadFile(valuesFile); err != nil {
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 
 		if err = json.Unmarshal(data, &values); err != nil {
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 	}
@@ -88,43 +98,18 @@ func runSave(cmd *cobra.Command, args []string) error {
 	// Save Helm Chart
 	helmPackage, err := dataaccess.SaveHelmChart(token, chart, version, namespace, repoURL, values)
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	var data []byte
-	data, err = json.MarshalIndent(helmPackage, "", "    ")
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully saved Helm Chart")
+
+	// Print output
+	err = utils.PrintTextTableJsonOutput(output, helmPackage)
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	switch output {
-	case "text":
-		utils.PrintSuccess("Helm Chart saved successfully")
-
-		var tableWriter *utils.Table
-		if tableWriter, err = utils.NewTableFromJSONTemplate(data); err != nil {
-			// Just print the JSON directly and return
-			fmt.Println(string(data))
-			return err
-		}
-
-		if err = tableWriter.AddRowFromJSON(data); err != nil {
-			// Just print the JSON directly and return
-			fmt.Println(string(data))
-			return err
-		}
-
-		tableWriter.Print()
-
-	case "json":
-		fmt.Println(string(data))
-
-	default:
-		err = fmt.Errorf("unsupported output format: %s", output)
-		utils.PrintError(err)
-		return err
-	}
 	return nil
 }

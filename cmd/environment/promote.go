@@ -1,7 +1,6 @@
 package environment
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/chelnak/ysmrr"
 	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
@@ -18,7 +17,7 @@ const (
   omctl environment promote [service-name] [environment-name]
 
   # Promote environment by ID instead of name
-  omctl environment promote --service-id [service-id] --environment-id [environment-id]`
+  omctl environment promote --service-id=[service-id] --environment-id=[environment-id]`
 )
 
 var promoteCmd = &cobra.Command{
@@ -31,7 +30,6 @@ var promoteCmd = &cobra.Command{
 }
 
 func init() {
-	promoteCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 	promoteCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	promoteCmd.Flags().StringP("environment-id", "", "", "Environment ID. Required if environment name is not provided")
 }
@@ -162,13 +160,13 @@ func getServiceEnvironment(token, serviceIDArg, serviceNameArg, environmentIDArg
 	return
 }
 
-func formatPromoteStatus(token, serviceID, environmentID, serviceName string, environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) ([]string, error) {
+func formatPromoteStatus(token, serviceID, environmentID, serviceName string, environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) ([]model.Promotion, error) {
 	promotions, err := dataaccess.PromoteServiceEnvironmentStatus(token, serviceID, environmentID)
 	if err != nil {
 		return nil, err
 	}
 
-	var formattedPromotions []string
+	var formattedPromotions []model.Promotion
 	for _, promotion := range promotions {
 		targetEnvID := string(promotion.TargetEnvironmentID)
 		targetEnv, err := dataaccess.DescribeServiceEnvironment(token, serviceID, targetEnvID)
@@ -185,12 +183,7 @@ func formatPromoteStatus(token, serviceID, environmentID, serviceName string, en
 			TargetEnvName:         targetEnv.Name,
 			PromoteStatus:         promotion.Status,
 		}
-
-		data, err := json.MarshalIndent(formattedPromotion, "", "    ")
-		if err != nil {
-			return nil, err
-		}
-		formattedPromotions = append(formattedPromotions, string(data))
+		formattedPromotions = append(formattedPromotions, formattedPromotion)
 	}
 
 	if len(formattedPromotions) == 0 {

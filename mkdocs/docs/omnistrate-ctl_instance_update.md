@@ -21,7 +21,6 @@ omnistrate-ctl instance update [instance-id] [flags]
 
 ```
   -h, --help                help for update
-  -o, --output string       Output format (text|table|json) (default "text")
       --param string        Parameters for the instance deployment
       --param-file string   Json file containing parameters for the instance deployment
 ```
@@ -29,7 +28,8 @@ omnistrate-ctl instance update [instance-id] [flags]
 ### Options inherited from parent commands
 
 ```
-  -v, --version   Print the version number of omnistrate-ctl
+  -o, --output string   Output format (text|table|json) (default "table")
+  -v, --version         Print the version number of omnistrate-ctl
 ```
 
 ### SEE ALSO

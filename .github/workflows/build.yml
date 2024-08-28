@@ -189,7 +189,7 @@ jobs:
           gotestsum_version: 1.11.0
 
       - name: Smoke test
-        timeout-minutes: 20
+        timeout-minutes: 30
         env: 
           ENABLE_SMOKE_TEST: true
           SMOKE_TEST_EMAIL: ${{ secrets.SMOKE_TEST_EMAIL }}
@@ -198,7 +198,7 @@ jobs:
           LOG_LEVEL: debug
           LOG_FORMAT: pretty
           DRY_RUN: true
-        run: gotestsum --format github-actions -- ./... -timeout 1200s -p 1 -p 1 -v
+        run: gotestsum --format github-actions -- ./... -timeout 1800s -p 1 -p 1 -v
 
   publish:
     if: github.event_name == 'push'

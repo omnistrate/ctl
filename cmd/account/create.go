@@ -2,6 +2,7 @@ package account
 
 import (
 	"fmt"
+	"github.com/chelnak/ysmrr"
 	accountconfigapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/account_config_api"
 	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/dataaccess"
@@ -11,16 +12,16 @@ import (
 
 const (
 	createExample = `  # Create aws account
-  omctl account create <name> --aws-account-id <aws-account-id>
+  omctl account create [account-name] --aws-account-id=[account-id]
 
   # Create gcp account
-  omctl account create <name> --gcp-project-id <gcp-project-id> --gcp-project-number <gcp-project-number>`
+  omctl account create [account-name] --gcp-project-id=[project-id] --gcp-project-number=[project-number]`
 )
 
 var createCmd = &cobra.Command{
-	Use:          "create --name=[name] [--aws-account-id=account-id] [--gcp-project-id=project-id] [--gcp-project-number=project-number]",
-	Short:        "Create an account",
-	Long:         `Create an account with the specified name and cloud provider details.`,
+	Use:          "create [account-name] [--aws-account-id=account-id] [--gcp-project-id=project-id] [--gcp-project-number=project-number]",
+	Short:        "Create a Cloud Provider Account",
+	Long:         `This command helps you create a Cloud Provider Account in your account list.`,
 	Example:      createExample,
 	RunE:         runCreate,
 	SilenceUsage: true,
@@ -33,40 +34,55 @@ func init() {
 	createCmd.Flags().String("gcp-project-id", "", "GCP project ID")
 	createCmd.Flags().String("gcp-project-number", "", "GCP project number")
 
-	err := createCmd.MarkFlagRequired("name")
-	if err != nil {
-		return
-	}
-
-	createCmd.MarkFlagsMutuallyExclusive("aws-account-id", "gcp-project-id")
-	createCmd.MarkFlagsOneRequired("aws-account-id", "gcp-project-id")
-	createCmd.MarkFlagsRequiredTogether("gcp-project-id", "gcp-project-number")
+	// TODO: Uncomment the following lines to add validation to the flags
+	// createCmd.MarkFlagsMutuallyExclusive("aws-account-id", "gcp-project-id")
+	// createCmd.MarkFlagsOneRequired("aws-account-id", "gcp-project-id")
+	// createCmd.MarkFlagsRequiredTogether("gcp-project-id", "gcp-project-number")
 }
 
 func runCreate(cmd *cobra.Command, args []string) error {
-	// Get flags
+	defer utils.CleanupArgsAndFlags(cmd, &args)
+
+	// Retrieve args
+	var name string
+	if len(args) > 0 {
+		name = args[0]
+	}
+
+	// Retrieve flags
 	awsAccountID, _ := cmd.Flags().GetString("aws-account-id")
 	gcpProjectID, _ := cmd.Flags().GetString("gcp-project-id")
 	gcpProjectNumber, _ := cmd.Flags().GetString("gcp-project-number")
+	output, _ := cmd.Flags().GetString("output")
 
-	// Validate user is currently logged in
+	// Validate user login
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	// Create account
+	// Initialize spinner if output is not JSON
+	var sm ysmrr.SpinnerManager
+	var spinner *ysmrr.Spinner
+	if output != "json" {
+		sm = ysmrr.NewSpinnerManager()
+		msg := "Creating account..."
+		spinner = sm.AddSpinner(msg)
+		sm.Start()
+	}
+
+	// Prepare request
 	request := &accountconfigapi.CreateAccountConfigRequest{
 		Token: token,
-		Name:  args[0],
+		Name:  name,
 	}
 
 	if awsAccountID != "" {
 		// Get aws cloud provider id
 		cloudProviderID, err := dataaccess.GetCloudProviderByName(token, "aws")
 		if err != nil {
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 
@@ -78,14 +94,14 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		// Get organization id
 		user, err := dataaccess.DescribeUser(token)
 		if err != nil {
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 
 		// Get gcp cloud provider id
 		cloudProviderID, err := dataaccess.GetCloudProviderByName(token, "gcp")
 		if err != nil {
-			utils.PrintError(err)
+			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 
@@ -96,19 +112,32 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		request.Description = "GCP Account" + gcpProjectID
 	}
 
+	// Create account
 	accountConfigID, err := dataaccess.CreateAccount(request)
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
-	utils.PrintSuccess("Account created successfully")
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully created account")
 
+	// Describe account
 	account, err := dataaccess.DescribeAccount(token, string(accountConfigID))
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
-	dataaccess.PrintNextStepVerifyAccountMsg(account)
+
+	// Print output
+	err = utils.PrintTextTableJsonOutput(output, account)
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	// Print next step
+	if output != "json" {
+		dataaccess.PrintNextStepVerifyAccountMsg(account)
+	}
 
 	return nil
 }

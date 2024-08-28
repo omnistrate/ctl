@@ -22,10 +22,15 @@ omnistrate-ctl helm save chart --repo-url=[repo-url] --version=[version] --names
 ```
   -h, --help                 help for save
       --namespace string     Helm Chart namespace
-  -o, --output string        Output format (text|json) (default "text")
       --repo-url string      Helm Chart repository URL
       --values-file string   Helm Chart values file containing custom values defined as a JSON
       --version string       Helm Chart version
+```
+
+### Options inherited from parent commands
+
+```
+  -o, --output string   Output format (text|table|json) (default "table")
 ```
 
 ### SEE ALSO

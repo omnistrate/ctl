@@ -1,10 +1,10 @@
 ## omnistrate-ctl service-plan describe
 
-Describe a service plan
+Describe a Service Plan
 
 ### Synopsis
 
-This command helps you describe a service plan in your service.
+This command helps you get details of a Service Plan for your service.
 
 ```
 omnistrate-ctl service-plan describe [service-name] [plan-name] [flags]
@@ -24,6 +24,7 @@ omnistrate-ctl service-plan describe [service-name] [plan-name] [flags]
 
 ```
   -h, --help                help for describe
+  -o, --output string       Output format. Only json is supported (default "json")
       --plan-id string      Environment ID. Required if plan name is not provided
       --service-id string   Service ID. Required if service name is not provided
 ```

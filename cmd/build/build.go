@@ -136,6 +136,13 @@ func init() {
 func runBuild(cmd *cobra.Command, args []string) error {
 	defer utils.CleanupArgsAndFlags(cmd, &args)
 
+	// Retrieve flags
+	output, err := cmd.Flags().GetString("output")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
 	// Validate input arguments
 	if file == "" && imageUrl == "" {
 		err := errors.New("either file or image is required")
@@ -291,21 +298,28 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		releaseNamePtr = &releaseDescription
 	}
 
-	sm1 := ysmrr.NewSpinnerManager()
-	building := sm1.AddSpinner("Building service...")
-	sm1.Start()
+	var sm1 ysmrr.SpinnerManager
+	var spinner1 *ysmrr.Spinner
+	if output != "json" {
+		sm1 = ysmrr.NewSpinnerManager()
+		spinner1 = sm1.AddSpinner("Building service...")
+		sm1.Start()
+	}
 
 	ServiceID, EnvironmentID, ProductTierID, err = buildService(fileData, token, name, specType, descriptionPtr, serviceLogoURLPtr,
 		environmentPtr, environmentTypePtr, release, releaseAsPreferred, releaseNamePtr)
 	if err != nil {
-		building.Error()
-		sm1.Stop()
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner1, sm1, err)
 		return err
 	}
 
-	building.Complete()
-	sm1.Stop()
+	utils.HandleSpinnerSuccess(spinner1, sm1, "Successfully built service")
+
+	// Early return if output is json
+	if output == "json" {
+		return nil
+	}
+
 	utils.PrintURL("Check the service plan result at", fmt.Sprintf("https://%s/product-tier?serviceId=%s&environmentId=%s", utils.GetRootDomain(), ServiceID, EnvironmentID))
 
 	// Ask user to verify account if there are any unverified accounts

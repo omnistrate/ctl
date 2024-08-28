@@ -1,7 +1,6 @@
 package serviceplan
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/chelnak/ysmrr"
 	tierversionsetapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/tier_version_set_api"
@@ -19,14 +18,12 @@ const (
 
   # Describe a service plan version by ID instead of name
   omctl service-plan describe-version --service-id [service-id] --plan-id [plan-id] --version [version]`
-
-	defaultDescribeVersionOutput = "json"
 )
 
 var describeVersionCmd = &cobra.Command{
 	Use:          "describe-version [service-name] [plan-name] [flags]",
-	Short:        "Describe a service plan version",
-	Long:         `This command helps you describe a service plan version in your service.`,
+	Short:        "Describe a specific version of a Service Plan",
+	Long:         `This command helps you get details of a specific version of a Service Plan for your service. You can get environment, enabled features, and resource configuration details for the version.`,
 	Example:      describeVersionExample,
 	RunE:         runDescribeVersion,
 	SilenceUsage: true,
@@ -36,6 +33,7 @@ func init() {
 	describeVersionCmd.Flags().StringP("version", "v", "", "Service plan version (latest|preferred|1.0 etc.)")
 	describeVersionCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	describeVersionCmd.Flags().StringP("plan-id", "", "", "Environment ID. Required if plan name is not provided")
+	describeVersionCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported")
 
 	err := describeVersionCmd.MarkFlagRequired("version")
 	if err != nil {
@@ -50,10 +48,10 @@ func runDescribeVersion(cmd *cobra.Command, args []string) error {
 	serviceID, _ := cmd.Flags().GetString("service-id")
 	planID, _ := cmd.Flags().GetString("plan-id")
 	version, _ := cmd.Flags().GetString("version")
-	output := defaultDescribeVersionOutput
+	output, _ := cmd.Flags().GetString("output")
 
 	// Validate input arguments
-	if err := validateDescribeVersionArguments(args, serviceID, planID); err != nil {
+	if err := validateDescribeVersionArguments(args, serviceID, planID, output); err != nil {
 		utils.PrintError(err)
 		return err
 	}
@@ -76,7 +74,7 @@ func runDescribeVersion(cmd *cobra.Command, args []string) error {
 	var spinner *ysmrr.Spinner
 	if output != "json" {
 		sm = ysmrr.NewSpinnerManager()
-		spinner = sm.AddSpinner("Describing service plan...")
+		spinner = sm.AddSpinner("Describing service plan version...")
 		sm.Start()
 	}
 
@@ -102,23 +100,16 @@ func runDescribeVersion(cmd *cobra.Command, args []string) error {
 	}
 
 	// Format the service plan details
-	formattedServicePlan, err := formatServicePlanVersionDetails(token, serviceName, planName, environment, servicePlan)
+	formattedServicePlanVersion, err := formatServicePlanVersionDetails(token, serviceName, planName, environment, servicePlan)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Handle output based on format
-	utils.HandleSpinnerSuccess(spinner, sm, "Service plan details retrieved successfully")
+	utils.HandleSpinnerSuccess(spinner, sm, "Service plan version details retrieved successfully")
 
-	// Marshal data
-	data, err := json.MarshalIndent(formattedServicePlan, "", "    ")
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
-	if err = utils.PrintTextTableJsonOutput(output, string(data)); err != nil {
+	if err = utils.PrintTextTableJsonOutput(output, formattedServicePlanVersion); err != nil {
 		return err
 	}
 
@@ -127,12 +118,15 @@ func runDescribeVersion(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func validateDescribeVersionArguments(args []string, serviceID, planID string) error {
+func validateDescribeVersionArguments(args []string, serviceID, planID, json string) error {
 	if len(args) == 0 && (serviceID == "" || planID == "") {
 		return fmt.Errorf("please provide the service name and service plan name or the service ID and service plan ID")
 	}
 	if len(args) > 0 && len(args) != 2 {
 		return fmt.Errorf("invalid arguments: %s. Need 2 arguments: [service-name] [plan-name]", strings.Join(args, " "))
+	}
+	if json != "json" {
+		return fmt.Errorf("only json output is supported")
 	}
 	return nil
 }

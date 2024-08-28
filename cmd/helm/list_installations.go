@@ -1,8 +1,7 @@
 package helm
 
 import (
-	"encoding/json"
-	"fmt"
+	"github.com/chelnak/ysmrr"
 	helmpackageapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/helm_package_api"
 	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/dataaccess"
@@ -33,14 +32,15 @@ var listInstallationsCmd = &cobra.Command{
 }
 
 func init() {
-	saveCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
+	saveCmd.Args = cobra.NoArgs // Require no arguments
 
 	listInstallationsCmd.Flags().String("host-cluster-id", "", "Host cluster ID")
-	listInstallationsCmd.Flags().StringP("output", "o", "text", "Output format (text|json)")
 }
 
 func runListInstallations(cmd *cobra.Command, args []string) error {
-	// Get flags
+	defer utils.CleanupArgsAndFlags(cmd, &args)
+
+	// Retrieve flags
 	hostClusterID, _ := cmd.Flags().GetString("host-cluster-id")
 	output, _ := cmd.Flags().GetString("output")
 
@@ -49,6 +49,16 @@ func runListInstallations(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		utils.PrintError(err)
 		return err
+	}
+
+	// Initialize spinner if output is not JSON
+	var sm ysmrr.SpinnerManager
+	var spinner *ysmrr.Spinner
+	if output != "json" {
+		sm = ysmrr.NewSpinnerManager()
+		msg := "Listing Helm package installations..."
+		spinner = sm.AddSpinner(msg)
+		sm.Start()
 	}
 
 	var hostClusterIDReq *helmpackageapi.HostClusterID
@@ -64,7 +74,7 @@ func runListInstallations(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	var jsonData []string
+	var intermediates []helmPackageInstallationIntermediate
 	for _, helmPackageInstallation := range helmPackageResult.HelmPackageInstallations {
 		// Convert HelmPackageInstallation to intermediate struct
 		intermediate := helmPackageInstallationIntermediate{
@@ -74,43 +84,19 @@ func runListInstallations(cmd *cobra.Command, args []string) error {
 			HostClusterID: string(helmPackageInstallation.HostClusterID),
 			Status:        helmPackageInstallation.Status,
 		}
-		data, err := json.MarshalIndent(intermediate, "", "    ")
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-		jsonData = append(jsonData, string(data))
+		intermediates = append(intermediates, intermediate)
 	}
 
-	if len(jsonData) == 0 {
-		utils.PrintInfo("No Helm package installations found.")
+	if len(intermediates) == 0 {
+		utils.HandleSpinnerSuccess(spinner, sm, "No Helm package installations found")
 		return nil
+	} else {
+		utils.HandleSpinnerSuccess(spinner, sm, "Successfully retrieved Helm package installations")
 	}
 
-	switch output {
-	case "text":
-		var tableWriter *utils.Table
-		if tableWriter, err = utils.NewTableFromJSONTemplate(json.RawMessage(jsonData[0])); err != nil {
-			// Just print the JSON directly and return
-			fmt.Printf("%+v\n", jsonData)
-			return err
-		}
-
-		for _, data := range jsonData {
-			if err = tableWriter.AddRowFromJSON(json.RawMessage(data)); err != nil {
-				// Just print the JSON directly and return
-				fmt.Printf("%+v\n", jsonData)
-				return err
-			}
-		}
-
-		tableWriter.Print()
-
-	case "json":
-		fmt.Printf("%+v\n", jsonData)
-
-	default:
-		err = fmt.Errorf("unsupported output format: %s", output)
+	// Print output
+	err = utils.PrintTextTableJsonArrayOutput(output, intermediates)
+	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
