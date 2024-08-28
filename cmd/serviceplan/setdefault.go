@@ -1,7 +1,6 @@
 package serviceplan
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/chelnak/ysmrr"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
@@ -13,17 +12,17 @@ import (
 
 const (
 	setDefaultExample = `  # Set service plan as default
-  omctl service-plan set-default [service-name] [plan-name] --version [version]
+  omctl service-plan set-default [service-name] [plan-name] --version=[version]
 
   # Set  service plan as default by ID instead of name
-  omctl service-plan set-default --service-id [service-id] --plan-id [plan-id] --version [version]`
+  omctl service-plan set-default --service-id=[service-id] --plan-id=[plan-id] --version=[version]`
 )
 
 var setDefaultCmd = &cobra.Command{
-	Use:   "set-default [service-name] [plan-name] --version=VERSION [flags]",
-	Short: "Set a service plan as default",
-	Long: `This command helps you set a service plan as default for your service.
-By setting a service plan as default, you can ensure that new instances of the service are created with the default plan.`,
+	Use:   "set-default [service-name] [plan-name] --version=[version] [flags]",
+	Short: "Set a Version of a Service Plan as Default(Preferred)",
+	Long: `This command helps you set a Version of a Service Plan as the default (preferred) version for your service.
+By setting it as default, new instance deployments from your customers will be created with this version by default.`,
 	Example:      setDefaultExample,
 	RunE:         runSetDefault,
 	SilenceUsage: true,
@@ -31,7 +30,7 @@ By setting a service plan as default, you can ensure that new instances of the s
 
 func init() {
 	setDefaultCmd.Flags().String("version", "", "Specify the version number to set the default to. Use 'latest' to set the latest version as default.")
-	setDefaultCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
+
 	setDefaultCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	setDefaultCmd.Flags().StringP("plan-id", "", "", "Plan ID. Required if plan name is not provided")
 
@@ -118,20 +117,13 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 	}
 
 	// Format output
-	formattedServicePlan, err := formatServicePlanVersion(targetServicePlan, false)
+	formattedServicePlanVersion, err := formatServicePlanVersion(targetServicePlan, false)
 	if err != nil {
-		return err
-	}
-
-	// Marshal data
-	data, err := json.MarshalIndent(formattedServicePlan, "", "    ")
-	if err != nil {
-		utils.PrintError(err)
 		return err
 	}
 
 	// Print output
-	if err = utils.PrintTextTableJsonOutput(output, string(data)); err != nil {
+	if err = utils.PrintTextTableJsonOutput(output, formattedServicePlanVersion); err != nil {
 		return err
 	}
 

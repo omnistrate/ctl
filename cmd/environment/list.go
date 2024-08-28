@@ -1,7 +1,7 @@
 package environment
 
 import (
-	"encoding/json"
+	"github.com/chelnak/ysmrr"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
@@ -12,7 +12,7 @@ import (
 
 const (
 	listExample = `  # List environments of the service postgres in the prod and dev environment types
-  omctl environment list -o=table -f="service_name:postgres,environment_type:PROD" -f="service:postgres,environment_type:DEV"`
+  omctl environment list -f="service_name:postgres,environment_type:PROD" -f="service:postgres,environment_type:DEV"`
 	defaultMaxNameLength = 30 // Maximum length of the name column in the table
 )
 
@@ -27,7 +27,6 @@ You can filter for specific environments by using the filter flag.`,
 }
 
 func init() {
-	listCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 	listCmd.Flags().StringArrayP("filter", "f", []string{}, "Filter to apply to the list of environments. E.g.: key1:value1,key2:value2, which filters environments where key1 equals value1 and key2 equals value2. Allow use of multiple filters to form the logical OR operation. Supported keys: "+strings.Join(utils.GetSupportedFilterKeys(model.Environment{}), ",")+". Check the examples for more details.")
 	listCmd.Flags().Bool("truncate", false, "Truncate long names in the output")
 }
@@ -54,14 +53,23 @@ func runList(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// Initialize spinner if output is not JSON
+	var sm ysmrr.SpinnerManager
+	var spinner *ysmrr.Spinner
+	if output != "json" {
+		sm = ysmrr.NewSpinnerManager()
+		spinner = sm.AddSpinner("Retrieving environments...")
+		sm.Start()
+	}
+
 	// Retrieve services and environments
 	services, err := dataaccess.ListServices(token)
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	var environments []string
+	var formattedEnvironments []model.Environment
 
 	// Process and filter environments
 	for _, service := range services.Services {
@@ -72,36 +80,32 @@ func runList(cmd *cobra.Command, args []string) error {
 
 			env, err := formatEnvironment(service, environment, truncateNames)
 			if err != nil {
-				utils.PrintError(err)
+				utils.HandleSpinnerError(spinner, sm, err)
 				return err
 			}
 
 			match, err := utils.MatchesFilters(env, filterMaps)
 			if err != nil {
-				utils.PrintError(err)
-				return err
-			}
-
-			data, err := json.MarshalIndent(env, "", "    ")
-			if err != nil {
-				utils.PrintError(err)
+				utils.HandleSpinnerError(spinner, sm, err)
 				return err
 			}
 
 			if match {
-				environments = append(environments, string(data))
+				formattedEnvironments = append(formattedEnvironments, env)
 			}
 		}
 	}
 
 	// Handle case when no environments match
-	if len(environments) == 0 {
-		utils.PrintInfo("No environments found.")
+	if len(formattedEnvironments) == 0 {
+		utils.HandleSpinnerSuccess(spinner, sm, "No environments found")
 		return nil
+	} else {
+		utils.HandleSpinnerSuccess(spinner, sm, "Successfully retrieved environments")
 	}
 
 	// Format output as requested
-	err = utils.PrintTextTableJsonArrayOutput(output, environments)
+	err = utils.PrintTextTableJsonArrayOutput(output, formattedEnvironments)
 	if err != nil {
 		return err
 	}

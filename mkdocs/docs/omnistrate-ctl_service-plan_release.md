@@ -1,10 +1,10 @@
 ## omnistrate-ctl service-plan release
 
-Release a service plan
+Release a Service Plan
 
 ### Synopsis
 
-This command helps you release a service plan from your service.
+This command helps you release a Service Plan for your service. You can specify a custom release description and set the service plan as preferred if needed.
 
 ```
 omnistrate-ctl service-plan release [service-name] [plan-name] [flags]
@@ -13,18 +13,17 @@ omnistrate-ctl service-plan release [service-name] [plan-name] [flags]
 ### Examples
 
 ```
-  # Release service plan
+  # Release service plan by name
   omctl service-plan release [service-name] [plan-name]
 
-  # Release service plan by ID instead of name
-  omctl service-plan release --service-id [service-id] --plan-id [plan-id]
+  # Release service plan by ID
+  omctl service-plan release --service-id=[service-id] --plan-id=[plan-id]
 ```
 
 ### Options
 
 ```
   -h, --help                         help for release
-  -o, --output string                Output format (text|table|json) (default "text")
       --plan-id string               Plan ID. Required if plan name is not provided
       --release-as-preferred         Release the service plan as preferred
       --release-description string   Set custom release description for this release version
@@ -34,7 +33,8 @@ omnistrate-ctl service-plan release [service-name] [plan-name] [flags]
 ### Options inherited from parent commands
 
 ```
-  -v, --version   Print the version number of omnistrate-ctl
+  -o, --output string   Output format (text|table|json) (default "table")
+  -v, --version         Print the version number of omnistrate-ctl
 ```
 
 ### SEE ALSO

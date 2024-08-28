@@ -88,6 +88,7 @@ func Execute() {
 
 func init() {
 	RootCmd.PersistentFlags().BoolP("version", "v", false, "Print the version number of omnistrate-ctl")
+	RootCmd.PersistentFlags().StringP("output", "o", "table", "Output format (text|table|json)")
 
 	RootCmd.AddCommand(login.LoginCmd)
 	RootCmd.AddCommand(logout.LogoutCmd)

@@ -1,7 +1,6 @@
 package serviceplan
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/chelnak/ysmrr"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
@@ -16,13 +15,13 @@ import (
 
 const (
 	listVersionsExample = `  # List service plan versions of the service postgres in the prod and dev environments
-  omctl service-plan list-versions postgres postgres -o=table -f="service_name:postgres,environment:prod" -f="service:postgres,environment:dev"`
+  omctl service-plan list-versions postgres postgres -f="service_name:postgres,environment:prod" -f="service:postgres,environment:dev"`
 )
 
 var listVersionsCmd = &cobra.Command{
 	Use:   "list-versions [service-name] [plan-name] [flags]",
-	Short: "List service plan versions for your service",
-	Long: `This command helps you list service plan versions for your service.
+	Short: "List Versions of a specific Service Plan",
+	Long: `This command helps you list Versions of a specific Service Plan.
 You can filter for specific service plan versions by using the filter flag.`,
 	Example:      listVersionsExample,
 	RunE:         runListVersions,
@@ -33,7 +32,7 @@ func init() {
 	listVersionsCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	listVersionsCmd.Flags().StringP("plan-id", "", "", "Environment ID. Required if plan name is not provided")
 	listVersionsCmd.Flags().IntP("latest-n", "", -1, "List only the latest N service plan versions")
-	listVersionsCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
+
 	listVersionsCmd.Flags().StringArrayP("filter", "f", []string{}, "Filter to apply to the list of service plan versions. E.g.: key1:value1,key2:value2, which filters service plans where key1 equals value1 and key2 equals value2. Allow use of multiple filters to form the logical OR operation. Supported keys: "+strings.Join(utils.GetSupportedFilterKeys(model.ServicePlanVersion{}), ",")+". Check the examples for more details.")
 	listVersionsCmd.Flags().Bool("truncate", false, "Truncate long names in the output")
 }
@@ -101,7 +100,7 @@ func runListVersions(cmd *cobra.Command, args []string) error {
 	// Filter out the latest N versions if latestN flag is provided
 	latestNServicePlanVersions := filterLatestNVersions(searchRes.ServicePlanResults, latestN)
 
-	var servicePlanVersions []string
+	var formattedServicePlanVersions []model.ServicePlanVersion
 
 	// Process and filter service plans
 	for _, servicePlanVersion := range latestNServicePlanVersions {
@@ -117,19 +116,13 @@ func runListVersions(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		data, err := json.MarshalIndent(formattedServicePlanVersion, "", "    ")
-		if err != nil {
-			utils.HandleSpinnerError(spinner, sm, err)
-			return err
-		}
-
 		if match {
-			servicePlanVersions = append(servicePlanVersions, string(data))
+			formattedServicePlanVersions = append(formattedServicePlanVersions, formattedServicePlanVersion)
 		}
 	}
 
 	// Handle case when no service plans match
-	if len(servicePlanVersions) == 0 {
+	if len(formattedServicePlanVersions) == 0 {
 		utils.HandleSpinnerSuccess(spinner, sm, "No service plan versions found.")
 		return nil
 	}
@@ -137,7 +130,7 @@ func runListVersions(cmd *cobra.Command, args []string) error {
 	utils.HandleSpinnerSuccess(spinner, sm, "Service plan versions retrieved successfully")
 
 	// Format output as requested
-	err = utils.PrintTextTableJsonArrayOutput(output, servicePlanVersions)
+	err = utils.PrintTextTableJsonArrayOutput(output, formattedServicePlanVersions)
 	if err != nil {
 		return err
 	}

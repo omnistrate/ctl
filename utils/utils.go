@@ -46,13 +46,6 @@ func IsProd() bool {
 	return GetRootDomain() == "omnistrate.cloud"
 }
 
-func CombineSubCmdExamples(root *cobra.Command) (example string) {
-	for _, cmd := range root.Commands() {
-		example += cmd.Example + "\n\n"
-	}
-	return
-}
-
 func TruncateString(s string, max int) string {
 	if len(s) <= max {
 		return s

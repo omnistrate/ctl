@@ -14,20 +14,20 @@ const (
   omctl service-plan delete [service-name] [plan-name]
 
   # Delete service plan by ID instead of name
-  omctl service-plan delete --service-id [service-id] --plan-id [plan-id]`
+  omctl service-plan delete --service-id=[service-id] --plan-id=[plan-id]`
 )
 
 var deleteCmd = &cobra.Command{
 	Use:          "delete [service-name] [plan-name] [flags]",
-	Short:        "Delete a service plan",
-	Long:         `This command helps you delete a service plan from your service.`,
+	Short:        "Delete a Service Plan",
+	Long:         `This command helps you delete a Service Plan from your service.`,
 	Example:      deleteExample,
 	RunE:         runDelete,
 	SilenceUsage: true,
 }
 
 func init() {
-	deleteCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
+
 	deleteCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	deleteCmd.Flags().StringP("plan-id", "", "", "Plan ID. Required if plan name is not provided")
 }

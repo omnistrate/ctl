@@ -94,7 +94,7 @@ func Test_environment_basic(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: delete postgresql service
-	cmd.RootCmd.SetArgs([]string{"service", "delete", serviceName, "--id=false"})
+	cmd.RootCmd.SetArgs([]string{"service", "delete", serviceName})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 }

@@ -21,8 +21,13 @@ omnistrate-ctl helm describe chart --version=[version] [flags]
 
 ```
   -h, --help             help for describe
-  -o, --output string    Output format (text|table|json) (default "text")
       --version string   Helm Chart version
+```
+
+### Options inherited from parent commands
+
+```
+  -o, --output string   Output format (text|table|json) (default "table")
 ```
 
 ### SEE ALSO

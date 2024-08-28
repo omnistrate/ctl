@@ -1,13 +1,11 @@
 package environment
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/chelnak/ysmrr"
 	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
 	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/dataaccess"
-	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -17,18 +15,18 @@ import (
 
 const (
 	createExample = `  # Create environment
-  omctl environment create [service-name] [environment-name] --type [type] --source [source]
+  omctl environment create [service-name] [environment-name] --type=[type] --source=[source]
 
   # Create environment by ID instead of name
-  omctl environment create [environment-name] --service-id [service-id] --type [type] --source [source]`
+  omctl environment create [environment-name] --service-id=[service-id] --type=[type] --source=[source]`
 )
 
 var EnvironmentID string
 
 var createCmd = &cobra.Command{
 	Use:          "create [service-name] [environment-name] [flags]",
-	Short:        "Create a environment",
-	Long:         `This command helps you create a environment in your service.`,
+	Short:        "Create a Service Environment",
+	Long:         `This command helps you create a new environment for your service.`,
 	Example:      createExample,
 	RunE:         runCreate,
 	SilenceUsage: true,
@@ -38,7 +36,6 @@ func init() {
 	createCmd.Flags().StringP("description", "", "", "Environment description")
 	createCmd.Flags().StringP("type", "", "", "Type of environment. Valid options include: 'dev', 'prod', 'qa', 'canary', 'staging', 'private'")
 	createCmd.Flags().StringP("source", "", "", "Source environment name")
-	createCmd.Flags().StringP("output", "o", "text", "Output format (text|table|json)")
 	createCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 
 	err := createCmd.MarkFlagRequired("type")
@@ -98,14 +95,14 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	// Check if the service exists
 	serviceID, serviceName, err = getService(token, serviceID, serviceName)
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Check if source environment exists
 	sourceEnvID, err := getSourceEnvironmentID(token, serviceID, sourceEnvName)
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
@@ -117,7 +114,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	visibility := getVisibility(envType)
 	defaultDeploymentConfigID, err := dataaccess.GetDefaultDeploymentConfigID(token)
 	if err != nil {
-		utils.PrintError(err)
+		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
@@ -133,16 +130,16 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	// Describe the environment
 	environment, err := dataaccess.DescribeServiceEnvironment(token, serviceID, string(environmentID))
 	if err != nil {
+		utils.PrintError(err)
 		return err
 	}
 
 	// Format and print the environment
-	formattedEnvironment, err := formatDetailedEnvironment(token, serviceID, serviceName, sourceEnvName, environment)
-	if err != nil {
-		return err
-	}
+	formattedEnvironment := formatEnvironmentDetails(token, serviceID, serviceName, sourceEnvName, environment)
+
 	err = utils.PrintTextTableJsonOutput(output, formattedEnvironment)
 	if err != nil {
+		utils.PrintError(err)
 		return err
 	}
 
@@ -236,38 +233,6 @@ func createEnvironment(token, envName, description, serviceID, envType, visibili
 	}
 
 	return dataaccess.CreateServiceEnvironment(token, request)
-}
-
-func formatDetailedEnvironment(token, serviceID, serviceName, sourceEnvName string, environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) (string, error) {
-	saasPortalStatus := ""
-	if environment.SaasPortalStatus != nil {
-		saasPortalStatus = string(*environment.SaasPortalStatus)
-	}
-	saasPortalURL := ""
-	if environment.SaasPortalURL != nil {
-		saasPortalURL = *environment.SaasPortalURL
-	}
-
-	promoteStatus := getPromoteStatus(token, serviceID, environment)
-
-	formattedEnvironment := model.DetailedEnvironment{
-		EnvironmentID:    string(environment.ID),
-		EnvironmentName:  environment.Name,
-		EnvironmentType:  string(environment.Type),
-		ServiceID:        string(environment.ServiceID),
-		ServiceName:      serviceName,
-		SourceEnvName:    sourceEnvName,
-		PromoteStatus:    promoteStatus,
-		SaaSPortalStatus: saasPortalStatus,
-		SaaSPortalURL:    saasPortalURL,
-	}
-
-	data, err := json.MarshalIndent(formattedEnvironment, "", "    ")
-	if err != nil {
-		return "", err
-	}
-
-	return string(data), nil
 }
 
 func getPromoteStatus(token, serviceID string, environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) string {

@@ -4,6 +4,7 @@ go 1.22.0
 
 require (
 	github.com/atotto/clipboard v0.1.4
+	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/chelnak/ysmrr v0.4.0
 	github.com/compose-spec/compose-go v1.20.2
 	github.com/cqroot/prompt v0.9.3
@@ -14,6 +15,7 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1
 	github.com/omnistrate/api-design v0.6.570
 	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240827024933-262d2321a97a
+	github.com/omnistrate/commons/pkg/constants v0.0.0-20240826200901-a7da1566918b
 	github.com/omnistrate/commons/pkg/utils v0.0.0-20240816220514-e12d0d8f0c53
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/pkg/errors v0.9.1
@@ -27,7 +29,6 @@ require (
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/bubbles v0.18.0 // indirect
 	github.com/charmbracelet/bubbletea v0.26.6 // indirect
@@ -58,7 +59,6 @@ require (
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/omnistrate/commons/pkg/constants v0.0.0-20240826200901-a7da1566918b // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.20.0 // indirect
