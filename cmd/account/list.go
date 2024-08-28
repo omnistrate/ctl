@@ -104,6 +104,11 @@ func runList(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// Ask user to verify account if output is not JSON
+	if output != "json" {
+		dataaccess.AskVerifyAccountIfAny()
+	}
+
 	return nil
 }
 

@@ -18,14 +18,11 @@ const (
 )
 
 var describeCmd = &cobra.Command{
-	Use:     "describe [account-name] [flags]",
-	Short:   "Describe a Cloud Provider Account",
-	Long:    "This command helps you get details of a cloud provider account.",
-	Example: describeExample,
-	RunE:    runDescribe,
-	PostRun: func(cmd *cobra.Command, args []string) {
-		dataaccess.AskVerifyAccountIfAny()
-	},
+	Use:          "describe [account-name] [flags]",
+	Short:        "Describe a Cloud Provider Account",
+	Long:         "This command helps you get details of a cloud provider account.",
+	Example:      describeExample,
+	RunE:         runDescribe,
 	SilenceUsage: true,
 }
 
@@ -102,6 +99,11 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		utils.PrintError(err)
 		return err
+	}
+
+	// Ask user to verify account if output is not JSON
+	if output != "json" {
+		dataaccess.AskVerifyAccountIfAny()
 	}
 
 	return nil
