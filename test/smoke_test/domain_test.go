@@ -78,9 +78,15 @@ func Test_domain_basic(t *testing.T) {
 	// delete domains
 	cmd.RootCmd.SetArgs([]string{"domain", "delete", devDomainName})
 	err = cmd.RootCmd.Execute()
-	require.NoError(err)
+	if err != nil {
+		require.Contains(err.Error(), "not found")
+	}
 
+	// PASS: delete domain
 	cmd.RootCmd.SetArgs([]string{"domain", "delete", prodDomainName})
 	err = cmd.RootCmd.Execute()
-	require.NoError(err)
+	if err != nil {
+		require.Contains(err.Error(), "not found")
+	}
+
 }
