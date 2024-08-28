@@ -73,7 +73,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(domainsNotFound) > 0 {
-		err = errors.New("domain(s) not found: " + strings.Join(domainsNotFound, ", "))
+		err = errors.New("domain not found: " + strings.Join(domainsNotFound, ", "))
 		utils.PrintError(err)
 		return err
 	}
