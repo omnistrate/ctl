@@ -1,23 +1,23 @@
 ## omnistrate-ctl account create
 
-Create an account
+Create a Cloud Provider Account
 
 ### Synopsis
 
-Create an account with the specified name and cloud provider details.
+This command helps you create a Cloud Provider Account in your account list.
 
 ```
-omnistrate-ctl account create --name=[name] [--aws-account-id=account-id] [--gcp-project-id=project-id] [--gcp-project-number=project-number] [flags]
+omnistrate-ctl account create [account-name] [--aws-account-id=account-id] [--gcp-project-id=project-id] [--gcp-project-number=project-number] [flags]
 ```
 
 ### Examples
 
 ```
   # Create aws account
-  omctl account create <name> --aws-account-id <aws-account-id>
+  omctl account create [account-name] --aws-account-id=[account-id]
 
   # Create gcp account
-  omctl account create <name> --gcp-project-id <gcp-project-id> --gcp-project-number <gcp-project-number>
+  omctl account create [account-name] --gcp-project-id=[project-id] --gcp-project-number=[project-number]
 ```
 
 ### Options

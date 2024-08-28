@@ -85,6 +85,10 @@ nav:
         - delete: 'omnistrate-ctl_instance_delete.md'
         - describe: 'omnistrate-ctl_instance_describe.md'
         - list: 'omnistrate-ctl_instance_list.md'
+        - restart: 'omnistrate-ctl_instance_restart.md'
+        - start: 'omnistrate-ctl_instance_start.md'
+        - stop: 'omnistrate-ctl_instance_stop.md'
+        - update: 'omnistrate-ctl_instance_update.md'
     - service:
       - command: 'omnistrate-ctl_service.md'
       - operations:

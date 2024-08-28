@@ -1,10 +1,10 @@
 ## omnistrate-ctl account delete
 
-Delete one or more accounts
+Delete a Cloud Provider Account
 
 ### Synopsis
 
-Delete account with name or ID. Use --id to specify ID. If not specified, name is assumed. If multiple accounts are found with the same name, all of them will be deleted.
+This command helps you delete a Cloud Provider Account from your account list.
 
 ```
 omnistrate-ctl account delete [account-name] [flags]
@@ -14,23 +14,17 @@ omnistrate-ctl account delete [account-name] [flags]
 
 ```
   # Delete account with name
-  omctl account delete <name>
+  omctl account delete [account-name]
 
   # Delete account with ID
-  omctl account delete <id> --id
-
-  # Delete multiple accounts with names
-  omctl account delete <name1> <name2> <name3>
-
-  # Delete multiple accounts with IDs
-  omctl account delete <id1> <id2> <id3> --id
+  omctl account delete --id=[account-ID]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for delete
-      --id     Specify account ID instead of name
+  -h, --help        help for delete
+      --id string   Account ID
 ```
 
 ### Options inherited from parent commands

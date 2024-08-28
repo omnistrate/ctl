@@ -1,10 +1,10 @@
 ## omnistrate-ctl service-plan delete
 
-Delete a service plan
+Delete a Service Plan
 
 ### Synopsis
 
-This command helps you delete a service plan from your service.
+This command helps you delete a Service Plan from your service.
 
 ```
 omnistrate-ctl service-plan delete [service-name] [plan-name] [flags]
@@ -17,14 +17,13 @@ omnistrate-ctl service-plan delete [service-name] [plan-name] [flags]
   omctl service-plan delete [service-name] [plan-name]
 
   # Delete service plan by ID instead of name
-  omctl service-plan delete --service-id [service-id] --plan-id [plan-id]
+  omctl service-plan delete --service-id=[service-id] --plan-id=[plan-id]
 ```
 
 ### Options
 
 ```
   -h, --help                help for delete
-  -o, --output string       Output format (text|table|json) (default "text")
       --plan-id string      Plan ID. Required if plan name is not provided
       --service-id string   Service ID. Required if service name is not provided
 ```
@@ -32,7 +31,8 @@ omnistrate-ctl service-plan delete [service-name] [plan-name] [flags]
 ### Options inherited from parent commands
 
 ```
-  -v, --version   Print the version number of omnistrate-ctl
+  -o, --output string   Output format (text|table|json) (default "table")
+  -v, --version         Print the version number of omnistrate-ctl
 ```
 
 ### SEE ALSO

@@ -1,10 +1,10 @@
 ## omnistrate-ctl account describe
 
-Display details for one or more accounts
+Describe a Cloud Provider Account
 
 ### Synopsis
 
-Display detailed information about the account by specifying the account name or ID
+This command helps you get details of a cloud provider account.
 
 ```
 omnistrate-ctl account describe [account-name] [flags]
@@ -14,30 +14,24 @@ omnistrate-ctl account describe [account-name] [flags]
 
 ```
   # Describe account with name
-  omctl account describe <name>
+  omctl account describe [account-name]
 
   # Describe account with ID
-  omctl account describe <id> --id
-  
-  # Describe multiple accounts with names
-  omctl account describe <name1> <name2> <name3>
-
-  # Describe multiple accounts with IDs
-  omctl account describe <id1> <id2> <id3> --id
+  omctl account describe --id=[account-id]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for describe
-      --id     Specify account ID instead of name
+  -h, --help            help for describe
+      --id string       Account ID
+  -o, --output string   Output format. Only json is supported. (default "json")
 ```
 
 ### Options inherited from parent commands
 
 ```
-  -o, --output string   Output format (text|table|json) (default "table")
-  -v, --version         Print the version number of omnistrate-ctl
+  -v, --version   Print the version number of omnistrate-ctl
 ```
 
 ### SEE ALSO

@@ -1,10 +1,10 @@
 ## omnistrate-ctl service-plan describe-version
 
-Describe a service plan version
+Describe a specific version of a Service Plan
 
 ### Synopsis
 
-This command helps you describe a service plan version in your service.
+This command helps you get details of a specific version of a Service Plan for your service. You can get environment, enabled features, and resource configuration details for the version.
 
 ```
 omnistrate-ctl service-plan describe-version [service-name] [plan-name] [flags]
