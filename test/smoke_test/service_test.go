@@ -68,4 +68,5 @@ func Test_service_basic(t *testing.T) {
 	cmd.RootCmd.SetArgs([]string{"service", "delete", "--id", "s-invalid"})
 	err = cmd.RootCmd.Execute()
 	require.Error(err)
+	require.Contains(err.Error(), "service not found")
 }
