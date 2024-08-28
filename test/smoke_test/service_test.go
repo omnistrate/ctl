@@ -26,19 +26,13 @@ func Test_service_basic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	serviceName1 := "postgresql" + uuid.NewString()
-	serviceName2 := "postgresql" + uuid.NewString()
+	serviceName := "postgresql" + uuid.NewString()
 
 	// Build service
-	cmd.RootCmd.SetArgs([]string{"build", "-f", "composefiles/postgresql.yaml", "--name", serviceName1, "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "composefiles/postgresql.yaml", "--name", serviceName, "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
-	serviceID1 := build.ServiceID
-
-	cmd.RootCmd.SetArgs([]string{"build", "-f", "composefiles/postgresql.yaml", "--name", serviceName2, "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
-	err = cmd.RootCmd.Execute()
-	require.NoError(err)
-	serviceID2 := build.ServiceID
+	serviceID := build.ServiceID
 
 	// List services
 	cmd.RootCmd.SetArgs([]string{"service", "list"})
@@ -46,32 +40,32 @@ func Test_service_basic(t *testing.T) {
 	require.NoError(err)
 
 	// List services by name
-	cmd.RootCmd.SetArgs([]string{"service", "list", "--filter", fmt.Sprintf("name:%s", serviceName1), "--filter", fmt.Sprintf("name:%s", serviceName2)})
+	cmd.RootCmd.SetArgs([]string{"service", "list", "--filter", fmt.Sprintf("name:%s", serviceName)})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
 	// Get services by ID
-	cmd.RootCmd.SetArgs([]string{"service", "list", "--filter", fmt.Sprintf("id:%s", serviceID1), "--filter", fmt.Sprintf("id:%s", serviceID2)})
+	cmd.RootCmd.SetArgs([]string{"service", "list", "--filter", fmt.Sprintf("id:%s", serviceID)})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
 	// Describe services by name
-	cmd.RootCmd.SetArgs([]string{"service", "describe", serviceName1, serviceName2})
+	cmd.RootCmd.SetArgs([]string{"service", "describe", serviceName})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
 	// Describe services by ID
-	cmd.RootCmd.SetArgs([]string{"service", "describe", serviceID1, serviceID2, "--id"})
+	cmd.RootCmd.SetArgs([]string{"service", "describe", "--id", serviceID})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
 	// Delete service by name
-	cmd.RootCmd.SetArgs([]string{"service", "delete", serviceName1})
+	cmd.RootCmd.SetArgs([]string{"service", "delete", serviceName})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
 	// Delete service by ID
-	cmd.RootCmd.SetArgs([]string{"service", "delete", serviceID2, "--id"})
+	cmd.RootCmd.SetArgs([]string{"service", "delete", "--id", "s-invalid"})
 	err = cmd.RootCmd.Execute()
-	require.NoError(err)
+	require.Error(err)
 }

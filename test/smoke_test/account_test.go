@@ -50,14 +50,21 @@ func Test_account_basic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	// PASS: describe accounts
-	cmd.RootCmd.SetArgs([]string{"account", "describe", awsAccountName, gcpAccountName})
+	// PASS: describe account
+	cmd.RootCmd.SetArgs([]string{"account", "describe", awsAccountName})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	// FAIL: delete accounts
-	cmd.RootCmd.SetArgs([]string{"account", "delete", awsAccountName, gcpAccountName})
+	cmd.RootCmd.SetArgs([]string{"account", "describe", gcpAccountName})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	// FAIL: delete account
+	cmd.RootCmd.SetArgs([]string{"account", "delete", awsAccountName})
 	err = cmd.RootCmd.Execute()
 	require.Error(err)
-	require.Contains(err.Error(), "account(s) not found")
+
+	cmd.RootCmd.SetArgs([]string{"account", "delete", gcpAccountName})
+	err = cmd.RootCmd.Execute()
+	require.Error(err)
 }

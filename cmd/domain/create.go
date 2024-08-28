@@ -12,16 +12,16 @@ import (
 
 const (
 	createExample = `  # Create a custom domain for dev environment
-  omctl domain create dev --domain abc.dev --environment-type dev
+  omctl domain create dev --domain=abc.dev --environment-type=dev
 
   # Create a custom domain for prod environment
-  omctl domain create abc.cloud --domain abc.cloud --environment-type prod`
+  omctl domain create abc.cloud --domain=abc.cloud --environment-type=prod`
 )
 
 var createCmd = &cobra.Command{
 	Use:          "create [flags]",
-	Short:        "Create a domain",
-	Long:         `Create a domain with the specified name and custom domain. The domain will be created for the specified environment type.`,
+	Short:        "Create a Custom Domain",
+	Long:         `This command helps you create a Custom Domain.`,
 	Example:      createExample,
 	RunE:         runCreate,
 	SilenceUsage: true,
@@ -47,6 +47,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	// Get flags
 	domain, _ := cmd.Flags().GetString("domain")
 	environmentType, _ := cmd.Flags().GetString("environment-type")
+	output, _ := cmd.Flags().GetString("output")
 
 	// Validate user is currently logged in
 	token, err := utils.GetToken()
@@ -98,7 +99,9 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		utils.PrintError(err)
 		return err
 	}
-	utils.PrintSuccess("Domain created successfully")
+	if output != "json" {
+		utils.PrintSuccess("Domain created successfully")
+	}
 
 	domains, err = dataaccess.ListDomains(token)
 	if err != nil {
@@ -114,7 +117,14 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	dataaccess.PrintNextStepVerifyDomainMsg(customDomain.ClusterEndpoint)
+	err = utils.PrintTextTableJsonOutput(output, customDomain)
+	if err != nil {
+		return err
+	}
+
+	if output != "json" {
+		dataaccess.PrintNextStepVerifyDomainMsg(customDomain.ClusterEndpoint)
+	}
 
 	return nil
 }

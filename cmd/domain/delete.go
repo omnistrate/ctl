@@ -11,26 +11,32 @@ import (
 
 var (
 	deleteExample = `  # Delete domain with name
-  omctl delete domain <name>
-
-  # Delete multiple domains with names
-  omctl delete domain <name1> <name2> <name3>`
+  omctl delete domain [domain-name]`
 )
 
 var deleteCmd = &cobra.Command{
 	Use:          "delete [name]",
-	Short:        "Delete one or more domains",
-	Long:         `Delete domain by specifying name.`,
+	Short:        "Delete a Custom Domain",
+	Long:         `This command helps you delete a Custom Domain.`,
 	Example:      deleteExample,
 	RunE:         runDelete,
 	SilenceUsage: true,
 }
 
 func init() {
-	deleteCmd.Args = cobra.MinimumNArgs(1) // Require at least one argument
+	deleteCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 }
 
 func runDelete(cmd *cobra.Command, args []string) error {
+	defer utils.CleanupArgsAndFlags(cmd, &args)
+
+	// Retrieve flags
+	output, err := cmd.Flags().GetString("output")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
 	token, err := utils.GetToken()
 	if err != nil {
 		utils.PrintError(err)
@@ -87,7 +93,9 @@ func runDelete(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	utils.PrintSuccess("Domain(s) deleted successfully")
+	if output != "json" {
+		utils.PrintSuccess("Domain deleted successfully")
+	}
 
 	return nil
 }
