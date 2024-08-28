@@ -28,6 +28,7 @@ var describeCmd = &cobra.Command{
 
 func init() {
 	describeCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
+	describeCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported")
 }
 
 func runDescribe(cmd *cobra.Command, args []string) error {

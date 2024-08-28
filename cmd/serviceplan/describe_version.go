@@ -33,6 +33,7 @@ func init() {
 	describeVersionCmd.Flags().StringP("version", "v", "", "Service plan version (latest|preferred|1.0 etc.)")
 	describeVersionCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	describeVersionCmd.Flags().StringP("plan-id", "", "", "Environment ID. Required if plan name is not provided")
+	describeVersionCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported")
 
 	err := describeVersionCmd.MarkFlagRequired("version")
 	if err != nil {
