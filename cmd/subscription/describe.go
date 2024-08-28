@@ -117,9 +117,9 @@ func formatSubscription(subscription *inventoryapi.SubscriptionSearchRecord, tru
 	formattedSubscription := model.Subscription{
 		SubscriptionID:         subscription.ID,
 		ServiceID:              string(subscription.ServiceID),
-		ServiceName:            subscription.ServiceName,
+		ServiceName:            serviceName,
 		PlanID:                 string(subscription.ProductTierID),
-		PlanName:               subscription.ServicePlanName,
+		PlanName:               planName,
 		Environment:            subscription.ServiceEnvironmentName,
 		SubscriptionOwnerName:  subscription.RootUserName,
 		SubscriptionOwnerEmail: subscription.RootUserEmail,

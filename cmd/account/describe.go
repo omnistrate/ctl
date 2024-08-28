@@ -82,7 +82,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if account exists
-	id, name, err = getAccount(token, name, id)
+	id, _, err = getAccount(token, name, id)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -99,6 +99,10 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 
 	// Print output
 	err = utils.PrintTextTableJsonOutput(output, account)
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
 
 	return nil
 }
