@@ -111,10 +111,10 @@ nav:
         - describe: 'omnistrate-ctl_subscription_describe.md'
         - list: 'omnistrate-ctl_subscription_list.md'
     - upgrade:
-      - command: 'omnistrate-ctl_upgrade.md'
       - operations:
-        - status: 'omnistrate-ctl_upgrade_status.md'
-        - status detail: 'omnistrate-ctl_upgrade_status_detail.md'
+        - upgrade: 'omnistrate-ctl_upgrade.md'
+        - upgrade status: 'omnistrate-ctl_upgrade_status.md'
+        - upgrade status detail: 'omnistrate-ctl_upgrade_status_detail.md'
 
 extra_css:
   - stylesheets/extra.css
