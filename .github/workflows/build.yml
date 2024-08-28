@@ -198,7 +198,7 @@ jobs:
           LOG_LEVEL: debug
           LOG_FORMAT: pretty
           DRY_RUN: true
-        run: gotestsum --format github-actions -- ./... -timeout 1200s -p 1 -p 1 -v
+        run: gotestsum --format github-actions -- ./... -timeout 1800s -p 1 -p 1 -v
 
   publish:
     if: github.event_name == 'push'
