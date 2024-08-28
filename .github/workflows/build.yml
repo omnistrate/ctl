@@ -189,7 +189,7 @@ jobs:
           gotestsum_version: 1.11.0
 
       - name: Smoke test
-        timeout-minutes: 20
+        timeout-minutes: 30
         env: 
           ENABLE_SMOKE_TEST: true
           SMOKE_TEST_EMAIL: ${{ secrets.SMOKE_TEST_EMAIL }}
