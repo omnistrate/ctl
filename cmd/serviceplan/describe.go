@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/chelnak/ysmrr"
 	producttierapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/product_tier_api"
-	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
@@ -131,7 +130,7 @@ func formatServicePlanDetails(token, serviceName, planName, environment string, 
 	var resources []model.Resource
 	for resourceID := range productTier.APIGroups {
 		// Get resource details
-		desRes, err := dataaccess.DescribeResource(token, string(productTier.ServiceID), string(resourceID), commonutils.ToPtr(string(productTier.ID)), nil)
+		desRes, err := dataaccess.DescribeResource(token, string(productTier.ServiceID), string(resourceID), nil, nil)
 		if err != nil {
 			return model.ServicePlanDetails{}, err
 		}
