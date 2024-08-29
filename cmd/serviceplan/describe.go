@@ -31,6 +31,7 @@ var describeCmd = &cobra.Command{
 }
 
 func init() {
+	describeCmd.Flags().StringP("environment", "", "", "Environment name. Use this flag with service name and plan name to describe the service plan in a specific environment")
 	describeCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported")
 	describeCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	describeCmd.Flags().StringP("plan-id", "", "", "Environment ID. Required if plan name is not provided")
@@ -43,6 +44,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	serviceID, _ := cmd.Flags().GetString("service-id")
 	planID, _ := cmd.Flags().GetString("plan-id")
 	output, _ := cmd.Flags().GetString("output")
+	environment, _ := cmd.Flags().GetString("environment")
 
 	// Validate input arguments
 	if err := validateDescribeArguments(args, serviceID, planID, output); err != nil {
@@ -73,7 +75,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the service plan exists
-	serviceID, serviceName, planID, _, environment, err := getServicePlan(token, serviceID, serviceName, planID, planName)
+	serviceID, serviceName, planID, _, environment, err = getServicePlan(token, serviceID, serviceName, planID, planName, environment)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

@@ -30,7 +30,7 @@ By setting it as default, new instance deployments from your customers will be c
 
 func init() {
 	setDefaultCmd.Flags().String("version", "", "Specify the version number to set the default to. Use 'latest' to set the latest version as default.")
-
+	setDefaultCmd.Flags().StringP("environment", "", "", "Environment name. Use this flag with service name and plan name to set the default version in a specific environment")
 	setDefaultCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	setDefaultCmd.Flags().StringP("plan-id", "", "", "Plan ID. Required if plan name is not provided")
 
@@ -45,6 +45,7 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 
 	// Retrieve flags
 	version, _ := cmd.Flags().GetString("version")
+	environment, _ := cmd.Flags().GetString("environment")
 	output, _ := cmd.Flags().GetString("output")
 	serviceID, _ := cmd.Flags().GetString("service-id")
 	planID, _ := cmd.Flags().GetString("plan-id")
@@ -79,7 +80,7 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the service plan exists
-	serviceID, _, planID, _, _, err = getServicePlan(token, serviceID, serviceName, planID, planName)
+	serviceID, _, planID, _, _, err = getServicePlan(token, serviceID, serviceName, planID, planName, environment)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -130,7 +131,7 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func getServicePlan(token, serviceIDArg, serviceNameArg, planIDArg, planNameArg string) (serviceID, serviceName, planID, planName, environment string, err error) {
+func getServicePlan(token, serviceIDArg, serviceNameArg, planIDArg, planNameArg, envNameArg string) (serviceID, serviceName, planID, planName, environment string, err error) {
 	searchRes, err := dataaccess.SearchInventory(token, "service:s")
 	if err != nil {
 		return
@@ -151,16 +152,21 @@ func getServicePlan(token, serviceIDArg, serviceNameArg, planIDArg, planNameArg 
 	}
 
 	if serviceFound > 1 {
-		err = fmt.Errorf("multiple services found. Please provide the service ID instead of the name")
+		err = fmt.Errorf("multiple services with the same name found. Please provide the service ID instead of the name")
 		return
 	}
 
+	envFound := 0
 	servicePlanFound := 0
 	describeServiceRes, err := dataaccess.DescribeService(token, serviceID)
 	if err != nil {
 		return
 	}
 	for _, env := range describeServiceRes.ServiceEnvironments {
+		if envNameArg != "" && !strings.EqualFold(envNameArg, env.Name) {
+			continue
+		}
+		envFound += 1
 		for _, servicePlan := range env.ServicePlans {
 			if !strings.EqualFold(servicePlan.Name, planNameArg) && string(servicePlan.ProductTierID) != planIDArg {
 				continue
@@ -171,13 +177,23 @@ func getServicePlan(token, serviceIDArg, serviceNameArg, planIDArg, planNameArg 
 		}
 	}
 
+	if envFound == 0 {
+		err = fmt.Errorf("environment not found. Please check input values and try again")
+		return
+	}
+
+	if envFound > 1 {
+		err = fmt.Errorf("multiple environments with the same name found. Please provide the environment name instead of the name")
+		return
+	}
+
 	if servicePlanFound == 0 {
 		err = fmt.Errorf("service plan not found. Please check input values and try again")
 		return
 	}
 
 	if servicePlanFound > 1 {
-		err = fmt.Errorf("multiple service plans found. Please provide the plan ID instead of the name")
+		err = fmt.Errorf("multiple service plans with the same name found. Please provide the service plan ID instead of the name")
 		return
 	}
 

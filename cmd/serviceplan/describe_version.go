@@ -31,6 +31,7 @@ var describeVersionCmd = &cobra.Command{
 
 func init() {
 	describeVersionCmd.Flags().StringP("version", "v", "", "Service plan version (latest|preferred|1.0 etc.)")
+	describeVersionCmd.Flags().StringP("environment", "", "", "Environment name. Use this flag with service name and plan name to describe the version in a specific environment")
 	describeVersionCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	describeVersionCmd.Flags().StringP("plan-id", "", "", "Environment ID. Required if plan name is not provided")
 	describeVersionCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported")
@@ -48,6 +49,7 @@ func runDescribeVersion(cmd *cobra.Command, args []string) error {
 	serviceID, _ := cmd.Flags().GetString("service-id")
 	planID, _ := cmd.Flags().GetString("plan-id")
 	version, _ := cmd.Flags().GetString("version")
+	environment, _ := cmd.Flags().GetString("environment")
 	output, _ := cmd.Flags().GetString("output")
 
 	// Validate input arguments
@@ -79,7 +81,7 @@ func runDescribeVersion(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the service plan exists
-	serviceID, serviceName, planID, _, environment, err := getServicePlan(token, serviceID, serviceName, planID, planName)
+	serviceID, serviceName, planID, _, environment, err = getServicePlan(token, serviceID, serviceName, planID, planName, environment)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

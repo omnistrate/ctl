@@ -30,6 +30,7 @@ var releaseCmd = &cobra.Command{
 func init() {
 	releaseCmd.Flags().String("release-description", "", "Set custom release description for this release version")
 	releaseCmd.Flags().Bool("release-as-preferred", false, "Release the service plan as preferred")
+	releaseCmd.Flags().StringP("environment", "", "", "Environment name. Use this flag with service name and plan name to release the service plan in a specific environment")
 
 	releaseCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	releaseCmd.Flags().StringP("plan-id", "", "", "Plan ID. Required if plan name is not provided")
@@ -44,6 +45,7 @@ func runRelease(cmd *cobra.Command, args []string) error {
 	output, _ := cmd.Flags().GetString("output")
 	serviceID, _ := cmd.Flags().GetString("service-id")
 	planID, _ := cmd.Flags().GetString("plan-id")
+	environment, _ := cmd.Flags().GetString("environment")
 
 	// Validate input arguments
 	if err := validateReleaseArguments(args, serviceID, planID); err != nil {
@@ -75,7 +77,7 @@ func runRelease(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if service plan exists
-	serviceID, _, planID, _, _, err = getServicePlan(token, serviceID, serviceName, planID, planName)
+	serviceID, _, planID, _, _, err = getServicePlan(token, serviceID, serviceName, planID, planName, environment)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
