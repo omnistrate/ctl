@@ -177,12 +177,12 @@ func getServicePlan(token, serviceIDArg, serviceNameArg, planIDArg, planNameArg,
 		}
 	}
 
-	if envFound == 0 {
+	if envNameArg != "" && envFound == 0 {
 		err = fmt.Errorf("environment not found. Please check input values and try again")
 		return
 	}
 
-	if envFound > 1 {
+	if envNameArg != "" && envFound > 1 {
 		err = fmt.Errorf("multiple environments with the same name found. Please provide the environment name instead of the name")
 		return
 	}
