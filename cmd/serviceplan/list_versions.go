@@ -31,10 +31,15 @@ You can filter for specific service plan versions by using the filter flag.`,
 func init() {
 	listVersionsCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	listVersionsCmd.Flags().StringP("plan-id", "", "", "Environment ID. Required if plan name is not provided")
+	listVersionsCmd.Flags().IntP("limit", "", -1, "List only the latest N service plan versions")
 	listVersionsCmd.Flags().IntP("latest-n", "", -1, "List only the latest N service plan versions")
 
 	listVersionsCmd.Flags().StringArrayP("filter", "f", []string{}, "Filter to apply to the list of service plan versions. E.g.: key1:value1,key2:value2, which filters service plans where key1 equals value1 and key2 equals value2. Allow use of multiple filters to form the logical OR operation. Supported keys: "+strings.Join(utils.GetSupportedFilterKeys(model.ServicePlanVersion{}), ",")+". Check the examples for more details.")
 	listVersionsCmd.Flags().Bool("truncate", false, "Truncate long names in the output")
+	err := listVersionsCmd.Flags().MarkHidden("latest-n")
+	if err != nil {
+		return
+	}
 }
 
 func runListVersions(cmd *cobra.Command, args []string) error {
@@ -44,9 +49,15 @@ func runListVersions(cmd *cobra.Command, args []string) error {
 	serviceID, _ := cmd.Flags().GetString("service-id")
 	planID, _ := cmd.Flags().GetString("plan-id")
 	latestN, _ := cmd.Flags().GetInt("latest-n")
+	limit, _ := cmd.Flags().GetInt("limit")
 	output, _ := cmd.Flags().GetString("output")
 	filters, _ := cmd.Flags().GetStringArray("filter")
 	truncateNames, _ := cmd.Flags().GetBool("truncate")
+
+	// Temporary workaround to support both latest-n and limit flags
+	if limit != -1 {
+		latestN = limit
+	}
 
 	// Validate input arguments
 	if err := validateListVersionsArguments(args, serviceID, planID); err != nil {
