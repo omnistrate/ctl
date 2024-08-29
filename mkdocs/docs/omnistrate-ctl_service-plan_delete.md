@@ -23,9 +23,10 @@ omnistrate-ctl service-plan delete [service-name] [plan-name] [flags]
 ### Options
 
 ```
-  -h, --help                help for delete
-      --plan-id string      Plan ID. Required if plan name is not provided
-      --service-id string   Service ID. Required if service name is not provided
+      --environment string   Environment name. Use this flag with service name and plan name to delete the service plan in a specific environment
+  -h, --help                 help for delete
+      --plan-id string       Plan ID. Required if plan name is not provided
+      --service-id string    Service ID. Required if service name is not provided
 ```
 
 ### Options inherited from parent commands

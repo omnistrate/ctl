@@ -20,14 +20,14 @@ omnistrate-ctl instance describe [instance-id] [flags]
 ### Options
 
 ```
-  -h, --help   help for describe
+  -h, --help            help for describe
+  -o, --output string   Output format. Only json is supported (default "json")
 ```
 
 ### Options inherited from parent commands
 
 ```
-  -o, --output string   Output format (text|table|json) (default "table")
-  -v, --version         Print the version number of omnistrate-ctl
+  -v, --version   Print the version number of omnistrate-ctl
 ```
 
 ### SEE ALSO

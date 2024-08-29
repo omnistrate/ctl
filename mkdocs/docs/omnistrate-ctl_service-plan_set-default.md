@@ -24,10 +24,11 @@ omnistrate-ctl service-plan set-default [service-name] [plan-name] --version=[ve
 ### Options
 
 ```
-  -h, --help                help for set-default
-      --plan-id string      Plan ID. Required if plan name is not provided
-      --service-id string   Service ID. Required if service name is not provided
-      --version string      Specify the version number to set the default to. Use 'latest' to set the latest version as default.
+      --environment string   Environment name. Use this flag with service name and plan name to set the default version in a specific environment
+  -h, --help                 help for set-default
+      --plan-id string       Plan ID. Required if plan name is not provided
+      --service-id string    Service ID. Required if service name is not provided
+      --version string       Specify the version number to set the default to. Use 'latest' to set the latest version as default.
 ```
 
 ### Options inherited from parent commands
