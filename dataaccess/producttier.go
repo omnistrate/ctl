@@ -97,3 +97,24 @@ func ReleaseServicePlan(token, serviceID, serviceAPIID, productTierID string, ve
 
 	return
 }
+
+func DescribePendingChanges(token, serviceID, serviceAPIID, productTierID string) (pendingChanges *serviceapiapi.DescribePendingChangesResult, err error) {
+	serviceApi, err := httpclientwrapper.NewServiceAPI(utils.GetHostScheme(), utils.GetHost())
+	if err != nil {
+		return
+	}
+
+	request := &serviceapiapi.DescribePendingChangesRequest{
+		Token:         token,
+		ServiceID:     serviceapiapi.ServiceID(serviceID),
+		ID:            serviceapiapi.ServiceAPIID(serviceAPIID),
+		ProductTierID: commonutils.ToPtr(serviceapiapi.ProductTierID(productTierID)),
+	}
+
+	pendingChanges, err = serviceApi.DescribePendingChanges(context.Background(), request)
+	if err != nil {
+		return
+	}
+
+	return
+}

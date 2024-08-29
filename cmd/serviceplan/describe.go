@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/chelnak/ysmrr"
 	producttierapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/product_tier_api"
-	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
@@ -31,6 +30,7 @@ var describeCmd = &cobra.Command{
 }
 
 func init() {
+	describeCmd.Flags().StringP("environment", "", "", "Environment name. Use this flag with service name and plan name to describe the service plan in a specific environment")
 	describeCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported")
 	describeCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	describeCmd.Flags().StringP("plan-id", "", "", "Environment ID. Required if plan name is not provided")
@@ -43,6 +43,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	serviceID, _ := cmd.Flags().GetString("service-id")
 	planID, _ := cmd.Flags().GetString("plan-id")
 	output, _ := cmd.Flags().GetString("output")
+	environment, _ := cmd.Flags().GetString("environment")
 
 	// Validate input arguments
 	if err := validateDescribeArguments(args, serviceID, planID, output); err != nil {
@@ -73,7 +74,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the service plan exists
-	serviceID, serviceName, planID, _, environment, err := getServicePlan(token, serviceID, serviceName, planID, planName)
+	serviceID, serviceName, planID, _, environment, err = getServicePlan(token, serviceID, serviceName, planID, planName, environment)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -129,14 +130,15 @@ func formatServicePlanDetails(token, serviceName, planName, environment string, 
 	var resources []model.Resource
 	for resourceID := range productTier.APIGroups {
 		// Get resource details
-		desRes, err := dataaccess.DescribeResource(token, string(productTier.ServiceID), string(resourceID), commonutils.ToPtr(string(productTier.ID)), nil)
+		desRes, err := dataaccess.DescribeResource(token, string(productTier.ServiceID), string(resourceID), nil, nil)
 		if err != nil {
 			return model.ServicePlanDetails{}, err
 		}
 		resource := model.Resource{
-			ResourceID:   string(desRes.ID),
-			ResourceName: desRes.Name,
-			ResourceType: string(desRes.ResourceType),
+			ResourceID:          string(desRes.ID),
+			ResourceName:        desRes.Name,
+			ResourceDescription: desRes.Description,
+			ResourceType:        string(desRes.ResourceType),
 		}
 
 		if desRes.ActionHooks != nil {
@@ -188,6 +190,26 @@ func formatServicePlanDetails(token, serviceName, planName, environment string, 
 		resources = append(resources, resource)
 	}
 
+	// Describe pending changes
+	pendingChanges, err := dataaccess.DescribePendingChanges(token, string(productTier.ServiceID), string(serviceModel.ServiceAPIID), string(productTier.ID))
+	if err != nil {
+		return model.ServicePlanDetails{}, err
+	}
+
+	formattedPendingChanges := make(map[string]model.ResourceChangeSet)
+	for resourceID, changeSet := range pendingChanges.ResourceChangeSets {
+		formattedChangeSet := model.ResourceChangeSet{
+			ResourceChanges:           changeSet.ResourceChanges,
+			ProductTierFeatureChanges: changeSet.ProductTierFeatureChanges,
+			ImageConfigChanges:        changeSet.ImageConfigChanges,
+			InfraConfigChanges:        changeSet.InfraConfigChanges,
+		}
+		if changeSet.ResourceName != nil {
+			formattedChangeSet.ResourceName = *changeSet.ResourceName
+		}
+		formattedPendingChanges[string(resourceID)] = formattedChangeSet
+	}
+
 	formattedServicePlan := model.ServicePlanDetails{
 		PlanID:          string(productTier.ID),
 		PlanName:        planName,
@@ -198,6 +220,7 @@ func formatServicePlanDetails(token, serviceName, planName, environment string, 
 		TenancyType:     string(serviceModel.ModelType),
 		EnabledFeatures: productTier.EnabledFeatures,
 		Resources:       resources,
+		PendingChanges:  formattedPendingChanges,
 	}
 
 	return formattedServicePlan, nil

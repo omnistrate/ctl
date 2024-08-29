@@ -27,7 +27,7 @@ var deleteCmd = &cobra.Command{
 }
 
 func init() {
-
+	deleteCmd.Flags().StringP("environment", "", "", "Environment name. Use this flag with service name and plan name to delete the service plan in a specific environment")
 	deleteCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
 	deleteCmd.Flags().StringP("plan-id", "", "", "Plan ID. Required if plan name is not provided")
 }
@@ -39,6 +39,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	output, _ := cmd.Flags().GetString("output")
 	serviceID, _ := cmd.Flags().GetString("service-id")
 	planID, _ := cmd.Flags().GetString("plan-id")
+	environment, _ := cmd.Flags().GetString("environment")
 
 	// Validate input arguments
 	if err := validateDeleteArguments(args, serviceID, planID); err != nil {
@@ -70,7 +71,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the service plan exists
-	serviceID, _, planID, _, _, err = getServicePlan(token, serviceID, serviceName, planID, planName)
+	serviceID, _, planID, _, _, err = getServicePlan(token, serviceID, serviceName, planID, planName, environment)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

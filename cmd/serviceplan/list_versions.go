@@ -33,6 +33,7 @@ func init() {
 	listVersionsCmd.Flags().StringP("plan-id", "", "", "Environment ID. Required if plan name is not provided")
 	listVersionsCmd.Flags().IntP("limit", "", -1, "List only the latest N service plan versions")
 	listVersionsCmd.Flags().IntP("latest-n", "", -1, "List only the latest N service plan versions")
+	listVersionsCmd.Flags().StringP("environment", "", "", "Environment name. Use this flag with service name and plan name to describe the version in a specific environment")
 
 	listVersionsCmd.Flags().StringArrayP("filter", "f", []string{}, "Filter to apply to the list of service plan versions. E.g.: key1:value1,key2:value2, which filters service plans where key1 equals value1 and key2 equals value2. Allow use of multiple filters to form the logical OR operation. Supported keys: "+strings.Join(utils.GetSupportedFilterKeys(model.ServicePlanVersion{}), ",")+". Check the examples for more details.")
 	listVersionsCmd.Flags().Bool("truncate", false, "Truncate long names in the output")
@@ -53,6 +54,7 @@ func runListVersions(cmd *cobra.Command, args []string) error {
 	output, _ := cmd.Flags().GetString("output")
 	filters, _ := cmd.Flags().GetStringArray("filter")
 	truncateNames, _ := cmd.Flags().GetBool("truncate")
+	environment, _ := cmd.Flags().GetString("environment")
 
 	// Temporary workaround to support both latest-n and limit flags
 	if limit != -1 {
@@ -95,7 +97,7 @@ func runListVersions(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the service plan exists
-	_, _, planID, _, _, err = getServicePlan(token, serviceID, serviceName, planID, planName)
+	_, _, planID, _, _, err = getServicePlan(token, serviceID, serviceName, planID, planName, environment)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
