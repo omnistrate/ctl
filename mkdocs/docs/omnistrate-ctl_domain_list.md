@@ -1,10 +1,10 @@
 ## omnistrate-ctl domain list
 
-List SaaS Portal custom domains
+List SaaS Portal Custom Domains
 
 ### Synopsis
 
-This command helps you list SaaS Portal custom domains.
+This command helps you list SaaS Portal Custom Domains.
 You can filter for specific domains by using the filter flag.
 
 ```

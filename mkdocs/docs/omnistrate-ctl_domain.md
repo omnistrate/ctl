@@ -27,7 +27,7 @@ omnistrate-ctl domain [operation] [flags]
 ### SEE ALSO
 
 * [omnistrate-ctl](omnistrate-ctl.md)	 - Manage your Omnistrate SaaS from the command line
-* [omnistrate-ctl domain create](omnistrate-ctl_domain_create.md)	 - Create a domain
-* [omnistrate-ctl domain delete](omnistrate-ctl_domain_delete.md)	 - Delete one or more domains
-* [omnistrate-ctl domain list](omnistrate-ctl_domain_list.md)	 - List SaaS Portal custom domains
+* [omnistrate-ctl domain create](omnistrate-ctl_domain_create.md)	 - Create a Custom Domain
+* [omnistrate-ctl domain delete](omnistrate-ctl_domain_delete.md)	 - Delete a Custom Domain
+* [omnistrate-ctl domain list](omnistrate-ctl_domain_list.md)	 - List SaaS Portal Custom Domains
 

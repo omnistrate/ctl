@@ -23,6 +23,7 @@ omnistrate-ctl service-plan release [service-name] [plan-name] [flags]
 ### Options
 
 ```
+      --environment string           Environment name. Use this flag with service name and plan name to release the service plan in a specific environment
   -h, --help                         help for release
       --plan-id string               Plan ID. Required if plan name is not provided
       --release-as-preferred         Release the service plan as preferred

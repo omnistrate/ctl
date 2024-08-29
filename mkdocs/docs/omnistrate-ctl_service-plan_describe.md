@@ -23,10 +23,11 @@ omnistrate-ctl service-plan describe [service-name] [plan-name] [flags]
 ### Options
 
 ```
-  -h, --help                help for describe
-  -o, --output string       Output format. Only json is supported (default "json")
-      --plan-id string      Environment ID. Required if plan name is not provided
-      --service-id string   Service ID. Required if service name is not provided
+      --environment string   Environment name. Use this flag with service name and plan name to describe the service plan in a specific environment
+  -h, --help                 help for describe
+  -o, --output string        Output format. Only json is supported (default "json")
+      --plan-id string       Environment ID. Required if plan name is not provided
+      --service-id string    Service ID. Required if service name is not provided
 ```
 
 ### Options inherited from parent commands
