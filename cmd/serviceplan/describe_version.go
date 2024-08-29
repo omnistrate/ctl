@@ -142,9 +142,10 @@ func formatServicePlanVersionDetails(token, serviceName, planName, environment s
 		}
 
 		resource := model.Resource{
-			ResourceID:   string(desRes.ID),
-			ResourceName: desRes.Name,
-			ResourceType: string(desRes.ResourceType),
+			ResourceID:          string(desRes.ID),
+			ResourceName:        desRes.Name,
+			ResourceDescription: desRes.Description,
+			ResourceType:        string(desRes.ResourceType),
 		}
 
 		if desRes.ActionHooks != nil {

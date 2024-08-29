@@ -11,15 +11,24 @@ type ServicePlan struct {
 }
 
 type ServicePlanDetails struct {
-	PlanID          string     `json:"plan_id,omitempty"`
-	PlanName        string     `json:"plan_name,omitempty"`
-	ServiceID       string     `json:"service_id,omitempty"`
-	ServiceName     string     `json:"service_name,omitempty"`
-	Environment     string     `json:"environment,omitempty"`
-	DeploymentType  string     `json:"deployment_type,omitempty"`
-	TenancyType     string     `json:"tenancy_type,omitempty"`
-	EnabledFeatures any        `json:"enabled_features,omitempty"`
-	Resources       []Resource `json:"resources,omitempty"`
+	PlanID          string                       `json:"plan_id,omitempty"`
+	PlanName        string                       `json:"plan_name,omitempty"`
+	ServiceID       string                       `json:"service_id,omitempty"`
+	ServiceName     string                       `json:"service_name,omitempty"`
+	Environment     string                       `json:"environment,omitempty"`
+	DeploymentType  string                       `json:"deployment_type,omitempty"`
+	TenancyType     string                       `json:"tenancy_type,omitempty"`
+	EnabledFeatures any                          `json:"enabled_features,omitempty"`
+	Resources       []Resource                   `json:"resources,omitempty"`
+	PendingChanges  map[string]ResourceChangeSet `json:"pending_changes,omitempty"`
+}
+
+type ResourceChangeSet struct {
+	ResourceName              string `json:"resource_name,omitempty"`
+	ResourceChanges           any    `json:"resource_changes,omitempty"`
+	ProductTierFeatureChanges any    `json:"product_tier_feature_changes,omitempty"`
+	ImageConfigChanges        any    `json:"image_config_changes,omitempty"`
+	InfraConfigChanges        any    `json:"infra_config_changes,omitempty"`
 }
 
 type ServicePlanVersion struct {
@@ -49,6 +58,7 @@ type ServicePlanVersionDetails struct {
 type Resource struct {
 	ResourceID                  string `json:"resource_id,omitempty"`
 	ResourceName                string `json:"resource_name,omitempty"`
+	ResourceDescription         string `json:"resource_description,omitempty"`
 	ResourceType                string `json:"resource_type,omitempty"`
 	ActionHooks                 any    `json:"action_hooks,omitempty"`
 	AdditionalSecurityContext   any    `json:"additional_security_context,omitempty"`

@@ -134,9 +134,10 @@ func formatServicePlanDetails(token, serviceName, planName, environment string, 
 			return model.ServicePlanDetails{}, err
 		}
 		resource := model.Resource{
-			ResourceID:   string(desRes.ID),
-			ResourceName: desRes.Name,
-			ResourceType: string(desRes.ResourceType),
+			ResourceID:          string(desRes.ID),
+			ResourceName:        desRes.Name,
+			ResourceDescription: desRes.Description,
+			ResourceType:        string(desRes.ResourceType),
 		}
 
 		if desRes.ActionHooks != nil {
@@ -188,6 +189,26 @@ func formatServicePlanDetails(token, serviceName, planName, environment string, 
 		resources = append(resources, resource)
 	}
 
+	// Describe pending changes
+	pendingChanges, err := dataaccess.DescribePendingChanges(token, string(productTier.ServiceID), string(serviceModel.ServiceAPIID), string(productTier.ID))
+	if err != nil {
+		return model.ServicePlanDetails{}, err
+	}
+
+	formattedPendingChanges := make(map[string]model.ResourceChangeSet)
+	for resourceID, changeSet := range pendingChanges.ResourceChangeSets {
+		formattedChangeSet := model.ResourceChangeSet{
+			ResourceChanges:           changeSet.ResourceChanges,
+			ProductTierFeatureChanges: changeSet.ProductTierFeatureChanges,
+			ImageConfigChanges:        changeSet.ImageConfigChanges,
+			InfraConfigChanges:        changeSet.InfraConfigChanges,
+		}
+		if changeSet.ResourceName != nil {
+			formattedChangeSet.ResourceName = *changeSet.ResourceName
+		}
+		formattedPendingChanges[string(resourceID)] = formattedChangeSet
+	}
+
 	formattedServicePlan := model.ServicePlanDetails{
 		PlanID:          string(productTier.ID),
 		PlanName:        planName,
@@ -198,6 +219,7 @@ func formatServicePlanDetails(token, serviceName, planName, environment string, 
 		TenancyType:     string(serviceModel.ModelType),
 		EnabledFeatures: productTier.EnabledFeatures,
 		Resources:       resources,
+		PendingChanges:  formattedPendingChanges,
 	}
 
 	return formattedServicePlan, nil
