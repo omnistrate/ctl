@@ -193,7 +193,7 @@ func getServicePlan(token, serviceIDArg, serviceNameArg, planIDArg, planNameArg,
 	}
 
 	if servicePlanFound > 1 {
-		err = fmt.Errorf("multiple service plans with the same name found. Please provide the service plan ID instead of the name")
+		err = fmt.Errorf("multiple service plans with the same name found. Please specify the environment or provide the plan ID instead of the name")
 		return
 	}
 
