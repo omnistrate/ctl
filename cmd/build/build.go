@@ -63,11 +63,11 @@ const (
   # Build service with compose spec in prod environment
   omctl build --file docker-compose.yml --name "My Service" --environment prod --environment-type prod
 
-  # Build service with compose spec and release the service with a specific release version name
-  omctl build --file docker-compose.yml --name "My Service" --release --release-name "v1.0.0-alpha"
+  # Build service with compose spec and release the service with a release description
+  omctl build --file docker-compose.yml --name "My Service" --release --release-description "v1.0.0-alpha"
 
-  # Build service with compose spec and release the service as preferred with a specific release version name
-  omctl build --file docker-compose.yml --name "My Service" --release-as-preferred --release-name "v1.0.0-alpha"
+  # Build service with compose spec and release the service as preferred with a release description
+  omctl build --file docker-compose.yml --name "My Service" --release-as-preferred --release-description "v1.0.0-alpha"
 
   # Build service with compose spec interactively
   omctl build --file docker-compose.yml --name "My Service" --interactive
@@ -93,7 +93,7 @@ This command has an interactive mode. In this mode, you can choose to promote th
 
 // BuildCmd represents the build command
 var BuildCmd = &cobra.Command{
-	Use:          "build [--file=file] [--spec-type=spec-type][--name=name] [--environment=environment] [--environment-type=environment-type] [--release] [--release-as-preferred][--interactive][--description=description] [--service-logo-url=service-logo-url] [--image=image-url] [--image-registry-auth-username=username] [--image-registry-auth-password=password] [--env-var=\"key=var\"]",
+	Use:          "build [--file=file] [--spec-type=spec-type][--name=name] [--environment=environment] [--environment-type=environment-type] [--release] [--release-as-preferred][--release-description=release-description][--interactive][--description=service-description] [--service-logo-url=service-logo-url] [--image=image-url] [--image-registry-auth-username=username] [--image-registry-auth-password=password] [--env-var=\"key=var\"]",
 	Short:        "Build Services from image, compose spec and service plan specs",
 	Long:         buildLong,
 	Example:      buildExample,
@@ -103,8 +103,8 @@ var BuildCmd = &cobra.Command{
 
 func init() {
 	BuildCmd.Flags().StringVarP(&file, "file", "f", "", "Path to the docker compose file")
-	BuildCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the service")
-	BuildCmd.Flags().StringVarP(&description, "description", "", "", "Description of the service")
+	BuildCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the service. A service can have multiple service plans. The service plan will be built inside the service")
+	BuildCmd.Flags().StringVarP(&description, "description", "", "", "A short description for the whole service. A service can have multiple service plans.")
 	BuildCmd.Flags().StringVarP(&serviceLogoURL, "service-logo-url", "", "", "URL to the service logo")
 	BuildCmd.Flags().StringVarP(&environment, "environment", "", "Dev", "Name of the environment to build the service in")
 	BuildCmd.Flags().StringVarP(&environmentType, "environment-type", "", "dev", "Type of environment. Valid options include: 'dev', 'prod', 'qa', 'canary', 'staging', 'private')")
@@ -129,7 +129,10 @@ func init() {
 	if err != nil {
 		return
 	}
-
+	err = BuildCmd.Flags().MarkHidden("release-name")
+	if err != nil {
+		return
+	}
 	BuildCmd.MarkFlagsRequiredTogether("environment", "environment-type")
 }
 
