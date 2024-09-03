@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	stopExample = `  # Stop an instance deployment
-  omctl instance stop instance-abcd1234`
+	stopExample = `# Stop an instance deployment
+omctl instance stop instance-abcd1234`
 )
 
 var stopCmd = &cobra.Command{

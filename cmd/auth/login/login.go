@@ -13,21 +13,21 @@ import (
 type loginMethod string
 
 const (
-	loginExample = `  # Select login method with a prompt
-  omctl login
+	loginExample = `# Select login method with a prompt
+omctl login
 
-  # Login with email and password
-  omctl login --email email --password password
+# Login with email and password
+omctl login --email email --password password
 
-  # Login with environment variables
+# Login with environment variables
   export OMNISTRATE_USER_NAME=YOUR_EMAIL
   export OMNISTRATE_PASSWORD=YOUR_PASSWORD
   ./omnistrate-ctl-darwin-arm64 login --email "$OMNISTRATE_USER_NAME" --password "$OMNISTRATE_PASSWORD"
 
-  # Login with email and password from stdin. Save the password in a file and use cat to read it
+# Login with email and password from stdin. Save the password in a file and use cat to read it
   cat ~/omnistrate_pass.txt | omnistrate-ctl login --email email --password-stdin
 
-  # Login with email and password from stdin. Save the password in an environment variable and use echo to read it
+# Login with email and password from stdin. Save the password in an environment variable and use echo to read it
   echo $OMNISTRATE_PASSWORD | omnistrate-ctl login --email email --password-stdin`
 
 	loginWithEmailAndPassword loginMethod = "Login with email and password"

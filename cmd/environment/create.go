@@ -14,11 +14,11 @@ import (
 )
 
 const (
-	createExample = `  # Create environment
-  omctl environment create [service-name] [environment-name] --type=[type] --source=[source]
+	createExample = `# Create environment
+omctl environment create [service-name] [environment-name] --type=[type] --source=[source]
 
-  # Create environment by ID instead of name
-  omctl environment create [environment-name] --service-id=[service-id] --type=[type] --source=[source]`
+# Create environment by ID instead of name
+omctl environment create [environment-name] --service-id=[service-id] --type=[type] --source=[source]`
 )
 
 var EnvironmentID string

@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	deleteExample = `  # Delete a Helm package
-  omctl helm delete redis --version=20.0.1`
+	deleteExample = `# Delete a Helm package
+omctl helm delete redis --version=20.0.1`
 )
 
 var deleteCmd = &cobra.Command{

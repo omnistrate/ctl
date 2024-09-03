@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	listExample = `  # List all Helm packages that are saved
-  omctl helm list`
+	listExample = `# List all Helm packages that are saved
+omctl helm list`
 )
 
 var listCmd = &cobra.Command{

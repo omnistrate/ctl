@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	listExample = `  # List accounts
-  omctl account list`
+	listExample = `# List accounts
+omctl account list`
 )
 
 var listCmd = &cobra.Command{

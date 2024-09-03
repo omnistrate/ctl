@@ -51,29 +51,29 @@ const (
 	DockerComposeSpecType = "DockerCompose"
 	ServicePlanSpecType   = "ServicePlanSpec"
 
-	buildExample = `  # Build service from image in dev environment
-  omctl build --image docker.io/mysql:5.7 --name MySQL --env-var "MYSQL_ROOT_PASSWORD=password" --env-var "MYSQL_DATABASE=mydb"
+	buildExample = `# Build service from image in dev environment
+omctl build --image docker.io/mysql:5.7 --name MySQL --env-var "MYSQL_ROOT_PASSWORD=password" --env-var "MYSQL_DATABASE=mydb"
 
-  # Build service with private image in dev environment
-  omctl build --image docker.io/namespace/my-image:v1.2 --name "My Service" --image-registry-auth-username username --image-registry-auth-password password --env-var KEY1:VALUE1 --env-var KEY2:VALUE2
+# Build service with private image in dev environment
+omctl build --image docker.io/namespace/my-image:v1.2 --name "My Service" --image-registry-auth-username username --image-registry-auth-password password --env-var KEY1:VALUE1 --env-var KEY2:VALUE2
 
-  # Build service with compose spec in dev environment
-  omctl build --file docker-compose.yml --name "My Service"
+# Build service with compose spec in dev environment
+omctl build --file docker-compose.yml --name "My Service"
 
-  # Build service with compose spec in prod environment
-  omctl build --file docker-compose.yml --name "My Service" --environment prod --environment-type prod
+# Build service with compose spec in prod environment
+omctl build --file docker-compose.yml --name "My Service" --environment prod --environment-type prod
 
-  # Build service with compose spec and release the service with a release description
-  omctl build --file docker-compose.yml --name "My Service" --release --release-description "v1.0.0-alpha"
+# Build service with compose spec and release the service with a release description
+omctl build --file docker-compose.yml --name "My Service" --release --release-description "v1.0.0-alpha"
 
-  # Build service with compose spec and release the service as preferred with a release description
-  omctl build --file docker-compose.yml --name "My Service" --release-as-preferred --release-description "v1.0.0-alpha"
+# Build service with compose spec and release the service as preferred with a release description
+omctl build --file docker-compose.yml --name "My Service" --release-as-preferred --release-description "v1.0.0-alpha"
 
-  # Build service with compose spec interactively
-  omctl build --file docker-compose.yml --name "My Service" --interactive
+# Build service with compose spec interactively
+omctl build --file docker-compose.yml --name "My Service" --interactive
 
-  # Build service with compose spec with service description and service logo
-  omctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png"
+# Build service with compose spec with service description and service logo
+omctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png"
 `
 
 	buildLong = `Build command can be used to build a service from image, docker compose, and service plan spec. 

@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	listExample = `  # List domains
-  omctl domain list`
+	listExample = `# List domains
+omctl domain list`
 )
 
 var listCmd = &cobra.Command{
