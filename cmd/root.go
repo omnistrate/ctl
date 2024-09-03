@@ -109,7 +109,12 @@ func init() {
 	RootCmd.AddCommand(deprecated.DescribeCmd)
 	RootCmd.AddCommand(deprecated.ListCmd)
 	RootCmd.AddCommand(deprecated.RemoveCmd)
+
+	// Hide deprecated commands
 	deprecated.DescribeCmd.Hidden = true
 	deprecated.ListCmd.Hidden = true
 	deprecated.RemoveCmd.Hidden = true
+
+	// Hide the default completion command
+	RootCmd.Root().CompletionOptions.DisableDefaultCmd = true
 }
