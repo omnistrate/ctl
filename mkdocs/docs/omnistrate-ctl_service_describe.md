@@ -13,11 +13,11 @@ omnistrate-ctl service describe [flags]
 ### Examples
 
 ```
-  # Describe service with name
-  omctl service describe [service-name]
+# Describe service with name
+omctl service describe [service-name]
 
-  # Describe service with ID
-  omctl service describe --id=[service-ID]
+# Describe service with ID
+omctl service describe --id=[service-ID]
 ```
 
 ### Options

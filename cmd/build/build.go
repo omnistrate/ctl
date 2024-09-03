@@ -94,7 +94,7 @@ This command has an interactive mode. In this mode, you can choose to promote th
 // BuildCmd represents the build command
 var BuildCmd = &cobra.Command{
 	Use:          "build [--file=file] [--spec-type=spec-type] [--name=service-name] [--description=service-description] [--service-logo-url=service-logo-url] [--environment=environment-name] [--environment-type=environment-type] [--release] [--release-as-preferred] [--release-description=release-description][--interactive] [--image=image-url] [--image-registry-auth-username=username] [--image-registry-auth-password=password] [--env-var=\"key=var\"]",
-	Short:        "Build Services from image, compose spec and service plan specs",
+	Short:        "Build Services from image, compose spec or service plan spec",
 	Long:         buildLong,
 	Example:      buildExample,
 	RunE:         runBuild,

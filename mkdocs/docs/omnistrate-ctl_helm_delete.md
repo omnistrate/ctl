@@ -13,8 +13,8 @@ omnistrate-ctl helm delete chart --version=[version] [flags]
 ### Examples
 
 ```
-  # Delete a Helm package
-  omctl helm delete redis --version=20.0.1
+# Delete a Helm package
+omctl helm delete redis --version=20.0.1
 ```
 
 ### Options

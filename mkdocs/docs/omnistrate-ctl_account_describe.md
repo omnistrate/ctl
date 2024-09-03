@@ -13,11 +13,11 @@ omnistrate-ctl account describe [account-name] [flags]
 ### Examples
 
 ```
-  # Describe account with name
-  omctl account describe [account-name]
+# Describe account with name
+omctl account describe [account-name]
 
-  # Describe account with ID
-  omctl account describe --id=[account-id]
+# Describe account with ID
+omctl account describe --id=[account-id]
 ```
 
 ### Options

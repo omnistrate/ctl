@@ -13,8 +13,8 @@ omnistrate-ctl instance update [instance-id] [flags]
 ### Examples
 
 ```
-  # Update an instance deployment
-  omctl instance update instance-abcd1234
+# Update an instance deployment
+omctl instance update instance-abcd1234
 ```
 
 ### Options
