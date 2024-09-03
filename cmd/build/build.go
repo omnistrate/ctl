@@ -103,7 +103,7 @@ var BuildCmd = &cobra.Command{
 
 func init() {
 	BuildCmd.Flags().StringVarP(&file, "file", "f", "", "Path to the docker compose file")
-	BuildCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the service. A service can have multiple service plans. The service plan will be built inside the service")
+	BuildCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the service. A service can have multiple service plans. The build command will build a new or existing service plan inside the specified service.")
 	BuildCmd.Flags().StringVarP(&description, "description", "", "", "A short description for the whole service. A service can have multiple service plans.")
 	BuildCmd.Flags().StringVarP(&serviceLogoURL, "service-logo-url", "", "", "URL to the service logo")
 	BuildCmd.Flags().StringVarP(&environment, "environment", "", "Dev", "Name of the environment to build the service in")
