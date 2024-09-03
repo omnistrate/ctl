@@ -51,7 +51,7 @@ const (
 	DockerComposeSpecType = "DockerCompose"
 	ServicePlanSpecType   = "ServicePlanSpec"
 
-	buildExample = `  # Build service with image in dev environment
+	buildExample = `  # Build service from image in dev environment
   omctl build --image docker.io/mysql:5.7 --name MySQL --env-var "MYSQL_ROOT_PASSWORD=password" --env-var "MYSQL_DATABASE=mydb"
 
   # Build service with private image in dev environment
