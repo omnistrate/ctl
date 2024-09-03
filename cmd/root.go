@@ -109,4 +109,7 @@ func init() {
 	RootCmd.AddCommand(deprecated.DescribeCmd)
 	RootCmd.AddCommand(deprecated.ListCmd)
 	RootCmd.AddCommand(deprecated.RemoveCmd)
+	deprecated.DescribeCmd.Hidden = true
+	deprecated.ListCmd.Hidden = true
+	deprecated.RemoveCmd.Hidden = true
 }
