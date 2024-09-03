@@ -13,7 +13,7 @@ import (
 type loginMethod string
 
 const (
-	loginExample = `  # Login interactively with a single sign-on provider or using email and password
+	loginExample = `  # Select login method with a prompt
   omctl login
 
   # Login with email and password
