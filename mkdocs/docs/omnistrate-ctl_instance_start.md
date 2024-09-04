@@ -13,8 +13,8 @@ omnistrate-ctl instance start [instance-id] [flags]
 ### Examples
 
 ```
-  # Start an instance deployment
-  omctl instance start instance-abcd1234
+# Start an instance deployment
+omctl instance start instance-abcd1234
 ```
 
 ### Options

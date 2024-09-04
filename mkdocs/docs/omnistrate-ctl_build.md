@@ -1,6 +1,6 @@
 ## omnistrate-ctl build
 
-Build Services from image, compose spec and service plan specs
+Build Services from image, compose spec or service plan spec
 
 ### Synopsis
 
@@ -19,42 +19,42 @@ If the identifiers match an existing service plan, it will update that plan. Oth
 This command has an interactive mode. In this mode, you can choose to promote the service plan to production by interacting with the prompts.
 
 ```
-omnistrate-ctl build [--file=file] [--spec-type=spec-type][--name=name] [--environment=environment] [--environment-type=environment-type] [--release] [--release-as-preferred][--interactive][--description=description] [--service-logo-url=service-logo-url] [--image=image-url] [--image-registry-auth-username=username] [--image-registry-auth-password=password] [--env-var="key=var"] [flags]
+omnistrate-ctl build [--file=file] [--spec-type=spec-type] [--name=service-name] [--description=service-description] [--service-logo-url=service-logo-url] [--environment=environment-name] [--environment-type=environment-type] [--release] [--release-as-preferred] [--release-description=release-description][--interactive] [--image=image-url] [--image-registry-auth-username=username] [--image-registry-auth-password=password] [--env-var="key=var"] [flags]
 ```
 
 ### Examples
 
 ```
-  # Build service with image in dev environment
-  omctl build --image docker.io/mysql:5.7 --name MySQL --env-var "MYSQL_ROOT_PASSWORD=password" --env-var "MYSQL_DATABASE=mydb""
+# Build service from image in dev environment
+omctl build --image docker.io/mysql:5.7 --name MySQL --env-var "MYSQL_ROOT_PASSWORD=password" --env-var "MYSQL_DATABASE=mydb"
 
-  # Build service with private image in dev environment
-  omctl build --image docker.io/namespace/my-image:v1.2 --name "My Service" --image-registry-auth-username username --image-registry-auth-password password --env-var KEY1:VALUE1 --env-var KEY2:VALUE2
+# Build service with private image in dev environment
+omctl build --image docker.io/namespace/my-image:v1.2 --name "My Service" --image-registry-auth-username username --image-registry-auth-password password --env-var KEY1:VALUE1 --env-var KEY2:VALUE2
 
-  # Build service with compose spec in dev environment
-  omctl build --file docker-compose.yml --name "My Service"
+# Build service with compose spec in dev environment
+omctl build --file docker-compose.yml --name "My Service"
 
-  # Build service with compose spec in prod environment
-  omctl build --file docker-compose.yml --name "My Service" --environment prod --environment-type prod
+# Build service with compose spec in prod environment
+omctl build --file docker-compose.yml --name "My Service" --environment prod --environment-type prod
 
-  # Build service with compose spec and release the service with a specific release version name
-  omctl build --file docker-compose.yml --name "My Service" --release --release-name "v1.0.0-alpha"
+# Build service with compose spec and release the service with a release description
+omctl build --file docker-compose.yml --name "My Service" --release --release-description "v1.0.0-alpha"
 
-  # Build service with compose spec and release the service as preferred with a specific release version name
-  omctl build --file docker-compose.yml --name "My Service" --release-as-preferred --release-name "v1.0.0-alpha"
+# Build service with compose spec and release the service as preferred with a release description
+omctl build --file docker-compose.yml --name "My Service" --release-as-preferred --release-description "v1.0.0-alpha"
 
-  # Build service with compose spec interactively
-  omctl build --file docker-compose.yml --name "My Service" --interactive
+# Build service with compose spec interactively
+omctl build --file docker-compose.yml --name "My Service" --interactive
 
-  # Build service with compose spec with service description and service logo
-  omctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png"
+# Build service with compose spec with service description and service logo
+omctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png"
 
 ```
 
 ### Options
 
 ```
-      --description string                    Description of the service
+      --description string                    A short description for the whole service. A service can have multiple service plans.
       --env-var stringArray                   Used together with --image flag. Provide environment variables in the format --env-var key1=var1 --env-var key2=var2
       --environment string                    Name of the environment to build the service in (default "Dev")
       --environment-type string               Type of environment. Valid options include: 'dev', 'prod', 'qa', 'canary', 'staging', 'private') (default "dev")
@@ -64,11 +64,10 @@ omnistrate-ctl build [--file=file] [--spec-type=spec-type][--name=name] [--envir
       --image-registry-auth-password string   Used together with --image flag. Provide the password to authenticate with the image registry if it's a private registry
       --image-registry-auth-username string   Used together with --image flag. Provide the username to authenticate with the image registry if it's a private registry
   -i, --interactive                           Interactive mode
-  -n, --name string                           Name of the service
+  -n, --name string                           Name of the service. A service can have multiple service plans. The build command will build a new or existing service plan inside the specified service.
       --release                               Release the service after building it
       --release-as-preferred                  Release the service as preferred after building it
       --release-description string            Custom description of the release version
-      --release-name string                   Custom description of the release version. Deprecated: use --release-description instead
       --service-logo-url string               URL to the service logo
   -s, --spec-type string                      Spec type (default "DockerCompose")
 ```

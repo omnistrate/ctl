@@ -13,11 +13,11 @@ omnistrate-ctl service delete [service-name] [flags]
 ### Examples
 
 ```
-  # Delete service with name
-  omctl service delete [service-name]
+# Delete service with name
+omctl service delete [service-name]
 
-  # Delete service with ID
-  omctl service delete --id=[service-ID]
+# Delete service with ID
+omctl service delete --id=[service-ID]
 ```
 
 ### Options

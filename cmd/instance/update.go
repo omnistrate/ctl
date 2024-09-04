@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	updateExample = `  # Update an instance deployment
-  omctl instance update instance-abcd1234`
+	updateExample = `# Update an instance deployment
+omctl instance update instance-abcd1234`
 )
 
 var updateCmd = &cobra.Command{

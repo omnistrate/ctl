@@ -5,13 +5,21 @@ Manage your Omnistrate SaaS from the command line
 ### Synopsis
 
 
-Omnistrate CTL is a command line tool designed to streamline the creation,
-deployment, and management of your Omnistrate SaaS. Use it to build services
-from docker-compose files, manage service plans, and interact with the
-Omnistrate platform efficiently.
+Omnistrate CTL is a powerful command-line tool designed to simplify the creation, deployment, and
+management of your Omnistrate SaaS.
 
-For additional support, please refer to the CTL reference documentation at
-https://docs.omnistrate.com/getting-started/ctl-reference/.
+Key Features:
+- Build Services: Create services from images or compose specs.
+- Manage Service Plans: Efficiently handle your service plans.
+- Deploy Instances: Deploy and manage instances with ease.
+
+Resources:
+- CTL Manual: https://ctl.omnistrate.cloud/omnistrate-ctl/
+- Quick Start Guide: https://docs.omnistrate.com/getting-started/getting-started-with-ctl/
+
+Use the CTL commands below to begin managing your services effectively.
+
+
 
 ```
 omnistrate-ctl [flags]
@@ -28,16 +36,13 @@ omnistrate-ctl [flags]
 ### SEE ALSO
 
 * [omnistrate-ctl account](omnistrate-ctl_account.md)	 - Manage your Cloud Provider Accounts
-* [omnistrate-ctl build](omnistrate-ctl_build.md)	 - Build Services from image, compose spec and service plan specs
-* [omnistrate-ctl describe](omnistrate-ctl_describe.md)	 - Describe a Service (deprecated)
+* [omnistrate-ctl build](omnistrate-ctl_build.md)	 - Build Services from image, compose spec or service plan spec
 * [omnistrate-ctl domain](omnistrate-ctl_domain.md)	 - Manage Customer Domains for your service
 * [omnistrate-ctl environment](omnistrate-ctl_environment.md)	 - Manage Service Environments for your service
 * [omnistrate-ctl helm](omnistrate-ctl_helm.md)	 - Manage Helm Charts for your service
 * [omnistrate-ctl instance](omnistrate-ctl_instance.md)	 - Manage Instance Deployments for your service
-* [omnistrate-ctl list](omnistrate-ctl_list.md)	 - List Services (deprecated)
 * [omnistrate-ctl login](omnistrate-ctl_login.md)	 - Log in to the Omnistrate platform
 * [omnistrate-ctl logout](omnistrate-ctl_logout.md)	 - Logout
-* [omnistrate-ctl remove](omnistrate-ctl_remove.md)	 - Remove a Service (deprecated)
 * [omnistrate-ctl service](omnistrate-ctl_service.md)	 - Manage Services for your account
 * [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage Service Plans for your service
 * [omnistrate-ctl subscription](omnistrate-ctl_subscription.md)	 - Manage Customer Subscriptions for your service

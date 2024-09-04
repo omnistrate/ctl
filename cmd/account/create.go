@@ -11,11 +11,11 @@ import (
 )
 
 const (
-	createExample = `  # Create aws account
-  omctl account create [account-name] --aws-account-id=[account-id]
+	createExample = `# Create aws account
+omctl account create [account-name] --aws-account-id=[account-id]
 
-  # Create gcp account
-  omctl account create [account-name] --gcp-project-id=[project-id] --gcp-project-number=[project-number]`
+# Create gcp account
+omctl account create [account-name] --gcp-project-id=[project-id] --gcp-project-number=[project-number]`
 )
 
 var createCmd = &cobra.Command{

@@ -14,8 +14,8 @@ omnistrate-ctl service list [flags]
 ### Examples
 
 ```
-  # List services
-  omctl service list
+# List services
+omctl service list
 ```
 
 ### Options

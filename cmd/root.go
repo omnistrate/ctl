@@ -36,9 +36,20 @@ var RootCmd = &cobra.Command{
 	Use:   "omnistrate-ctl",
 	Short: "Manage your Omnistrate SaaS from the command line",
 	Long: wordwrap.WrapString(`
-Omnistrate CTL is a command line tool designed to streamline the creation, deployment, and management of your Omnistrate SaaS. Use it to build services from docker-compose files, manage service plans, and interact with the Omnistrate platform efficiently.
+Omnistrate CTL is a powerful command-line tool designed to simplify the creation, deployment, and management of your Omnistrate SaaS.
 
-For additional support, please refer to the CTL reference documentation at https://docs.omnistrate.com/getting-started/ctl-reference/.`, 80),
+Key Features:
+- Build Services: Create services from images or compose specs.
+- Manage Service Plans: Efficiently handle your service plans.
+- Deploy Instances: Deploy and manage instances with ease.
+
+Resources:
+- CTL Manual: https://ctl.omnistrate.cloud/omnistrate-ctl/
+- Quick Start Guide: https://docs.omnistrate.com/getting-started/getting-started-with-ctl/
+
+Use the CTL commands below to begin managing your services effectively.
+
+`, 100),
 	Run:               runRoot,
 	DisableAutoGenTag: true,
 	Aliases:           []string{"omctl"},
@@ -109,4 +120,12 @@ func init() {
 	RootCmd.AddCommand(deprecated.DescribeCmd)
 	RootCmd.AddCommand(deprecated.ListCmd)
 	RootCmd.AddCommand(deprecated.RemoveCmd)
+
+	// Hide deprecated commands
+	deprecated.DescribeCmd.Hidden = true
+	deprecated.ListCmd.Hidden = true
+	deprecated.RemoveCmd.Hidden = true
+
+	// Hide the default completion command
+	RootCmd.Root().CompletionOptions.DisableDefaultCmd = true
 }

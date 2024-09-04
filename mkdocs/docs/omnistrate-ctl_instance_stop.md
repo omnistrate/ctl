@@ -13,8 +13,8 @@ omnistrate-ctl instance stop [instance-id] [flags]
 ### Examples
 
 ```
-  # Stop an instance deployment
-  omctl instance stop instance-abcd1234
+# Stop an instance deployment
+omctl instance stop instance-abcd1234
 ```
 
 ### Options
