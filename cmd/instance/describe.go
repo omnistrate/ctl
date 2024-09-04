@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	describeExample = `  # Describe an instance deployment
-  omctl instance describe instance-abcd1234`
+	describeExample = `# Describe an instance deployment
+omctl instance describe instance-abcd1234`
 )
 
 var InstanceStatus string

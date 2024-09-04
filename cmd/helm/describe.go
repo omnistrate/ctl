@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	describeExample = `  # Describe the Redis Operator Helm Chart
-  omctl helm describe redis --version=20.0.1`
+	describeExample = `# Describe the Redis Operator Helm Chart
+omctl helm describe redis --version=20.0.1`
 )
 
 var describeCmd = &cobra.Command{

@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	listExample = `  # List instance deployments of the service postgres in the prod and dev environments
-  omctl instance list -f="service:postgres,environment:Production" -f="service:postgres,environment:Dev"`
+	listExample = `# List instance deployments of the service postgres in the prod and dev environments
+omctl instance list -f="service:postgres,environment:Production" -f="service:postgres,environment:Dev"`
 	defaultMaxNameLength = 30 // Maximum length of the name column in the table
 )
 

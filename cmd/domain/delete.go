@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	deleteExample = `  # Delete domain with name
-  omctl delete domain [domain-name]`
+	deleteExample = `# Delete domain with name
+omctl delete domain [domain-name]`
 )
 
 var deleteCmd = &cobra.Command{

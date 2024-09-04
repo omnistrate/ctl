@@ -13,14 +13,14 @@ import (
 )
 
 const (
-	upgradeExample = `  # Upgrade instances to a specific version
-  omctl upgrade [instance1] [instance2] --version=2.0
+	upgradeExample = `# Upgrade instances to a specific version
+omctl upgrade [instance1] [instance2] --version=2.0
 
-  # Upgrade instances to the latest version
-  omctl upgrade [instance1] [instance2] --version=latest
+# Upgrade instances to the latest version
+omctl upgrade [instance1] [instance2] --version=latest
 
  # Upgrade instances to the preferred version
-  omctl upgrade [instance1] [instance2] --version=preferred`
+omctl upgrade [instance1] [instance2] --version=preferred`
 )
 
 var Cmd = &cobra.Command{

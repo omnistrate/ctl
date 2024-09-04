@@ -112,15 +112,15 @@ func TestInstanceBasic(t *testing.T) {
 	err = WaitForInstanceToReachStatus(instanceID2, string(constants.Running), 300*time.Second)
 	require.NoError(t, err)
 
-	//// PASS: instance list
-	// cmd.RootCmd.SetArgs([]string{"instance", "list"})
-	// err = cmd.RootCmd.Execute()
-	// require.NoError(t, err)
-	//
-	//// PASS: instance list with filters
-	// cmd.RootCmd.SetArgs([]string{"instance", "list", "-f", "environment:DEV,cloud_provider:gcp", "-f", "environment:DEV,cloud_provider:aws"})
-	// err = cmd.RootCmd.Execute()
-	// require.NoError(t, err)
+	// PASS: instance list
+	cmd.RootCmd.SetArgs([]string{"instance", "list"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(t, err)
+
+	// PASS: instance list with filters
+	cmd.RootCmd.SetArgs([]string{"instance", "list", "-f", "environment:DEV,cloud_provider:gcp", "-f", "environment:Dev,cloud_provider:aws"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(t, err)
 
 	// PASS: delete instance 1
 	cmd.RootCmd.SetArgs([]string{"instance", "delete", instanceID1, "--yes"})

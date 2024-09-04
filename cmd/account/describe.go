@@ -10,11 +10,11 @@ import (
 )
 
 const (
-	describeExample = `  # Describe account with name
-  omctl account describe [account-name]
+	describeExample = `# Describe account with name
+omctl account describe [account-name]
 
-  # Describe account with ID
-  omctl account describe --id=[account-id]`
+# Describe account with ID
+omctl account describe --id=[account-id]`
 )
 
 var describeCmd = &cobra.Command{

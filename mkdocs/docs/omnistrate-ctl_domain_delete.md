@@ -13,8 +13,8 @@ omnistrate-ctl domain delete [name] [flags]
 ### Examples
 
 ```
-  # Delete domain with name
-  omctl delete domain [domain-name]
+# Delete domain with name
+omctl delete domain [domain-name]
 ```
 
 ### Options

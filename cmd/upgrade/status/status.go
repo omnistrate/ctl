@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	statusExample = `  # Get upgrade status
-  omctl upgrade status [upgrade-id]`
+	statusExample = `# Get upgrade status
+omctl upgrade status [upgrade-id]`
 )
 
 var Cmd = &cobra.Command{
