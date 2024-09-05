@@ -20,33 +20,14 @@ const (
 
 // ConfigFile represents the Omnistrate CTL config file.
 type ConfigFile struct {
-	AuthConfigs []AuthConfig `yaml:"auths"`
-	FilePath    string       `yaml:"-"`
+	AuthConfigs               []AuthConfig `yaml:"auths"`
+	GitHubPersonalAccessToken string       `yaml:"github_personal_access_token,omitempty"`
+	FilePath                  string       `yaml:"-"`
 }
 
 // AuthConfig represents the authentication configuration.
 type AuthConfig struct {
 	Token string `yaml:"token,omitempty"`
-}
-
-// ServiceConfig represents the service configuration.
-type ServiceConfig struct {
-	ID             string `yaml:"id,omitempty"`
-	Name           string `yaml:"name,omitempty"`
-	Description    string `yaml:"description,omitempty"`
-	ServiceLogoURL string `yaml:"serviceLogoURL,omitempty"`
-}
-
-type AuthConfigNotFoundError struct{}
-
-func (e *AuthConfigNotFoundError) Error() string {
-	return "no auth config found"
-}
-
-type ServiceConfigNotFoundError struct{}
-
-func (e *ServiceConfigNotFoundError) Error() string {
-	return "no service config found"
 }
 
 // New initializes a config file for the given file path.
@@ -187,11 +168,11 @@ func LookupAuthConfig() (AuthConfig, error) {
 		return authConfig, err
 	}
 
-	if len(cfg.AuthConfigs) > 0 {
+	if len(cfg.AuthConfigs) > 0 && cfg.AuthConfigs[0].Token != "" {
 		return cfg.AuthConfigs[0], nil
 	}
 
-	return authConfig, &AuthConfigNotFoundError{}
+	return authConfig, errors.New("no auth config found")
 }
 
 // RemoveAuthConfig deletes the authentication configuration.
@@ -219,5 +200,81 @@ func RemoveAuthConfig() error {
 		return cfg.save()
 	}
 
-	return &AuthConfigNotFoundError{}
+	return errors.New("no auth config found")
+}
+
+// CreateOrUpdateGitHubPersonalAccessToken creates or updates the authentication configuration.
+func CreateOrUpdateGitHubPersonalAccessToken(gitHubPersonalAccessToken string) error {
+	configPath, err := EnsureFile()
+	if err != nil {
+		return err
+	}
+
+	cfg, err := New(configPath)
+	if err != nil {
+		return err
+	}
+
+	if err = cfg.load(); err != nil {
+		return err
+	}
+
+	cfg.GitHubPersonalAccessToken = gitHubPersonalAccessToken
+
+	return cfg.save()
+}
+
+// LookupGitHubPersonalAccessToken returns the authentication configuration.
+func LookupGitHubPersonalAccessToken() (string, error) {
+	if !fileExists() {
+		return "", errors.New("config file not found")
+	}
+
+	configPath, err := EnsureFile()
+	if err != nil {
+		return "", err
+	}
+
+	cfg, err := New(configPath)
+	if err != nil {
+		return "", err
+	}
+
+	if err = cfg.load(); err != nil {
+		return "", err
+	}
+
+	if len(cfg.GitHubPersonalAccessToken) > 0 {
+		return cfg.GitHubPersonalAccessToken, nil
+	}
+
+	return "", errors.New("no github personal access token found")
+}
+
+// RemoveGitHubPersonalAccessToken deletes the authentication configuration.
+func RemoveGitHubPersonalAccessToken() error {
+	if !fileExists() {
+		return errors.New("config file not found")
+	}
+
+	configPath, err := EnsureFile()
+	if err != nil {
+		return err
+	}
+
+	cfg, err := New(configPath)
+	if err != nil {
+		return err
+	}
+
+	if err = cfg.load(); err != nil {
+		return err
+	}
+
+	if len(cfg.GitHubPersonalAccessToken) > 0 {
+		cfg.GitHubPersonalAccessToken = ""
+		return cfg.save()
+	}
+
+	return errors.New("no github personal access token found")
 }
