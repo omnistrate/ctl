@@ -67,7 +67,7 @@ func TestSaveAndLoad(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestCreateOrUpdateAuthConfig(t *testing.T) {
+func TestAuthConfig(t *testing.T) {
 	authConfig := AuthConfig{
 		Token: "token123",
 	}
@@ -78,43 +78,33 @@ func TestCreateOrUpdateAuthConfig(t *testing.T) {
 	loadedConfig, err := LookupAuthConfig()
 	assert.NoError(t, err)
 	assert.Equal(t, authConfig, loadedConfig)
-
-	err = RemoveAuthConfig()
-	assert.NoError(t, err)
-}
-
-func TestLookupAuthConfig(t *testing.T) {
-	_, err := LookupAuthConfig()
-	assert.Error(t, err)
-
-	authConfig := AuthConfig{
-		Token: "token123",
-	}
-
-	err = CreateOrUpdateAuthConfig(authConfig)
-	assert.NoError(t, err)
-
-	loadedConfig, err := LookupAuthConfig()
-	assert.NoError(t, err)
-	assert.Equal(t, authConfig, loadedConfig)
-
-	err = RemoveAuthConfig()
-	assert.NoError(t, err)
-}
-
-func TestRemoveAuthConfig(t *testing.T) {
-	authConfig := AuthConfig{
-		Token: "token123",
-	}
-
-	err := CreateOrUpdateAuthConfig(authConfig)
-	assert.NoError(t, err)
 
 	err = RemoveAuthConfig()
 	assert.NoError(t, err)
 
 	_, err = LookupAuthConfig()
 	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "no auth config found")
+}
+
+func TestGitHubPersonalAccessToken(t *testing.T) {
+	_, err := LookupGitHubPersonalAccessToken()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "no github personal access token found")
+
+	err = CreateOrUpdateGitHubPersonalAccessToken("token123")
+	assert.NoError(t, err)
+
+	loadedPAT, err := LookupGitHubPersonalAccessToken()
+	assert.NoError(t, err)
+	assert.Equal(t, "token123", loadedPAT)
+
+	err = RemoveGitHubPersonalAccessToken()
+	assert.NoError(t, err)
+
+	_, err = LookupGitHubPersonalAccessToken()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "no github personal access token found")
 }
 
 func TestLoadNonExistentFile(t *testing.T) {
