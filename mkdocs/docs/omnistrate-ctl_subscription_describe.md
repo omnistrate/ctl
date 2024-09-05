@@ -13,8 +13,8 @@ omnistrate-ctl subscription describe [subscription-id] [flags]
 ### Examples
 
 ```
-  # Describe subscription
-  omctl subscription describe [subscription-id]
+# Describe subscription
+omctl subscription describe [subscription-id]
 ```
 
 ### Options

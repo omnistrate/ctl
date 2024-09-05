@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	listExample = `  # List subscriptions of the service postgres and mysql in the prod environment
-  omctl subscription list -f="service_name:postgres,environment:PROD" -f="service:mysql,environment:PROD"`
+	listExample = `# List subscriptions of the service postgres and mysql in the prod environment
+omctl subscription list -f="service_name:postgres,environment:prod" -f="service:mysql,environment:prod"`
 	defaultMaxNameLength = 30 // Maximum length of the name column in the table
 )
 

@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	listVersionsExample = `  # List service plan versions of the service postgres in the prod and dev environments
-  omctl service-plan list-versions postgres postgres -f="service_name:postgres,environment:prod" -f="service:postgres,environment:dev"`
+	listVersionsExample = `# List service plan versions of the service postgres in the prod and dev environments
+omctl service-plan list-versions postgres postgres -f="service_name:postgres,environment:prod" -f="service:postgres,environment:dev"`
 )
 
 var listVersionsCmd = &cobra.Command{

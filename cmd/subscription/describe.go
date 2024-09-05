@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	describeExample = `  # Describe subscription
-  omctl subscription describe [subscription-id]`
+	describeExample = `# Describe subscription
+omctl subscription describe [subscription-id]`
 )
 
 var describeCmd = &cobra.Command{

@@ -13,11 +13,11 @@ omnistrate-ctl account delete [account-name] [flags]
 ### Examples
 
 ```
-  # Delete account with name
-  omctl account delete [account-name]
+# Delete account with name
+omctl account delete [account-name]
 
-  # Delete account with ID
-  omctl account delete --id=[account-ID]
+# Delete account with ID
+omctl account delete --id=[account-ID]
 ```
 
 ### Options

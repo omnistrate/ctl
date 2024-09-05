@@ -14,8 +14,8 @@ omnistrate-ctl environment list [flags]
 ### Examples
 
 ```
-  # List environments of the service postgres in the prod and dev environment types
-  omctl environment list -f="service_name:postgres,environment_type:PROD" -f="service:postgres,environment_type:DEV"
+# List environments of the service postgres in the prod and dev environment types
+omctl environment list -f="service_name:postgres,environment_type:PROD" -f="service:postgres,environment_type:DEV"
 ```
 
 ### Options

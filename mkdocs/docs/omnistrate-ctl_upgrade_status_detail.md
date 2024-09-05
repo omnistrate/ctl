@@ -9,8 +9,8 @@ omnistrate-ctl upgrade status detail [upgrade-id] [flags]
 ### Examples
 
 ```
-  # Get upgrade status detail
-  omctl upgrade status detail [upgrade-id]
+# Get upgrade status detail
+omctl upgrade status detail [upgrade-id]
 ```
 
 ### Options

@@ -11,11 +11,11 @@ import (
 )
 
 const (
-	setDefaultExample = `  # Set service plan as default
-  omctl service-plan set-default [service-name] [plan-name] --version=[version]
+	setDefaultExample = `# Set service plan as default
+omctl service-plan set-default [service-name] [plan-name] --version=[version]
 
-  # Set  service plan as default by ID instead of name
-  omctl service-plan set-default --service-id=[service-id] --plan-id=[plan-id] --version=[version]`
+# Set  service plan as default by ID instead of name
+omctl service-plan set-default --service-id=[service-id] --plan-id=[plan-id] --version=[version]`
 )
 
 var setDefaultCmd = &cobra.Command{

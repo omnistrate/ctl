@@ -12,11 +12,11 @@ import (
 )
 
 const (
-	describeExample = `  # Describe environment
-  omctl environment describe [service-name] [environment-name]
+	describeExample = `# Describe environment
+omctl environment describe [service-name] [environment-name]
 
-  # Describe environment by ID instead of name
-  omctl environment describe --service-id=[service-id] --environment-id=[environment-id]`
+# Describe environment by ID instead of name
+omctl environment describe --service-id=[service-id] --environment-id=[environment-id]`
 )
 
 var describeCmd = &cobra.Command{

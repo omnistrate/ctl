@@ -13,11 +13,11 @@ omnistrate-ctl account create [account-name] [--aws-account-id=account-id] [--gc
 ### Examples
 
 ```
-  # Create aws account
-  omctl account create [account-name] --aws-account-id=[account-id]
+# Create aws account
+omctl account create [account-name] --aws-account-id=[account-id]
 
-  # Create gcp account
-  omctl account create [account-name] --gcp-project-id=[project-id] --gcp-project-number=[project-number]
+# Create gcp account
+omctl account create [account-name] --gcp-project-id=[project-id] --gcp-project-number=[project-number]
 ```
 
 ### Options

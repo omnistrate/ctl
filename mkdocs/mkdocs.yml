@@ -43,6 +43,7 @@ validation:
 nav:
   - Install CTL: 'install.md'
   - Integrate CTL: "integrating.md"
+  - CTL Usage: "omnistrate-ctl.md"
   - Commands:
     - auth:
       - login: 'omnistrate-ctl_login.md'
