@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	DefaultDir         string      = ".omnistrate"
+	DefaultDir         string      = "~/.omnistrate"
 	DefaultFile        string      = "config.yml"
 	DefaultPermissions os.FileMode = 0700
 )
