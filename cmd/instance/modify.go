@@ -11,33 +11,32 @@ import (
 )
 
 const (
-	updateExample = `# Update an instance deployment
-omctl instance update instance-abcd1234`
+	modifyExample = `# Modify an instance deployment
+omctl instance modify instance-abcd1234`
 )
 
-var updateCmd = &cobra.Command{
-	Use:          "update [instance-id]",
-	Short:        "Update an instance deployment for your service",
-	Long:         `This command helps you update the instance for your service.`,
-	Example:      updateExample,
-	RunE:         runUpdate,
+var modifyCmd = &cobra.Command{
+	Use:          "modify [instance-id]",
+	Short:        "Modify an instance deployment for your service",
+	Long:         `This command helps you modify the instance for your service.`,
+	Example:      modifyExample,
+	RunE:         runModify,
 	SilenceUsage: true,
 }
 
 func init() {
-	updateCmd.Flags().String("param", "", "Parameters for the instance deployment")
-	updateCmd.Flags().String("param-file", "", "Json file containing parameters for the instance deployment")
 
-	if err := updateCmd.MarkFlagFilename("param-file"); err != nil {
+	modifyCmd.Flags().String("param", "", "Parameters for the instance deployment")
+	modifyCmd.Flags().String("param-file", "", "Json file containing parameters for the instance deployment")
+
+	if err := modifyCmd.MarkFlagFilename("param-file"); err != nil {
 		return
 	}
 
-	updateCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
-
-	updateCmd.Hidden = true
+	modifyCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 }
 
-func runUpdate(cmd *cobra.Command, args []string) error {
+func runModify(cmd *cobra.Command, args []string) error {
 	defer utils.CleanupArgsAndFlags(cmd, &args)
 
 	// Retrieve args
@@ -72,7 +71,7 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 	var spinner *ysmrr.Spinner
 	if output != "json" {
 		sm = ysmrr.NewSpinnerManager()
-		msg := "Updating instance..."
+		msg := "Modify instance..."
 		spinner = sm.AddSpinner(msg)
 		sm.Start()
 	}
@@ -91,7 +90,7 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Update instance
+	// Modify instance
 	err = dataaccess.UpdateResourceInstance(token, inventoryapi.FleetUpdateResourceInstanceRequest{
 		ServiceID:     inventoryapi.ServiceID(serviceID),
 		EnvironmentID: inventoryapi.ServiceEnvironmentID(environmentID),
@@ -104,7 +103,7 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	utils.HandleSpinnerSuccess(spinner, sm, "Successfully updated instance")
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully modified instance")
 
 	// Search for the instance
 	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("resourceinstance:%s", instanceID))
@@ -114,7 +113,7 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(searchRes.ResourceInstanceResults) == 0 {
-		err = errors.New("failed to find the updated instance")
+		err = errors.New("failed to find the modified instance")
 		utils.PrintError(err)
 		return err
 	}
