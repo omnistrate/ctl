@@ -345,6 +345,9 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
+		// Replace the actual PAT with ${{ secrets.GitHubPAT }}
+		fileData = []byte(strings.ReplaceAll(string(fileData), pat, "${{ secrets.GitHubPAT }}"))
+
 		// Write the compose spec to a file
 		err = os.WriteFile(ComposeFileName, fileData, 0600)
 		if err != nil {
@@ -369,6 +372,9 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+
+	// Render the ${{ secrets.GitHubPAT }} in the compose file
+	fileData = []byte(strings.ReplaceAll(string(fileData), "${{ secrets.GitHubPAT }}", pat))
 
 	// Build the service
 	serviceID, devEnvironmentID, devPlanID, err := buildService(fileData, token, repoName, DockerComposeSpecType, nil, nil,
