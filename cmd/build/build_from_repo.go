@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/chelnak/ysmrr"
 	composegenapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/compose_gen_api"
+	producttierapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/product_tier_api"
 	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
 	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/config"
@@ -320,7 +321,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	}
 
 	// Build the service
-	serviceID, devEnvironmentID, _, err := buildService(fileData, token, repoName, DockerComposeSpecType, nil, nil,
+	serviceID, devEnvironmentID, devPlanID, err := buildService(fileData, token, repoName, DockerComposeSpecType, nil, nil,
 		nil, nil, true, true, nil)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
@@ -367,7 +368,53 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	spinner.UpdateMessage("Promoting the service to the production environment: Success")
 	spinner.Complete()
 
-	// Step 17: Initialize the SaaS Portal
+	// Step 17: Set this service plan as the default service plan in production
+	spinner = sm.AddSpinner("Setting the service plan as the default service plan in production")
+
+	// Describe the dev product tier
+	var devProductTier *producttierapi.DescribeProductTierResult
+	devProductTier, err = dataaccess.DescribeProductTier(token, serviceID, devPlanID)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+
+	// Find the production plan with the same name as the dev plan
+	var prodPlanID string
+	service, err := dataaccess.DescribeService(token, serviceID)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+	for _, env := range service.ServiceEnvironments {
+		if string(env.ID) != string(prodEnvironmentID) {
+			continue
+		}
+		for _, plan := range env.ServicePlans {
+			if plan.Name == devProductTier.Name {
+				prodPlanID = string(plan.ProductTierID)
+				break
+			}
+		}
+	}
+
+	// Find the latest version of the production plan
+	targetVersion, err := dataaccess.FindLatestVersion(token, serviceID, prodPlanID)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+
+	// Set the default service plan
+	_, err = dataaccess.SetDefaultServicePlan(token, serviceID, prodPlanID, targetVersion)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+	spinner.UpdateMessage("Setting current version as the default service plan version in production: Success")
+	spinner.Complete()
+
+	// Step 18: Initialize the SaaS Portal
 	var prodEnvironment *serviceenvironmentapi.DescribeServiceEnvironmentResult
 	prodEnvironment, err = dataaccess.DescribeServiceEnvironment(token, serviceID, string(prodEnvironmentID))
 	if err != nil {
@@ -395,7 +442,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		spinner.Complete()
 	}
 
-	// Step 18: Retrieve the SaaS Portal URL
+	// Step 19: Retrieve the SaaS Portal URL
 	spinner = sm.AddSpinner("Retrieving the SaaS Portal URL")
 	time.Sleep(1 * time.Second) // Add a delay to show the spinner
 	spinner.Complete()
