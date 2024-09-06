@@ -46,8 +46,9 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	sm = ysmrr.NewSpinnerManager()
 
 	// Step 1: Validate user is currently logged in
-	spinner = sm.AddSpinner("Checking if user is logged in")
 	sm.Start()
+	spinner = sm.AddSpinner("Checking if user is logged in")
+	time.Sleep(1 * time.Second) // Add a delay to show the spinner
 	token, err := utils.GetToken()
 	if errors.As(err, &config.ErrAuthConfigNotFound) {
 		utils.HandleSpinnerError(spinner, sm, errors.New("user is not logged in"))
@@ -62,6 +63,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	// Step 2: Check if there is an existing GitHub pat
 	spinner = sm.AddSpinner("Checking for existing GitHub Personal Access Token")
+	time.Sleep(1 * time.Second) // Add a delay to show the spinner
 	pat, err := config.LookupGitHubPersonalAccessToken()
 	if err != nil && !errors.As(err, &config.ErrGitHubPATNotFound) {
 		utils.HandleSpinnerError(spinner, sm, err)
@@ -130,6 +132,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	// Step 3: Check if the user is in the root of the repository
 	spinner = sm.AddSpinner("Checking if user is in the root of the repository")
+	time.Sleep(1 * time.Second) // Add a delay to show the spinner
 	cwd, err := os.Getwd()
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
@@ -144,6 +147,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	// Step 4: Check if the Dockerfile exists in the root of the repository
 	spinner = sm.AddSpinner("Checking if Dockerfile exists in the root of the repository")
+	time.Sleep(1 * time.Second) // Add a delay to show the spinner
 	if _, err = os.Stat(filepath.Join(cwd, "Dockerfile")); os.IsNotExist(err) {
 		utils.HandleSpinnerError(spinner, sm, errors.New("Dockerfile not found in the root of the repository"))
 		return err
@@ -153,6 +157,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	// Step 5: Check if the Docker daemon is running
 	spinner = sm.AddSpinner("Checking if Docker daemon is running")
+	time.Sleep(1 * time.Second)                // Add a delay to show the spinner
 	err = exec.Command("docker", "info").Run() // Simple way to check if Docker is available
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
@@ -163,6 +168,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	// Step 6: Retrieve the repository name
 	spinner = sm.AddSpinner("Retrieving repository name")
+	time.Sleep(1 * time.Second) // Add a delay to show the spinner
 	output, err := exec.Command("git", "remote", "get-url", "origin").Output()
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
@@ -176,6 +182,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	// Step 7: Retrieve the GitHub username
 	spinner = sm.AddSpinner("Retrieving GitHub username")
+	time.Sleep(1 * time.Second) // Add a delay to show the spinner
 	ghUsernameOutput, err := exec.Command("gh", "api", "user", "-q", ".login").Output()
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
@@ -249,6 +256,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	// Step 11: Check if there exists a compose spec in the repository
 	spinner = sm.AddSpinner("Checking if there exists a compose spec in the repository")
+	time.Sleep(1 * time.Second) // Add a delay to show the spinner
 	var composeSpecExists bool
 	if _, err := os.Stat(filepath.Join(cwd, ComposeFileName)); os.IsNotExist(err) {
 		composeSpecExists = false
@@ -324,6 +332,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	// Step 14: Check if the production environment is set up
 	spinner = sm.AddSpinner("Checking if the production environment is set up")
+	time.Sleep(1 * time.Second) // Add a delay to show the spinner
 	prodEnvironmentID, err := checkIfProdEnvExists(token, serviceID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
@@ -388,6 +397,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	// Step 18: Retrieve the SaaS Portal URL
 	spinner = sm.AddSpinner("Retrieving the SaaS Portal URL")
+	time.Sleep(1 * time.Second) // Add a delay to show the spinner
 	spinner.Complete()
 
 	sm.Stop()
