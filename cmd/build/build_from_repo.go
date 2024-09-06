@@ -203,7 +203,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	loginCmd.Stdout = os.Stdout
 	loginCmd.Stderr = os.Stderr
 
-	fmt.Printf("Invoking 'docker login ghcr.io --username %s --password %s'...\n", ghUsername, pat)
+	fmt.Printf("Invoking 'docker login ghcr.io --username %s --password ******'...\n", ghUsername)
 	err = loginCmd.Run()
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
