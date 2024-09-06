@@ -20,7 +20,8 @@ func init() {
 	Cmd.AddCommand(startCmd)
 	Cmd.AddCommand(stopCmd)
 	Cmd.AddCommand(restartCmd)
-	Cmd.AddCommand(updateCmd)
+	Cmd.AddCommand(updateCmd) // Hidden (deprecated)
+	Cmd.AddCommand(modifyCmd)
 }
 
 func run(cmd *cobra.Command, args []string) {
