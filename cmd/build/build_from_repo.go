@@ -26,6 +26,7 @@ omctl build-from-repo"
 `
 	GitHubPATGenerateURL = "https://github.com/settings/tokens"
 	ComposeFileName      = "compose.yaml"
+	DefaultProdEnvName   = "Production"
 )
 
 var BuildFromRepoCmd = &cobra.Command{
@@ -66,6 +67,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
+	spinner.Complete()
 	if errors.As(err, &config.ErrGitHubPATNotFound) {
 		// Prompt user to enter GitHub pat
 		sm.Stop()
@@ -113,10 +115,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 		sm = ysmrr.NewSpinnerManager()
 		sm.Start()
-		sm.AddSpinner("Checking for existing GitHub Personal Access Token")
 	}
-	spinner.UpdateMessage(fmt.Sprintf("Checking for existing GitHub Personal Access Token: %s", pat))
-	spinner.Complete()
 
 	// Step 3: Check if the user is in the root of the repository
 	spinner = sm.AddSpinner("Checking if user is in the root of the repository")
@@ -176,23 +175,26 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	spinner.Complete()
 
 	// Step 8: Login to GitHub Container Registry
-	spinner = sm.AddSpinner("Logging in to GitHub Container Registry")
+	spinner = sm.AddSpinner("Logging in to ghcr.io")
 	loginCmd := exec.Command("docker", "login", "ghcr.io", "--username", ghUsername, "--password", pat)
 	err = loginCmd.Run()
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
+	spinner.UpdateMessage("Logging in to ghcr.io: Success")
 	spinner.Complete()
 
 	// Step 9: Build docker image
 	spinner = sm.AddSpinner("Building Docker image")
-	buildCmd := exec.Command("docker", "build", ".", "-t", fmt.Sprintf("ghcr.io/%s/%s:latest", strings.ToLower(ghUsername), repoName))
+	imageUrl = fmt.Sprintf("ghcr.io/%s/%s:latest", strings.ToLower(ghUsername), repoName)
+	buildCmd := exec.Command("docker", "build", ".", "-t", imageUrl)
 	err = buildCmd.Run()
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
+	spinner.UpdateMessage(fmt.Sprintf("Building Docker image: %s", imageUrl))
 	spinner.Complete()
 
 	// Step 10: Push docker image to GitHub Container Registry
@@ -213,6 +215,11 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	} else {
 		composeSpecExists = true
 	}
+	yesOrNo := "No"
+	if composeSpecExists {
+		yesOrNo = "Yes"
+	}
+	spinner.UpdateMessage(fmt.Sprintf("Checking if compose spec already exists in the repository: %s", yesOrNo))
 	spinner.Complete()
 
 	// Step 12: Generate compose spec from the Docker image if it does not exist
@@ -245,6 +252,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
+		spinner.UpdateMessage(fmt.Sprintf("Generating compose spec from the Docker image: saved to %s", ComposeFileName))
 		spinner.Complete()
 	}
 
@@ -271,6 +279,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	spinner.UpdateMessage(fmt.Sprintf("Building service from the compose spec: built service %s (service ID: %s)", repoName, serviceID))
 	spinner.Complete()
 
 	// Step 14: Check if the production environment is set up
@@ -280,6 +289,11 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
+	yesOrNo = "No"
+	if prodEnvironmentID != "" {
+		yesOrNo = "Yes"
+	}
+	spinner.UpdateMessage(fmt.Sprintf("Checking if the production environment is set up: %s", yesOrNo))
 	spinner.Complete()
 
 	// Step 15: Create a production environment if it does not exist
@@ -290,16 +304,18 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
+		spinner.UpdateMessage(fmt.Sprintf("Creating a production environment: created environment %s (environment ID: %s)", DefaultProdEnvName, prodEnvironmentID))
 		spinner.Complete()
 	}
 
 	// Step 16: Promote the service to the production environment
-	spinner = sm.AddSpinner("Promoting the service to the production environment")
+	spinner = sm.AddSpinner(fmt.Sprintf("Promoting the service to the %s environment", DefaultProdEnvName))
 	err = dataaccess.PromoteServiceEnvironment(token, serviceID, devEnvironmentID)
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
+	spinner.UpdateMessage("Promoting the service to the production environment: Success")
 	spinner.Complete()
 
 	// Step 17: Initialize the SaaS Portal
@@ -311,7 +327,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	}
 
 	if !checkIfSaaSPortalReady(prodEnvironment) {
-		spinner = sm.AddSpinner("Initializing the SaaS Portal")
+		spinner = sm.AddSpinner("Initializing the SaaS Portal. This may take a few minutes.")
 
 		for {
 			prodEnvironment, err = dataaccess.DescribeServiceEnvironment(token, serviceID, string(prodEnvironmentID))
@@ -335,7 +351,17 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	spinner.Complete()
 
 	sm.Stop()
-	utils.PrintURL("Your SaaS offer is available at", getSaaSPortalURL(prodEnvironment, serviceID, string(prodEnvironmentID)))
+
+	println()
+	fmt.Println("Congratulations! Your service has been successfully built and deployed.")
+	utils.PrintURL("You can access the SaaS Portal at", getSaaSPortalURL(prodEnvironment, serviceID, string(prodEnvironmentID)))
+
+	println()
+	fmt.Println("Next steps:")
+	fmt.Printf("1. Play around with the SaaS Portal! Subscribe to your service and create instance deployments.\n")
+	fmt.Printf("2. A compose spec has been generated from the Docker image. You can customize it further by editing the %s file. Refer to the documentation https://docs.omnistrate.com/getting-started/compose-spec/ for more information.\n", ComposeFileName)
+	fmt.Printf("3. Push any changes to the repository and automatically update the service by running 'omctl build-from-repo' again.\n")
+	fmt.Println("4. Bring your own domain for your SaaS offer. Check 'omctl create domain' command.")
 
 	return nil
 }
@@ -364,7 +390,7 @@ func createProdEnv(token string, ServiceID string, devEnvironmentID string) (ser
 	}
 
 	prod := serviceenvironmentapi.CreateServiceEnvironmentRequest{
-		Name:                    "Production",
+		Name:                    DefaultProdEnvName,
 		Description:             "Production environment",
 		ServiceID:               serviceenvironmentapi.ServiceID(ServiceID),
 		Visibility:              serviceenvironmentapi.ServiceVisibility("PUBLIC"),
