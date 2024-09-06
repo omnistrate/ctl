@@ -225,8 +225,8 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the Dockerfile already has the label
-	if strings.Contains(string(dockerfileData), fmt.Sprintf("LABEL org.opencontainers.image.source")) {
-		spinner.UpdateMessage(fmt.Sprintf("Labeling Docker image with the repository name: Already labeled"))
+	if strings.Contains(string(dockerfileData), "LABEL org.opencontainers.image.source") {
+		spinner.UpdateMessage("Labeling Docker image with the repository name: Already labeled")
 	} else {
 		// Append the label to the Dockerfile
 		dockerfileData = append(dockerfileData, []byte(fmt.Sprintf("\nLABEL org.opencontainers.image.source https://github.com/%s/%s\n", ghUsername, repoName))...)
