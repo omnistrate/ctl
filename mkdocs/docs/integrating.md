@@ -4,7 +4,7 @@ Omnistrate CTL has a number of features that enable it to be seamlessly integrat
 
 ## Using omnistrate-ctl with GitHub Actions
 
-Create secrets in your repository for your Omnistrate email and password and use omnistrate-ctl from your Github workflows. 
+Create secrets in your repository for your Omnistrate email and password and use omnistrate-ctl from your Github workflows using [Setup Omnistrate CTL Action](https://github.com/marketplace/actions/setup-omnistrate-ctl).
 
 ```
 - name: Setup Omnistrate CTL
