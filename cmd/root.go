@@ -105,6 +105,7 @@ func init() {
 	RootCmd.AddCommand(logout.LogoutCmd)
 
 	RootCmd.AddCommand(build.BuildCmd)
+	RootCmd.AddCommand(build.BuildFromRepoCmd)
 
 	RootCmd.AddCommand(service.Cmd)
 	RootCmd.AddCommand(account.Cmd)
