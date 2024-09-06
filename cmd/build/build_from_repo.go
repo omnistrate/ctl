@@ -187,36 +187,65 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	// Step 8: Login to GitHub Container Registry
 	spinner = sm.AddSpinner("Logging in to ghcr.io")
+	spinner.Complete()
+	sm.Stop()
 	loginCmd := exec.Command("docker", "login", "ghcr.io", "--username", ghUsername, "--password", pat)
+
+	// Redirect stdout and stderr to the terminal
+	loginCmd.Stdout = os.Stdout
+	loginCmd.Stderr = os.Stderr
+
+	fmt.Printf("Invoking 'docker login ghcr.io --username %s --password %s'...\n", ghUsername, pat)
 	err = loginCmd.Run()
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
-	spinner.UpdateMessage("Logging in to ghcr.io: Success")
-	spinner.Complete()
+
+	sm = ysmrr.NewSpinnerManager()
+	sm.Start()
 
 	// Step 9: Build docker image
-	spinner = sm.AddSpinner("Building Docker image")
 	imageUrl := fmt.Sprintf("ghcr.io/%s/%s:latest", strings.ToLower(ghUsername), repoName)
+
+	spinner = sm.AddSpinner(fmt.Sprintf("Building Docker image: %s", imageUrl))
+	spinner.Complete()
+	sm.Stop()
 	buildCmd := exec.Command("docker", "build", ".", "-t", imageUrl)
+
+	// Redirect stdout and stderr to the terminal
+	buildCmd.Stdout = os.Stdout
+	buildCmd.Stderr = os.Stderr
+
+	fmt.Printf("Invoking 'docker build . -t %s'...\n", imageUrl)
 	err = buildCmd.Run()
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
-	spinner.UpdateMessage(fmt.Sprintf("Building Docker image: %s", imageUrl))
-	spinner.Complete()
+
+	sm = ysmrr.NewSpinnerManager()
+	sm.Start()
 
 	// Step 10: Push docker image to GitHub Container Registry
 	spinner = sm.AddSpinner("Pushing Docker image to GitHub Container Registry")
+	spinner.Complete()
+	sm.Stop()
 	pushCmd := exec.Command("docker", "push", imageUrl)
+
+	// Redirect stdout and stderr to the terminal
+	pushCmd.Stdout = os.Stdout
+	pushCmd.Stderr = os.Stderr
+
+	fmt.Printf("Invoking 'docker push %s'...\n", imageUrl)
 	err = pushCmd.Run()
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
-	spinner.Complete()
+
+	sm = ysmrr.NewSpinnerManager()
+	sm.Start()
 
 	// Step 11: Check if there exists a compose spec in the repository
 	spinner = sm.AddSpinner("Checking if there exists a compose spec in the repository")
@@ -363,6 +392,8 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	sm.Stop()
 
+	println()
+	println()
 	println()
 	fmt.Println("Congratulations! Your service has been successfully built and deployed.")
 	utils.PrintURL("You can access the SaaS Portal at", getSaaSPortalURL(prodEnvironment, serviceID, string(prodEnvironmentID)))

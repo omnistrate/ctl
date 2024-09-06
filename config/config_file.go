@@ -49,7 +49,11 @@ func New(filePath string) (*ConfigFile, error) {
 
 // ConfigDir returns the path to the omnistrate-ctl config directory.
 func ConfigDir() string {
-	return DefaultDir
+	expandedDefaultDir, err := homedir.Expand(DefaultDir)
+	if err != nil {
+		return DefaultDir
+	}
+	return expandedDefaultDir
 }
 
 // EnsureFile creates the root directory and config file.

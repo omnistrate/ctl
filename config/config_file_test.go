@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/mitchellh/go-homedir"
 	"os"
 	"path/filepath"
 	"testing"
@@ -19,7 +20,9 @@ func TestNew(t *testing.T) {
 }
 
 func TestConfigDir(t *testing.T) {
-	assert.Equal(t, DefaultDir, ConfigDir())
+	expandedDefaultDir, err := homedir.Expand(DefaultDir)
+	assert.NoError(t, err)
+	assert.Equal(t, expandedDefaultDir, ConfigDir())
 }
 
 func TestEnsureFile(t *testing.T) {
