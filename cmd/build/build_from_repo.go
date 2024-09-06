@@ -187,7 +187,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	// Step 9: Build docker image
 	spinner = sm.AddSpinner("Building Docker image")
-	imageUrl = fmt.Sprintf("ghcr.io/%s/%s:latest", strings.ToLower(ghUsername), repoName)
+	imageUrl := fmt.Sprintf("ghcr.io/%s/%s:latest", strings.ToLower(ghUsername), repoName)
 	buildCmd := exec.Command("docker", "build", ".", "-t", imageUrl)
 	err = buildCmd.Run()
 	if err != nil {
@@ -199,7 +199,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	// Step 10: Push docker image to GitHub Container Registry
 	spinner = sm.AddSpinner("Pushing Docker image to GitHub Container Registry")
-	pushCmd := exec.Command("docker", "push", fmt.Sprintf("ghcr.io/%s/%s:latest", strings.ToLower(ghUsername), repoName))
+	pushCmd := exec.Command("docker", "push", imageUrl)
 	err = pushCmd.Run()
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
@@ -228,7 +228,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		// Generate compose spec from image
 		generateComposeSpecRequest := composegenapi.GenerateComposeSpecFromContainerImageRequest{
 			ImageRegistry: "ghcr.io",
-			Image:         fmt.Sprintf("ghcr.io/%s/%s:latest", strings.ToLower(ghUsername), repoName),
+			Image:         imageUrl,
 			Username:      commonutils.ToPtr(ghUsername),
 			Password:      commonutils.ToPtr(pat),
 		}
@@ -247,7 +247,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		}
 
 		// Write the compose spec to a file
-		err = os.WriteFile(ComposeFileName, fileData, 0644)
+		err = os.WriteFile(ComposeFileName, fileData, 0600)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
@@ -368,10 +368,9 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func checkIfProdEnvExists(token string, ServiceID string) (serviceenvironmentapi.ServiceEnvironmentID, error) {
-	prodEnvironment, err := dataaccess.FindEnvironment(token, ServiceID, "prod")
+func checkIfProdEnvExists(token string, serviceID string) (serviceenvironmentapi.ServiceEnvironmentID, error) {
+	prodEnvironment, err := dataaccess.FindEnvironment(token, serviceID, "prod")
 	if errors.As(err, &dataaccess.ErrEnvironmentNotFound) {
-		err = nil
 		return "", nil
 	}
 	if err != nil {
@@ -381,7 +380,7 @@ func checkIfProdEnvExists(token string, ServiceID string) (serviceenvironmentapi
 	return prodEnvironment.ID, nil
 }
 
-func createProdEnv(token string, ServiceID string, devEnvironmentID string) (serviceenvironmentapi.ServiceEnvironmentID, error) {
+func createProdEnv(token string, serviceID string, devEnvironmentID string) (serviceenvironmentapi.ServiceEnvironmentID, error) {
 	// Get default deployment config ID
 	defaultDeploymentConfigID, err := dataaccess.GetDefaultDeploymentConfigID(token)
 	if err != nil {
@@ -392,7 +391,7 @@ func createProdEnv(token string, ServiceID string, devEnvironmentID string) (ser
 	prod := serviceenvironmentapi.CreateServiceEnvironmentRequest{
 		Name:                    DefaultProdEnvName,
 		Description:             "Production environment",
-		ServiceID:               serviceenvironmentapi.ServiceID(ServiceID),
+		ServiceID:               serviceenvironmentapi.ServiceID(serviceID),
 		Visibility:              serviceenvironmentapi.ServiceVisibility("PUBLIC"),
 		Type:                    (*serviceenvironmentapi.EnvironmentType)(commonutils.ToPtr("PROD")),
 		SourceEnvironmentID:     commonutils.ToPtr(serviceenvironmentapi.ServiceEnvironmentID(devEnvironmentID)),

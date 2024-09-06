@@ -23,26 +23,9 @@ import (
 )
 
 var (
-	ServiceID          string
-	EnvironmentID      string
-	ProductTierID      string
-	file               string
-	specType           string
-	name               string
-	description        string
-	serviceLogoURL     string
-	environment        string
-	environmentType    string
-	release            bool
-	releaseAsPreferred bool
-	releaseName        string
-	releaseDescription string
-	interactive        bool
-
-	imageUrl                  string
-	envVars                   []string
-	imageRegistryAuthUsername string
-	imageRegistryAuthPassword string
+	ServiceID     string
+	EnvironmentID string
+	ProductTierID string
 
 	validSpecType = []string{DockerComposeSpecType, ServicePlanSpecType}
 )
@@ -102,23 +85,23 @@ var BuildCmd = &cobra.Command{
 }
 
 func init() {
-	BuildCmd.Flags().StringVarP(&file, "file", "f", "", "Path to the docker compose file")
-	BuildCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the service. A service can have multiple service plans. The build command will build a new or existing service plan inside the specified service.")
-	BuildCmd.Flags().StringVarP(&description, "description", "", "", "A short description for the whole service. A service can have multiple service plans.")
-	BuildCmd.Flags().StringVarP(&serviceLogoURL, "service-logo-url", "", "", "URL to the service logo")
-	BuildCmd.Flags().StringVarP(&environment, "environment", "", "Dev", "Name of the environment to build the service in")
-	BuildCmd.Flags().StringVarP(&environmentType, "environment-type", "", "dev", "Type of environment. Valid options include: 'dev', 'prod', 'qa', 'canary', 'staging', 'private')")
-	BuildCmd.Flags().BoolVarP(&release, "release", "", false, "Release the service after building it")
-	BuildCmd.Flags().BoolVarP(&releaseAsPreferred, "release-as-preferred", "", false, "Release the service as preferred after building it")
-	BuildCmd.Flags().StringVarP(&releaseName, "release-name", "", "", "Custom description of the release version. Deprecated: use --release-description instead")
-	BuildCmd.Flags().StringVarP(&releaseDescription, "release-description", "", "", "Custom description of the release version")
-	BuildCmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "Interactive mode")
-	BuildCmd.Flags().StringVarP(&specType, "spec-type", "s", DockerComposeSpecType, "Spec type")
+	BuildCmd.Flags().StringP("file", "f", "", "Path to the docker compose file")
+	BuildCmd.Flags().StringP("name", "n", "", "Name of the service. A service can have multiple service plans. The build command will build a new or existing service plan inside the specified service.")
+	BuildCmd.Flags().StringP("description", "", "", "A short description for the whole service. A service can have multiple service plans.")
+	BuildCmd.Flags().StringP("service-logo-url", "", "", "URL to the service logo")
+	BuildCmd.Flags().StringP("environment", "", "Dev", "Name of the environment to build the service in")
+	BuildCmd.Flags().StringP("environment-type", "", "dev", "Type of environment. Valid options include: 'dev', 'prod', 'qa', 'canary', 'staging', 'private')")
+	BuildCmd.Flags().BoolP("release", "", false, "Release the service after building it")
+	BuildCmd.Flags().BoolP("release-as-preferred", "", false, "Release the service as preferred after building it")
+	BuildCmd.Flags().StringP("release-name", "", "", "Custom description of the release version. Deprecated: use --release-description instead")
+	BuildCmd.Flags().StringP("release-description", "", "", "Custom description of the release version")
+	BuildCmd.Flags().BoolP("interactive", "i", false, "Interactive mode")
+	BuildCmd.Flags().StringP("spec-type", "s", DockerComposeSpecType, "Spec type")
 
-	BuildCmd.Flags().StringVarP(&imageUrl, "image", "", "", "Provide the complete image repository URL with the image name and tag (e.g., docker.io/namespace/my-image:v1.2)")
-	BuildCmd.Flags().StringArrayVarP(&envVars, "env-var", "", nil, "Used together with --image flag. Provide environment variables in the format --env-var key1=var1 --env-var key2=var2")
-	BuildCmd.Flags().StringVarP(&imageRegistryAuthUsername, "image-registry-auth-username", "", "", "Used together with --image flag. Provide the username to authenticate with the image registry if it's a private registry")
-	BuildCmd.Flags().StringVarP(&imageRegistryAuthPassword, "image-registry-auth-password", "", "", "Used together with --image flag. Provide the password to authenticate with the image registry if it's a private registry")
+	BuildCmd.Flags().StringP("image", "", "", "Provide the complete image repository URL with the image name and tag (e.g., docker.io/namespace/my-image:v1.2)")
+	BuildCmd.Flags().StringArrayP("env-var", "", nil, "Used together with --image flag. Provide environment variables in the format --env-var key1=var1 --env-var key2=var2")
+	BuildCmd.Flags().StringP("image-registry-auth-username", "", "", "Used together with --image flag. Provide the username to authenticate with the image registry if it's a private registry")
+	BuildCmd.Flags().StringP("image-registry-auth-password", "", "", "Used together with --image flag. Provide the password to authenticate with the image registry if it's a private registry")
 
 	BuildCmd.MarkFlagsRequiredTogether("image-registry-auth-username", "image-registry-auth-password")
 	err := BuildCmd.MarkFlagFilename("file")
@@ -140,9 +123,72 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	defer utils.CleanupArgsAndFlags(cmd, &args)
 
 	// Retrieve flags
+	file, err := cmd.Flags().GetString("file")
+	if err != nil {
+		return err
+	}
+	specType, err := cmd.Flags().GetString("spec-type")
+	if err != nil {
+		return err
+	}
+	name, err := cmd.Flags().GetString("name")
+	if err != nil {
+		return err
+	}
+	description, err := cmd.Flags().GetString("description")
+	if err != nil {
+		return err
+	}
+	serviceLogoURL, err := cmd.Flags().GetString("service-logo-url")
+	if err != nil {
+		return err
+	}
+	environment, err := cmd.Flags().GetString("environment")
+	if err != nil {
+		return err
+	}
+	environmentType, err := cmd.Flags().GetString("environment-type")
+	if err != nil {
+		return err
+	}
+	release, err := cmd.Flags().GetBool("release")
+	if err != nil {
+		return err
+	}
+	releaseAsPreferred, err := cmd.Flags().GetBool("release-as-preferred")
+	if err != nil {
+		return err
+	}
+	releaseName, err := cmd.Flags().GetString("release-name")
+	if err != nil {
+		return err
+	}
+	releaseDescription, err := cmd.Flags().GetString("release-description")
+	if err != nil {
+		return err
+	}
+	interactive, err := cmd.Flags().GetBool("interactive")
+	if err != nil {
+		return err
+	}
+	imageUrl, err := cmd.Flags().GetString("image")
+	if err != nil {
+		return err
+	}
+	envVars, err := cmd.Flags().GetStringArray("env-var")
+	if err != nil {
+		return err
+	}
+	imageRegistryAuthUsername, err := cmd.Flags().GetString("image-registry-auth-username")
+	if err != nil {
+		return err
+	}
+	imageRegistryAuthPassword, err := cmd.Flags().GetString("image-registry-auth-password")
+	if err != nil {
+		return err
+	}
 	output, err := cmd.Flags().GetString("output")
 	if err != nil {
-		utils.PrintError(err)
 		return err
 	}
 
