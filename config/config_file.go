@@ -30,6 +30,12 @@ type AuthConfig struct {
 	Token string `yaml:"token,omitempty"`
 }
 
+var (
+	ErrConfigFileNotFound = errors.New("config file not found")
+	ErrAuthConfigNotFound = errors.New("no auth config found")
+	ErrGitHubPATNotFound  = errors.New("no github personal access token found")
+)
+
 // New initializes a config file for the given file path.
 func New(filePath string) (*ConfigFile, error) {
 	if filePath == "" {
@@ -151,7 +157,7 @@ func LookupAuthConfig() (AuthConfig, error) {
 	var authConfig AuthConfig
 
 	if !fileExists() {
-		return authConfig, errors.New("config file not found")
+		return authConfig, ErrConfigFileNotFound
 	}
 
 	configPath, err := EnsureFile()
@@ -172,13 +178,13 @@ func LookupAuthConfig() (AuthConfig, error) {
 		return cfg.AuthConfigs[0], nil
 	}
 
-	return authConfig, errors.New("no auth config found")
+	return authConfig, ErrAuthConfigNotFound
 }
 
 // RemoveAuthConfig deletes the authentication configuration.
 func RemoveAuthConfig() error {
 	if !fileExists() {
-		return errors.New("config file not found")
+		return ErrConfigFileNotFound
 	}
 
 	configPath, err := EnsureFile()
@@ -200,7 +206,7 @@ func RemoveAuthConfig() error {
 		return cfg.save()
 	}
 
-	return errors.New("no auth config found")
+	return ErrAuthConfigNotFound
 }
 
 // CreateOrUpdateGitHubPersonalAccessToken creates or updates the authentication configuration.
@@ -227,7 +233,7 @@ func CreateOrUpdateGitHubPersonalAccessToken(gitHubPersonalAccessToken string) e
 // LookupGitHubPersonalAccessToken returns the authentication configuration.
 func LookupGitHubPersonalAccessToken() (string, error) {
 	if !fileExists() {
-		return "", errors.New("config file not found")
+		return "", ErrConfigFileNotFound
 	}
 
 	configPath, err := EnsureFile()
@@ -248,13 +254,13 @@ func LookupGitHubPersonalAccessToken() (string, error) {
 		return cfg.GitHubPersonalAccessToken, nil
 	}
 
-	return "", errors.New("no github personal access token found")
+	return "", ErrGitHubPATNotFound
 }
 
 // RemoveGitHubPersonalAccessToken deletes the authentication configuration.
 func RemoveGitHubPersonalAccessToken() error {
 	if !fileExists() {
-		return errors.New("config file not found")
+		return ErrConfigFileNotFound
 	}
 
 	configPath, err := EnsureFile()
@@ -276,5 +282,5 @@ func RemoveGitHubPersonalAccessToken() error {
 		return cfg.save()
 	}
 
-	return errors.New("no github personal access token found")
+	return ErrGitHubPATNotFound
 }

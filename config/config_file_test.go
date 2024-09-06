@@ -84,13 +84,13 @@ func TestAuthConfig(t *testing.T) {
 
 	_, err = LookupAuthConfig()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "no auth config found")
+	assert.Contains(t, err.Error(), ErrAuthConfigNotFound.Error())
 }
 
 func TestGitHubPersonalAccessToken(t *testing.T) {
 	_, err := LookupGitHubPersonalAccessToken()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "no github personal access token found")
+	assert.Contains(t, err.Error(), ErrGitHubPATNotFound.Error())
 
 	err = CreateOrUpdateGitHubPersonalAccessToken("token123")
 	assert.NoError(t, err)
@@ -104,7 +104,7 @@ func TestGitHubPersonalAccessToken(t *testing.T) {
 
 	_, err = LookupGitHubPersonalAccessToken()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "no github personal access token found")
+	assert.Contains(t, err.Error(), ErrGitHubPATNotFound.Error())
 }
 
 func TestLoadNonExistentFile(t *testing.T) {
