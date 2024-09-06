@@ -39,26 +39,48 @@ var BuildFromRepoCmd = &cobra.Command{
 	SilenceUsage: true,
 }
 
+func init() {
+	BuildFromRepoCmd.Flags().Bool("reset-pat", false, "Reset the GitHub Personal Access Token (PAT) for the current user.")
+}
+
 func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	defer utils.CleanupArgsAndFlags(cmd, &args)
+
+	// Retrieve the flags
+	resetPAT, err := cmd.Flags().GetBool("reset-pat")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
 
 	var sm ysmrr.SpinnerManager
 	var spinner *ysmrr.Spinner
 	sm = ysmrr.NewSpinnerManager()
+	sm.Start()
 
-	// Step 1: Check if the Docker daemon is running
-	spinner = sm.AddSpinner("Checking if Docker installed and Docker daemon is running")
-	time.Sleep(1 * time.Second)                 // Add a delay to show the spinner
-	err := exec.Command("docker", "info").Run() // Simple way to check if Docker is available
+	// Step 0: Check if the Docker daemon is running
+	spinner = sm.AddSpinner("Checking if Docker installed")
+	time.Sleep(1 * time.Second)                   // Add a delay to show the spinner
+	err = exec.Command("docker", "version").Run() // Simple way to check if Docker is available
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
-	spinner.UpdateMessage("Checking if Docker installed and Docker daemon is running: Yes")
+	spinner.UpdateMessage("Checking if Docker installed: Yes")
+	spinner.Complete()
+
+	// Step 1: Check if the Docker daemon is running
+	spinner = sm.AddSpinner("Checking if Docker daemon is running")
+	time.Sleep(1 * time.Second)                // Add a delay to show the spinner
+	err = exec.Command("docker", "info").Run() // Simple way to check if Docker is available
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+	spinner.UpdateMessage("Checking if Docker daemon is running: Yes")
 	spinner.Complete()
 
 	// Step 2: Validate user is currently logged in
-	sm.Start()
 	spinner = sm.AddSpinner("Checking if user is logged in")
 	time.Sleep(1 * time.Second) // Add a delay to show the spinner
 	token, err := utils.GetToken()
@@ -81,7 +103,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
-	if err == nil {
+	if err == nil && !resetPAT {
 		spinner.UpdateMessage("Checking for existing GitHub Personal Access Token: Yes")
 		spinner.Complete()
 	}
@@ -89,14 +111,14 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
-	if errors.As(err, &config.ErrGitHubPATNotFound) {
+	if errors.As(err, &config.ErrGitHubPATNotFound) || resetPAT {
 		// Prompt user to enter GitHub pat
 		spinner.UpdateMessage("Checking for existing GitHub Personal Access Token: No GitHub Personal Access Token found.")
 		spinner.Complete()
 		sm.Stop()
-		fmt.Println("[Action Required] GitHub Personal Access Token (PAT) is required to push the Docker image to GitHub Container Registry.")
-		fmt.Println("Please follow the instructions below to generate a GitHub Personal Access Token with the following scopes: write:packages, delete:packages.")
-		fmt.Println("The token will be stored securely on your machine and will not be shared with anyone.")
+		utils.PrintWarning("[Action Required] GitHub Personal Access Token (PAT) is required to push the Docker image to GitHub Container Registry.")
+		utils.PrintWarning("Please follow the instructions below to generate a GitHub Personal Access Token with the following scopes: write:packages, delete:packages.")
+		utils.PrintWarning("The token will be stored securely on your machine and will not be shared with anyone.")
 		fmt.Println()
 		fmt.Println("Instructions to generate a GitHub Personal Access Token:")
 		fmt.Println("1. Click on the 'Generate new token' button. Choose 'Generate new token (classic)'. Authenticate with your GitHub account.")
@@ -122,7 +144,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		fmt.Print("Please paste the GitHub Personal Access Token: ")
+		utils.PrintSuccess("Please paste the GitHub Personal Access Token: ")
 		var userInput string
 		_, err = fmt.Scanln(&userInput)
 		if err != nil {
