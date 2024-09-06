@@ -67,11 +67,22 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
-	spinner.Complete()
+	if err == nil {
+		spinner.UpdateMessage("Checking for existing GitHub Personal Access Token: Yes")
+		spinner.Complete()
+	}
+	if err != nil && !errors.As(err, &config.ErrGitHubPATNotFound) {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
 	if errors.As(err, &config.ErrGitHubPATNotFound) {
 		// Prompt user to enter GitHub pat
+		spinner.UpdateMessage("Checking for existing GitHub Personal Access Token: No GitHub Personal Access Token found.")
+		spinner.Complete()
 		sm.Stop()
-		fmt.Println("No GitHub Personal Access Token found. Please follow the instructions to generate a GitHub Personal Access Token.")
+		fmt.Println("[Action Required] GitHub Personal Access Token (PAT) is required to push the Docker image to GitHub Container Registry.")
+		fmt.Println("Please follow the instructions below to generate a GitHub Personal Access Token with the following scopes: write:packages, delete:packages.")
+		fmt.Println("The token will be stored securely on your machine and will not be shared with anyone.")
 		fmt.Println()
 		fmt.Println("Instructions to generate a GitHub Personal Access Token:")
 		fmt.Println("1. Click on the 'Generate new token' button. Choose 'Generate new token (classic)'. Authenticate with your GitHub account.")
@@ -81,10 +92,10 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
   - Select the following scopes:	
     - write:packages
     - delete:packages`)
-		fmt.Println("3. Click 'Generate token'.")
+		fmt.Println("3. Click 'Generate token' and copy the token to your clipboard.")
 		fmt.Println()
 
-		fmt.Println("It will automatically open the GitHub Personal Access Token generation page in your default browser in a few seconds...")
+		fmt.Println("Redirecting you to the GitHub Personal Access Token generation page in your default browser in a few seconds...")
 		fmt.Println()
 		fmt.Print("If the browser does not open automatically, open the following URL:\n\n")
 		fmt.Printf("%s\n\n", GitHubPATGenerateURL)
@@ -97,7 +108,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		fmt.Print("Please enter the GitHub Personal Access Token: ")
+		fmt.Print("Please paste the GitHub Personal Access Token: ")
 		var userInput string
 		_, err = fmt.Scanln(&userInput)
 		if err != nil {
