@@ -215,7 +215,35 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	spinner.UpdateMessage(fmt.Sprintf("Retrieving GitHub username: %s", ghUsername))
 	spinner.Complete()
 
-	// Step 8: Login to GitHub Container Registry
+	// Step 8: Label the docker image with the repository name
+	spinner = sm.AddSpinner("Labeling Docker image with the repository name")
+	// Read the Dockerfile
+	dockerfileData, err := os.ReadFile(filepath.Join(cwd, "Dockerfile"))
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+
+	// Check if the Dockerfile already has the label
+	if strings.Contains(string(dockerfileData), fmt.Sprintf("LABEL org.opencontainers.image.source")) {
+		spinner.UpdateMessage(fmt.Sprintf("Labeling Docker image with the repository name: Already labeled"))
+	} else {
+		// Append the label to the Dockerfile
+		dockerfileData = append(dockerfileData, []byte(fmt.Sprintf("\nLABEL org.opencontainers.image.source https://github.com/%s/%s\n", ghUsername, repoName))...)
+
+		// Write the Dockerfile back
+		err = os.WriteFile(filepath.Join(cwd, "Dockerfile"), dockerfileData, 0600)
+		if err != nil {
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
+
+		spinner.UpdateMessage(fmt.Sprintf("Labeling Docker image with the repository name: %s", repoName))
+	}
+
+	spinner.Complete()
+
+	// Step 9: Login to GitHub Container Registry
 	spinner = sm.AddSpinner("Logging in to ghcr.io")
 	spinner.Complete()
 	sm.Stop()
@@ -235,7 +263,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	sm = ysmrr.NewSpinnerManager()
 	sm.Start()
 
-	// Step 9: Build docker image
+	// Step 10: Build docker image
 	imageUrl := fmt.Sprintf("ghcr.io/%s/%s:latest", strings.ToLower(ghUsername), repoName)
 
 	spinner = sm.AddSpinner(fmt.Sprintf("Building Docker image: %s", imageUrl))
@@ -257,7 +285,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	sm = ysmrr.NewSpinnerManager()
 	sm.Start()
 
-	// Step 10: Push docker image to GitHub Container Registry
+	// Step 11: Push docker image to GitHub Container Registry
 	spinner = sm.AddSpinner("Pushing Docker image to GitHub Container Registry")
 	spinner.Complete()
 	sm.Stop()
@@ -277,7 +305,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	sm = ysmrr.NewSpinnerManager()
 	sm.Start()
 
-	// Step 11: Check if there exists a compose spec in the repository
+	// Step 12: Check if there exists a compose spec in the repository
 	spinner = sm.AddSpinner("Checking if there exists a compose spec in the repository")
 	time.Sleep(1 * time.Second) // Add a delay to show the spinner
 	var composeSpecExists bool
@@ -293,7 +321,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	spinner.UpdateMessage(fmt.Sprintf("Checking if compose spec already exists in the repository: %s", yesOrNo))
 	spinner.Complete()
 
-	// Step 12: Generate compose spec from the Docker image if it does not exist
+	// Step 13: Generate compose spec from the Docker image if it does not exist
 	if !composeSpecExists {
 		spinner = sm.AddSpinner("Generating compose spec from the Docker image")
 		// Generate compose spec from image
@@ -327,7 +355,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		spinner.Complete()
 	}
 
-	// Step 13: Building service from the compose spec
+	// Step 14: Building service from the compose spec
 	spinner = sm.AddSpinner("Building service from the compose spec")
 
 	// Load the compose file
@@ -353,7 +381,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	spinner.UpdateMessage(fmt.Sprintf("Building service from the compose spec: built service %s (service ID: %s)", repoName, serviceID))
 	spinner.Complete()
 
-	// Step 14: Check if the production environment is set up
+	// Step 15: Check if the production environment is set up
 	spinner = sm.AddSpinner("Checking if the production environment is set up")
 	time.Sleep(1 * time.Second) // Add a delay to show the spinner
 	prodEnvironmentID, err := checkIfProdEnvExists(token, serviceID)
@@ -368,7 +396,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	spinner.UpdateMessage(fmt.Sprintf("Checking if the production environment is set up: %s", yesOrNo))
 	spinner.Complete()
 
-	// Step 15: Create a production environment if it does not exist
+	// Step 16: Create a production environment if it does not exist
 	if prodEnvironmentID == "" {
 		spinner = sm.AddSpinner("Creating a production environment")
 		prodEnvironmentID, err = createProdEnv(token, serviceID, devEnvironmentID)
@@ -380,7 +408,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		spinner.Complete()
 	}
 
-	// Step 16: Promote the service to the production environment
+	// Step 17: Promote the service to the production environment
 	spinner = sm.AddSpinner(fmt.Sprintf("Promoting the service to the %s environment", DefaultProdEnvName))
 	err = dataaccess.PromoteServiceEnvironment(token, serviceID, devEnvironmentID)
 	if err != nil {
@@ -390,7 +418,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	spinner.UpdateMessage("Promoting the service to the production environment: Success")
 	spinner.Complete()
 
-	// Step 17: Set this service plan as the default service plan in production
+	// Step 18: Set this service plan as the default service plan in production
 	spinner = sm.AddSpinner("Setting the service plan as the default service plan in production")
 
 	// Describe the dev product tier
@@ -436,7 +464,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	spinner.UpdateMessage("Setting current version as the default service plan version in production: Success")
 	spinner.Complete()
 
-	// Step 18: Initialize the SaaS Portal
+	// Step 19: Initialize the SaaS Portal
 	var prodEnvironment *serviceenvironmentapi.DescribeServiceEnvironmentResult
 	prodEnvironment, err = dataaccess.DescribeServiceEnvironment(token, serviceID, string(prodEnvironmentID))
 	if err != nil {
@@ -464,7 +492,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		spinner.Complete()
 	}
 
-	// Step 19: Retrieve the SaaS Portal URL
+	// Step 20: Retrieve the SaaS Portal URL
 	spinner = sm.AddSpinner("Retrieving the SaaS Portal URL")
 	time.Sleep(1 * time.Second) // Add a delay to show the spinner
 	spinner.Complete()
