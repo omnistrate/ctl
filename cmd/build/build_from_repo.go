@@ -46,7 +46,18 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	var spinner *ysmrr.Spinner
 	sm = ysmrr.NewSpinnerManager()
 
-	// Step 1: Validate user is currently logged in
+	// Step 1: Check if the Docker daemon is running
+	spinner = sm.AddSpinner("Checking if Docker installed and Docker daemon is running")
+	time.Sleep(1 * time.Second)                 // Add a delay to show the spinner
+	err := exec.Command("docker", "info").Run() // Simple way to check if Docker is available
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+	spinner.UpdateMessage("Checking if Docker installed and Docker daemon is running: Yes")
+	spinner.Complete()
+
+	// Step 2: Validate user is currently logged in
 	sm.Start()
 	spinner = sm.AddSpinner("Checking if user is logged in")
 	time.Sleep(1 * time.Second) // Add a delay to show the spinner
@@ -62,7 +73,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	spinner.UpdateMessage("Checking if user is logged in: Yes")
 	spinner.Complete()
 
-	// Step 2: Check if there is an existing GitHub pat
+	// Step 3: Check if there is an existing GitHub pat
 	spinner = sm.AddSpinner("Checking for existing GitHub Personal Access Token")
 	time.Sleep(1 * time.Second) // Add a delay to show the spinner
 	pat, err := config.LookupGitHubPersonalAccessToken()
@@ -131,7 +142,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		sm.Start()
 	}
 
-	// Step 3: Check if the user is in the root of the repository
+	// Step 4: Check if the user is in the root of the repository
 	spinner = sm.AddSpinner("Checking if user is in the root of the repository")
 	time.Sleep(1 * time.Second) // Add a delay to show the spinner
 	cwd, err := os.Getwd()
@@ -146,7 +157,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	spinner.UpdateMessage("Checking if user is in the root of the repository: Yes")
 	spinner.Complete()
 
-	// Step 4: Check if the Dockerfile exists in the root of the repository
+	// Step 5: Check if the Dockerfile exists in the root of the repository
 	spinner = sm.AddSpinner("Checking if Dockerfile exists in the root of the repository")
 	time.Sleep(1 * time.Second) // Add a delay to show the spinner
 	if _, err = os.Stat(filepath.Join(cwd, "Dockerfile")); os.IsNotExist(err) {
@@ -154,17 +165,6 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	spinner.UpdateMessage("Checking if Dockerfile exists in the root of the repository: Yes")
-	spinner.Complete()
-
-	// Step 5: Check if the Docker daemon is running
-	spinner = sm.AddSpinner("Checking if Docker daemon is running")
-	time.Sleep(1 * time.Second)                // Add a delay to show the spinner
-	err = exec.Command("docker", "info").Run() // Simple way to check if Docker is available
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
-	spinner.UpdateMessage("Checking if Docker daemon is running: Yes")
 	spinner.Complete()
 
 	// Step 6: Retrieve the repository name
