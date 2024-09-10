@@ -103,6 +103,8 @@ func init() {
 	BuildCmd.Flags().StringP("image-registry-auth-username", "", "", "Used together with --image flag. Provide the username to authenticate with the image registry if it's a private registry")
 	BuildCmd.Flags().StringP("image-registry-auth-password", "", "", "Used together with --image flag. Provide the password to authenticate with the image registry if it's a private registry")
 
+	BuildCmd.Flags().StringP("output", "o", "text", "Output format. Only text is supported")
+
 	BuildCmd.MarkFlagsRequiredTogether("image-registry-auth-username", "image-registry-auth-password")
 	err := BuildCmd.MarkFlagFilename("file")
 	if err != nil {
@@ -201,6 +203,12 @@ func runBuild(cmd *cobra.Command, args []string) error {
 
 	if file != "" && imageUrl != "" {
 		err := errors.New("only one of file or image can be provided")
+		utils.PrintError(err)
+		return err
+	}
+
+	if output != "text" {
+		err = errors.New("only text output format is supported")
 		utils.PrintError(err)
 		return err
 	}
@@ -349,13 +357,12 @@ func runBuild(cmd *cobra.Command, args []string) error {
 
 	var sm1 ysmrr.SpinnerManager
 	var spinner1 *ysmrr.Spinner
-	if output != "json" {
-		sm1 = ysmrr.NewSpinnerManager()
-		spinner1 = sm1.AddSpinner("Building service...")
-		sm1.Start()
-	}
+	sm1 = ysmrr.NewSpinnerManager()
+	spinner1 = sm1.AddSpinner("Building service...")
+	sm1.Start()
 
-	ServiceID, EnvironmentID, ProductTierID, err = buildService(fileData, token, name, specType, descriptionPtr, serviceLogoURLPtr,
+	var undefinedResources map[string]serviceapi.ResourceID
+	ServiceID, EnvironmentID, ProductTierID, undefinedResources, err = buildService(fileData, token, name, specType, descriptionPtr, serviceLogoURLPtr,
 		environmentPtr, environmentTypePtr, release, releaseAsPreferred, releaseNamePtr)
 	if err != nil {
 		utils.HandleSpinnerError(spinner1, sm1, err)
@@ -364,9 +371,13 @@ func runBuild(cmd *cobra.Command, args []string) error {
 
 	utils.HandleSpinnerSuccess(spinner1, sm1, "Successfully built service")
 
-	// Early return if output is json
-	if output == "json" {
-		return nil
+	// Print warning if there are any undefined resources
+	if len(undefinedResources) > 0 {
+		utils.PrintWarning("The following resources appear in the service plan but were not defined in the spec:")
+		for resourceName, resourceID := range undefinedResources {
+			utils.PrintWarning(fmt.Sprintf("  %s: %s", resourceName, resourceID))
+		}
+		utils.PrintWarning("These resources were not processed during the build. If you no longer need them, please deprecate and remove them from the service plan manually in UI or using the API.")
 	}
 
 	utils.PrintURL("Check the service plan result at", fmt.Sprintf("https://%s/product-tier?serviceId=%s&environmentId=%s", utils.GetRootDomain(), ServiceID, EnvironmentID))
@@ -385,7 +396,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		utils.PrintURL("Access your SaaS offer at", getSaaSPortalURL(serviceEnvironment, ServiceID, EnvironmentID))
 	} else if interactive {
 		// Ask the user if they want to wait for the SaaS portal URL
-		fmt.Print("Do you want to wait to acccess the SaaS portal? [Y/n] It may take a few minutes: ")
+		fmt.Print("Do you want to wait to access the SaaS portal? [Y/n] It may take a few minutes: ")
 		var userInput string
 		_, err = fmt.Scanln(&userInput)
 		if err != nil {
@@ -533,18 +544,18 @@ func runBuild(cmd *cobra.Command, args []string) error {
 }
 
 func buildService(fileData []byte, token, name, specType string, description, serviceLogoURL, environment, environmentType *string, release,
-	releaseAsPreferred bool, releaseName *string) (serviceID string, environmentID string, productTierID string, err error) {
+	releaseAsPreferred bool, releaseName *string) (serviceID string, environmentID string, productTierID string, undefinedResources map[string]serviceapi.ResourceID, err error) {
 	if name == "" {
-		return "", "", "", errors.New("name is required")
+		return "", "", "", nil, errors.New("name is required")
 	}
 
 	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
-		return "", "", "", err
+		return "", "", "", nil, err
 	}
 
 	if specType == "" {
-		return "", "", "", errors.New("specType is required")
+		return "", "", "", nil, errors.New("specType is required")
 	}
 
 	switch specType {
@@ -564,14 +575,14 @@ func buildService(fileData []byte, token, name, specType string, description, se
 		if err != nil {
 			var serviceError *goa.ServiceError
 			if errors.As(err, &serviceError) {
-				return "", "", "", fmt.Errorf("%s\nDetail: %s", serviceError.Name, serviceError.Message)
+				return "", "", "", nil, fmt.Errorf("%s\nDetail: %s", serviceError.Name, serviceError.Message)
 			}
 			return
 		}
 		if buildRes == nil {
-			return "", "", "", errors.New("empty response from server")
+			return "", "", "", nil, errors.New("empty response from server")
 		}
-		return string(buildRes.ServiceID), string(buildRes.ServiceEnvironmentID), string(buildRes.ProductTierID), nil
+		return string(buildRes.ServiceID), string(buildRes.ServiceEnvironmentID), string(buildRes.ProductTierID), buildRes.UndefinedResources, nil
 	case DockerComposeSpecType:
 		request := serviceapi.BuildServiceFromComposeSpecRequest{
 			Token:              token,
@@ -610,7 +621,7 @@ func buildService(fileData []byte, token, name, specType string, description, se
 		// Convert config volumes to configs
 		var modified bool
 		if project, modified, err = convertVolumesToConfigs(project); err != nil {
-			return "", "", "", err
+			return "", "", "", nil, err
 		}
 
 		// Convert the project back to YAML, in case it was modified
@@ -630,7 +641,7 @@ func buildService(fileData []byte, token, name, specType string, description, se
 				var fileContent []byte
 				fileContent, err = os.ReadFile(filepath.Clean(config.File))
 				if err != nil {
-					return "", "", "", err
+					return "", "", "", nil, err
 				}
 
 				request.Configs[configName] = base64.StdEncoding.EncodeToString(fileContent)
@@ -644,7 +655,7 @@ func buildService(fileData []byte, token, name, specType string, description, se
 				var fileContent []byte
 				fileContent, err = os.ReadFile(filepath.Clean(secret.File))
 				if err != nil {
-					return "", "", "", err
+					return "", "", "", nil, err
 				}
 
 				request.Secrets[secretName] = base64.StdEncoding.EncodeToString(fileContent)
@@ -656,17 +667,17 @@ func buildService(fileData []byte, token, name, specType string, description, se
 		if err != nil {
 			var serviceError *goa.ServiceError
 			if errors.As(err, &serviceError) {
-				return "", "", "", fmt.Errorf("%s\nDetail: %s", serviceError.Name, serviceError.Message)
+				return "", "", "", nil, fmt.Errorf("%s\nDetail: %s", serviceError.Name, serviceError.Message)
 			}
 			return
 		}
 		if buildRes == nil {
-			return "", "", "", errors.New("empty response from server")
+			return "", "", "", nil, errors.New("empty response from server")
 		}
-		return string(buildRes.ServiceID), string(buildRes.ServiceEnvironmentID), string(buildRes.ProductTierID), nil
+		return string(buildRes.ServiceID), string(buildRes.ServiceEnvironmentID), string(buildRes.ProductTierID), buildRes.UndefinedResources, nil
 
 	default:
-		return "", "", "", errors.New("invalid spec type")
+		return "", "", "", nil, errors.New("invalid spec type")
 	}
 }
 
