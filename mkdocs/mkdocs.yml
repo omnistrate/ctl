@@ -60,6 +60,7 @@ nav:
       - list: 'omnistrate-ctl_environment_list.md'
       - promote: 'omnistrate-ctl_environment_promote.md'
     - build: 'omnistrate-ctl_build.md'
+    - build-from-repo: 'omnistrate-ctl_build-from-repo.md'
     - domain:
       - create: 'omnistrate-ctl_domain_create.md'
       - delete: 'omnistrate-ctl_domain_delete.md'
