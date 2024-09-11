@@ -41,6 +41,7 @@ var BuildFromRepoCmd = &cobra.Command{
 
 func init() {
 	BuildFromRepoCmd.Flags().Bool("reset-pat", false, "Reset the GitHub Personal Access Token (PAT) for the current user.")
+	BuildFromRepoCmd.Flags().StringP("output", "o", "text", "Output format. Only text is supported")
 }
 
 func runBuildFromRepo(cmd *cobra.Command, args []string) error {
@@ -53,12 +54,26 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	outputFlagValue, err := cmd.Flags().GetString("output")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	// Validate the output format
+	if outputFlagValue != "text" {
+		err = errors.New("only text output format is supported")
+		utils.PrintError(err)
+		return err
+	}
+
+	// Initialize the spinner manager
 	var sm ysmrr.SpinnerManager
 	var spinner *ysmrr.Spinner
 	sm = ysmrr.NewSpinnerManager()
 	sm.Start()
 
-	// Step 0: Check if the Docker daemon is running
+	// Step 0: Check if Docker and gh cli is installed
 	spinner = sm.AddSpinner("Checking if Docker installed")
 	time.Sleep(1 * time.Second)                   // Add a delay to show the spinner
 	err = exec.Command("docker", "version").Run() // Simple way to check if Docker is available
@@ -67,6 +82,16 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	spinner.UpdateMessage("Checking if Docker installed: Yes")
+	spinner.Complete()
+
+	spinner = sm.AddSpinner("Checking if gh installed")
+	time.Sleep(1 * time.Second) // Add a delay to show the spinner
+	err = exec.Command("gh", "version").Run()
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+	spinner.UpdateMessage("Checking if gh installed: Yes")
 	spinner.Complete()
 
 	// Step 1: Check if the Docker daemon is running
@@ -377,7 +402,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	fileData = []byte(strings.ReplaceAll(string(fileData), "${{ secrets.GitHubPAT }}", pat))
 
 	// Build the service
-	serviceID, devEnvironmentID, devPlanID, err := buildService(fileData, token, repoName, DockerComposeSpecType, nil, nil,
+	serviceID, devEnvironmentID, devPlanID, undefinedResources, err := buildService(fileData, token, repoName, DockerComposeSpecType, nil, nil,
 		nil, nil, true, true, nil)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
@@ -386,6 +411,20 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	spinner.UpdateMessage(fmt.Sprintf("Building service from the compose spec: built service %s (service ID: %s)", repoName, serviceID))
 	spinner.Complete()
+
+	// Print warning if there are any undefined resources
+	if len(undefinedResources) > 0 {
+		sm.Stop()
+
+		utils.PrintWarning("The following resources appear in the service plan but were not defined in the spec:")
+		for resourceName, resourceID := range undefinedResources {
+			utils.PrintWarning(fmt.Sprintf("  %s: %s", resourceName, resourceID))
+		}
+		utils.PrintWarning("These resources were not processed during the build. If you no longer need them, please deprecate and remove them from the service plan manually in UI or using the API.")
+
+		sm = ysmrr.NewSpinnerManager()
+		sm.Start()
+	}
 
 	// Step 15: Check if the production environment is set up
 	spinner = sm.AddSpinner("Checking if the production environment is set up")
