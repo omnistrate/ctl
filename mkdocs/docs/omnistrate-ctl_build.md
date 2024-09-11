@@ -65,6 +65,7 @@ omctl build --file docker-compose.yml --name "My Service" --description "My Serv
       --image-registry-auth-username string   Used together with --image flag. Provide the username to authenticate with the image registry if it's a private registry
   -i, --interactive                           Interactive mode
   -n, --name string                           Name of the service. A service can have multiple service plans. The build command will build a new or existing service plan inside the specified service.
+  -o, --output string                         Output format. Only text is supported (default "text")
       --release                               Release the service after building it
       --release-as-preferred                  Release the service as preferred after building it
       --release-description string            Custom description of the release version
@@ -75,8 +76,7 @@ omctl build --file docker-compose.yml --name "My Service" --description "My Serv
 ### Options inherited from parent commands
 
 ```
-  -o, --output string   Output format (text|table|json) (default "table")
-  -v, --version         Print the version number of omnistrate-ctl
+  -v, --version   Print the version number of omnistrate-ctl
 ```
 
 ### SEE ALSO

@@ -73,7 +73,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	sm = ysmrr.NewSpinnerManager()
 	sm.Start()
 
-	// Step 0: Check if the Docker daemon is running
+	// Step 0: Check if Docker and gh cli is installed
 	spinner = sm.AddSpinner("Checking if Docker installed")
 	time.Sleep(1 * time.Second)                   // Add a delay to show the spinner
 	err = exec.Command("docker", "version").Run() // Simple way to check if Docker is available
@@ -82,6 +82,16 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	spinner.UpdateMessage("Checking if Docker installed: Yes")
+	spinner.Complete()
+
+	spinner = sm.AddSpinner("Checking if gh installed")
+	time.Sleep(1 * time.Second) // Add a delay to show the spinner
+	err = exec.Command("gh", "version").Run()
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+	spinner.UpdateMessage("Checking if gh installed: Yes")
 	spinner.Complete()
 
 	// Step 1: Check if the Docker daemon is running
