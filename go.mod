@@ -2,8 +2,6 @@ module github.com/omnistrate/ctl
 
 go 1.23.0
 
-toolchain go1.23.1
-
 require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/cenkalti/backoff/v4 v4.3.0
