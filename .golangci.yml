@@ -19,7 +19,6 @@ linters:
     - asciicheck
     - bodyclose
     - durationcheck
-    - exportloopref
     - gocritic
     - loggercheck
     - unconvert

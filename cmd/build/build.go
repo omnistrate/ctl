@@ -709,7 +709,7 @@ func isValidSpecType(s string) bool {
 // Most compose files mount the configs directly as volumes. This function converts the volumes to configs.
 func convertVolumesToConfigs(project *types.Project) (converted *types.Project, modified bool, err error) {
 	modified = false
-	volumesToBeRemoved := make(map[int]int) // map of volume index to service index
+	volumesToBeRemoved := make(map[int]map[int]struct{}) // map of service index to list of volume indexes to be removed
 	for svcIdx, service := range project.Services {
 		for volIdx, volume := range service.Volumes {
 			// Check if the volume source exists. If so, it needs to be a directory with files or the source is itself a file
@@ -784,7 +784,10 @@ func convertVolumesToConfigs(project *types.Project) (converted *types.Project, 
 				}
 
 				// Remove the volume from the service
-				volumesToBeRemoved[svcIdx] = volIdx
+				if volumesToBeRemoved[svcIdx] == nil {
+					volumesToBeRemoved[svcIdx] = make(map[int]struct{})
+				}
+				volumesToBeRemoved[svcIdx][volIdx] = struct{}{}
 			}
 		}
 
@@ -793,8 +796,16 @@ func convertVolumesToConfigs(project *types.Project) (converted *types.Project, 
 	}
 
 	// Remove the volumes from the services
-	for svcIdx, volIdx := range volumesToBeRemoved {
-		project.Services[svcIdx].Volumes = append(project.Services[svcIdx].Volumes[:volIdx], project.Services[svcIdx].Volumes[volIdx+1:]...)
+	for svcIdx, volumes := range volumesToBeRemoved {
+		volumesBefore := make([]types.ServiceVolumeConfig, len(project.Services[svcIdx].Volumes))
+		copy(volumesBefore, project.Services[svcIdx].Volumes)
+
+		project.Services[svcIdx].Volumes = nil
+		for volIdx := range volumesBefore {
+			if _, ok := volumes[volIdx]; !ok {
+				project.Services[svcIdx].Volumes = append(project.Services[svcIdx].Volumes, volumesBefore[volIdx])
+			}
+		}
 	}
 
 	converted = project
