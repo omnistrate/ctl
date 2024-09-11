@@ -46,14 +46,14 @@ func IsProd() bool {
 	return GetRootDomain() == "omnistrate.cloud"
 }
 
-func TruncateString(s string, max int) string {
-	if len(s) <= max {
+func TruncateString(s string, maxLen int) string {
+	if len(s) <= maxLen {
 		return s
 	}
-	if !strings.ContainsAny(s[:max], " .,:;-") {
-		return s[:max] + "..."
+	if !strings.ContainsAny(s[:maxLen], " .,:;-") {
+		return s[:maxLen] + "..."
 	}
-	return s[:strings.LastIndexAny(s[:max], " .,:;-!")] + "..."
+	return s[:strings.LastIndexAny(s[:maxLen], " .,:;-!")] + "..."
 }
 
 func CleanupArgsAndFlags(cmd *cobra.Command, args *[]string) {
