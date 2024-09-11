@@ -546,16 +546,16 @@ func runBuild(cmd *cobra.Command, args []string) error {
 func buildService(fileData []byte, token, name, specType string, description, serviceLogoURL, environment, environmentType *string, release,
 	releaseAsPreferred bool, releaseName *string) (serviceID string, environmentID string, productTierID string, undefinedResources map[string]serviceapi.ResourceID, err error) {
 	if name == "" {
-		return "", "", "", nil, errors.New("name is required")
+		return "", "", "", make(map[string]serviceapi.ResourceID), errors.New("name is required")
 	}
 
 	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())
 	if err != nil {
-		return "", "", "", nil, err
+		return "", "", "", make(map[string]serviceapi.ResourceID), err
 	}
 
 	if specType == "" {
-		return "", "", "", nil, errors.New("specType is required")
+		return "", "", "", make(map[string]serviceapi.ResourceID), errors.New("specType is required")
 	}
 
 	switch specType {
@@ -575,12 +575,12 @@ func buildService(fileData []byte, token, name, specType string, description, se
 		if err != nil {
 			var serviceError *goa.ServiceError
 			if errors.As(err, &serviceError) {
-				return "", "", "", nil, fmt.Errorf("%s\nDetail: %s", serviceError.Name, serviceError.Message)
+				return "", "", "", make(map[string]serviceapi.ResourceID), fmt.Errorf("%s\nDetail: %s", serviceError.Name, serviceError.Message)
 			}
 			return
 		}
 		if buildRes == nil {
-			return "", "", "", nil, errors.New("empty response from server")
+			return "", "", "", make(map[string]serviceapi.ResourceID), errors.New("empty response from server")
 		}
 		return string(buildRes.ServiceID), string(buildRes.ServiceEnvironmentID), string(buildRes.ProductTierID), buildRes.UndefinedResources, nil
 	case DockerComposeSpecType:
@@ -621,7 +621,7 @@ func buildService(fileData []byte, token, name, specType string, description, se
 		// Convert config volumes to configs
 		var modified bool
 		if project, modified, err = convertVolumesToConfigs(project); err != nil {
-			return "", "", "", nil, err
+			return "", "", "", make(map[string]serviceapi.ResourceID), err
 		}
 
 		// Convert the project back to YAML, in case it was modified
@@ -641,7 +641,7 @@ func buildService(fileData []byte, token, name, specType string, description, se
 				var fileContent []byte
 				fileContent, err = os.ReadFile(filepath.Clean(config.File))
 				if err != nil {
-					return "", "", "", nil, err
+					return "", "", "", make(map[string]serviceapi.ResourceID), err
 				}
 
 				request.Configs[configName] = base64.StdEncoding.EncodeToString(fileContent)
@@ -655,7 +655,7 @@ func buildService(fileData []byte, token, name, specType string, description, se
 				var fileContent []byte
 				fileContent, err = os.ReadFile(filepath.Clean(secret.File))
 				if err != nil {
-					return "", "", "", nil, err
+					return "", "", "", make(map[string]serviceapi.ResourceID), err
 				}
 
 				request.Secrets[secretName] = base64.StdEncoding.EncodeToString(fileContent)
@@ -667,17 +667,17 @@ func buildService(fileData []byte, token, name, specType string, description, se
 		if err != nil {
 			var serviceError *goa.ServiceError
 			if errors.As(err, &serviceError) {
-				return "", "", "", nil, fmt.Errorf("%s\nDetail: %s", serviceError.Name, serviceError.Message)
+				return "", "", "", make(map[string]serviceapi.ResourceID), fmt.Errorf("%s\nDetail: %s", serviceError.Name, serviceError.Message)
 			}
 			return
 		}
 		if buildRes == nil {
-			return "", "", "", nil, errors.New("empty response from server")
+			return "", "", "", make(map[string]serviceapi.ResourceID), errors.New("empty response from server")
 		}
 		return string(buildRes.ServiceID), string(buildRes.ServiceEnvironmentID), string(buildRes.ProductTierID), buildRes.UndefinedResources, nil
 
 	default:
-		return "", "", "", nil, errors.New("invalid spec type")
+		return "", "", "", make(map[string]serviceapi.ResourceID), errors.New("invalid spec type")
 	}
 }
 
