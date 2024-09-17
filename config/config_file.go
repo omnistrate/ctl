@@ -31,8 +31,8 @@ type AuthConfig struct {
 }
 
 var (
-	ErrConfigFileNotFound = errors.New("config file not found")
-	ErrAuthConfigNotFound = errors.New("no auth config found")
+	ErrConfigFileNotFound = errors.New("auth failure: please login first")
+	ErrAuthConfigNotFound = errors.New("auth failure: please login first")
 	ErrGitHubPATNotFound  = errors.New("no github personal access token found")
 )
 
