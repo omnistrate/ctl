@@ -3,6 +3,7 @@ package smoke
 import (
 	"fmt"
 	"github.com/omnistrate/ctl/cmd"
+	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/test/testutils"
 	"testing"
 
@@ -22,7 +23,7 @@ func Test_logout(t *testing.T) {
 	cmd.RootCmd.SetArgs([]string{"logout"})
 	err = cmd.RootCmd.Execute()
 	require.Error(err)
-	require.Contains(err.Error(), "config file not found")
+	require.Contains(err.Error(), config.ErrConfigFileNotFound.Error())
 
 	// PASS: logout after login
 	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
