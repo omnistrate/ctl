@@ -1,10 +1,11 @@
-package login
+package auth
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/omnistrate/ctl/cmd"
 	"github.com/omnistrate/ctl/test/testutils"
-	"testing"
 
 	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/stretchr/testify/require"

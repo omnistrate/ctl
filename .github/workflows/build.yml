@@ -149,9 +149,16 @@ jobs:
       fail-fast: false
       matrix:
         test-group: [ 
+          'account/...',
+          'auth/...',
           'build/...',
+          'domain/...',
+          'environment/...',
+          'helm/...',
           'instance/...',
-          'identityprovider/...',
+          'service/...', 
+          'serviceplan/...',
+          'upgrade/...',
         ]
 
     concurrency:
@@ -202,7 +209,7 @@ jobs:
           LOG_LEVEL: debug
           LOG_FORMAT: pretty
           DRY_RUN: true
-        run: gotestsum --format github-actions -- ./smoke_test/${{ matrix.test-group }}/... -timeout 1800s -p 1 -p 1 -v
+        run: gotestsum --format github-actions -- ./smoke_test/${{ matrix.test-group }} -timeout 1800s -p 1 -p 1 -v
 
   publish:
     if: github.event_name == 'push'
