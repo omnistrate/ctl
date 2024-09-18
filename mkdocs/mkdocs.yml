@@ -80,7 +80,7 @@ nav:
       - restart: 'omnistrate-ctl_instance_restart.md'
       - start: 'omnistrate-ctl_instance_start.md'
       - stop: 'omnistrate-ctl_instance_stop.md'
-      - update: 'omnistrate-ctl_instance_update.md'
+      - modify: 'omnistrate-ctl_instance_modify.md'
     - service:
       - delete: 'omnistrate-ctl_service_delete.md'
       - describe: 'omnistrate-ctl_service_describe.md'
