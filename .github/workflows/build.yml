@@ -69,8 +69,6 @@ jobs:
           version: v1.60.2
           args: ./...
           skip-cache: true
-          only-new-issues: ${{ github.event_name == 'pull_request' || github.event_name == 'merge_group' }}
-          install-mode: "goinstall"
 
   build:
     runs-on: ubuntu-latest
@@ -205,7 +203,7 @@ jobs:
           LOG_LEVEL: debug
           LOG_FORMAT: pretty
           DRY_RUN: true
-        run: gotestsum --format github-actions -- ./smoke_test/${{ matrix.test-group }} -timeout 1800s -p 1 -p 1 -v
+        run: gotestsum --format github-actions -- ./test/smoke_test/${{ matrix.test-group }} -timeout 1800s -p 1 -p 1 -v
 
   publish:
     if: github.event_name == 'push'
