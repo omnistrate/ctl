@@ -25,13 +25,13 @@ x-internal-integrations:
       aws: arn:aws:secretsmanager:us-west-2:1234567890:secret:compose-secret
 services:
   writer:
-    image: docker.io/bitnami/mysql:8.1.0
+    image: docker.io/bitnami/mysql:8.1.1
     configs:
       - source: my_config
         target: /etc/config/conf.yaml
     secrets:
       - source: my_secret
-        target: /etc/config/secret.yaml
+        target: /etc/config/secret_updated.yaml
     ports:
       - '3306'
     volumes:
@@ -40,44 +40,49 @@ services:
         type: volume
         x-omnistrate-storage:
           aws:
-            instanceStorageType: AWS::EBS_GP3
-            instanceStorageSizeGi: 100
-            instanceStorageIOPS: 3000
-            instanceStorageThroughputMiBps: 400
+            instanceStorageType: AWS::EBS_GP2
+            instanceStorageSizeGi: 200
+            instanceStorageIOPS: 6000
+            instanceStorageThroughputMiBps: 800
+            disableBackup: true
           gcp:
-            instanceStorageType: GCP::PD_BALANCED
-            instanceStorageSizeGi: 100
+            instanceStorageType: GCP::PD_SSD
+            instanceStorageSizeGi: 200
+            disableBackup: true
+      - type: cluster
+        x-omnistrate-storage:
+          aws:
+            clusterStorageType: AWS::S3
     x-omnistrate-compute:
-      rootVolumeSizeGi: 10
+      rootVolumeSizeGi: 20
       instanceTypes:
-        - name: t4g.small
+        - name: t4g.medium
           cloudProvider: aws
-        - name: e2-medium
+        - name: e2-large
           cloudProvider: gcp
     x-omnistrate-capabilities:
       autoscaling:
         maxReplicas: 1
         minReplicas: 1
-        idleMinutesBeforeScalingDown: 2
+        idleMinutesBeforeScalingDown: 20
         idleThreshold: 1
         overUtilizedMinutesBeforeScalingUp: 3
         overUtilizedThreshold: 80
-        scalingMetric:
-          metricEndpoint: "http://localhost:9187/metrics"
-          metricLabelName: "application_name"
-          metricLabelValue: "psql"
-          metricName: "pg_stat_activity_count"
+      serverlessConfiguration:
+        targetPort: 3306
+        enableAutoStop: true
+        minimumNodesInPool: 10
     environment:
       - MYSQL_REPLICATION_MODE=master
       - MYSQL_REPLICATION_USER=repl_user
       - MYSQL_REPLICATION_PASSWORD=xFAwjmUcECktqL
       - MYSQL_PASSWORD=$var.password
-      - MYSQL_DATABASE=$var.database
-      - MYSQL_USER=$var.username
+      - MYSQL_DATABASE=mydatabase
+      - MYSQL_USER=$var.username2
       - MYSQL_ROOT_PASSWORD=jstztiwtzujorf
-      - SECURITY_CONTEXT_USER_ID=1001
-      - SECURITY_CONTEXT_FS_GROUP=1001
-      - SECURITY_CONTEXT_GROUP_ID=0
+      - SECURITY_CONTEXT_USER_ID=1002
+      - SECURITY_CONTEXT_FS_GROUP=1002
+      - NEW_ENV_VAR=NEW_ENV_VAR_VALUE
     x-omnistrate-api-params:
       - key: password
         description: Default DB Password
@@ -86,16 +91,9 @@ services:
         modifiable: false
         required: true
         export: false
-      - key: database
-        description: Default DB Name
-        name: Default Database
-        type: String
-        modifiable: false
-        required: true
-        export: true
-      - key: username
-        description: Username
-        name: Default DB Username
+      - key: username2
+        description: Username2
+        name: Default DB Username2
         type: String
         modifiable: false
         required: true
@@ -104,30 +102,30 @@ services:
       - scope: CLUSTER
         type: INIT
         commandTemplate: >
-          echo "Initializing the cluster"
-      - scope: NODE
-        type: POST_START
+          echo "Initializing the cluster - NEW ACTION HOOK"
+      - scope: CLUSTER
+        type: POST_UPGRADE
         commandTemplate: |
-          echo "Post start action"
+          echo "Post cluster upgrade action"
     x-omnistrate-mode-internal: true
   reader:
-    image: docker.io/bitnami/mysql:8.1.0
+    image: docker.io/bitnami/mysql:8.1.1
     ports:
       - '3306'
+      - '3307'
     volumes:
       - 'mysql_slave_data:/bitnami/mysql/data'
     x-omnistrate-compute:
       replicaCountAPIParam: numReadReplicas
       instanceTypes:
         - cloudProvider: aws
-          apiParam: readerInstanceType
+          apiParam: readerInstanceType2
         - cloudProvider: gcp
-          apiParam: readerInstanceType
+          apiParam: readerInstanceType2
     x-omnistrate-capabilities:
-      enableMultiZone: false
+      enableMultiZone: true
       httpReverseProxy:
-        targetPort: 3306
-      enableStableEgressIP: true
+        targetPort: 3307
     environment:
       - MYSQL_REPLICATION_MODE=slave
       - MYSQL_REPLICATION_USER=repl_user
@@ -139,9 +137,9 @@ services:
       - SECURITY_CONTEXT_FS_GROUP=1001
       - SECURITY_CONTEXT_GROUP_ID=0
     x-omnistrate-api-params:
-      - key: readerInstanceType
-        description: Reader Instance Type
-        name: Reader Instance Type
+      - key: readerInstanceType2
+        description: Reader Instance Type2
+        name: Reader Instance Type2
         type: String
         modifiable: true
         required: true
@@ -174,27 +172,34 @@ services:
         modifiable: true
         required: true
         export: true
+      - key: newAPIParam
+        description: New API Param
+        name: New API Param
+        type: String
+        modifiable: true
+        required: true
+        export: true
     x-omnistrate-mode-internal: true
   cluster:
     image: omnistrate/noop
     x-omnistrate-capabilities:
       backupConfiguration:
-        backupRetentionInDays: 7
+        backupRetentionInDays: 1
         backupPeriodInHours: 6
     x-omnistrate-api-params:
-      - key: instanceType
-        description: Instance Type
-        name: Instance Type
+      - key: instanceType2
+        description: Instance Type2
+        name: Instance Type2
         type: String
         modifiable: true
         required: true
         export: true
         defaultValue: t4g.small
         parameterDependencyMap:
-          reader: readerInstanceType
+          reader: readerInstanceType2
       - key: password
-        description: Default DB Password
-        name: Password
+        description: Default DB Password2
+        name: Password2
         type: String
         modifiable: false
         required: true
@@ -210,7 +215,7 @@ services:
         required: true
         export: true
         parameterDependencyMap:
-          writer: username
+          writer: username2
           reader: username
       - key: dbName
         description: Default Database Name
@@ -220,7 +225,6 @@ services:
         required: true
         export: true
         parameterDependencyMap:
-          writer: database
           reader: database
       - key: numReadReplicas
         description: Number of Read Replicas
@@ -229,9 +233,18 @@ services:
         modifiable: true
         required: false
         export: true
-        defaultValue: "1"
+        defaultValue: "2"
         parameterDependencyMap:
           reader: numReadReplicas
+      - key: newAPIParam
+        description: New API Param
+        name: New API Param
+        type: String
+        modifiable: true
+        required: true
+        export: true
+        parameterDependencyMap:
+          reader: newAPIParam
     depends_on:
       - writer
       - reader
@@ -239,11 +252,11 @@ services:
 
 configs:
   my_config:
-    file: configfiles/conf.yaml
+    file: ../configfiles/conf_updated.yaml
 
 secrets:
   my_secret:
-    file: configfiles/secret.yaml
+    file: ../configfiles/secret_updated.yaml
 
 volumes:
   mysql_master_data:

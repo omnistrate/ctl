@@ -2,10 +2,11 @@ package service
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/omnistrate/ctl/cmd"
 	"github.com/omnistrate/ctl/cmd/build"
 	"github.com/omnistrate/ctl/test/testutils"
-	"testing"
 
 	"github.com/google/uuid"
 	"github.com/omnistrate/commons/pkg/utils"
@@ -27,7 +28,7 @@ func Test_remove_basic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"build", "-f", "composefiles/postgresql.yaml", "--name", "postgresql" + uuid.NewString(), "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "../composefiles/postgresql.yaml", "--name", "postgresql" + uuid.NewString(), "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 

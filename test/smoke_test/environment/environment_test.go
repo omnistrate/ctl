@@ -30,7 +30,7 @@ func Test_environment_basic(t *testing.T) {
 
 	// PASS: create postgresql service
 	serviceName := "postgresql" + uuid.NewString()
-	cmd.RootCmd.SetArgs([]string{"build", "--file", "composefiles/postgresql.yaml", "--name", serviceName, "--environment=dev", "--environment-type=dev"})
+	cmd.RootCmd.SetArgs([]string{"build", "--file", "../composefiles/postgresql.yaml", "--name", serviceName, "--environment=dev", "--environment-type=dev"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 	serviceID := build.ServiceID
