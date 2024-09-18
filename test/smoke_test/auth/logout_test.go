@@ -5,7 +5,10 @@ import (
 	"testing"
 
 	"github.com/omnistrate/ctl/cmd"
+<<<<<<< improve-error-msg
 	"github.com/omnistrate/ctl/config"
+=======
+>>>>>>> master
 	"github.com/omnistrate/ctl/test/testutils"
 
 	"github.com/omnistrate/commons/pkg/utils"
