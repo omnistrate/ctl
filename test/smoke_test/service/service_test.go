@@ -1,12 +1,13 @@
-package smoke
+package service
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/google/uuid"
 	"github.com/omnistrate/ctl/cmd"
 	"github.com/omnistrate/ctl/cmd/build"
 	"github.com/omnistrate/ctl/test/testutils"
-	"testing"
 
 	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/stretchr/testify/require"
@@ -29,7 +30,7 @@ func Test_service_basic(t *testing.T) {
 	serviceName := "postgresql" + uuid.NewString()
 
 	// Build service
-	cmd.RootCmd.SetArgs([]string{"build", "-f", "composefiles/postgresql.yaml", "--name", serviceName, "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "../composefiles/postgresql.yaml", "--name", serviceName, "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 	serviceID := build.ServiceID

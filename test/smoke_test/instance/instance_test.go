@@ -1,7 +1,10 @@
-package smoke
+package instance
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/cenkalti/backoff/v4"
 	"github.com/omnistrate/commons/pkg/constants"
 	"github.com/omnistrate/commons/pkg/utils"
@@ -10,8 +13,6 @@ import (
 	"github.com/omnistrate/ctl/test/testutils"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
-	"testing"
-	"time"
 )
 
 func TestInstanceBasic(t *testing.T) {

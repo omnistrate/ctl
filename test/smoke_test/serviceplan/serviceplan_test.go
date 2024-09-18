@@ -1,12 +1,13 @@
-package smoke
+package serviceplan
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/google/uuid"
 	"github.com/omnistrate/ctl/cmd"
 	"github.com/omnistrate/ctl/cmd/build"
 	"github.com/omnistrate/ctl/test/testutils"
-	"testing"
 
 	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/stretchr/testify/require"
@@ -28,7 +29,7 @@ func Test_service_plan_basic(t *testing.T) {
 
 	// PASS: create postgresql service
 	serviceName := "postgresql" + uuid.NewString()
-	cmd.RootCmd.SetArgs([]string{"build", "--file", "composefiles/postgresql.yaml", "--name", serviceName})
+	cmd.RootCmd.SetArgs([]string{"build", "--file", "../composefiles/postgresql.yaml", "--name", serviceName})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
@@ -74,7 +75,7 @@ func Test_service_plan_basic(t *testing.T) {
 
 	// PASS: create postgresql service
 	serviceName = "postgresql" + uuid.NewString()
-	cmd.RootCmd.SetArgs([]string{"build", "--file", "composefiles/postgresql.yaml", "--name", serviceName})
+	cmd.RootCmd.SetArgs([]string{"build", "--file", "../composefiles/postgresql.yaml", "--name", serviceName})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 	serviceID := build.ServiceID

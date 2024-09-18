@@ -1,13 +1,14 @@
-package smoke
+package environment
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/google/uuid"
 	"github.com/omnistrate/ctl/cmd"
 	"github.com/omnistrate/ctl/cmd/build"
 	"github.com/omnistrate/ctl/cmd/environment"
 	"github.com/omnistrate/ctl/test/testutils"
-	"testing"
 
 	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/stretchr/testify/require"
@@ -29,7 +30,7 @@ func Test_environment_basic(t *testing.T) {
 
 	// PASS: create postgresql service
 	serviceName := "postgresql" + uuid.NewString()
-	cmd.RootCmd.SetArgs([]string{"build", "--file", "composefiles/postgresql.yaml", "--name", serviceName, "--environment=dev", "--environment-type=dev"})
+	cmd.RootCmd.SetArgs([]string{"build", "--file", "../composefiles/postgresql.yaml", "--name", serviceName, "--environment=dev", "--environment-type=dev"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 	serviceID := build.ServiceID

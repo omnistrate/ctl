@@ -1,4 +1,4 @@
-package smoke
+package account
 
 import (
 	"fmt"

@@ -1,17 +1,17 @@
-package smoke
+package auth
 
 import (
 	"fmt"
-	"github.com/omnistrate/ctl/cmd"
-	"github.com/omnistrate/ctl/test/testutils"
 	"testing"
 
-	"github.com/google/uuid"
+	"github.com/omnistrate/ctl/cmd"
+	"github.com/omnistrate/ctl/test/testutils"
+
 	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/stretchr/testify/require"
 )
 
-func Test_list_basic(t *testing.T) {
+func Test_logout(t *testing.T) {
 	utils.SmokeTest(t)
 
 	require := require.New(t)
@@ -19,6 +19,13 @@ func Test_list_basic(t *testing.T) {
 
 	var err error
 
+	// FAIL: logout without login
+	cmd.RootCmd.SetArgs([]string{"logout"})
+	err = cmd.RootCmd.Execute()
+	require.Error(err)
+	require.Contains(err.Error(), "config file not found")
+
+	// PASS: logout after login
 	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
 	require.NoError(err)
 
@@ -26,11 +33,7 @@ func Test_list_basic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"build", "-f", "composefiles/postgresql.yaml", "--name", "postgresql" + uuid.NewString(), "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
-	err = cmd.RootCmd.Execute()
-	require.NoError(err)
-
-	cmd.RootCmd.SetArgs([]string{"list"})
+	cmd.RootCmd.SetArgs([]string{"logout"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 }
