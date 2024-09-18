@@ -2,13 +2,10 @@ package auth
 
 import (
 	"fmt"
+	"github.com/omnistrate/ctl/config"
 	"testing"
 
 	"github.com/omnistrate/ctl/cmd"
-<<<<<<< improve-error-msg
-	"github.com/omnistrate/ctl/config"
-=======
->>>>>>> master
 	"github.com/omnistrate/ctl/test/testutils"
 
 	"github.com/omnistrate/commons/pkg/utils"
@@ -27,7 +24,7 @@ func Test_logout(t *testing.T) {
 	cmd.RootCmd.SetArgs([]string{"logout"})
 	err = cmd.RootCmd.Execute()
 	require.Error(err)
-	require.Contains(err.Error(), "config file not found")
+	require.Contains(err.Error(), config.ErrConfigFileNotFound.Error())
 
 	// PASS: logout after login
 	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
