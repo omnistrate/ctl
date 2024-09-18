@@ -1,13 +1,14 @@
-package smoke
+package environment
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/google/uuid"
 	"github.com/omnistrate/ctl/cmd"
 	"github.com/omnistrate/ctl/cmd/build"
 	"github.com/omnistrate/ctl/cmd/environment"
 	"github.com/omnistrate/ctl/test/testutils"
-	"testing"
 
 	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/stretchr/testify/require"

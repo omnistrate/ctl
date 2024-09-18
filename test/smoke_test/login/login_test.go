@@ -1,4 +1,4 @@
-package smoke
+package login
 
 import (
 	"github.com/omnistrate/ctl/cmd"

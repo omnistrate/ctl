@@ -145,6 +145,15 @@ jobs:
     permissions:
       contents: read
 
+    strategy:
+      fail-fast: false
+      matrix:
+        test-group: [ 
+          'build/...',
+          'instance/...',
+          'identityprovider/...',
+        ]
+
     concurrency:
       group: ${{ github.workflow }}-Dev-us-west-2
       cancel-in-progress: false
@@ -178,17 +187,12 @@ jobs:
         run: |
           make tidy
 
-      - name: Build
-        timeout-minutes: 20
-        run: |
-          make build
-
       - name: Gotestsum installer
         uses: autero1/action-gotestsum@v2.0.0
         with:
           gotestsum_version: 1.11.0
 
-      - name: Smoke test
+      - name: Smoke test ${{ matrix.test-group }}
         timeout-minutes: 30
         env: 
           ENABLE_SMOKE_TEST: true
@@ -198,7 +202,7 @@ jobs:
           LOG_LEVEL: debug
           LOG_FORMAT: pretty
           DRY_RUN: true
-        run: gotestsum --format github-actions -- ./... -timeout 1800s -p 1 -p 1 -v
+        run: gotestsum --format github-actions -- ./smoke_test/${{ matrix.test-group }}/... -timeout 1800s -p 1 -p 1 -v
 
   publish:
     if: github.event_name == 'push'
