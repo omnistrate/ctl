@@ -161,10 +161,6 @@ jobs:
           'upgrade/...',
         ]
 
-    concurrency:
-      group: ${{ github.workflow }}-Dev-us-west-2
-      cancel-in-progress: false
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
