@@ -207,7 +207,7 @@ jobs:
 
   publish:
     if: github.event_name == 'push'
-    needs: [build, lint]
+    needs: smoke-tests
     runs-on: ubuntu-latest
     permissions:
       contents: write
