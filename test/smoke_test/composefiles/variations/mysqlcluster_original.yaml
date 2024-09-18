@@ -26,6 +26,14 @@ x-internal-integrations:
 services:
   writer:
     image: docker.io/bitnami/mysql:8.1.0
+    labels:
+      - "name=writer"
+      - "description=default description"
+    command:
+      - /cloud
+      - exec
+      - --command
+      - server
     configs:
       - source: my_config
         target: /etc/config/conf.yaml
@@ -47,6 +55,12 @@ services:
           gcp:
             instanceStorageType: GCP::PD_BALANCED
             instanceStorageSizeGi: 100
+      - source: file_system_data
+        target: /var/lib/postgresql/data1
+        type: volume
+        x-omnistrate-storage:
+          aws:
+            clusterStorageType: AWS::EFS
     x-omnistrate-compute:
       rootVolumeSizeGi: 10
       instanceTypes:
@@ -115,7 +129,18 @@ services:
     ports:
       - '3306'
     volumes:
-      - 'mysql_slave_data:/bitnami/mysql/data'
+      - source: mysql_slave_data
+        target: /bitnami/mysql/data1
+        type: volume
+        x-omnistrate-storage:
+          aws:
+            instanceStorageType: AWS::EBS_GP3
+            instanceStorageSizeGi: 100
+            instanceStorageIOPS: 3000
+            instanceStorageThroughputMiBps: 400
+          gcp:
+            instanceStorageType: GCP::PD_BALANCED
+            instanceStorageSizeGi: 100
     x-omnistrate-compute:
       replicaCountAPIParam: numReadReplicas
       instanceTypes:
@@ -144,8 +169,14 @@ services:
         name: Reader Instance Type
         type: String
         modifiable: true
-        required: true
+        required: false
+        defaultValue: t4g.small
         export: true
+        hasOptions: true
+        options:
+          - t4g.small
+          - t4g.medium
+          - t4g.large
       - key: database
         description: Default DB Name
         name: Default Database
@@ -187,9 +218,14 @@ services:
         name: Instance Type
         type: String
         modifiable: true
-        required: true
+        required: false
         export: true
         defaultValue: t4g.small
+        hasOptions: true
+        options:
+          - t4g.small
+          - t4g.medium
+          - t4g.large
         parameterDependencyMap:
           reader: readerInstanceType
       - key: password
@@ -239,14 +275,20 @@ services:
 
 configs:
   my_config:
-    file: configfiles/conf.yaml
+    file: ../configfiles/conf.yaml
 
 secrets:
   my_secret:
-    file: configfiles/secret.yaml
+    file: ../configfiles/secret.yaml
 
 volumes:
   mysql_master_data:
     driver: local
   mysql_slave_data:
     driver: local
+  file_system_data:
+    driver: sharedFileSystem
+    driver_opts:
+      efsThroughputMode: provisioned
+      efsPerformanceMode: generalPurpose
+      efsProvisionedThroughputInMibps: 100
