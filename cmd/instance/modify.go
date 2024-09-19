@@ -12,7 +12,10 @@ import (
 
 const (
 	modifyExample = `# Modify an instance deployment
-omctl instance modify instance-abcd1234`
+omctl instance modify instance-abcd1234 --param '{"databaseName":"default","password":"a_secure_password","rootPassword":"a_secure_root_password","username":"user"}'
+
+# Modify an instance deployment using a parameter file
+omctl instance modify instance-abcd1234 --param-file /path/to/param.json`
 )
 
 var modifyCmd = &cobra.Command{
@@ -25,7 +28,6 @@ var modifyCmd = &cobra.Command{
 }
 
 func init() {
-
 	modifyCmd.Flags().String("param", "", "Parameters for the instance deployment")
 	modifyCmd.Flags().String("param-file", "", "Json file containing parameters for the instance deployment")
 
