@@ -1,17 +1,16 @@
 package instance
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/chelnak/ysmrr"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
 	commonutils "github.com/omnistrate/commons/pkg/utils"
+	"github.com/omnistrate/ctl/cmd/common"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"os"
 	"strings"
 )
 
@@ -190,7 +189,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	offering := res.ConsumptionDescribeServiceOfferingResult.Offerings[0]
 
 	// Format parameters
-	formattedParams, err := formatParams(param, paramFile)
+	formattedParams, err := common.FormatParams(param, paramFile)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -334,26 +333,4 @@ func formatInstance(instance *inventoryapi.ResourceInstanceSearchRecord, truncat
 	}
 
 	return formattedInstance
-}
-
-func formatParams(param, paramFile string) (formattedParams map[string]string, err error) {
-	// Read parameters from file if provided
-	if paramFile != "" {
-		var fileContent []byte
-		fileContent, err = os.ReadFile(paramFile)
-		if err != nil {
-			return
-		}
-		param = string(fileContent)
-	}
-
-	// Extract parameters from json format param
-	if param != "" {
-		err = json.Unmarshal([]byte(param), &formattedParams)
-		if err != nil {
-			return
-		}
-	}
-
-	return
 }

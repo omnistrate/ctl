@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/chelnak/ysmrr"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
+	"github.com/omnistrate/ctl/cmd/common"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
@@ -86,7 +87,7 @@ func runModify(cmd *cobra.Command, args []string) error {
 	}
 
 	// Format parameters
-	formattedParams, err := formatParams(param, paramFile)
+	formattedParams, err := common.FormatParams(param, paramFile)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
