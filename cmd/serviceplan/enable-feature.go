@@ -12,10 +12,10 @@ import (
 
 const (
 	enableFeatureExample = `# Enable service plan feature 
-omctl service-plan enable-feature [service-name] [plan-name] --feature-name [feature-name] --feature-configuration [feature-configuration]
+omctl service-plan enable-feature [service-name] [plan-name] --feature [feature-name] --feature-configuration [feature-configuration]
 
 # Enable service plan feature by ID instead of name and configure using file
-omctl service-plan enable-feature --service-id [service-id] --plan-id [plan-id] --feature-name [feature-name] --feature-configuration-file /path/to/feature-config-file.json`
+omctl service-plan enable-feature --service-id [service-id] --plan-id [plan-id] --feature [feature-name] --feature-configuration-file /path/to/feature-config-file.json`
 )
 
 var enableCmd = &cobra.Command{

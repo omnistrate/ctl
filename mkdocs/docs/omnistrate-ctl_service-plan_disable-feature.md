@@ -14,20 +14,20 @@ omnistrate-ctl service-plan disable-feature [service-name] [plan-name] [flags]
 
 ```
 # Disable service plan feature 
-omctl service-plan disable-feature [service-name] [plan-name] --feature-name [feature-name]
+omctl service-plan disable-feature [service-name] [plan-name] --feature [feature-name]
 
 #  Disable service plan feature by ID instead of name
-omctl service-plan enable-feature --service-id [service-id] --plan-id [plan-id] --feature-name [feature-name]
+omctl service-plan enable-feature --service-id [service-id] --plan-id [plan-id] --feature [feature-name]
 ```
 
 ### Options
 
 ```
-      --environment string    Environment name. Use this flag with service name and plan name to describe the service plan in a specific environment
-      --feature-name string   Name / identifier of the feature to disable
-  -h, --help                  help for disable-feature
-      --plan-id string        Environment ID. Required if plan name is not provided
-      --service-id string     Service ID. Required if service name is not provided
+      --environment string   Environment name. Use this flag with service name and plan name to describe the service plan in a specific environment
+      --feature string       Name / identifier of the feature to disable
+  -h, --help                 help for disable-feature
+      --plan-id string       Environment ID. Required if plan name is not provided
+      --service-id string    Service ID. Required if service name is not provided
 ```
 
 ### Options inherited from parent commands

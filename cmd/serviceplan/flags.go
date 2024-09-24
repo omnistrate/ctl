@@ -1,7 +1,7 @@
 package serviceplan
 
 const (
-	FeatureNameFlag              = "feature-name"
+	FeatureNameFlag              = "feature"
 	FeatureConfigurationFlag     = "feature-configuration"
 	FeatureConfigurationFileFlag = "feature-configuration-file"
 	EnvironmentFlag              = "environment"

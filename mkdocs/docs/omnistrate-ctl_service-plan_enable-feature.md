@@ -14,19 +14,19 @@ omnistrate-ctl service-plan enable-feature [service-name] [plan-name] [flags]
 
 ```
 # Enable service plan feature 
-omctl service-plan enable-feature [service-name] [plan-name] --feature-name [feature-name] --feature-configuration [feature-configuration]
+omctl service-plan enable-feature [service-name] [plan-name] --feature [feature-name] --feature-configuration [feature-configuration]
 
 # Enable service plan feature by ID instead of name and configure using file
-omctl service-plan enable-feature --service-id [service-id] --plan-id [plan-id] --feature-name [feature-name] --feature-configuration-file /path/to/feature-config-file.json
+omctl service-plan enable-feature --service-id [service-id] --plan-id [plan-id] --feature [feature-name] --feature-configuration-file /path/to/feature-config-file.json
 ```
 
 ### Options
 
 ```
       --environment string                  Environment name. Use this flag with service name and plan name to describe the service plan in a specific environment
+      --feature string                      Name / identifier of the feature to enable
       --feature-configuration string        Configuration of the feature
       --feature-configuration-file string   Json file containing feature configuration
-      --feature-name string                 Name / identifier of the feature to enable
   -h, --help                                help for enable-feature
       --plan-id string                      Environment ID. Required if plan name is not provided
       --service-id string                   Service ID. Required if service name is not provided
