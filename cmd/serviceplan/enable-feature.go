@@ -90,7 +90,7 @@ func runEnableFeature(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the service plan exists
-	serviceID, serviceName, planID, _, environment, err = getServicePlan(token, serviceID, serviceName, planID, planName, environment)
+	serviceID, _, planID, _, _, err = getServicePlan(token, serviceID, serviceName, planID, planName, environment)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
