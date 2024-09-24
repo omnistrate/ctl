@@ -121,3 +121,39 @@ func Test_service_plan_basic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 }
+
+func Test_service_plan_features_modification(t *testing.T) {
+	utils.SmokeTest(t)
+
+	require := require.New(t)
+	defer testutils.Cleanup()
+
+	var err error
+
+	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	require.NoError(err)
+	cmd.RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: create postgresql service
+	serviceName := "postgresql" + uuid.NewString()
+	cmd.RootCmd.SetArgs([]string{"build", "--file", "../composefiles/byoa_postgresql.yaml", "--name", serviceName})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: enable CUSTOM_TERRAFORM_POLICY feature
+	cmd.RootCmd.SetArgs([]string{"service-plan", "enable-feature", serviceName, "postgresql", "--feature-name", "CUSTOM_TERRAFORM_POLICY", "--feature-configuration-file", "../configfiles/customTfPolicyFeatureConfig.json"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: disable CUSTOM_TERRAFORM_POLICY feature
+	cmd.RootCmd.SetArgs([]string{"service-plan", "disable-feature", serviceName, "postgresql", "--feature-name", "CUSTOM_TERRAFORM_POLICY"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: delete the service
+	cmd.RootCmd.SetArgs([]string{"service", "delete", serviceName})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+}
