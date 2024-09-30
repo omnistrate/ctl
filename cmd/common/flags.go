@@ -5,6 +5,12 @@ import (
 	"os"
 )
 
+const (
+	OutputFlag string = "output"
+
+	OutputTypeJson string = "json"
+)
+
 func FormatParams(param, paramFile string) (formattedParams map[string]any, err error) {
 	// Read parameters from file if provided
 	if paramFile != "" {

@@ -8,6 +8,7 @@ import (
 	"github.com/omnistrate/ctl/cmd/auth/login"
 	"github.com/omnistrate/ctl/cmd/auth/logout"
 	"github.com/omnistrate/ctl/cmd/build"
+	"github.com/omnistrate/ctl/cmd/customnetwork"
 	"github.com/omnistrate/ctl/cmd/deprecated"
 	"github.com/omnistrate/ctl/cmd/domain"
 	"github.com/omnistrate/ctl/cmd/environment"
@@ -116,6 +117,7 @@ func init() {
 	RootCmd.AddCommand(serviceplan.Cmd)
 	RootCmd.AddCommand(subscription.Cmd)
 	RootCmd.AddCommand(environment.Cmd)
+	RootCmd.AddCommand(customnetwork.Cmd)
 
 	// Deprecated
 	RootCmd.AddCommand(deprecated.DescribeCmd)

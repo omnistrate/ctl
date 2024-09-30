@@ -78,7 +78,7 @@ func printServicesTable(services []*serviceapi.DescribeServiceResult) {
 	green := color.New(color.FgGreen).SprintFunc()
 	bold := color.New(color.Bold).SprintFunc()
 
-	fmt.Printf("%s %d\n\n", green("Total Services:"), len(services))
+	fmt.Printf("%s %d\n\n", green("TotalCount Services:"), len(services))
 
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
