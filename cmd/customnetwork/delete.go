@@ -17,7 +17,7 @@ const (
 omctl custom-network delete [custom-network-name]
 
 # Delete a custom network by ID
-omctl custom-network describe --custom-network-id [custom-network-id]`
+omctl custom-network delete --custom-network-id [custom-network-id]`
 )
 
 var deleteCmd = &cobra.Command{
