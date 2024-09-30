@@ -64,7 +64,7 @@ func Test_custom_network_lifecycle(t *testing.T) {
 	require.Equal("ap-south-1", customNetwork.CloudProviderRegion)
 
 	// PASS: list custom networks
-	cmd.RootCmd.SetArgs([]string{"custom-network", "list", "--cloud-provider", "aws", "--region", "ap-south-1"})
+	cmd.RootCmd.SetArgs([]string{"custom-network", "list", "--filter", "cloud_provider:aws,region:ap-south-1"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 

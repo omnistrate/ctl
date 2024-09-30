@@ -3,12 +3,12 @@ package customnetwork
 import (
 	"github.com/chelnak/ysmrr"
 	customnetworkapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/custom_network_api"
-	commonsutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/cmd/common"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
+	"strings"
 )
 
 const (
@@ -16,7 +16,7 @@ const (
 omctl custom-network list 
 
 # List custom networks for a specific cloud provider and region  
-omctl custom-network list --cloud-provider=[cloud-provider-name] --region=[cloud-provider-region]`
+omctl custom-network list --filter="cloud_provider:aws,region:us-east-1"`
 )
 
 var listCmd = &cobra.Command{
@@ -29,17 +29,22 @@ var listCmd = &cobra.Command{
 }
 
 func init() {
-	listCmd.Flags().StringP(CloudProviderFlag, "", "", "Cloud provider name. Valid options include: 'aws', 'azure', 'gcp'")
-	listCmd.Flags().StringP(RegionFlag, "", "", "Region for the custom network (format is cloud provider specific)")
+	listCmd.Flags().StringArrayP(FilterFlag, "f", []string{}, "Filter to apply to the list of custom networks. E.g.: key1:value1,key2:value2, which filters custom networks where key1 equals value1 and key2 equals value2. Allow use of multiple filters to form the logical OR operation. Supported keys: "+strings.Join(utils.GetSupportedFilterKeys(model.CustomNetwork{}), ",")+". Check the examples for more details.")
 }
 
 func runList(cmd *cobra.Command, args []string) (err error) {
 	defer utils.CleanupArgsAndFlags(cmd, &args)
 
 	// Get flags
-	cloudProvider, _ := cmd.Flags().GetString(CloudProviderFlag)
-	region, _ := cmd.Flags().GetString(RegionFlag)
+	filters, _ := cmd.Flags().GetStringArray(FilterFlag)
 	output, _ := cmd.Flags().GetString(common.OutputFlag)
+
+	// Parse and validate filters
+	filterMaps, err := utils.ParseFilters(filters, utils.GetSupportedFilterKeys(model.CustomNetwork{}))
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
 
 	// Validate user is logged in
 	token, err := utils.GetToken()
@@ -58,20 +63,35 @@ func runList(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	var listResult *customnetworkapi.ListCustomNetworksResult
-	listResult, err = listCustomNetworks(token, cloudProvider, region)
+	listResult, err = listCustomNetworks(token)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	utils.HandleSpinnerSuccess(spinner, sm, "Successfully listed custom networks")
-
-	// Format and print the list
+	// Process and filter environments
 	var formattedCustomNetworks []model.CustomNetwork
-	for _, network := range listResult.CustomNetworks {
-		formattedCustomNetworks = append(formattedCustomNetworks, formatCustomNetwork(network))
+	for _, customNetwork := range listResult.CustomNetworks {
+		var match bool
+		formattedCustomNetwork := formatCustomNetwork(customNetwork)
+		match, err = utils.MatchesFilters(formattedCustomNetwork, filterMaps)
+		if err != nil {
+			utils.HandleSpinnerError(spinner, sm, err)
+			return
+		}
+
+		if match {
+			formattedCustomNetworks = append(formattedCustomNetworks, formattedCustomNetwork)
+		}
 	}
 
+	if len(formattedCustomNetworks) > 0 {
+		utils.HandleSpinnerSuccess(spinner, sm, "Successfully listed custom networks")
+	} else {
+		utils.HandleSpinnerSuccess(spinner, sm, "No custom networks found")
+	}
+
+	// Print output
 	err = utils.PrintTextTableJsonArrayOutput(output, formattedCustomNetworks)
 	if err != nil {
 		utils.PrintError(err)
@@ -81,20 +101,8 @@ func runList(cmd *cobra.Command, args []string) (err error) {
 	return
 }
 
-func listCustomNetworks(token string, cloudProvider string, region string) (
+func listCustomNetworks(token string) (
 	*customnetworkapi.ListCustomNetworksResult, error) {
-	var regionApiParam *string
-	var cloudProviderApiParam *customnetworkapi.CloudProvider
-	if len(cloudProvider) > 0 {
-		cloudProviderApiParam = commonsutils.ToPtr(customnetworkapi.CloudProvider(cloudProvider))
-	}
-	if len(region) > 0 {
-		regionApiParam = commonsutils.ToPtr(region)
-	}
-	request := customnetworkapi.ListCustomNetworksRequest{
-		CloudProviderName:   cloudProviderApiParam,
-		CloudProviderRegion: regionApiParam,
-	}
-
+	request := customnetworkapi.ListCustomNetworksRequest{}
 	return dataaccess.ListCustomNetworks(token, request)
 }
