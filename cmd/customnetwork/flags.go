@@ -1,8 +1,10 @@
 package customnetwork
 
 const (
-	CloudProviderFlag = "cloud-provider"
-	RegionFlag        = "region"
-	CidrFlag          = "cidr"
-	NameFlag          = "name"
+	CloudProviderFlag   string = "cloud-provider"
+	RegionFlag          string = "region"
+	CidrFlag            string = "cidr"
+	NameFlag            string = "name"
+	CustomNetworkIDFlag string = "custom-network-id"
+	FilterFlag          string = "filter"
 )

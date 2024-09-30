@@ -40,7 +40,12 @@ func Test_custom_network_lifecycle(t *testing.T) {
 	require.NotEmpty(customNetworkID)
 
 	// PASS: describe custom network
-	cmd.RootCmd.SetArgs([]string{"custom-network", "describe", customNetworkID})
+	cmd.RootCmd.SetArgs([]string{"custom-network", "describe", "--custom-network-id", customNetworkID})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
+	// PASS: describe custom network by name
+	cmd.RootCmd.SetArgs([]string{"custom-network", "describe", "ctl-test-network"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
@@ -63,8 +68,8 @@ func Test_custom_network_lifecycle(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
-	// PASS: delete custom network
-	cmd.RootCmd.SetArgs([]string{"custom-network", "delete", customNetworkID})
+	// PASS: delete custom network by name
+	cmd.RootCmd.SetArgs([]string{"custom-network", "delete", "ctl-test-network"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 
