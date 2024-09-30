@@ -1,7 +1,6 @@
 package customnetwork
 
 import (
-	"fmt"
 	"github.com/chelnak/ysmrr"
 	customnetworkapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/custom_network_api"
 	commonsutils "github.com/omnistrate/commons/pkg/utils"
@@ -65,7 +64,7 @@ func runList(cmd *cobra.Command, args []string) (err error) {
 		return err
 	}
 
-	utils.HandleSpinnerSuccess(spinner, sm, fmt.Sprintf("Successfully listed custom networks"))
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully listed custom networks")
 
 	// Format and print the list
 	var formattedCustomNetworks []model.CustomNetwork
