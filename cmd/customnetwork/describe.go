@@ -113,7 +113,7 @@ func describeCustomNetworkByName(token string, name string) (network *customnetw
 		err = fmt.Errorf("custom network %s not found", name)
 		return
 	} else if len(matching) > 1 {
-		err = fmt.Errorf("multiple custom networks found with name %s", name)
+		err = fmt.Errorf("multiple custom networks found with name %s, please use custom network ID instead", name)
 		return
 	}
 
