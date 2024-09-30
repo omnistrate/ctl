@@ -157,6 +157,7 @@ jobs:
           'service/...', 
           'serviceplan/...',
           'upgrade/...',
+          'customnetwork/...',
         ]
 
     steps:
