@@ -7,20 +7,24 @@ Deletes a custom network
 This command helps you delete an existing custom network.
 
 ```
-omnistrate-ctl custom-network delete [custom-network-id] [flags]
+omnistrate-ctl custom-network delete [custom-network-name] [flags]
 ```
 
 ### Examples
 
 ```
 # Delete a custom network
-omctl custom-network delete [custom-network-id]
+omctl custom-network delete [custom-network-name]
+
+# Delete a custom network by ID
+omctl custom-network describe --custom-network-id [custom-network-id]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for delete
+      --custom-network-id string   ID of the custom network
+  -h, --help                       help for delete
 ```
 
 ### Options inherited from parent commands

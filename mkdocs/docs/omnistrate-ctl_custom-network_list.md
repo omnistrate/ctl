@@ -17,15 +17,14 @@ omnistrate-ctl custom-network list [flags]
 omctl custom-network list 
 
 # List custom networks for a specific cloud provider and region  
-omctl custom-network list --cloud-provider=[cloud-provider-name] --region=[cloud-provider-region]
+omctl custom-network list --filter="cloud_provider:aws,region:us-east-1"
 ```
 
 ### Options
 
 ```
-      --cloud-provider string   Cloud provider name. Valid options include: 'aws', 'azure', 'gcp'
-  -h, --help                    help for list
-      --region string           Region for the custom network (format is cloud provider specific)
+  -f, --filter stringArray   Filter to apply to the list of custom networks. E.g.: key1:value1,key2:value2, which filters custom networks where key1 equals value1 and key2 equals value2. Allow use of multiple filters to form the logical OR operation. Supported keys: custom_network_id,custom_network_name,cloud_provider,region,cidr. Check the examples for more details.
+  -h, --help                 help for list
 ```
 
 ### Options inherited from parent commands

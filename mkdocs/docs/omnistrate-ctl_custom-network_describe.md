@@ -7,20 +7,24 @@ Describe a custom network
 This command helps you describe an existing custom network.
 
 ```
-omnistrate-ctl custom-network describe [custom-network-id] [flags]
+omnistrate-ctl custom-network describe [custom-network-name] [flags]
 ```
 
 ### Examples
 
 ```
 # Describe a custom network
-omctl custom-network describe [custom-network-id]
+omctl custom-network describe [custom-network-name]
+
+# Describe a custom network by ID
+omctl custom-network describe --custom-network-id [custom-network-id]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for describe
+      --custom-network-id string   ID of the custom network
+  -h, --help                       help for describe
 ```
 
 ### Options inherited from parent commands
