@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	signinapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/signin_api"
-	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
 	goa "goa.design/goa/v3/pkg"
@@ -19,7 +18,7 @@ func LoginWithPassword(email string, pass string) (token string, err error) {
 
 	request := signinapi.SigninRequest{
 		Email:    email,
-		Password: commonutils.ToPtr(pass),
+		Password: utils.ToPtr(pass),
 	}
 
 	res, err := signin.Signin(context.Background(), &request)
@@ -44,7 +43,7 @@ func LoginWithIdentityProvider(deviceCode, identityProviderName string) (*signin
 	}
 
 	res, err := signin.LoginWithIdentityProvider(context.Background(), &signinapi.LoginWithIdentityProviderRequest{
-		DeviceCode:           commonutils.ToPtr(deviceCode),
+		DeviceCode:           utils.ToPtr(deviceCode),
 		IdentityProviderName: signinapi.IdentityProviderName(identityProviderName),
 	})
 	if err != nil {

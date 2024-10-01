@@ -6,8 +6,6 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
-	"github.com/omnistrate/commons/pkg/constants"
-	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/cmd"
 	"github.com/omnistrate/ctl/cmd/instance"
 	"github.com/omnistrate/ctl/test/testutils"
@@ -15,8 +13,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	Running   = "RUNNING"
+	Stopped   = "STOPPED"
+	Failed    = "FAILED"
+	Cancelled = "CANCELLED"
+)
+
 func TestInstanceBasic(t *testing.T) {
-	utils.SmokeTest(t)
+	testutils.SmokeTest(t)
 
 	defer testutils.Cleanup()
 
@@ -67,7 +72,7 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(t, err)
 
-	err = WaitForInstanceToReachStatus(instanceID1, string(constants.Running), 300*time.Second)
+	err = WaitForInstanceToReachStatus(instanceID1, Running, 300*time.Second)
 	require.NoError(t, err)
 
 	// PASS: stop instance 1
@@ -75,7 +80,7 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(t, err)
 
-	err = WaitForInstanceToReachStatus(instanceID1, string(constants.Stopped), 300*time.Second)
+	err = WaitForInstanceToReachStatus(instanceID1, Stopped, 300*time.Second)
 	require.NoError(t, err)
 
 	// PASS: start instance 1
@@ -83,7 +88,7 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.Execute()
 	require.NoError(t, err)
 
-	err = WaitForInstanceToReachStatus(instanceID1, string(constants.Running), 300*time.Second)
+	err = WaitForInstanceToReachStatus(instanceID1, Running, 300*time.Second)
 	require.NoError(t, err)
 
 	// PASS: restart instance 1
@@ -92,7 +97,7 @@ func TestInstanceBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	time.Sleep(5 * time.Second)
-	err = WaitForInstanceToReachStatus(instanceID1, string(constants.Running), 300*time.Second)
+	err = WaitForInstanceToReachStatus(instanceID1, Running, 300*time.Second)
 	require.NoError(t, err)
 
 	// PASS: update instance 1
@@ -101,7 +106,7 @@ func TestInstanceBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	time.Sleep(5 * time.Second)
-	err = WaitForInstanceToReachStatus(instanceID1, string(constants.Running), 300*time.Second)
+	err = WaitForInstanceToReachStatus(instanceID1, Running, 300*time.Second)
 	require.NoError(t, err)
 
 	// PASS: update instance 2
@@ -110,7 +115,7 @@ func TestInstanceBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	time.Sleep(5 * time.Second)
-	err = WaitForInstanceToReachStatus(instanceID2, string(constants.Running), 300*time.Second)
+	err = WaitForInstanceToReachStatus(instanceID2, Running, 300*time.Second)
 	require.NoError(t, err)
 
 	// PASS: instance list
@@ -160,12 +165,12 @@ func WaitForInstanceToReachStatus(instanceID, status string, timeout time.Durati
 			return nil
 		}
 
-		if currentStatus == string(constants.Failed) {
+		if currentStatus == string(Failed) {
 			ticker.Stop()
 			return errors.New("instance deployment failed")
 		}
 
-		if currentStatus == string(constants.Cancelled) {
+		if currentStatus == string(Cancelled) {
 			ticker.Stop()
 			return errors.New("instance deployment cancelled")
 		}

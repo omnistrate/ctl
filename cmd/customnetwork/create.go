@@ -2,9 +2,9 @@ package customnetwork
 
 import (
 	"fmt"
+
 	"github.com/chelnak/ysmrr"
 	customnetworkapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/custom_network_api"
-	commonsutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/cmd/common"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
@@ -117,7 +117,7 @@ func validateCreateArguments(cloudProvider, region, cidr string) error {
 func createCustomNetwork(token, cloudProvider, region, cidr, name string) (*customnetworkapi.CustomNetwork, error) {
 	var nameApiParam *string
 	if len(name) > 0 {
-		nameApiParam = commonsutils.ToPtr(name)
+		nameApiParam = utils.ToPtr(name)
 	}
 	request := customnetworkapi.CreateCustomNetworkRequest{
 		CloudProviderName:   customnetworkapi.CloudProvider(cloudProvider),

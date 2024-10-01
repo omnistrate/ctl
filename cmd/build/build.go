@@ -11,7 +11,6 @@ import (
 	composegenapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/compose_gen_api"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
-	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
@@ -342,7 +341,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		environmentPtr = nil
 	}
 
-	environmentTypePtr := commonutils.ToPtr(strings.ToUpper(environmentType))
+	environmentTypePtr := utils.ToPtr(strings.ToUpper(environmentType))
 	if environmentType == "" {
 		environmentTypePtr = nil
 	}
@@ -466,10 +465,10 @@ func runBuild(cmd *cobra.Command, args []string) error {
 						Description:             "Production environment",
 						ServiceID:               serviceenvironmentapi.ServiceID(ServiceID),
 						Visibility:              serviceenvironmentapi.ServiceVisibility("PUBLIC"),
-						Type:                    (*serviceenvironmentapi.EnvironmentType)(commonutils.ToPtr("PROD")),
-						SourceEnvironmentID:     commonutils.ToPtr(serviceenvironmentapi.ServiceEnvironmentID(EnvironmentID)),
+						Type:                    (*serviceenvironmentapi.EnvironmentType)(utils.ToPtr("PROD")),
+						SourceEnvironmentID:     utils.ToPtr(serviceenvironmentapi.ServiceEnvironmentID(EnvironmentID)),
 						DeploymentConfigID:      serviceenvironmentapi.DeploymentConfigID(defaultDeploymentConfigID),
-						AutoApproveSubscription: commonutils.ToPtr(true),
+						AutoApproveSubscription: utils.ToPtr(true),
 					}
 
 					prodEnvironmentID, err = dataaccess.CreateServiceEnvironment(token, prod)
@@ -743,7 +742,7 @@ func convertVolumesToConfigs(project *types.Project) (converted *types.Project, 
 
 					// Create a config for each file
 					for _, fileInDir := range files {
-						sourceFileNameSHA := commonutils.HashPasswordSha256(fileInDir)
+						sourceFileNameSHA := utils.HashPasswordSha256(fileInDir)
 						config := types.ConfigObjConfig{
 							Name: sourceFileNameSHA,
 							File: fileInDir,
@@ -769,7 +768,7 @@ func convertVolumesToConfigs(project *types.Project) (converted *types.Project, 
 						})
 					}
 				} else {
-					sourceFileNameSHA := commonutils.HashPasswordSha256(source)
+					sourceFileNameSHA := utils.HashPasswordSha256(source)
 					config := types.ConfigObjConfig{
 						Name: sourceFileNameSHA,
 						File: source,

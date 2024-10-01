@@ -2,15 +2,15 @@ package environment
 
 import (
 	"fmt"
+	"slices"
+	"strings"
+
 	"github.com/chelnak/ysmrr"
 	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
-	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"slices"
-	"strings"
 )
 
 const (
@@ -214,7 +214,7 @@ func getVisibility(envType string) string {
 
 func getPublicKeyPtr(visibility string) *string {
 	if visibility == "PRIVATE" {
-		return commonutils.ToPtr(utils.GetDefaultServiceAuthPublicKey())
+		return utils.ToPtr(utils.GetDefaultServiceAuthPublicKey())
 	}
 	return nil
 }
@@ -225,18 +225,18 @@ func createEnvironment(token, envName, description, serviceID, envType, visibili
 		Description:             description,
 		ServiceID:               serviceenvironmentapi.ServiceID(serviceID),
 		Visibility:              serviceenvironmentapi.ServiceVisibility(visibility),
-		Type:                    commonutils.ToPtr(serviceenvironmentapi.EnvironmentType(envType)),
+		Type:                    utils.ToPtr(serviceenvironmentapi.EnvironmentType(envType)),
 		ServiceAuthPublicKey:    publicKeyPtr,
 		DeploymentConfigID:      serviceenvironmentapi.DeploymentConfigID(defaultDeploymentConfigID),
-		AutoApproveSubscription: commonutils.ToPtr(true),
-		SourceEnvironmentID:     (*serviceenvironmentapi.ServiceEnvironmentID)(commonutils.ToPtr(sourceEnvID)),
+		AutoApproveSubscription: utils.ToPtr(true),
+		SourceEnvironmentID:     (*serviceenvironmentapi.ServiceEnvironmentID)(utils.ToPtr(sourceEnvID)),
 	}
 
 	return dataaccess.CreateServiceEnvironment(token, request)
 }
 
 func getPromoteStatus(token, serviceID string, environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) string {
-	if !commonutils.CheckIfNilOrEmpty((*string)(environment.SourceEnvironmentID)) {
+	if !utils.CheckIfNilOrEmpty((*string)(environment.SourceEnvironmentID)) {
 		promoteRes, err := dataaccess.PromoteServiceEnvironmentStatus(token, serviceID, string(*environment.SourceEnvironmentID))
 		if err == nil {
 			for _, res := range promoteRes {

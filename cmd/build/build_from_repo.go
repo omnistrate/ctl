@@ -3,22 +3,22 @@ package build
 import (
 	"encoding/base64"
 	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"time"
+
 	"github.com/chelnak/ysmrr"
 	composegenapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/compose_gen_api"
 	producttierapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/product_tier_api"
 	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
-	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/browser"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"strings"
-	"time"
 )
 
 const (
@@ -353,8 +353,8 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		generateComposeSpecRequest := composegenapi.GenerateComposeSpecFromContainerImageRequest{
 			ImageRegistry: "ghcr.io",
 			Image:         imageUrl,
-			Username:      commonutils.ToPtr(ghUsername),
-			Password:      commonutils.ToPtr(pat),
+			Username:      utils.ToPtr(ghUsername),
+			Password:      utils.ToPtr(pat),
 		}
 
 		generateComposeSpecRes, err := dataaccess.GenerateComposeSpecFromContainerImage(token, &generateComposeSpecRequest)
@@ -587,10 +587,10 @@ func createProdEnv(token string, serviceID string, devEnvironmentID string) (ser
 		Description:             "Production environment",
 		ServiceID:               serviceenvironmentapi.ServiceID(serviceID),
 		Visibility:              serviceenvironmentapi.ServiceVisibility("PUBLIC"),
-		Type:                    (*serviceenvironmentapi.EnvironmentType)(commonutils.ToPtr("PROD")),
-		SourceEnvironmentID:     commonutils.ToPtr(serviceenvironmentapi.ServiceEnvironmentID(devEnvironmentID)),
+		Type:                    (*serviceenvironmentapi.EnvironmentType)(utils.ToPtr("PROD")),
+		SourceEnvironmentID:     utils.ToPtr(serviceenvironmentapi.ServiceEnvironmentID(devEnvironmentID)),
 		DeploymentConfigID:      serviceenvironmentapi.DeploymentConfigID(defaultDeploymentConfigID),
-		AutoApproveSubscription: commonutils.ToPtr(true),
+		AutoApproveSubscription: utils.ToPtr(true),
 	}
 
 	prodEnvironmentID, err := dataaccess.CreateServiceEnvironment(token, prod)

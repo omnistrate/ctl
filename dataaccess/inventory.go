@@ -2,9 +2,9 @@ package dataaccess
 
 import (
 	"context"
+
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
-	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/utils"
 )
 
@@ -52,8 +52,8 @@ func DescribeServiceOfferingResource(token, serviceID, resourceID, instanceID, p
 		ServiceID:          inventoryapi.ServiceID(serviceID),
 		ResourceID:         inventoryapi.ResourceID(resourceID),
 		InstanceID:         instanceID,
-		ProductTierID:      (*inventoryapi.ProductTierID)(commonutils.ToPtr(productTierID)),
-		ProductTierVersion: commonutils.ToPtr(productTierVersion),
+		ProductTierID:      (*inventoryapi.ProductTierID)(utils.ToPtr(productTierID)),
+		ProductTierVersion: utils.ToPtr(productTierVersion),
 	})
 	if err != nil {
 		return nil, err
@@ -71,8 +71,8 @@ func DescribeServiceOffering(token, serviceID, productTierID, productTierVersion
 	res, err := inventory.DescribeServiceOffering(context.Background(), &inventoryapi.InventoryDescribeServiceOfferingRequest{
 		Token:              token,
 		ServiceID:          inventoryapi.ServiceID(serviceID),
-		ProductTierID:      (*inventoryapi.ProductTierID)(commonutils.ToPtr(productTierID)),
-		ProductTierVersion: commonutils.ToPtr(productTierVersion),
+		ProductTierID:      (*inventoryapi.ProductTierID)(utils.ToPtr(productTierID)),
+		ProductTierVersion: utils.ToPtr(productTierVersion),
 	})
 	if err != nil {
 		return nil, err

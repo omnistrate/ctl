@@ -3,15 +3,15 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/fatih/color"
-	"github.com/omnistrate/commons/pkg/utils"
 	"os"
+
+	"github.com/fatih/color"
 )
 
 func PrintError(err error) {
 	errorMsg := color.New(color.FgRed, color.Bold).SprintFunc()
 	fmt.Println(errorMsg("Error: "), err.Error())
-	if !utils.IsDryRun() {
+	if !IsDryRun() {
 		os.Exit(1)
 	}
 }

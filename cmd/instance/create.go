@@ -2,16 +2,16 @@ package instance
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/chelnak/ysmrr"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
-	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/cmd/common"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 const (
@@ -225,7 +225,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		NetworkType:           nil,
 	}
 	if subscriptionID != "" {
-		request.SubscriptionID = (*inventoryapi.SubscriptionID)(commonutils.ToPtr(subscriptionID))
+		request.SubscriptionID = (*inventoryapi.SubscriptionID)(utils.ToPtr(subscriptionID))
 	}
 	instance, err := dataaccess.CreateInstance(token, request)
 	if err != nil {

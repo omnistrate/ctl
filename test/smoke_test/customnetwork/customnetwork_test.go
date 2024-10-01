@@ -2,19 +2,20 @@ package customnetwork
 
 import (
 	"fmt"
+	"testing"
+
 	customnetworkapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/custom_network_api"
-	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/cmd"
 	"github.com/omnistrate/ctl/cmd/customnetwork"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/test/testutils"
+	"github.com/omnistrate/ctl/utils"
 	ctlutils "github.com/omnistrate/ctl/utils"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func Test_custom_network_lifecycle(t *testing.T) {
-	utils.SmokeTest(t)
+	testutils.SmokeTest(t)
 
 	require := require.New(t)
 	defer testutils.Cleanup()

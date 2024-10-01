@@ -8,12 +8,11 @@ import (
 	"github.com/omnistrate/ctl/test/testutils"
 
 	"github.com/google/uuid"
-	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_list_basic(t *testing.T) {
-	utils.SmokeTest(t)
+	testutils.SmokeTest(t)
 
 	require := require.New(t)
 	defer testutils.Cleanup()
