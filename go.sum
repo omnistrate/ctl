@@ -31,8 +31,8 @@ github.com/cpuguy83/go-md2man/v2 v2.0.4 h1:wfIWP927BUkWJb2NmU/kNDYIBTh/ziUX91+lV
 github.com/cpuguy83/go-md2man/v2 v2.0.4/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/cqroot/multichoose v0.1.1 h1:diGuKYKea9ePOTwUyUDor9zKRqKFWXGkYGqUa9+firU=
 github.com/cqroot/multichoose v0.1.1/go.mod h1:BJzIGqbQZNADPDuA3IzhmTMpRc2F3fZKysMRYP+Ydw8=
-github.com/cqroot/prompt v0.9.3 h1:00Sjiasl1QL7ttEphJ+1xAl0fKQi+7s2F3aY0x7wnz4=
-github.com/cqroot/prompt v0.9.3/go.mod h1:NZvCTeuvR9ew9Hkk7xlrZ9xdVH4AmkO9R0eeBkzOHXQ=
+github.com/cqroot/prompt v0.9.4 h1:uFRlhXuOP3CSD+Pii0Z8VJhgXpavSloFf7/KAERwjz8=
+github.com/cqroot/prompt v0.9.4/go.mod h1:6BVZiEv7XkW1K64y1k2wdzToDwspL3n/RkUIyPjQ808=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
@@ -96,8 +96,8 @@ github.com/muesli/termenv v0.15.2 h1:GohcuySI0QmI3wN8Ok9PtKGkgkFIk7y6Vpb5PvrY+Wo
 github.com/muesli/termenv v0.15.2/go.mod h1:Epx+iuz8sNs7mNKhxzH4fWXGNpZwUaJKRS1noLXviQ8=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
-github.com/omnistrate/api-design v0.6.602 h1:Q78AsfwCo5puIPxyAg5imfqR9/QdejX4+s2EUaCmXrU=
-github.com/omnistrate/api-design v0.6.602/go.mod h1:QI9iRlEwsGrAYiBQxrefLQmr+0V7H6vN5E2urBj4MMA=
+github.com/omnistrate/api-design v0.7.3 h1:3x6Gngckjc7H51eDKWlW2zBPwuxnca3jM28iB3wB0ZQ=
+github.com/omnistrate/api-design v0.7.3/go.mod h1:Uua74Bzoz7nqkATlU2QpDbP2CpjM984+detObm4BZlE=
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240930190335-4f00d7ad2eba h1:RAO84cNsH2oTcTr/1q612u2hqaagnpePdoY1xrZ7Ywk=
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240930190335-4f00d7ad2eba/go.mod h1:IoOEWoWISwWWTr/7Z5wDvqAMaDpW7i+DXj5F1Qp5T6o=
 github.com/omnistrate/commons/pkg/constants v0.0.0-20240927212520-56de99b5cc1d h1:SRzDHGp05Av1ghKOTBbzcZFL6HFA2qWR3P8zUgxDYCE=

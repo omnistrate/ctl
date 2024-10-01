@@ -7,13 +7,13 @@ require (
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/chelnak/ysmrr v0.4.0
 	github.com/compose-spec/compose-go v1.20.2
-	github.com/cqroot/prompt v0.9.3
+	github.com/cqroot/prompt v0.9.4
 	github.com/fatih/color v1.17.0
 	github.com/google/uuid v1.6.0
 	github.com/jedib0t/go-pretty/v6 v6.5.9
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-wordwrap v1.0.1
-	github.com/omnistrate/api-design v0.6.602
+	github.com/omnistrate/api-design v0.7.3
 	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20240930190335-4f00d7ad2eba
 	github.com/omnistrate/commons/pkg/constants v0.0.0-20240927212520-56de99b5cc1d
 	github.com/omnistrate/commons/pkg/utils v0.0.0-20240816220514-e12d0d8f0c53
