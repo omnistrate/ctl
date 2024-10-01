@@ -10,12 +10,11 @@ import (
 	"github.com/omnistrate/ctl/cmd/environment"
 	"github.com/omnistrate/ctl/test/testutils"
 
-	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_environment_basic(t *testing.T) {
-	utils.SmokeTest(t)
+	testutils.SmokeTest(t)
 
 	require := require.New(t)
 	defer testutils.Cleanup()

@@ -9,12 +9,11 @@ import (
 	"github.com/omnistrate/ctl/cmd/build"
 	"github.com/omnistrate/ctl/test/testutils"
 
-	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_service_plan_basic(t *testing.T) {
-	utils.SmokeTest(t)
+	testutils.SmokeTest(t)
 
 	require := require.New(t)
 	defer testutils.Cleanup()
@@ -123,7 +122,7 @@ func Test_service_plan_basic(t *testing.T) {
 }
 
 func Test_service_plan_features_modification(t *testing.T) {
-	utils.SmokeTest(t)
+	testutils.SmokeTest(t)
 
 	require := require.New(t)
 	defer testutils.Cleanup()

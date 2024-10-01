@@ -3,7 +3,7 @@ package helm
 import (
 	"github.com/chelnak/ysmrr"
 	helmpackageapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/helm_package_api"
-	commonutils "github.com/omnistrate/commons/pkg/utils"
+	
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
@@ -65,7 +65,7 @@ func runListInstallations(cmd *cobra.Command, args []string) error {
 	var helmPackageResult *helmpackageapi.ListHelmPackageInstallationsResult
 
 	if len(hostClusterID) > 0 {
-		hostClusterIDReq = commonutils.ToPtr(helmpackageapi.HostClusterID(hostClusterID))
+		hostClusterIDReq = utils.ToPtr(helmpackageapi.HostClusterID(hostClusterID))
 	}
 
 	helmPackageResult, err = dataaccess.ListHelmChartInstallations(token, hostClusterIDReq)

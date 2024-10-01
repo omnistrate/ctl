@@ -2,14 +2,14 @@ package serviceplan
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/chelnak/ysmrr"
 	tierversionsetapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/tier_version_set_api"
-	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 const (
@@ -138,7 +138,7 @@ func formatServicePlanVersionDetails(token, serviceName, planName, environment s
 	var resources []model.Resource
 	for _, versionSetResource := range versionSet.Resources {
 		// Get resource details
-		desRes, err := dataaccess.DescribeResource(token, string(versionSet.ServiceID), string(versionSetResource.ID), commonutils.ToPtr(string(versionSet.ProductTierID)), &versionSet.Version)
+		desRes, err := dataaccess.DescribeResource(token, string(versionSet.ServiceID), string(versionSetResource.ID), utils.ToPtr(string(versionSet.ProductTierID)), &versionSet.Version)
 		if err != nil {
 			return model.ServicePlanVersionDetails{}, err
 		}

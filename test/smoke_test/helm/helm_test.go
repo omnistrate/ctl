@@ -2,15 +2,15 @@ package helm
 
 import (
 	"fmt"
-	"github.com/omnistrate/commons/pkg/utils"
+	"testing"
+
 	"github.com/omnistrate/ctl/cmd"
 	"github.com/omnistrate/ctl/test/testutils"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestHelmBasic(t *testing.T) {
-	utils.SmokeTest(t)
+	testutils.SmokeTest(t)
 
 	defer testutils.Cleanup()
 
