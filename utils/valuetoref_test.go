@@ -7,6 +7,8 @@ import (
 )
 
 func TestPtr(t *testing.T) {
+	t.Parallel()
+	
 	assert := assert.New(t)
 
 	assert.Equal("test", *ToPtr("test"))
