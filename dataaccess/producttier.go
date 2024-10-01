@@ -2,10 +2,10 @@ package dataaccess
 
 import (
 	"context"
+
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	producttierapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/product_tier_api"
 	serviceapiapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_apiapi"
-	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/utils"
 )
 
@@ -85,9 +85,9 @@ func ReleaseServicePlan(token, serviceID, serviceAPIID, productTierID string, ve
 		Token:          token,
 		ServiceID:      serviceapiapi.ServiceID(serviceID),
 		ID:             serviceapiapi.ServiceAPIID(serviceAPIID),
-		ProductTierID:  commonutils.ToPtr(serviceapiapi.ProductTierID(productTierID)),
+		ProductTierID:  utils.ToPtr(serviceapiapi.ProductTierID(productTierID)),
 		VersionSetName: versionSetName,
-		VersionSetType: commonutils.ToPtr("Major"),
+		VersionSetType: utils.ToPtr("Major"),
 		IsPreferred:    isPreferred,
 	}
 
@@ -108,7 +108,7 @@ func DescribePendingChanges(token, serviceID, serviceAPIID, productTierID string
 		Token:         token,
 		ServiceID:     serviceapiapi.ServiceID(serviceID),
 		ID:            serviceapiapi.ServiceAPIID(serviceAPIID),
-		ProductTierID: commonutils.ToPtr(serviceapiapi.ProductTierID(productTierID)),
+		ProductTierID: utils.ToPtr(serviceapiapi.ProductTierID(productTierID)),
 	}
 
 	pendingChanges, err = serviceApi.DescribePendingChanges(context.Background(), request)
