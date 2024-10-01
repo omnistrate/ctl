@@ -10,12 +10,11 @@ import (
 	"github.com/omnistrate/ctl/test/testutils"
 
 	"github.com/google/uuid"
-	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_build_basic(t *testing.T) {
-	utils.SmokeTest(t)
+	testutils.SmokeTest(t)
 
 	require := require.New(t)
 	defer testutils.Cleanup()
@@ -63,7 +62,7 @@ func Test_build_basic(t *testing.T) {
 }
 
 func Test_build_update_service(t *testing.T) {
-	utils.SmokeTest(t)
+	testutils.SmokeTest(t)
 
 	require := require.New(t)
 	defer testutils.Cleanup()
@@ -142,7 +141,7 @@ func Test_build_update_service(t *testing.T) {
 }
 
 func Test_build_duplicate_service_plan_name(t *testing.T) {
-	utils.SmokeTest(t)
+	testutils.SmokeTest(t)
 
 	require := require.New(t)
 	defer testutils.Cleanup()
@@ -197,7 +196,7 @@ func Test_build_duplicate_service_plan_name(t *testing.T) {
 }
 
 func Test_build_invalid_file(t *testing.T) {
-	utils.SmokeTest(t)
+	testutils.SmokeTest(t)
 
 	require := require.New(t)
 	defer testutils.Cleanup()
@@ -217,7 +216,7 @@ func Test_build_invalid_file(t *testing.T) {
 }
 
 func Test_build_no_file(t *testing.T) {
-	utils.SmokeTest(t)
+	testutils.SmokeTest(t)
 
 	require := require.New(t)
 	defer testutils.Cleanup()
@@ -237,7 +236,7 @@ func Test_build_no_file(t *testing.T) {
 }
 
 func Test_build_create_no_name(t *testing.T) {
-	utils.SmokeTest(t)
+	testutils.SmokeTest(t)
 
 	require := require.New(t)
 	defer testutils.Cleanup()
@@ -257,7 +256,7 @@ func Test_build_create_no_name(t *testing.T) {
 }
 
 func Test_build_create_no_description(t *testing.T) {
-	utils.SmokeTest(t)
+	testutils.SmokeTest(t)
 
 	require := require.New(t)
 	defer testutils.Cleanup()
@@ -280,7 +279,7 @@ func Test_build_create_no_description(t *testing.T) {
 }
 
 func Test_build_create_no_service_logo_url(t *testing.T) {
-	utils.SmokeTest(t)
+	testutils.SmokeTest(t)
 
 	require := require.New(t)
 	defer testutils.Cleanup()
@@ -303,7 +302,7 @@ func Test_build_create_no_service_logo_url(t *testing.T) {
 }
 
 func Test_build_service_from_image(t *testing.T) {
-	utils.SmokeTest(t)
+	testutils.SmokeTest(t)
 
 	require := require.New(t)
 	defer testutils.Cleanup()

@@ -2,11 +2,10 @@ package utils
 
 import (
 	_ "embed"
-	"github.com/omnistrate/commons/pkg/utils"
+
 	"github.com/omnistrate/ctl/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"strings"
 )
 
 // GetToken returns the authentication token for current user
@@ -21,17 +20,17 @@ func GetToken() (string, error) {
 
 // GetHost returns the host of the Omnistrate server
 func GetHost() string {
-	return utils.GetEnv("OMNISTRATE_HOST", "api"+"."+GetRootDomain())
+	return GetEnv("OMNISTRATE_HOST", "api"+"."+GetRootDomain())
 }
 
 // GetRootDomain returns the root domain of the Omnistrate server
 func GetRootDomain() string {
-	return utils.GetEnv("OMNISTRATE_ROOT_DOMAIN", "omnistrate.cloud")
+	return GetEnv("OMNISTRATE_ROOT_DOMAIN", "omnistrate.cloud")
 }
 
 // GetHostScheme returns the scheme of the Omnistrate server
 func GetHostScheme() string {
-	return utils.GetEnv("OMNISTRATE_HOST_SCHEME", "https")
+	return GetEnv("OMNISTRATE_HOST_SCHEME", "https")
 }
 
 //go:embed public_key.pem
@@ -44,16 +43,6 @@ func GetDefaultServiceAuthPublicKey() string {
 
 func IsProd() bool {
 	return GetRootDomain() == "omnistrate.cloud"
-}
-
-func TruncateString(s string, maxLen int) string {
-	if len(s) <= maxLen {
-		return s
-	}
-	if !strings.ContainsAny(s[:maxLen], " .,:;-") {
-		return s[:maxLen] + "..."
-	}
-	return s[:strings.LastIndexAny(s[:maxLen], " .,:;-!")] + "..."
 }
 
 func CleanupArgsAndFlags(cmd *cobra.Command, args *[]string) {

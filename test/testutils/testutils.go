@@ -2,11 +2,12 @@ package testutils
 
 import (
 	"os"
+	"testing"
 
 	"github.com/pkg/errors"
 
-	"github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/config"
+	"github.com/omnistrate/ctl/utils"
 )
 
 func Cleanup() {
@@ -32,4 +33,24 @@ func GetSmokeTestAccount() (string, string, error) {
 		return "", "", errors.New("SMOKE_TEST_PASSWORD environment variable is not set. Set the environment variable to run the smoke test")
 	}
 	return email, password, nil
+}
+
+func SmokeTest(t *testing.T) {
+	t.Helper()
+
+	utils.ConfigureLoggingFromEnvOnce()
+
+	if !utils.GetEnvAsBoolean("ENABLE_SMOKE_TEST", "false") {
+		t.Skip("skipping smoke tests, set environment variable ENABLE_SMOKE_TEST")
+	}
+}
+
+func IntegrationTest(t *testing.T) {
+	t.Helper()
+
+	utils.ConfigureLoggingFromEnvOnce()
+
+	if !utils.GetEnvAsBoolean("ENABLE_INTEGRATION_TEST", "false") {
+		t.Skip("skipping integration tests, set environment variable ENABLE_INTEGRATION_TEST")
+	}
 }

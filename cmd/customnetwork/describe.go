@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/chelnak/ysmrr"
 	customnetworkapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/custom_network_api"
-	commonutils "github.com/omnistrate/commons/pkg/utils"
 	"github.com/omnistrate/ctl/cmd/common"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
@@ -48,7 +47,7 @@ func runDescribe(cmd *cobra.Command, args []string) (err error) {
 
 	var customNetworkName *string
 	if len(args) == 1 {
-		customNetworkName = commonutils.ToPtr(args[0])
+		customNetworkName = utils.ToPtr(args[0])
 	}
 
 	// Validate user is logged in
