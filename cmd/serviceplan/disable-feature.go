@@ -2,11 +2,13 @@ package serviceplan
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/chelnak/ysmrr"
+	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 const (
@@ -35,7 +37,7 @@ func init() {
 }
 
 func runDisableFeature(cmd *cobra.Command, args []string) error {
-	defer utils.CleanupArgsAndFlags(cmd, &args)
+	defer config.CleanupArgsAndFlags(cmd, &args)
 
 	// Retrieve flags
 	serviceID, _ := cmd.Flags().GetString(ServiceIDFlag)
@@ -56,7 +58,7 @@ func runDisableFeature(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user login
-	token, err := utils.GetToken()
+	token, err := config.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err

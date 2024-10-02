@@ -1,13 +1,15 @@
 package service
 
 import (
+	"strings"
+
 	"github.com/chelnak/ysmrr"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
+	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 const (
@@ -34,7 +36,7 @@ func init() {
 }
 
 func runList(cmd *cobra.Command, args []string) error {
-	defer utils.CleanupArgsAndFlags(cmd, &args)
+	defer config.CleanupArgsAndFlags(cmd, &args)
 
 	// Retrieve command-line flags
 	output, _ := cmd.Flags().GetString("output")
@@ -49,7 +51,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user login
-	token, err := utils.GetToken()
+	token, err := config.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err

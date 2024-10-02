@@ -6,6 +6,7 @@ import (
 
 	"github.com/chelnak/ysmrr"
 	tierversionsetapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/tier_version_set_api"
+	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
@@ -43,7 +44,7 @@ func init() {
 }
 
 func runDescribeVersion(cmd *cobra.Command, args []string) error {
-	defer utils.CleanupArgsAndFlags(cmd, &args)
+	defer config.CleanupArgsAndFlags(cmd, &args)
 
 	// Retrieve flags
 	serviceID, _ := cmd.Flags().GetString("service-id")
@@ -65,7 +66,7 @@ func runDescribeVersion(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user login
-	token, err := utils.GetToken()
+	token, err := config.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -206,7 +207,7 @@ func formatServicePlanVersionDetails(token, serviceName, planName, environment s
 		ServiceName:        serviceName,
 		Environment:        environment,
 		Version:            versionSet.Version,
-		ReleaseDescription: utils.GetStrValue(versionSet.Name),
+		ReleaseDescription: utils.FromPtr(versionSet.Name),
 		VersionSetStatus:   versionSet.Status,
 		EnabledFeatures:    versionSet.EnabledFeatures,
 		Resources:          resources,

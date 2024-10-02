@@ -2,9 +2,10 @@ package dataaccess
 
 import (
 	"context"
+
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	helmpackageapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/helm_package_api"
-	"github.com/omnistrate/ctl/utils"
+	"github.com/omnistrate/ctl/config"
 )
 
 func SaveHelmChart(
@@ -18,7 +19,7 @@ func SaveHelmChart(
 	helmPackage *helmpackageapi.HelmPackage,
 	err error,
 ) {
-	helmPackageService := httpclientwrapper.NewHelmPackage(utils.GetHostScheme(), utils.GetHost())
+	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
 
 	request := &helmpackageapi.SaveHelmPackageRequest{
 		Token: token,
@@ -38,7 +39,7 @@ func SaveHelmChart(
 }
 
 func ListHelmCharts(token string) (helmPackages *helmpackageapi.ListHelmPackagesResult, err error) {
-	helmPackageService := httpclientwrapper.NewHelmPackage(utils.GetHostScheme(), utils.GetHost())
+	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
 
 	request := &helmpackageapi.ListHelmPackagesRequest{
 		Token: token,
@@ -51,7 +52,7 @@ func ListHelmCharts(token string) (helmPackages *helmpackageapi.ListHelmPackages
 }
 
 func DescribeHelmChart(token, chartName, chartVersion string) (helmPackage *helmpackageapi.HelmPackage, err error) {
-	helmPackageService := httpclientwrapper.NewHelmPackage(utils.GetHostScheme(), utils.GetHost())
+	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
 
 	request := &helmpackageapi.DescribeHelmPackageRequest{
 		Token:        token,
@@ -66,7 +67,7 @@ func DescribeHelmChart(token, chartName, chartVersion string) (helmPackage *helm
 }
 
 func ListHelmChartInstallations(token string, hostClusterID *helmpackageapi.HostClusterID) (helmPackageInstallations *helmpackageapi.ListHelmPackageInstallationsResult, err error) {
-	helmPackageService := httpclientwrapper.NewHelmPackage(utils.GetHostScheme(), utils.GetHost())
+	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
 
 	request := &helmpackageapi.ListHelmPackageInstallationsRequest{
 		Token:         token,
@@ -80,7 +81,7 @@ func ListHelmChartInstallations(token string, hostClusterID *helmpackageapi.Host
 }
 
 func DeleteHelmChart(token, chartName, chartVersion string) (err error) {
-	helmPackageService := httpclientwrapper.NewHelmPackage(utils.GetHostScheme(), utils.GetHost())
+	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
 
 	request := &helmpackageapi.DeleteHelmPackageRequest{
 		Token:        token,

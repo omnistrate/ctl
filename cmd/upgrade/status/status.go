@@ -2,8 +2,10 @@ package status
 
 import (
 	"fmt"
+
 	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/cmd/upgrade/status/detail"
+	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
@@ -31,7 +33,7 @@ func init() {
 }
 
 func run(cmd *cobra.Command, args []string) error {
-	defer utils.CleanupArgsAndFlags(cmd, &args)
+	defer config.CleanupArgsAndFlags(cmd, &args)
 
 	// Retrieve flags
 	output, err := cmd.Flags().GetString("output")
@@ -41,7 +43,7 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user login
-	token, err := utils.GetToken()
+	token, err := config.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err

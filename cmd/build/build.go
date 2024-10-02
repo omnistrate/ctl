@@ -4,6 +4,10 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/chelnak/ysmrr"
 	"github.com/compose-spec/compose-go/loader"
 	"github.com/compose-spec/compose-go/types"
@@ -11,14 +15,12 @@ import (
 	composegenapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/compose_gen_api"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
+	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	goa "goa.design/goa/v3/pkg"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 var (
@@ -121,7 +123,7 @@ func init() {
 }
 
 func runBuild(cmd *cobra.Command, args []string) error {
-	defer utils.CleanupArgsAndFlags(cmd, &args)
+	defer config.CleanupArgsAndFlags(cmd, &args)
 
 	// Retrieve flags
 	file, err := cmd.Flags().GetString("file")
@@ -228,7 +230,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user is currently logged in
-	token, err := utils.GetToken()
+	token, err := config.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -379,7 +381,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		utils.PrintWarning("These resources were not processed during the build. If you no longer need them, please deprecate and remove them from the service plan manually in UI or using the API.")
 	}
 
-	utils.PrintURL("Check the service plan result at", fmt.Sprintf("https://%s/product-tier?serviceId=%s&environmentId=%s", utils.GetRootDomain(), ServiceID, EnvironmentID))
+	utils.PrintURL("Check the service plan result at", fmt.Sprintf("https://%s/product-tier?serviceId=%s&environmentId=%s", config.GetRootDomain(), ServiceID, EnvironmentID))
 
 	// Ask user to verify account if there are any unverified accounts
 	dataaccess.AskVerifyAccountIfAny()
@@ -548,7 +550,7 @@ func buildService(fileData []byte, token, name, specType string, description, se
 		return "", "", "", make(map[string]serviceapi.ResourceID), errors.New("name is required")
 	}
 
-	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())
+	service, err := httpclientwrapper.NewService(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return "", "", "", make(map[string]serviceapi.ResourceID), err
 	}

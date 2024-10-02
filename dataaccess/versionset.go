@@ -5,12 +5,13 @@ import (
 
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	tierversionsetapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/tier_version_set_api"
+	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
 )
 
 func FindLatestVersion(token, serviceID, productTierID string) (string, error) {
-	versionSet, err := httpclientwrapper.NewVersionSet(utils.GetHostScheme(), utils.GetHost())
+	versionSet, err := httpclientwrapper.NewVersionSet(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return "", err
 	}
@@ -33,7 +34,7 @@ func FindLatestVersion(token, serviceID, productTierID string) (string, error) {
 }
 
 func FindPreferredVersion(token, serviceID, productTierID string) (string, error) {
-	versionSet, err := httpclientwrapper.NewVersionSet(utils.GetHostScheme(), utils.GetHost())
+	versionSet, err := httpclientwrapper.NewVersionSet(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return "", err
 	}
@@ -61,7 +62,7 @@ func FindPreferredVersion(token, serviceID, productTierID string) (string, error
 }
 
 func DescribeVersionSet(token, serviceID, productTierID, version string) (*tierversionsetapi.TierVersionSet, error) {
-	versionSet, err := httpclientwrapper.NewVersionSet(utils.GetHostScheme(), utils.GetHost())
+	versionSet, err := httpclientwrapper.NewVersionSet(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +81,7 @@ func DescribeVersionSet(token, serviceID, productTierID, version string) (*tierv
 }
 
 func SetDefaultServicePlan(token, serviceID, productTierID, version string) (tierVersionSet *tierversionsetapi.TierVersionSet, err error) {
-	versionSet, err := httpclientwrapper.NewVersionSet(utils.GetHostScheme(), utils.GetHost())
+	versionSet, err := httpclientwrapper.NewVersionSet(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return
 	}

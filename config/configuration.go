@@ -1,16 +1,16 @@
-package utils
+package config
 
 import (
 	_ "embed"
 
-	"github.com/omnistrate/ctl/config"
+	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
 
 // GetToken returns the authentication token for current user
 func GetToken() (string, error) {
-	authConfig, err := config.LookupAuthConfig()
+	authConfig, err := LookupAuthConfig()
 	if err != nil {
 		return "", err
 	}
@@ -20,17 +20,17 @@ func GetToken() (string, error) {
 
 // GetHost returns the host of the Omnistrate server
 func GetHost() string {
-	return GetEnv("OMNISTRATE_HOST", "api"+"."+GetRootDomain())
+	return utils.GetEnv("OMNISTRATE_HOST", "api"+"."+GetRootDomain())
 }
 
 // GetRootDomain returns the root domain of the Omnistrate server
 func GetRootDomain() string {
-	return GetEnv("OMNISTRATE_ROOT_DOMAIN", "omnistrate.cloud")
+	return utils.GetEnv("OMNISTRATE_ROOT_DOMAIN", "omnistrate.cloud")
 }
 
 // GetHostScheme returns the scheme of the Omnistrate server
 func GetHostScheme() string {
-	return GetEnv("OMNISTRATE_HOST_SCHEME", "https")
+	return utils.GetEnv("OMNISTRATE_HOST_SCHEME", "https")
 }
 
 //go:embed public_key.pem
@@ -54,11 +54,4 @@ func CleanupArgsAndFlags(cmd *cobra.Command, args *[]string) {
 
 	// Clean up arguments by resetting the slice to nil or an empty slice
 	*args = nil
-}
-
-func GetStrValue(s *string) string {
-	if s == nil {
-		return ""
-	}
-	return *s
 }

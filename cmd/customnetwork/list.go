@@ -1,14 +1,16 @@
 package customnetwork
 
 import (
+	"strings"
+
 	"github.com/chelnak/ysmrr"
 	customnetworkapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/custom_network_api"
 	"github.com/omnistrate/ctl/cmd/common"
+	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 const (
@@ -33,7 +35,7 @@ func init() {
 }
 
 func runList(cmd *cobra.Command, args []string) (err error) {
-	defer utils.CleanupArgsAndFlags(cmd, &args)
+	defer config.CleanupArgsAndFlags(cmd, &args)
 
 	// Get flags
 	filters, _ := cmd.Flags().GetStringArray(FilterFlag)
@@ -47,7 +49,7 @@ func runList(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	// Validate user is logged in
-	token, err := utils.GetToken()
+	token, err := config.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err

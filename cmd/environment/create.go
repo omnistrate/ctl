@@ -7,6 +7,7 @@ import (
 
 	"github.com/chelnak/ysmrr"
 	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
+	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
@@ -48,7 +49,7 @@ func init() {
 }
 
 func runCreate(cmd *cobra.Command, args []string) error {
-	defer utils.CleanupArgsAndFlags(cmd, &args)
+	defer config.CleanupArgsAndFlags(cmd, &args)
 
 	// Get flags
 	description, _ := cmd.Flags().GetString("description")
@@ -77,7 +78,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user is logged in
-	token, err := utils.GetToken()
+	token, err := config.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -214,7 +215,7 @@ func getVisibility(envType string) string {
 
 func getPublicKeyPtr(visibility string) *string {
 	if visibility == "PRIVATE" {
-		return utils.ToPtr(utils.GetDefaultServiceAuthPublicKey())
+		return utils.ToPtr(config.GetDefaultServiceAuthPublicKey())
 	}
 	return nil
 }

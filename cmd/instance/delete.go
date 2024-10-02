@@ -1,15 +1,17 @@
 package instance
 
 import (
+	"slices"
+	"strings"
+
 	"github.com/chelnak/ysmrr"
 	"github.com/cqroot/prompt"
 	"github.com/cqroot/prompt/input"
+	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"slices"
-	"strings"
 )
 
 const (
@@ -32,7 +34,7 @@ func init() {
 }
 
 func runDelete(cmd *cobra.Command, args []string) error {
-	defer utils.CleanupArgsAndFlags(cmd, &args)
+	defer config.CleanupArgsAndFlags(cmd, &args)
 
 	// Retrieve args
 	instanceID := args[0]
@@ -42,7 +44,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	yes, _ := cmd.Flags().GetBool("yes")
 
 	// Validate user login
-	token, err := utils.GetToken()
+	token, err := config.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err

@@ -5,11 +5,12 @@ import (
 
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
+	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/utils"
 )
 
 func SearchInventory(token, query string) (*inventoryapi.SearchInventoryResult, error) {
-	inventory, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
+	inventory, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +27,7 @@ func SearchInventory(token, query string) (*inventoryapi.SearchInventoryResult, 
 }
 
 func ListServiceOfferings(token, orgID string) (*inventoryapi.InventoryListServiceOfferingsResult, error) {
-	inventory, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
+	inventory, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +43,7 @@ func ListServiceOfferings(token, orgID string) (*inventoryapi.InventoryListServi
 }
 
 func DescribeServiceOfferingResource(token, serviceID, resourceID, instanceID, productTierID, productTierVersion string) (*inventoryapi.InventoryDescribeServiceOfferingResourceResult, error) {
-	inventory, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
+	inventory, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +64,7 @@ func DescribeServiceOfferingResource(token, serviceID, resourceID, instanceID, p
 }
 
 func DescribeServiceOffering(token, serviceID, productTierID, productTierVersion string) (*inventoryapi.InventoryDescribeServiceOfferingResult, error) {
-	inventory, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
+	inventory, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}

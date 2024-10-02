@@ -2,13 +2,14 @@ package dataaccess
 
 import (
 	"context"
+
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	deploymentconfigapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/deployment_config_api"
-	"github.com/omnistrate/ctl/utils"
+	"github.com/omnistrate/ctl/config"
 )
 
 func GetDefaultDeploymentConfigID(token string) (deploymentconfigapi.DeploymentConfigID, error) {
-	service, err := httpclientwrapper.NewDeploymentConfig(utils.GetHostScheme(), utils.GetHost())
+	service, err := httpclientwrapper.NewDeploymentConfig(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return "", err
 	}

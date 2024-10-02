@@ -3,7 +3,9 @@ package deprecated
 import (
 	"encoding/json"
 	"fmt"
+
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
+	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
@@ -38,7 +40,7 @@ func run(cmd *cobra.Command, args []string) (err error) {
 
 		// Validate user is currently logged in
 		var token string
-		token, err = utils.GetToken()
+		token, err = config.GetToken()
 		if err != nil {
 			utils.PrintError(err)
 			return

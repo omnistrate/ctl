@@ -32,7 +32,7 @@ func run(cmd *cobra.Command, args []string) {
 func formatCustomNetwork(network *customnetworkapi.CustomNetwork) model.CustomNetwork {
 	return model.CustomNetwork{
 		CustomNetworkID:   string(network.ID),
-		CustomNetworkName: utils.GetStrValue(network.Name),
+		CustomNetworkName: utils.FromPtr(network.Name),
 		CloudProvider:     string(network.CloudProviderName),
 		Region:            network.CloudProviderRegion,
 		CIDR:              network.Cidr,

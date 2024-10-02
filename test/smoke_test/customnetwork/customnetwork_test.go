@@ -7,10 +7,10 @@ import (
 	customnetworkapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/custom_network_api"
 	"github.com/omnistrate/ctl/cmd"
 	"github.com/omnistrate/ctl/cmd/customnetwork"
+	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/test/testutils"
 	"github.com/omnistrate/ctl/utils"
-	ctlutils "github.com/omnistrate/ctl/utils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -29,7 +29,7 @@ func Test_custom_network_lifecycle(t *testing.T) {
 	require.NoError(err)
 
 	// Pre-test cleanup
-	token, err := ctlutils.GetToken()
+	token, err := config.GetToken()
 	require.NoError(err)
 	deleteCustomNetworkIfExists(t, token, "aws", "ap-south-1", "ctl-test-network")
 

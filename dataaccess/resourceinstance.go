@@ -2,13 +2,14 @@ package dataaccess
 
 import (
 	"context"
+
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
-	"github.com/omnistrate/ctl/utils"
+	"github.com/omnistrate/ctl/config"
 )
 
 func DescribeResourceInstance(token string, serviceID, environmentID, instanceID string) (*inventoryapi.ResourceInstance, error) {
-	instance, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
+	instance, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +29,7 @@ func DescribeResourceInstance(token string, serviceID, environmentID, instanceID
 }
 
 func RestartResourceInstance(token string, serviceID, environmentID, resourceID, instanceID string) error {
-	instance, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
+	instance, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return err
 	}
@@ -50,7 +51,7 @@ func RestartResourceInstance(token string, serviceID, environmentID, resourceID,
 }
 
 func StartResourceInstance(token string, serviceID, environmentID, resourceID, instanceID string) error {
-	instance, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
+	instance, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return err
 	}
@@ -72,7 +73,7 @@ func StartResourceInstance(token string, serviceID, environmentID, resourceID, i
 }
 
 func StopResourceInstance(token string, serviceID, environmentID, resourceID, instanceID string) error {
-	instance, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
+	instance, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return err
 	}
@@ -94,7 +95,7 @@ func StopResourceInstance(token string, serviceID, environmentID, resourceID, in
 }
 
 func UpdateResourceInstance(token string, request inventoryapi.FleetUpdateResourceInstanceRequest) error {
-	instance, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
+	instance, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return err
 	}

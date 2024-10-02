@@ -2,13 +2,14 @@ package dataaccess
 
 import (
 	"context"
+
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
-	"github.com/omnistrate/ctl/utils"
+	"github.com/omnistrate/ctl/config"
 )
 
 func DescribeSubscription(token string, serviceID, environmentID, instanceID string) (*inventoryapi.FleetDescribeSubscriptionResult, error) {
-	subscription, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
+	subscription, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}

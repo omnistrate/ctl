@@ -173,13 +173,13 @@ func pollForAccessTokenAndLogin(identityProviderName, deviceCode string, interva
 func getClientID(identityProviderName string) string {
 	switch identityProviderName {
 	case identityProviderGitHub:
-		if utils.IsProd() {
+		if config.IsProd() {
 			return gitHubProdClientID
 		} else {
 			return gitHubDevClientID
 		}
 	case identityProviderGoogle:
-		if utils.IsProd() {
+		if config.IsProd() {
 			return googleProdClientID
 		} else {
 			return googleDevClientID
