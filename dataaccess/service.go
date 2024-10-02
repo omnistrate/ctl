@@ -3,9 +3,10 @@ package dataaccess
 import (
 	"context"
 	"fmt"
+
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
-	"github.com/omnistrate/ctl/utils"
+	"github.com/omnistrate/ctl/config"
 )
 
 const (
@@ -20,7 +21,7 @@ func PrintNextStepsAfterBuildMsg() {
 }
 
 func ListServices(token string) (*serviceapi.ListServiceResult, error) {
-	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())
+	service, err := httpclientwrapper.NewService(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +38,7 @@ func ListServices(token string) (*serviceapi.ListServiceResult, error) {
 }
 
 func DescribeService(token, serviceID string) (*serviceapi.DescribeServiceResult, error) {
-	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())
+	service, err := httpclientwrapper.NewService(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +56,7 @@ func DescribeService(token, serviceID string) (*serviceapi.DescribeServiceResult
 }
 
 func DeleteService(token, serviceID string) error {
-	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())
+	service, err := httpclientwrapper.NewService(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return err
 	}

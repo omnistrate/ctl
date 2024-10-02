@@ -2,13 +2,14 @@ package dataaccess
 
 import (
 	"context"
+
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
-	"github.com/omnistrate/ctl/utils"
+	"github.com/omnistrate/ctl/config"
 )
 
 func DescribeInstance(token, serviceID, serviceEnvironmentID, instanceID string) (instance *inventoryapi.ResourceInstance, err error) {
-	fleetService, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
+	fleetService, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return
 	}
@@ -30,7 +31,7 @@ func DescribeInstance(token, serviceID, serviceEnvironmentID, instanceID string)
 func CreateInstance(token string, request inventoryapi.FleetCreateResourceInstanceRequest) (res *inventoryapi.CreateResourceInstanceResult, err error) {
 	request.Token = token
 
-	fleetService, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
+	fleetService, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return
 	}
@@ -43,7 +44,7 @@ func CreateInstance(token string, request inventoryapi.FleetCreateResourceInstan
 }
 
 func DeleteInstance(token, serviceID, serviceEnvironmentID, resourceID, instanceID string) (err error) {
-	fleetService, err := httpclientwrapper.NewInventory(utils.GetHostScheme(), utils.GetHost())
+	fleetService, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return
 	}

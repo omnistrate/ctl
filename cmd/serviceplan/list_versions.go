@@ -2,15 +2,17 @@ package serviceplan
 
 import (
 	"fmt"
+	"slices"
+	"strings"
+	"time"
+
 	"github.com/chelnak/ysmrr"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
+	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/model"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
-	"slices"
-	"strings"
-	"time"
 )
 
 const (
@@ -44,7 +46,7 @@ func init() {
 }
 
 func runListVersions(cmd *cobra.Command, args []string) error {
-	defer utils.CleanupArgsAndFlags(cmd, &args)
+	defer config.CleanupArgsAndFlags(cmd, &args)
 
 	// Retrieve command-line flags
 	serviceID, _ := cmd.Flags().GetString("service-id")
@@ -81,7 +83,7 @@ func runListVersions(cmd *cobra.Command, args []string) error {
 	}
 
 	// Ensure user is logged in
-	token, err := utils.GetToken()
+	token, err := config.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err

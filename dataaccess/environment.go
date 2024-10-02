@@ -2,11 +2,12 @@ package dataaccess
 
 import (
 	"context"
+	"strings"
+
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
-	"github.com/omnistrate/ctl/utils"
+	"github.com/omnistrate/ctl/config"
 	"github.com/pkg/errors"
-	"strings"
 )
 
 var (
@@ -14,7 +15,7 @@ var (
 )
 
 func CreateServiceEnvironment(token string, request serviceenvironmentapi.CreateServiceEnvironmentRequest) (serviceenvironmentapi.ServiceEnvironmentID, error) {
-	service, err := httpclientwrapper.NewServiceEnvironment(utils.GetHostScheme(), utils.GetHost())
+	service, err := httpclientwrapper.NewServiceEnvironment(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return "", err
 	}
@@ -29,7 +30,7 @@ func CreateServiceEnvironment(token string, request serviceenvironmentapi.Create
 }
 
 func DescribeServiceEnvironment(token, serviceID, serviceEnvironmentID string) (*serviceenvironmentapi.DescribeServiceEnvironmentResult, error) {
-	service, err := httpclientwrapper.NewServiceEnvironment(utils.GetHostScheme(), utils.GetHost())
+	service, err := httpclientwrapper.NewServiceEnvironment(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +49,7 @@ func DescribeServiceEnvironment(token, serviceID, serviceEnvironmentID string) (
 }
 
 func ListServiceEnvironments(token, serviceID string) (*serviceenvironmentapi.ListServiceEnvironmentsResult, error) {
-	service, err := httpclientwrapper.NewServiceEnvironment(utils.GetHostScheme(), utils.GetHost())
+	service, err := httpclientwrapper.NewServiceEnvironment(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +67,7 @@ func ListServiceEnvironments(token, serviceID string) (*serviceenvironmentapi.Li
 }
 
 func PromoteServiceEnvironment(token, serviceID, serviceEnvironmentID string) error {
-	service, err := httpclientwrapper.NewServiceEnvironment(utils.GetHostScheme(), utils.GetHost())
+	service, err := httpclientwrapper.NewServiceEnvironment(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return err
 	}
@@ -85,7 +86,7 @@ func PromoteServiceEnvironment(token, serviceID, serviceEnvironmentID string) er
 }
 
 func PromoteServiceEnvironmentStatus(token, serviceID, serviceEnvironmentID string) (serviceenvironmentapi.PromoteServiceEnvironmentStatusResult, error) {
-	service, err := httpclientwrapper.NewServiceEnvironment(utils.GetHostScheme(), utils.GetHost())
+	service, err := httpclientwrapper.NewServiceEnvironment(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +105,7 @@ func PromoteServiceEnvironmentStatus(token, serviceID, serviceEnvironmentID stri
 }
 
 func DeleteServiceEnvironment(token, serviceID, serviceEnvironmentID string) error {
-	service, err := httpclientwrapper.NewServiceEnvironment(utils.GetHostScheme(), utils.GetHost())
+	service, err := httpclientwrapper.NewServiceEnvironment(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return err
 	}

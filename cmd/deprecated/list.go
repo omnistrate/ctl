@@ -3,16 +3,18 @@ package deprecated
 import (
 	"context"
 	"fmt"
+	"os"
+	"sort"
+	"time"
+
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
+	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
-	"os"
-	"sort"
-	"time"
 )
 
 // ListCmd represents the list command
@@ -27,7 +29,7 @@ var ListCmd = &cobra.Command{
 
 func runList(cmd *cobra.Command, args []string) error {
 	// Validate user is currently logged in
-	token, err := utils.GetToken()
+	token, err := config.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -47,7 +49,7 @@ func runList(cmd *cobra.Command, args []string) error {
 }
 
 func listServices(token string) (*serviceapi.ListServiceResult, error) {
-	service, err := httpclientwrapper.NewService(utils.GetHostScheme(), utils.GetHost())
+	service, err := httpclientwrapper.NewService(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}

@@ -2,6 +2,8 @@ package deprecated
 
 import (
 	"fmt"
+
+	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/pkg/errors"
 
@@ -38,7 +40,7 @@ func runRemove(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user is currently logged in
-	token, err := utils.GetToken()
+	token, err := config.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err

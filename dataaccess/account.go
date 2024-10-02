@@ -3,13 +3,15 @@ package dataaccess
 import (
 	"context"
 	"fmt"
+
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	accountconfigapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/account_config_api"
+	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/utils"
 )
 
 func DescribeAccount(token string, id string) (*accountconfigapi.DescribeAccountConfigResult, error) {
-	account, err := httpclientwrapper.NewAccountConfig(utils.GetHostScheme(), utils.GetHost())
+	account, err := httpclientwrapper.NewAccountConfig(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +29,7 @@ func DescribeAccount(token string, id string) (*accountconfigapi.DescribeAccount
 }
 
 func ListAccounts(token string, cloudProvider string) (*accountconfigapi.ListAccountConfigResult, error) {
-	account, err := httpclientwrapper.NewAccountConfig(utils.GetHostScheme(), utils.GetHost())
+	account, err := httpclientwrapper.NewAccountConfig(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +47,7 @@ func ListAccounts(token string, cloudProvider string) (*accountconfigapi.ListAcc
 }
 
 func DeleteAccount(token, accountConfigID string) error {
-	service, err := httpclientwrapper.NewAccountConfig(utils.GetHostScheme(), utils.GetHost())
+	service, err := httpclientwrapper.NewAccountConfig(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return err
 	}
@@ -63,7 +65,7 @@ func DeleteAccount(token, accountConfigID string) error {
 }
 
 func CreateAccount(accountConfig *accountconfigapi.CreateAccountConfigRequest) (accountconfigapi.AccountConfigID, error) {
-	service, err := httpclientwrapper.NewAccountConfig(utils.GetHostScheme(), utils.GetHost())
+	service, err := httpclientwrapper.NewAccountConfig(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return "", err
 	}
@@ -121,7 +123,7 @@ func PrintAccountNotVerifiedWarning(account *accountconfigapi.DescribeAccountCon
 }
 
 func AskVerifyAccountIfAny() {
-	token, err := utils.GetToken()
+	token, err := config.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return

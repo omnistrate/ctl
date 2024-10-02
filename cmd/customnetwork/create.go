@@ -6,6 +6,7 @@ import (
 	"github.com/chelnak/ysmrr"
 	customnetworkapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/custom_network_api"
 	"github.com/omnistrate/ctl/cmd/common"
+	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
@@ -48,7 +49,7 @@ func init() {
 }
 
 func runCreate(cmd *cobra.Command, args []string) (err error) {
-	defer utils.CleanupArgsAndFlags(cmd, &args)
+	defer config.CleanupArgsAndFlags(cmd, &args)
 
 	// Get flags
 	cloudProvider, _ := cmd.Flags().GetString(CloudProviderFlag)
@@ -64,7 +65,7 @@ func runCreate(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	// Validate user is logged in
-	token, err := utils.GetToken()
+	token, err := config.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err

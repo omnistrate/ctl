@@ -2,13 +2,14 @@ package dataaccess
 
 import (
 	"context"
+
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	resourceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/resource_api"
-	"github.com/omnistrate/ctl/utils"
+	"github.com/omnistrate/ctl/config"
 )
 
 func DescribeResource(token, serviceID, resourceID string, productTierID, productTierVersion *string) (resource *resourceapi.DescribeResourceResult, err error) {
-	service, err := httpclientwrapper.NewResource(utils.GetHostScheme(), utils.GetHost())
+	service, err := httpclientwrapper.NewResource(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return
 	}

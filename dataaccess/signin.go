@@ -3,15 +3,17 @@ package dataaccess
 import (
 	"context"
 	"fmt"
+
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	signinapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/signin_api"
+	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
 	goa "goa.design/goa/v3/pkg"
 )
 
 func LoginWithPassword(email string, pass string) (token string, err error) {
-	signin, err := httpclientwrapper.NewSignin(utils.GetHostScheme(), utils.GetHost())
+	signin, err := httpclientwrapper.NewSignin(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return "", err
 	}
@@ -37,7 +39,7 @@ func LoginWithPassword(email string, pass string) (token string, err error) {
 }
 
 func LoginWithIdentityProvider(deviceCode, identityProviderName string) (*signinapi.LoginWithIdentityProviderResult, error) {
-	signin, err := httpclientwrapper.NewSignin(utils.GetHostScheme(), utils.GetHost())
+	signin, err := httpclientwrapper.NewSignin(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}

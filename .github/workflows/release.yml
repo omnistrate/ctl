@@ -342,8 +342,8 @@ jobs:
           build-args: |
               GIT_USER=api 
               GIT_TOKEN=${{ steps.generate_token.outputs.token }}
-              GOPROXY=${{ secrets.GOPROXY }}
-              GOSUMDB=${{ secrets.GOSUMDB }}
+              GOPROXY=${{ env.GOPROXY }}
+              GOSUMDB=${{ env.GOSUMDB }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

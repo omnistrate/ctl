@@ -3,13 +3,15 @@ package dataaccess
 import (
 	"context"
 	"fmt"
+
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	saasportalapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/saas_portal_api"
+	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/utils"
 )
 
 func ListDomains(token string) (*saasportalapi.ListSaaSPortalCustomDomainsResult, error) {
-	domain, err := httpclientwrapper.NewSaaSPortal(utils.GetHostScheme(), utils.GetHost())
+	domain, err := httpclientwrapper.NewSaaSPortal(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +28,7 @@ func ListDomains(token string) (*saasportalapi.ListSaaSPortalCustomDomainsResult
 }
 
 func DeleteDomain(token, environmentType string) error {
-	service, err := httpclientwrapper.NewSaaSPortal(utils.GetHostScheme(), utils.GetHost())
+	service, err := httpclientwrapper.NewSaaSPortal(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return err
 	}
@@ -44,7 +46,7 @@ func DeleteDomain(token, environmentType string) error {
 }
 
 func CreateDomain(request *saasportalapi.CreateSaaSPortalCustomDomainRequest) error {
-	service, err := httpclientwrapper.NewSaaSPortal(utils.GetHostScheme(), utils.GetHost())
+	service, err := httpclientwrapper.NewSaaSPortal(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return err
 	}
@@ -98,7 +100,7 @@ func PrintDomainNotVerifiedWarningMsg(domain, clusterEndpoint string) {
 }
 
 func AskVerifyDomainIfAny() {
-	token, err := utils.GetToken()
+	token, err := config.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return

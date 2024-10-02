@@ -2,12 +2,14 @@ package serviceplan
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/chelnak/ysmrr"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
+	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 const (
@@ -41,7 +43,7 @@ func init() {
 }
 
 func runSetDefault(cmd *cobra.Command, args []string) error {
-	defer utils.CleanupArgsAndFlags(cmd, &args)
+	defer config.CleanupArgsAndFlags(cmd, &args)
 
 	// Retrieve flags
 	version, _ := cmd.Flags().GetString("version")
@@ -63,7 +65,7 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user login
-	token, err := utils.GetToken()
+	token, err := config.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return err

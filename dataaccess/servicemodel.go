@@ -2,13 +2,14 @@ package dataaccess
 
 import (
 	"context"
+
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	servicemodelapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_model_api"
-	"github.com/omnistrate/ctl/utils"
+	"github.com/omnistrate/ctl/config"
 )
 
 func DescribeServiceModel(token, serviceID, serviceModelID string) (serviceModel *servicemodelapi.DescribeServiceModelResult, err error) {
-	fleetService, err := httpclientwrapper.NewServiceModel(utils.GetHostScheme(), utils.GetHost())
+	fleetService, err := httpclientwrapper.NewServiceModel(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return
 	}
@@ -28,7 +29,7 @@ func DescribeServiceModel(token, serviceID, serviceModelID string) (serviceModel
 }
 
 func EnableServiceModelFeature(token, serviceID, serviceModelID, featureName string, featureConfiguration map[string]any) (err error) {
-	fleetService, err := httpclientwrapper.NewServiceModel(utils.GetHostScheme(), utils.GetHost())
+	fleetService, err := httpclientwrapper.NewServiceModel(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return
 	}
@@ -50,7 +51,7 @@ func EnableServiceModelFeature(token, serviceID, serviceModelID, featureName str
 }
 
 func DisableServiceModelFeature(token, serviceID, serviceModelID, featureName string) (err error) {
-	fleetService, err := httpclientwrapper.NewServiceModel(utils.GetHostScheme(), utils.GetHost())
+	fleetService, err := httpclientwrapper.NewServiceModel(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return
 	}

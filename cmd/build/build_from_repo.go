@@ -45,7 +45,7 @@ func init() {
 }
 
 func runBuildFromRepo(cmd *cobra.Command, args []string) error {
-	defer utils.CleanupArgsAndFlags(cmd, &args)
+	defer config.CleanupArgsAndFlags(cmd, &args)
 
 	// Retrieve the flags
 	resetPAT, err := cmd.Flags().GetBool("reset-pat")
@@ -108,7 +108,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	// Step 2: Validate user is currently logged in
 	spinner = sm.AddSpinner("Checking if user is logged in")
 	time.Sleep(1 * time.Second) // Add a delay to show the spinner
-	token, err := utils.GetToken()
+	token, err := config.GetToken()
 	if errors.As(err, &config.ErrAuthConfigNotFound) {
 		utils.HandleSpinnerError(spinner, sm, errors.New("user is not logged in"))
 		return err
