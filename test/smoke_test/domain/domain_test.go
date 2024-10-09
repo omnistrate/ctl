@@ -23,7 +23,7 @@ func Test_domain_basic(t *testing.T) {
 	testEmail, testPassword, err := testutils.GetTestAccount()
 	require.NoError(err)
 	cmd.RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	devDomainName := "dev" + uuid.NewString()
@@ -33,7 +33,7 @@ func Test_domain_basic(t *testing.T) {
 
 	// create dev domain
 	cmd.RootCmd.SetArgs([]string{"domain", "create", devDomainName, "--environment-type", "dev", "--domain", devDomain})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	if err != nil {
 		require.Condition(func() bool {
 			if strings.Contains(err.Error(), "saas portal does not exist for environment type") {
@@ -50,7 +50,7 @@ func Test_domain_basic(t *testing.T) {
 
 	// create prod domain
 	cmd.RootCmd.SetArgs([]string{"domain", "create", prodDomainName, "--environment-type", "prod", "--domain", prodDomain})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	if err != nil {
 		require.Condition(func() bool {
 			if strings.Contains(err.Error(), "saas portal does not exist for environment type") {
@@ -67,24 +67,24 @@ func Test_domain_basic(t *testing.T) {
 
 	// PASS: list domains
 	cmd.RootCmd.SetArgs([]string{"domain", "list"})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// PASS: list domains by name
 	cmd.RootCmd.SetArgs([]string{"domain", "list", "--filter", fmt.Sprintf("name:%s", devDomainName), "--filter", fmt.Sprintf("name:%s", prodDomainName)})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// delete domains
 	cmd.RootCmd.SetArgs([]string{"domain", "delete", devDomainName})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	if err != nil {
 		require.Contains(err.Error(), "domain not found")
 	}
 
 	// PASS: delete domain
 	cmd.RootCmd.SetArgs([]string{"domain", "delete", prodDomainName})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	if err != nil {
 		require.Contains(err.Error(), "domain not found")
 	}

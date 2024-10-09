@@ -29,7 +29,7 @@ func TestInstanceBasic(t *testing.T) {
 	testEmail, testPassword, err := testutils.GetTestAccount()
 	require.NoError(t, err)
 	cmd.RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
 	// PASS: create instance 1 with param
@@ -42,7 +42,7 @@ func TestInstanceBasic(t *testing.T) {
 		"--cloud-provider=aws",
 		"--region=ca-central-1",
 		"--param", `{"databaseName":"default","password":"a_secure_password","rootPassword":"a_secure_root_password","username":"user"}`})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 	instanceID1 := instance.InstanceID
 	require.NotEmpty(t, instanceID1)
@@ -57,19 +57,19 @@ func TestInstanceBasic(t *testing.T) {
 		"--cloud-provider=aws",
 		"--region=ca-central-1",
 		"--param-file", "paramfiles/instance_create_param.json"})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 	instanceID2 := instance.InstanceID
 	require.NotEmpty(t, instanceID2)
 
 	// PASS: describe instance 1
 	cmd.RootCmd.SetArgs([]string{"instance", "describe", instanceID1})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
 	// PASS: describe instance 2
 	cmd.RootCmd.SetArgs([]string{"instance", "describe", instanceID2})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
 	err = WaitForInstanceToReachStatus(instanceID1, Running, 300*time.Second)
@@ -77,7 +77,7 @@ func TestInstanceBasic(t *testing.T) {
 
 	// PASS: stop instance 1
 	cmd.RootCmd.SetArgs([]string{"instance", "stop", instanceID1})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
 	err = WaitForInstanceToReachStatus(instanceID1, Stopped, 300*time.Second)
@@ -85,7 +85,7 @@ func TestInstanceBasic(t *testing.T) {
 
 	// PASS: start instance 1
 	cmd.RootCmd.SetArgs([]string{"instance", "start", instanceID1})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
 	err = WaitForInstanceToReachStatus(instanceID1, Running, 300*time.Second)
@@ -93,7 +93,7 @@ func TestInstanceBasic(t *testing.T) {
 
 	// PASS: restart instance 1
 	cmd.RootCmd.SetArgs([]string{"instance", "restart", instanceID1})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
 	time.Sleep(5 * time.Second)
@@ -102,7 +102,7 @@ func TestInstanceBasic(t *testing.T) {
 
 	// PASS: update instance 1
 	cmd.RootCmd.SetArgs([]string{"instance", "update", instanceID1, "--param", `{"databaseName":"default","password":"updated_password","rootPassword":"updated_root_password","username":"user"}`})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
 	time.Sleep(5 * time.Second)
@@ -111,7 +111,7 @@ func TestInstanceBasic(t *testing.T) {
 
 	// PASS: update instance 2
 	cmd.RootCmd.SetArgs([]string{"instance", "update", instanceID2, "--param-file", "paramfiles/instance_update_param.json"})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
 	time.Sleep(5 * time.Second)
@@ -120,22 +120,22 @@ func TestInstanceBasic(t *testing.T) {
 
 	// PASS: instance list
 	cmd.RootCmd.SetArgs([]string{"instance", "list"})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
 	// PASS: instance list with filters
 	cmd.RootCmd.SetArgs([]string{"instance", "list", "-f", "environment:DEV,cloud_provider:gcp", "-f", "environment:Dev,cloud_provider:aws"})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
 	// PASS: delete instance 1
 	cmd.RootCmd.SetArgs([]string{"instance", "delete", instanceID1, "--yes"})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
 	// PASS: delete instance 2
 	cmd.RootCmd.SetArgs([]string{"instance", "delete", instanceID2, "--yes"})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 }
 
@@ -154,7 +154,7 @@ func WaitForInstanceToReachStatus(instanceID, status string, timeout time.Durati
 
 	for range ticker.C {
 		cmd.RootCmd.SetArgs([]string{"instance", "describe", instanceID})
-		err := cmd.RootCmd.Execute()
+		err := cmd.RootCmd.ExecuteContext(ctx)
 		if err != nil {
 			return err
 		}

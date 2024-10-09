@@ -1,13 +1,14 @@
 package login
 
 import (
+	"regexp"
+
 	"github.com/cqroot/prompt"
 	"github.com/cqroot/prompt/choose"
 	"github.com/cqroot/prompt/input"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"regexp"
 )
 
 type loginMethod string
@@ -69,17 +70,19 @@ func init() {
 func runLogin(cmd *cobra.Command, args []string) error {
 	defer resetLogin()
 
+	ctx := cmd.Context()
+
 	// Login with email and password if any of the flags are set
 	if len(email) > 0 || len(password) > 0 || passwordStdin {
-		return PasswordLogin(cmd, args, false)
+		return passwordLogin(ctx, cmd, args, false)
 	}
 
 	if gh {
-		return SSOLogin(identityProviderGitHub)
+		return ssoLogin(ctx, identityProviderGitHub)
 	}
 
 	if google {
-		return SSOLogin(identityProviderGoogle)
+		return ssoLogin(ctx, identityProviderGoogle)
 	}
 
 	// Login interactively
@@ -118,11 +121,11 @@ func runLogin(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		return PasswordLogin(cmd, args, true)
+		return passwordLogin(cmd, args, true)
 	case string(loginWithGoogle):
-		return SSOLogin(identityProviderGoogle)
+		return ssoLogin(cmd.Context(), identityProviderGoogle)
 	case string(loginWithGitHub):
-		return SSOLogin(identityProviderGitHub)
+		return ssoLogin(cmd.Context(), identityProviderGitHub)
 
 	default:
 		err := errors.New("Invalid selection")

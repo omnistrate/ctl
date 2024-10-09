@@ -25,7 +25,7 @@ func Test_custom_network_lifecycle(t *testing.T) {
 	testEmail, testPassword, err := testutils.GetTestAccount()
 	require.NoError(err)
 	cmd.RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// Pre-test cleanup
@@ -36,18 +36,22 @@ func Test_custom_network_lifecycle(t *testing.T) {
 	// PASS: create custom network
 	cmd.RootCmd.SetArgs([]string{"custom-network", "create", "--cloud-provider", "aws", "--region", "ap-south-1", "--cidr", "1.2.255.1/16", "--name", "ctl-test-network"})
 	err = cmd.RootCmd.Execute()
+=======
+	cmd.RootCmd.SetArgs([]string{"custom-network", "create", "--cloud-provider", "aws", "--region", "ap-south-1", "--cidr", "1.2.255.1/16", "--name", "ctl-test-network"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+>>>>>>> Stashed changes
 	require.NoError(err)
 	customNetworkID := customnetwork.CustomNetworkID
 	require.NotEmpty(customNetworkID)
 
 	// PASS: describe custom network
 	cmd.RootCmd.SetArgs([]string{"custom-network", "describe", "--custom-network-id", customNetworkID})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// PASS: describe custom network by name
 	cmd.RootCmd.SetArgs([]string{"custom-network", "describe", "ctl-test-network"})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// PASS: describe manually
@@ -66,12 +70,12 @@ func Test_custom_network_lifecycle(t *testing.T) {
 
 	// PASS: list custom networks
 	cmd.RootCmd.SetArgs([]string{"custom-network", "list", "--filter", "cloud_provider:aws,region:ap-south-1"})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// PASS: delete custom network by name
 	cmd.RootCmd.SetArgs([]string{"custom-network", "delete", "ctl-test-network"})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// FAIL: describe again

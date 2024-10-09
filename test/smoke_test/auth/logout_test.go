@@ -22,7 +22,7 @@ func Test_logout(t *testing.T) {
 
 	// FAIL: logout without login
 	cmd.RootCmd.SetArgs([]string{"logout"})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext()
 	require.Error(err)
 	require.Contains(err.Error(), config.ErrConfigFileNotFound.Error())
 
@@ -31,10 +31,10 @@ func Test_logout(t *testing.T) {
 	require.NoError(err)
 
 	cmd.RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext()
 	require.NoError(err)
 
 	cmd.RootCmd.SetArgs([]string{"logout"})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext()
 	require.NoError(err)
 }

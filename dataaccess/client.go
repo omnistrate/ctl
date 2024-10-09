@@ -2,6 +2,7 @@ package dataaccess
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/omnistrate/ctl/config"
 	openapiclientv1 "github.com/omnistrate/omnistrate-sdk-go/v1"
@@ -14,6 +15,10 @@ func getV1Client() *openapiclientv1.APIClient {
 	configuration.Host = config.GetHost()
 	configuration.Scheme = config.GetHostScheme()
 	configuration.Debug = config.GetDebug()
+
+	configuration.HTTPClient = &http.Client{
+		Timeout: config.GetClientTimeout(),
+	}
 
 	apiClient := openapiclientv1.NewAPIClient(configuration)
 	return apiClient

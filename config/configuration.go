@@ -2,6 +2,7 @@ package config
 
 import (
 	_ "embed"
+	"time"
 
 	"github.com/omnistrate/ctl/utils"
 	"github.com/spf13/cobra"
@@ -15,6 +16,7 @@ const (
 	omnistrateRootDomain = "OMNISTRATE_ROOT_DOMAIN"
 	omnistrateHostSchema = "OMNISTRATE_HOST_SCHEME"
 	defaultRootDomain    = "omnistrate.cloud"
+	clientTimeout        = "CLIENT_TIMEOUT_IN_SECONDS"
 )
 
 // GetToken returns the authentication token for current user
@@ -60,6 +62,11 @@ func IsProd() bool {
 
 func IsDryRun() bool {
 	return utils.GetEnvAsBoolean(dryRunEnv, "false")
+}
+
+func GetClientTimeout() time.Duration {
+	timeoutInSeconds := utils.GetEnvAsInteger(clientTimeout, "60")
+	return time.Duration(timeoutInSeconds) * time.Second
 }
 
 func CleanupArgsAndFlags(cmd *cobra.Command, args *[]string) {

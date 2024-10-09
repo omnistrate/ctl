@@ -30,7 +30,7 @@ func Test_login(t *testing.T) {
 
 	for _, tt := range tests {
 		cmd.RootCmd.SetArgs(tt.Args)
-		err = cmd.RootCmd.Execute()
+		err = cmd.RootCmd.ExecuteContext()
 		if tt.WantErr {
 			require.Error(err, tt.ExpectedErrMsg)
 			require.Contains(err.Error(), tt.ExpectedErrMsg)

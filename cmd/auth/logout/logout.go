@@ -19,7 +19,7 @@ var LogoutCmd = &cobra.Command{
 
 func runLogout(cmd *cobra.Command, args []string) error {
 	err := config.RemoveAuthConfig()
-	if err != nil {
+	if err != nil && err != config.ErrConfigFileNotFound {
 		utils.PrintError(err)
 		return err
 	}

@@ -22,7 +22,7 @@ func Test_account_basic(t *testing.T) {
 	testEmail, testPassword, err := testutils.GetTestAccount()
 	require.NoError(err)
 	cmd.RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext()
 	require.NoError(err)
 
 	awsAccountName := "aws" + uuid.NewString()
@@ -30,45 +30,45 @@ func Test_account_basic(t *testing.T) {
 
 	// FAIL: create aws account
 	cmd.RootCmd.SetArgs([]string{"account", "create", awsAccountName, "--aws-account-id", "123456789012"})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext()
 	require.Error(err)
 	require.Contains(err.Error(), "unauthorized: only root users can onboard accounts")
 
 	// FAIL: create gcp account
 	cmd.RootCmd.SetArgs([]string{"account", "create", gcpAccountName, "--gcp-project-id", "project-id", "--gcp-project-number", "project-number"})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext()
 	require.Error(err)
 	require.Contains(err.Error(), "unauthorized: only root users can onboard accounts")
 
 	// PASS: list accounts
 	cmd.RootCmd.SetArgs([]string{"account", "list"})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext()
 	require.NoError(err)
 
 	// PASS: list accounts by name
 	cmd.RootCmd.SetArgs([]string{"account", "list", "--filter", fmt.Sprintf("name:%s", awsAccountName), "--filter", fmt.Sprintf("name:%s", gcpAccountName)})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext()
 	require.NoError(err)
 
 	// PASS: describe account
 	cmd.RootCmd.SetArgs([]string{"account", "describe", awsAccountName})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext()
 	require.Error(err)
 	require.Contains(err.Error(), "account not found")
 
 	cmd.RootCmd.SetArgs([]string{"account", "describe", gcpAccountName})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext()
 	require.Error(err)
 	require.Contains(err.Error(), "account not found")
 
 	// FAIL: delete account
 	cmd.RootCmd.SetArgs([]string{"account", "delete", awsAccountName})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext()
 	require.Error(err)
 	require.Contains(err.Error(), "account not found")
 
 	cmd.RootCmd.SetArgs([]string{"account", "delete", gcpAccountName})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext()
 	require.Error(err)
 	require.Contains(err.Error(), "account not found")
 }

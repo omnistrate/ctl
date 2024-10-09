@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func PasswordLogin(cmd *cobra.Command, args []string, calledByInteractiveMode bool) error {
+func passwordLogin(cmd *cobra.Command, args []string, calledByInteractiveMode bool) error {
 	if len(password) > 0 {
 		if !calledByInteractiveMode {
 			ctlutils.PrintWarning("Notice: Using the --password flag is insecure. Please consider using the --password-stdin flag instead. Refer to the help documentation for examples.")
@@ -54,7 +54,7 @@ func PasswordLogin(cmd *cobra.Command, args []string, calledByInteractiveMode bo
 		return err
 	}
 
-	token, err := dataaccess.LoginWithPassword(email, password)
+	token, err := dataaccess.LoginWithPassword(cmd.Context(), email, password)
 	if err != nil {
 		ctlutils.PrintError(err)
 		return err

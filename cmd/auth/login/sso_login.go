@@ -5,16 +5,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/atotto/clipboard"
 	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/browser"
 	"github.com/pkg/errors"
-	"io"
-	"net/http"
-	"strings"
-	"time"
 )
 
 // DeviceCodeResponse represents the response from the device code request
@@ -46,7 +47,7 @@ const (
 	googleScope            = "email"
 )
 
-func SSOLogin(identityProviderName string) error {
+func ssoLogin(ctx context.Context, identityProviderName string) error {
 	// Step 1: Request device and user verification codes
 	deviceCodeResponse, err := requestDeviceCode(identityProviderName)
 	if err != nil {
@@ -79,7 +80,7 @@ func SSOLogin(identityProviderName string) error {
 	fmt.Printf("%s\n\n", deviceCodeResponse.UserCode)
 
 	// Step 3: Poll identity provider server to check if the user authorized the device via backend API
-	jwtTokenResponse, err := pollForAccessTokenAndLogin(identityProviderName, deviceCodeResponse.DeviceCode, deviceCodeResponse.Interval)
+	jwtTokenResponse, err := pollForAccessTokenAndLogin(ctx, identityProviderName, deviceCodeResponse.DeviceCode, deviceCodeResponse.Interval)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -145,11 +146,11 @@ func requestDeviceCode(identityProviderName string) (*DeviceCodeResponse, error)
 }
 
 // pollForAccessTokenAndLogin polls identity provider server for an access token and uses it to log user into the platform
-func pollForAccessTokenAndLogin(identityProviderName, deviceCode string, interval int) (*AccessTokenResponse, error) {
+func pollForAccessTokenAndLogin(ctx context.Context, identityProviderName, deviceCode string, interval int) (*AccessTokenResponse, error) {
 	for {
 		time.Sleep(time.Duration(interval) * time.Second)
 
-		resp, err := dataaccess.LoginWithIdentityProvider(deviceCode, identityProviderName)
+		jwtToken, err := dataaccess.LoginWithIdentityProvider(ctx, deviceCode, identityProviderName)
 		if err != nil {
 			if strings.Contains(err.Error(), "Failed to get access token with status code: 428 Precondition Required") { // authorization_pending
 				continue
@@ -165,7 +166,7 @@ func pollForAccessTokenAndLogin(identityProviderName, deviceCode string, interva
 		}
 
 		return &AccessTokenResponse{
-			JWTToken: resp.JWTToken,
+			JWTToken: jwtToken,
 		}, nil
 	}
 }
