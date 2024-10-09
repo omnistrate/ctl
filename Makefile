@@ -34,6 +34,12 @@ tidy:
 	go mod tidy
 	go mod vendor
 
+.PHONY: download
+download:
+	echo "Download dependency modules"
+	go mod download
+	go mod vendor
+
 .PHONY: unit-test
 unit-test:
 	echo "Running unit tests for service"

@@ -55,7 +55,7 @@ jobs:
       - name: Get dependencies
         timeout-minutes: 10
         run: |
-          make tidy
+          make download
 
       - name: golangci-lint
         timeout-minutes: 20
@@ -108,7 +108,7 @@ jobs:
       - name: Get dependencies
         timeout-minutes: 10
         run: |
-         GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} make tidy
+         GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} make download
 
       - name: Build
         timeout-minutes: 20
@@ -166,7 +166,7 @@ jobs:
       - name: Get dependencies
         timeout-minutes: 10
         run: |
-          make tidy
+          make download
 
       - name: Gotestsum installer
         uses: autero1/action-gotestsum@v2.0.0
