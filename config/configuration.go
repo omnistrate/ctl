@@ -8,6 +8,15 @@ import (
 	"github.com/spf13/pflag"
 )
 
+const (
+	dryRunEnv            = "DRY_RUN"
+	debug                = "DEBUG"
+	omnistrateHost       = "OMNISTRATE_HOST"
+	omnistrateRootDomain = "OMNISTRATE_ROOT_DOMAIN"
+	omnistrateHostSchema = "OMNISTRATE_HOST_SCHEME"
+	defaultRootDomain    = "omnistrate.cloud"
+)
+
 // GetToken returns the authentication token for current user
 func GetToken() (string, error) {
 	authConfig, err := LookupAuthConfig()
@@ -20,17 +29,17 @@ func GetToken() (string, error) {
 
 // GetHost returns the host of the Omnistrate server
 func GetHost() string {
-	return utils.GetEnv("OMNISTRATE_HOST", "api"+"."+GetRootDomain())
+	return utils.GetEnv(omnistrateHost, "api"+"."+GetRootDomain())
 }
 
 // GetRootDomain returns the root domain of the Omnistrate server
 func GetRootDomain() string {
-	return utils.GetEnv("OMNISTRATE_ROOT_DOMAIN", "omnistrate.cloud")
+	return utils.GetEnv(omnistrateRootDomain, defaultRootDomain)
 }
 
 // GetHostScheme returns the scheme of the Omnistrate server
 func GetHostScheme() string {
-	return utils.GetEnv("OMNISTRATE_HOST_SCHEME", "https")
+	return utils.GetEnv(omnistrateHostSchema, "https")
 }
 
 func GetDebug() bool {
@@ -46,7 +55,11 @@ func GetDefaultServiceAuthPublicKey() string {
 }
 
 func IsProd() bool {
-	return GetRootDomain() == "omnistrate.cloud"
+	return GetRootDomain() == defaultRootDomain
+}
+
+func IsDryRun() bool {
+	return utils.GetEnvAsBoolean(dryRunEnv, "false")
 }
 
 func CleanupArgsAndFlags(cmd *cobra.Command, args *[]string) {

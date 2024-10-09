@@ -33,22 +33,22 @@ func TestSignIn(t *testing.T) {
 			"missing email",
 			"",
 			"",
-			false,
-			"",
+			true,
+			"invalid_format\nDetail: body.email must be formatted as a email but got value \"\", mail: no address; length of body.email must be greater or equal than 1 but got value \"\" (len=0); length of body.password must be greater or equal than 1 but got value \"\" (len=0)",
 		},
 		{
 			"missing password",
-			"xzhang+cli@omnistrate.com",
+			"xzhang+cli1@omnistrate.com",
 			"",
 			true,
-			"must provide a non-empty password via --password or --password-stdin",
+			"invalid_length\nDetail: length of body.password must be greater or equal than 1 but got value \"\" (len=0)",
 		},
 		{
 			"invalid password",
 			"--email=xzhang+cli@omnistrate.com",
-			"--password=wrong_password",
+			"wrong_password",
 			true,
-			"wrong user email or password",
+			"bad_request\nDetail: wrong user email or password",
 		},
 	}
 
@@ -57,10 +57,10 @@ func TestSignIn(t *testing.T) {
 			assert := assert.New(t)
 			require := require.New(t)
 
-			token, err := dataaccess.LoginWithPassword("pberton@omnistrate.com", "invalidpassword")
+			token, err := dataaccess.LoginWithPassword(tt.email, tt.password)
 
 			if tt.wantErr {
-				assert.Equal(err.Error(), "bad_request\nDetail: "+tt.expectedErrMsg)
+				assert.Equal(tt.expectedErrMsg, err.Error())
 				assert.Empty(token)
 			} else {
 				require.NoError(err)

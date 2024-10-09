@@ -16,3 +16,5 @@ vendor/
 
 *.omnistrate
 omnistrate-ctl
+
+__debug_bin*
