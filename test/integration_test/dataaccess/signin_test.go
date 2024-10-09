@@ -1,9 +1,10 @@
 package dataaccess
 
 import (
+	"context"
 	"testing"
 
-	"github.com/omnistrate/ctl/dataaccess"
+	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -57,7 +58,8 @@ func TestSignIn(t *testing.T) {
 			assert := assert.New(t)
 			require := require.New(t)
 
-			token, err := dataaccess.LoginWithPassword(tt.email, tt.password)
+			ctx := context.TODO()
+			token, err := dataaccess.LoginWithPassword(ctx, tt.email, tt.password)
 
 			if tt.wantErr {
 				assert.Equal(tt.expectedErrMsg, err.Error())

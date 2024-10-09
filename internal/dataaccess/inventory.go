@@ -5,8 +5,8 @@ import (
 
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
-	"github.com/omnistrate/ctl/config"
-	"github.com/omnistrate/ctl/utils"
+	"github.com/omnistrate/ctl/internal/config"
+	"github.com/omnistrate/ctl/internal/utils"
 )
 
 func SearchInventory(token, query string) (*inventoryapi.SearchInventoryResult, error) {

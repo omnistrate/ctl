@@ -5,7 +5,7 @@ import (
 
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	resourceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/resource_api"
-	"github.com/omnistrate/ctl/config"
+	"github.com/omnistrate/ctl/internal/config"
 )
 
 func DescribeResource(token, serviceID, resourceID string, productTierID, productTierVersion *string) (resource *resourceapi.DescribeResourceResult, err error) {

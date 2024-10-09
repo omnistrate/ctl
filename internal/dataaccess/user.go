@@ -5,7 +5,7 @@ import (
 
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	usersapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/users_api"
-	"github.com/omnistrate/ctl/config"
+	"github.com/omnistrate/ctl/internal/config"
 )
 
 func DescribeUser(token string) (*usersapi.DescribeUserResult, error) {

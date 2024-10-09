@@ -6,7 +6,7 @@ import (
 
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
-	"github.com/omnistrate/ctl/config"
+	"github.com/omnistrate/ctl/internal/config"
 	"github.com/pkg/errors"
 )
 

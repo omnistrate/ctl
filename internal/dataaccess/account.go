@@ -6,8 +6,8 @@ import (
 
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	accountconfigapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/account_config_api"
-	"github.com/omnistrate/ctl/config"
-	"github.com/omnistrate/ctl/utils"
+	"github.com/omnistrate/ctl/internal/config"
+	"github.com/omnistrate/ctl/internal/utils"
 )
 
 func DescribeAccount(token string, id string) (*accountconfigapi.DescribeAccountConfigResult, error) {

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -14,6 +15,8 @@ import (
 func Test_list_basic(t *testing.T) {
 	testutils.SmokeTest(t)
 
+	ctx := context.TODO()
+
 	require := require.New(t)
 	defer testutils.Cleanup()
 
@@ -23,14 +26,14 @@ func Test_list_basic(t *testing.T) {
 	require.NoError(err)
 
 	cmd.RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	cmd.RootCmd.SetArgs([]string{"build", "-f", "../composefiles/postgresql.yaml", "--name", "postgresql" + uuid.NewString(), "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	cmd.RootCmd.SetArgs([]string{"list"})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 }

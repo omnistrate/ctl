@@ -2,8 +2,8 @@ package customnetwork
 
 import (
 	customnetworkapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/custom_network_api"
-	"github.com/omnistrate/ctl/model"
-	"github.com/omnistrate/ctl/utils"
+	"github.com/omnistrate/ctl/internal/model"
+	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/spf13/cobra"
 )
 

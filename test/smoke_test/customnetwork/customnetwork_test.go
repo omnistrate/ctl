@@ -1,21 +1,24 @@
 package customnetwork
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	customnetworkapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/custom_network_api"
 	"github.com/omnistrate/ctl/cmd"
 	"github.com/omnistrate/ctl/cmd/customnetwork"
-	"github.com/omnistrate/ctl/config"
-	"github.com/omnistrate/ctl/dataaccess"
+	"github.com/omnistrate/ctl/internal/config"
+	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/test/testutils"
-	"github.com/omnistrate/ctl/utils"
+	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_custom_network_lifecycle(t *testing.T) {
 	testutils.SmokeTest(t)
+
+	ctx := context.TODO()
 
 	require := require.New(t)
 	defer testutils.Cleanup()
@@ -25,7 +28,7 @@ func Test_custom_network_lifecycle(t *testing.T) {
 	testEmail, testPassword, err := testutils.GetTestAccount()
 	require.NoError(err)
 	cmd.RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// Pre-test cleanup
@@ -42,12 +45,12 @@ func Test_custom_network_lifecycle(t *testing.T) {
 
 	// PASS: describe custom network
 	cmd.RootCmd.SetArgs([]string{"custom-network", "describe", "--custom-network-id", customNetworkID})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// PASS: describe custom network by name
 	cmd.RootCmd.SetArgs([]string{"custom-network", "describe", "ctl-test-network"})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// PASS: describe manually
@@ -66,12 +69,12 @@ func Test_custom_network_lifecycle(t *testing.T) {
 
 	// PASS: list custom networks
 	cmd.RootCmd.SetArgs([]string{"custom-network", "list", "--filter", "cloud_provider:aws,region:ap-south-1"})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// PASS: delete custom network by name
 	cmd.RootCmd.SetArgs([]string{"custom-network", "delete", "ctl-test-network"})
-	err = cmd.RootCmd.Execute()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// FAIL: describe again

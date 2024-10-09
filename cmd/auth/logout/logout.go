@@ -1,9 +1,9 @@
 package logout
 
 import (
-	"github.com/omnistrate/ctl/utils"
+	"github.com/omnistrate/ctl/internal/utils"
 
-	"github.com/omnistrate/ctl/config"
+	"github.com/omnistrate/ctl/internal/config"
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +19,7 @@ var LogoutCmd = &cobra.Command{
 
 func runLogout(cmd *cobra.Command, args []string) error {
 	err := config.RemoveAuthConfig()
-	if err != nil {
+	if err != nil && err != config.ErrConfigFileNotFound {
 		utils.PrintError(err)
 		return err
 	}
