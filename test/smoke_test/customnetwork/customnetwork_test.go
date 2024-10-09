@@ -94,7 +94,7 @@ func deleteCustomNetworkIfExists(t *testing.T, ctx context.Context, token, cloud
 
 	for _, network := range customNetworks.CustomNetworks {
 		if network.Name != nil && *network.Name == customNetworkName {
-			err = dataaccess.DeleteCustomNetwork(token, customnetworkapi.DeleteCustomNetworkRequest{
+			err = dataaccess.DeleteCustomNetwork(ctx, token, customnetworkapi.DeleteCustomNetworkRequest{
 				ID: network.ID,
 			})
 			require.NoError(t, err)
