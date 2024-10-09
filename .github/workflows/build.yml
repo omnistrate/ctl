@@ -188,7 +188,7 @@ jobs:
   smoke-tests:
     environment: Dev-us-west-2
     if: github.event_name != 'push'
-    needs: [build, lint, integration-tests]
+    needs: [build, lint]
     runs-on: ubuntu-latest
     permissions:
       contents: read
