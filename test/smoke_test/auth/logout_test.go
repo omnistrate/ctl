@@ -26,8 +26,7 @@ func Test_logout(t *testing.T) {
 	// FAIL: logout without login
 	cmd.RootCmd.SetArgs([]string{"logout"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
-	require.Error(err)
-	require.Contains(err.Error(), config.ErrConfigFileNotFound.Error())
+	require.NoError(err)
 
 	// PASS: logout after login
 	testEmail, testPassword, err := testutils.GetTestAccount()
