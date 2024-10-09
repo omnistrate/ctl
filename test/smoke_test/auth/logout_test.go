@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -15,6 +16,8 @@ import (
 func Test_logout(t *testing.T) {
 	testutils.SmokeTest(t)
 
+	ctx := context.TODO()
+
 	require := require.New(t)
 	defer testutils.Cleanup()
 
@@ -22,7 +25,7 @@ func Test_logout(t *testing.T) {
 
 	// FAIL: logout without login
 	cmd.RootCmd.SetArgs([]string{"logout"})
-	err = cmd.RootCmd.ExecuteContext()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.Error(err)
 	require.Contains(err.Error(), config.ErrConfigFileNotFound.Error())
 
@@ -31,10 +34,10 @@ func Test_logout(t *testing.T) {
 	require.NoError(err)
 
 	cmd.RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
-	err = cmd.RootCmd.ExecuteContext()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	cmd.RootCmd.SetArgs([]string{"logout"})
-	err = cmd.RootCmd.ExecuteContext()
+	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 }

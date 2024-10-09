@@ -1,6 +1,7 @@
 package serviceplan
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -14,6 +15,8 @@ import (
 
 func Test_service_plan_basic(t *testing.T) {
 	testutils.SmokeTest(t)
+
+	ctx := context.TODO()
 
 	require := require.New(t)
 	defer testutils.Cleanup()
@@ -123,6 +126,8 @@ func Test_service_plan_basic(t *testing.T) {
 
 func Test_service_plan_features_modification(t *testing.T) {
 	testutils.SmokeTest(t)
+
+	ctx := context.TODO()
 
 	require := require.New(t)
 	defer testutils.Cleanup()

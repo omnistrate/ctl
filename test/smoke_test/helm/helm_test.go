@@ -1,6 +1,7 @@
 package helm
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -11,6 +12,8 @@ import (
 
 func TestHelmBasic(t *testing.T) {
 	testutils.SmokeTest(t)
+
+	ctx := context.TODO()
 
 	defer testutils.Cleanup()
 

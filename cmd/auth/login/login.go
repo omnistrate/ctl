@@ -70,19 +70,17 @@ func init() {
 func runLogin(cmd *cobra.Command, args []string) error {
 	defer resetLogin()
 
-	ctx := cmd.Context()
-
 	// Login with email and password if any of the flags are set
 	if len(email) > 0 || len(password) > 0 || passwordStdin {
-		return passwordLogin(ctx, cmd, args, false)
+		return passwordLogin(cmd, args, false)
 	}
 
 	if gh {
-		return ssoLogin(ctx, identityProviderGitHub)
+		return ssoLogin(cmd.Context(), identityProviderGitHub)
 	}
 
 	if google {
-		return ssoLogin(ctx, identityProviderGoogle)
+		return ssoLogin(cmd.Context(), identityProviderGoogle)
 	}
 
 	// Login interactively

@@ -5,17 +5,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-	"strings"
-	"time"
-
 	"github.com/atotto/clipboard"
 	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/dataaccess"
 	"github.com/omnistrate/ctl/utils"
 	"github.com/pkg/browser"
 	"github.com/pkg/errors"
+	"io"
+	"net/http"
+	"strings"
+	"time"
 )
 
 // DeviceCodeResponse represents the response from the device code request

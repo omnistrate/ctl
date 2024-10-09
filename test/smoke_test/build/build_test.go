@@ -1,6 +1,7 @@
 package build
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -15,6 +16,8 @@ import (
 
 func Test_build_basic(t *testing.T) {
 	testutils.SmokeTest(t)
+
+	ctx := context.TODO()
 
 	require := require.New(t)
 	defer testutils.Cleanup()
@@ -63,6 +66,8 @@ func Test_build_basic(t *testing.T) {
 
 func Test_build_update_service(t *testing.T) {
 	testutils.SmokeTest(t)
+
+	ctx := context.TODO()
 
 	require := require.New(t)
 	defer testutils.Cleanup()
@@ -143,6 +148,8 @@ func Test_build_update_service(t *testing.T) {
 func Test_build_duplicate_service_plan_name(t *testing.T) {
 	testutils.SmokeTest(t)
 
+	ctx := context.TODO()
+
 	require := require.New(t)
 	defer testutils.Cleanup()
 
@@ -198,6 +205,8 @@ func Test_build_duplicate_service_plan_name(t *testing.T) {
 func Test_build_invalid_file(t *testing.T) {
 	testutils.SmokeTest(t)
 
+	ctx := context.TODO()
+
 	require := require.New(t)
 	defer testutils.Cleanup()
 
@@ -217,6 +226,8 @@ func Test_build_invalid_file(t *testing.T) {
 
 func Test_build_no_file(t *testing.T) {
 	testutils.SmokeTest(t)
+
+	ctx := context.TODO()
 
 	require := require.New(t)
 	defer testutils.Cleanup()
@@ -238,6 +249,8 @@ func Test_build_no_file(t *testing.T) {
 func Test_build_create_no_name(t *testing.T) {
 	testutils.SmokeTest(t)
 
+	ctx := context.TODO()
+
 	require := require.New(t)
 	defer testutils.Cleanup()
 
@@ -257,6 +270,8 @@ func Test_build_create_no_name(t *testing.T) {
 
 func Test_build_create_no_description(t *testing.T) {
 	testutils.SmokeTest(t)
+
+	ctx := context.TODO()
 
 	require := require.New(t)
 	defer testutils.Cleanup()
@@ -281,6 +296,8 @@ func Test_build_create_no_description(t *testing.T) {
 func Test_build_create_no_service_logo_url(t *testing.T) {
 	testutils.SmokeTest(t)
 
+	ctx := context.TODO()
+
 	require := require.New(t)
 	defer testutils.Cleanup()
 
@@ -303,6 +320,8 @@ func Test_build_create_no_service_logo_url(t *testing.T) {
 
 func Test_build_service_from_image(t *testing.T) {
 	testutils.SmokeTest(t)
+
+	ctx := context.TODO()
 
 	require := require.New(t)
 	defer testutils.Cleanup()

@@ -1,6 +1,7 @@
 package customnetwork
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -16,6 +17,8 @@ import (
 
 func Test_custom_network_lifecycle(t *testing.T) {
 	testutils.SmokeTest(t)
+
+	ctx := context.TODO()
 
 	require := require.New(t)
 	defer testutils.Cleanup()
@@ -36,10 +39,6 @@ func Test_custom_network_lifecycle(t *testing.T) {
 	// PASS: create custom network
 	cmd.RootCmd.SetArgs([]string{"custom-network", "create", "--cloud-provider", "aws", "--region", "ap-south-1", "--cidr", "1.2.255.1/16", "--name", "ctl-test-network"})
 	err = cmd.RootCmd.Execute()
-=======
-	cmd.RootCmd.SetArgs([]string{"custom-network", "create", "--cloud-provider", "aws", "--region", "ap-south-1", "--cidr", "1.2.255.1/16", "--name", "ctl-test-network"})
-	err = cmd.RootCmd.ExecuteContext(ctx)
->>>>>>> Stashed changes
 	require.NoError(err)
 	customNetworkID := customnetwork.CustomNetworkID
 	require.NotEmpty(customNetworkID)

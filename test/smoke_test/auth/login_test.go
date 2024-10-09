@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"testing"
 
 	"github.com/omnistrate/ctl/cmd"
@@ -11,6 +12,8 @@ import (
 
 func Test_login(t *testing.T) {
 	testutils.SmokeTest(t)
+
+	ctx := context.TODO()
 
 	require := require.New(t)
 	defer testutils.Cleanup()
@@ -30,7 +33,7 @@ func Test_login(t *testing.T) {
 
 	for _, tt := range tests {
 		cmd.RootCmd.SetArgs(tt.Args)
-		err = cmd.RootCmd.ExecuteContext()
+		err = cmd.RootCmd.ExecuteContext(ctx)
 		if tt.WantErr {
 			require.Error(err, tt.ExpectedErrMsg)
 			require.Contains(err.Error(), tt.ExpectedErrMsg)

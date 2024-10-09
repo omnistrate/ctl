@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -14,6 +15,8 @@ import (
 
 func Test_remove_basic(t *testing.T) {
 	testutils.SmokeTest(t)
+
+	ctx := context.TODO()
 
 	require := require.New(t)
 	defer testutils.Cleanup()
