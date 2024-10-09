@@ -16,7 +16,7 @@ func Test_upgrade_basic(t *testing.T) {
 	require := require.New(t)
 	defer testutils.Cleanup()
 
-	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	testEmail, testPassword, err := testutils.GetTestAccount()
 	require.NoError(err)
 	cmd.RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = cmd.RootCmd.Execute()

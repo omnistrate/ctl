@@ -17,7 +17,6 @@ func init() {
 	Cmd.AddCommand(listCmd)
 	Cmd.AddCommand(describeCmd)
 	Cmd.AddCommand(deleteCmd)
-
 }
 
 func run(cmd *cobra.Command, args []string) {

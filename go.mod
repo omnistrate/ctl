@@ -1,6 +1,6 @@
 module github.com/omnistrate/ctl
 
-go 1.23.0
+go 1.23.1
 
 require (
 	github.com/atotto/clipboard v0.1.4
@@ -15,6 +15,7 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1
 	github.com/omnistrate/api-design v0.7.4
 	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20241001141101-537ace327d87
+	github.com/omnistrate/omnistrate-sdk-go v0.0.7
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.33.0

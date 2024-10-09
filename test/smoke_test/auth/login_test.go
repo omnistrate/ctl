@@ -15,14 +15,15 @@ func Test_login(t *testing.T) {
 	require := require.New(t)
 	defer testutils.Cleanup()
 
-	var err error
+	testEmail, testPassword, err := testutils.GetTestAccount()
+	require.NoError(err)
 
 	tests := []struct {
 		Args           []string
 		WantErr        bool
 		ExpectedErrMsg string
 	}{
-		{[]string{"login", "--email=xzhang+cli@omnistrate.com", "--password=Test@1234"}, false, ""},
+		{[]string{"login", "--email=" + testEmail, "--password=" + testPassword}, false, ""},
 		{[]string{"login", "--email=xzhang+cli@omnistrate.com"}, true, "must provide a non-empty password via --password or --password-stdin"},
 		{[]string{"login", "--email=xzhang+cli@omnistrate.com", "--password=wrong_password"}, true, "wrong user email or password"},
 	}

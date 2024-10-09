@@ -15,7 +15,7 @@ func TestHelmBasic(t *testing.T) {
 	defer testutils.Cleanup()
 
 	// Step 1: login
-	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	testEmail, testPassword, err := testutils.GetTestAccount()
 	require.NoError(t, err)
 	cmd.RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = cmd.RootCmd.Execute()

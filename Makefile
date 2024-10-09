@@ -26,12 +26,18 @@ CGO_ENABLED=0
 GOPRIVATE=github.com/omnistrate
 
 .PHONY: all
-all: tidy build unit-test lint gen-doc
+all: tidy build unit-test lint check-dependencies gen-doc 
 
 .PHONY: tidy
 tidy:
 	echo "Tidy dependency modules"
 	go mod tidy
+	go mod vendor
+
+.PHONY: download
+download:
+	echo "Download dependency modules"
+	go mod download
 	go mod vendor
 
 .PHONY: unit-test
@@ -43,13 +49,24 @@ unit-test:
 .PHONY: smoke-test
 smoke-test:
 	echo "Running smoke tests for service"
-	echo you need to set the following environment variables: SMOKE_TEST_EMAIL, SMOKE_TEST_PASSWORD before running the smoke tests
+	echo you need to set the following environment variables: TEST_EMAIL, TEST_PASSWORD before running the smoke tests
 	export ENABLE_SMOKE_TEST=true && \
 	export OMNISTRATE_ROOT_DOMAIN=omnistrate.dev && \
 	export LOG_LEVEL=debug && \
 	export LOG_FORMAT=pretty && \
 	go clean -testcache && \
-	go test ./... -skip ./test/... $(ARGS) 
+	go test ./... -skip ./test/smoke_test/... $(ARGS) 
+
+.PHONY: integration-test
+integration-test:
+	echo "Running integration tests for service"
+	echo you need to set the following environment variables: TEST_EMAIL, TEST_PASSWORD before running the integration tests
+	export ENABLE_INTEGRATION_TEST=true && \
+	export OMNISTRATE_ROOT_DOMAIN=omnistrate.dev && \
+	export LOG_LEVEL=debug && \
+	export LOG_FORMAT=pretty && \
+	go clean -testcache && \
+	go test ./... -skip ./test/integration_test/... $(ARGS) 
 
 .PHONY: build
 build:
@@ -129,7 +146,7 @@ update-omnistrate-dependencies:
 .PHONY: check-dependencies
 check-dependencies:
 	@echo "Checking dependencies starting with github.com/omnistrate..."
-	@violating_deps=$$(grep -E '^\s*github.com/omnistrate' go.mod | grep -v -E 'github.com/omnistrate/api-design|github.com/omnistrate/api-design/pkg/httpclientwrapper'); \
+	@violating_deps=$$(grep -E '^\s*github.com/omnistrate' go.mod | grep -v -E 'github.com/omnistrate/api-design|github.com/omnistrate/api-design/pkg/httpclientwrapper|github.com/omnistrate/omnistrate-sdk-go'); \
     if [ -n "$$violating_deps" ]; then \
         echo "Error: Found dependencies starting with github.com/omnistrate/commons other than allowed ones:"; \
         echo "$$violating_deps"; \
@@ -141,7 +158,7 @@ check-dependencies:
 .PHONY: gen-doc
 gen-doc:
 	echo "Generating docs"
-	rm mkdocs/docs/omnistrate-ctl*.md # remove old docs
+	rm -f mkdocs/docs/omnistrate-ctl*.md # remove old docs
 	go run doc-gen/main.go
 
 .PHONY: docker

@@ -19,7 +19,7 @@ func Test_account_basic(t *testing.T) {
 
 	var err error
 
-	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	testEmail, testPassword, err := testutils.GetTestAccount()
 	require.NoError(err)
 	cmd.RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = cmd.RootCmd.Execute()

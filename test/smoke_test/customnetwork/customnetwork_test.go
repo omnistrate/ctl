@@ -22,7 +22,7 @@ func Test_custom_network_lifecycle(t *testing.T) {
 
 	var err error
 
-	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	testEmail, testPassword, err := testutils.GetTestAccount()
 	require.NoError(err)
 	cmd.RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = cmd.RootCmd.Execute()
@@ -34,7 +34,7 @@ func Test_custom_network_lifecycle(t *testing.T) {
 	deleteCustomNetworkIfExists(t, token, "aws", "ap-south-1", "ctl-test-network")
 
 	// PASS: create custom network
-	cmd.RootCmd.SetArgs([]string{"custom-network", "create", "--cloud-provider", "aws", "--region", "ap-south-1", "--cidr", "10.99.101.0/24", "--name", "ctl-test-network"})
+	cmd.RootCmd.SetArgs([]string{"custom-network", "create", "--cloud-provider", "aws", "--region", "ap-south-1", "--cidr", "1.2.255.1/16", "--name", "ctl-test-network"})
 	err = cmd.RootCmd.Execute()
 	require.NoError(err)
 	customNetworkID := customnetwork.CustomNetworkID
@@ -60,7 +60,7 @@ func Test_custom_network_lifecycle(t *testing.T) {
 	require.Equal(customNetworkID, string(customNetwork.ID))
 	require.NotNil(customNetwork.Name)
 	require.Equal("ctl-test-network", *customNetwork.Name)
-	require.Equal("10.99.101.0/24", customNetwork.Cidr)
+	require.Equal("1.2.255.1/16", customNetwork.Cidr)
 	require.Equal("aws", string(customNetwork.CloudProviderName))
 	require.Equal("ap-south-1", customNetwork.CloudProviderRegion)
 
