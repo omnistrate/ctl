@@ -19,7 +19,7 @@ func GetCloudProviderByName(ctx context.Context, token string, cloudProvider str
 		Name:  cloudProvider,
 	}
 
-	res, err := service.GetCloudProviderByName(context.Background(), &request)
+	res, err := service.GetCloudProviderByName(ctx, &request)
 	if err != nil {
 		return "", err
 	}

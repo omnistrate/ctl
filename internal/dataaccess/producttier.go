@@ -22,7 +22,7 @@ func DeleteProductTier(ctx context.Context, token, serviceID, productTierID stri
 		ID:        producttierapi.ProductTierID(productTierID),
 	}
 
-	if err = service.DeleteProductTier(context.Background(), request); err != nil {
+	if err = service.DeleteProductTier(ctx, request); err != nil {
 		return
 	}
 
@@ -41,7 +41,7 @@ func DescribeProductTier(ctx context.Context, token, serviceID, productTierID st
 		ID:        producttierapi.ProductTierID(productTierID),
 	}
 
-	productTier, err = service.DescribeProductTier(context.Background(), request)
+	productTier, err = service.DescribeProductTier(ctx, request)
 	if err != nil {
 		return
 	}
@@ -60,7 +60,7 @@ func ListProductTiers(ctx context.Context, token, serviceID string) (productTier
 		ServiceID: producttierapi.ServiceID(serviceID),
 	}
 
-	productTierIDs, err := service.ListProductTier(context.Background(), request)
+	productTierIDs, err := service.ListProductTier(ctx, request)
 	if err != nil {
 		return
 	}
@@ -92,7 +92,7 @@ func ReleaseServicePlan(ctx context.Context, token, serviceID, serviceAPIID, pro
 		IsPreferred:    isPreferred,
 	}
 
-	if err = serviceApi.ReleaseServiceAPI(context.Background(), request); err != nil {
+	if err = serviceApi.ReleaseServiceAPI(ctx, request); err != nil {
 		return
 	}
 
@@ -112,7 +112,7 @@ func DescribePendingChanges(ctx context.Context, token, serviceID, serviceAPIID,
 		ProductTierID: utils.ToPtr(serviceapiapi.ProductTierID(productTierID)),
 	}
 
-	pendingChanges, err = serviceApi.DescribePendingChanges(context.Background(), request)
+	pendingChanges, err = serviceApi.DescribePendingChanges(ctx, request)
 	if err != nil {
 		return
 	}

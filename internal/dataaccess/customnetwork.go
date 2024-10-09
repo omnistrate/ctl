@@ -17,7 +17,7 @@ func CreateCustomNetwork(ctx context.Context, token string, request customnetwor
 	}
 
 	request.Token = token
-	return service.CreateCustomNetwork(context.Background(), &request)
+	return service.CreateCustomNetwork(ctx, &request)
 }
 
 func DescribeCustomNetwork(ctx context.Context, token string, request customnetworkapi.DescribeCustomNetworkRequest) (
@@ -29,7 +29,7 @@ func DescribeCustomNetwork(ctx context.Context, token string, request customnetw
 	}
 
 	request.Token = token
-	return service.DescribeCustomNetwork(context.Background(), &request)
+	return service.DescribeCustomNetwork(ctx, &request)
 }
 
 func ListCustomNetworks(ctx context.Context, token string, request customnetworkapi.ListCustomNetworksRequest) (
@@ -41,10 +41,10 @@ func ListCustomNetworks(ctx context.Context, token string, request customnetwork
 	}
 
 	request.Token = token
-	return service.ListCustomNetworks(context.Background(), &request)
+	return service.ListCustomNetworks(ctx, &request)
 }
 
-func DeleteCustomNetwork(token string, request customnetworkapi.DeleteCustomNetworkRequest) (
+func DeleteCustomNetwork(ctx context.Context, token string, request customnetworkapi.DeleteCustomNetworkRequest) (
 	err error) {
 	var service *httpclientwrapper.CustomNetwork
 	service, err = httpclientwrapper.NewCustomNetwork(config.GetHostScheme(), config.GetHost())
@@ -53,5 +53,5 @@ func DeleteCustomNetwork(token string, request customnetworkapi.DeleteCustomNetw
 	}
 
 	request.Token = token
-	return service.DeleteCustomNetwork(context.Background(), &request)
+	return service.DeleteCustomNetwork(ctx, &request)
 }

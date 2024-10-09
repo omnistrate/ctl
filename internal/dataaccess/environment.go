@@ -22,7 +22,7 @@ func CreateServiceEnvironment(ctx context.Context, token string, request service
 
 	request.Token = token
 
-	res, err := service.CreateServiceEnvironment(context.Background(), &request)
+	res, err := service.CreateServiceEnvironment(ctx, &request)
 	if err != nil {
 		return "", err
 	}
@@ -41,7 +41,7 @@ func DescribeServiceEnvironment(ctx context.Context, token, serviceID, serviceEn
 		ID:        serviceenvironmentapi.ServiceEnvironmentID(serviceEnvironmentID),
 	}
 
-	res, err := service.DescribeServiceEnvironment(context.Background(), &request)
+	res, err := service.DescribeServiceEnvironment(ctx, &request)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func ListServiceEnvironments(ctx context.Context, token, serviceID string) (*ser
 		ServiceID: serviceenvironmentapi.ServiceID(serviceID),
 	}
 
-	res, err := service.ListServiceEnvironment(context.Background(), &request)
+	res, err := service.ListServiceEnvironment(ctx, &request)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func PromoteServiceEnvironment(ctx context.Context, token, serviceID, serviceEnv
 		ID:        serviceenvironmentapi.ServiceEnvironmentID(serviceEnvironmentID),
 	}
 
-	err = service.PromoteServiceEnvironment(context.Background(), &request)
+	err = service.PromoteServiceEnvironment(ctx, &request)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func PromoteServiceEnvironmentStatus(ctx context.Context, token, serviceID, serv
 		ID:        serviceenvironmentapi.ServiceEnvironmentID(serviceEnvironmentID),
 	}
 
-	res, err := service.PromoteServiceEnvironmentStatus(context.Background(), &request)
+	res, err := service.PromoteServiceEnvironmentStatus(ctx, &request)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +116,7 @@ func DeleteServiceEnvironment(ctx context.Context, token, serviceID, serviceEnvi
 		ID:        serviceenvironmentapi.ServiceEnvironmentID(serviceEnvironmentID),
 	}
 
-	err = service.DeleteServiceEnvironment(context.Background(), &request)
+	err = service.DeleteServiceEnvironment(ctx, &request)
 	if err != nil {
 		return err
 	}

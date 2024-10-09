@@ -21,7 +21,7 @@ func DescribeAccount(ctx context.Context, token string, id string) (*accountconf
 		ID:    accountconfigapi.AccountConfigID(id),
 	}
 
-	res, err := account.DescribeAccountConfig(context.Background(), &request)
+	res, err := account.DescribeAccountConfig(ctx, &request)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func ListAccounts(ctx context.Context, token string, cloudProvider string) (*acc
 		CloudProviderName: accountconfigapi.CloudProvider(cloudProvider),
 	}
 
-	res, err := account.ListAccountConfig(context.Background(), &request)
+	res, err := account.ListAccountConfig(ctx, &request)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func DeleteAccount(ctx context.Context, token, accountConfigID string) error {
 		ID:    accountconfigapi.AccountConfigID(accountConfigID),
 	}
 
-	err = service.DeleteAccountConfig(context.Background(), &request)
+	err = service.DeleteAccountConfig(ctx, &request)
 	if err != nil {
 		return err
 	}
@@ -70,7 +70,7 @@ func CreateAccount(ctx context.Context, accountConfig *accountconfigapi.CreateAc
 		return "", err
 	}
 
-	res, err := service.CreateAccountConfig(context.Background(), accountConfig)
+	res, err := service.CreateAccountConfig(ctx, accountConfig)
 	if err != nil {
 		return "", err
 	}

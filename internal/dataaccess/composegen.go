@@ -16,7 +16,7 @@ func CheckIfContainerImageAccessible(ctx context.Context, token string, request 
 		return
 	}
 
-	res, err = service.CheckIfContainerImageAccessible(context.Background(), request)
+	res, err = service.CheckIfContainerImageAccessible(ctx, request)
 	if err != nil {
 		return
 	}
@@ -31,7 +31,7 @@ func GenerateComposeSpecFromContainerImage(ctx context.Context, token string, re
 		return
 	}
 
-	res, err = service.GenerateComposeSpecFromContainerImage(context.Background(), request)
+	res, err = service.GenerateComposeSpecFromContainerImage(ctx, request)
 	if err != nil {
 		return
 	}

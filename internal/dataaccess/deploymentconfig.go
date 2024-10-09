@@ -19,7 +19,7 @@ func GetDefaultDeploymentConfigID(ctx context.Context, token string) (deployment
 		ID:    "default",
 	}
 
-	res, err := service.DescribeDeploymentConfig(context.Background(), &request)
+	res, err := service.DescribeDeploymentConfig(ctx, &request)
 	if err != nil {
 		return "", err
 	}

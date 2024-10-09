@@ -403,8 +403,20 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	fileData = []byte(strings.ReplaceAll(string(fileData), "${{ secrets.GitHubPAT }}", pat))
 
 	// Build the service
-	serviceID, devEnvironmentID, devPlanID, undefinedResources, err := buildService(fileData, token, repoName, DockerComposeSpecType, nil, nil,
-		nil, nil, true, true, nil)
+	serviceID, devEnvironmentID, devPlanID, undefinedResources, err := buildService(
+		cmd.Context(),
+		fileData,
+		token,
+		repoName,
+		DockerComposeSpecType,
+		nil,
+		nil,
+		nil,
+		nil,
+		true,
+		true,
+		nil,
+	)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

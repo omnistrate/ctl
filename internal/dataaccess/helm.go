@@ -33,7 +33,7 @@ func SaveHelmChart(
 		},
 	}
 
-	if helmPackage, err = helmPackageService.SaveHelmPackage(context.Background(), request); err != nil {
+	if helmPackage, err = helmPackageService.SaveHelmPackage(ctx, request); err != nil {
 		return
 	}
 	return
@@ -46,7 +46,7 @@ func ListHelmCharts(ctx context.Context, token string) (helmPackages *helmpackag
 		Token: token,
 	}
 
-	if helmPackages, err = helmPackageService.ListHelmPackages(context.Background(), request); err != nil {
+	if helmPackages, err = helmPackageService.ListHelmPackages(ctx, request); err != nil {
 		return
 	}
 	return
@@ -61,7 +61,7 @@ func DescribeHelmChart(ctx context.Context, token, chartName, chartVersion strin
 		ChartVersion: chartVersion,
 	}
 
-	if helmPackage, err = helmPackageService.DescribeHelmPackage(context.Background(), request); err != nil {
+	if helmPackage, err = helmPackageService.DescribeHelmPackage(ctx, request); err != nil {
 		return
 	}
 	return
@@ -75,7 +75,7 @@ func ListHelmChartInstallations(ctx context.Context, token string, hostClusterID
 		HostClusterID: hostClusterID,
 	}
 
-	if helmPackageInstallations, err = helmPackageService.ListHelmPackageInstallations(context.Background(), request); err != nil {
+	if helmPackageInstallations, err = helmPackageService.ListHelmPackageInstallations(ctx, request); err != nil {
 		return
 	}
 	return
@@ -90,7 +90,7 @@ func DeleteHelmChart(ctx context.Context, token, chartName, chartVersion string)
 		ChartVersion: chartVersion,
 	}
 
-	if err = helmPackageService.DeleteHelmPackage(context.Background(), request); err != nil {
+	if err = helmPackageService.DeleteHelmPackage(ctx, request); err != nil {
 		return
 	}
 	return

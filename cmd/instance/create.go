@@ -183,7 +183,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Describe service offering
-	res, err := dataaccess.DescribeServiceOffering(token, serviceID, productTierID, version)
+	res, err := dataaccess.DescribeServiceOffering(cmd.Context(), token, serviceID, productTierID, version)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

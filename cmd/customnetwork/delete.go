@@ -1,6 +1,7 @@
 package customnetwork
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -80,7 +81,7 @@ func runDelete(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	// Delete
-	err = deleteCustomNetwork(token, customNetworkId)
+	err = deleteCustomNetwork(cmd.Context(), token, customNetworkId)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -90,12 +91,12 @@ func runDelete(cmd *cobra.Command, args []string) (err error) {
 	return
 }
 
-func deleteCustomNetwork(token string, id string) error {
+func deleteCustomNetwork(ctx context.Context, token string, id string) error {
 	request := customnetworkapi.DeleteCustomNetworkRequest{
 		ID: customnetworkapi.CustomNetworkID(id),
 	}
 
-	return dataaccess.DeleteCustomNetwork(token, request)
+	return dataaccess.DeleteCustomNetwork(ctx, token, request)
 }
 
 func validateDeleteArguments(args []string, idFlag string) error {

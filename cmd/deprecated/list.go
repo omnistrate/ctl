@@ -36,7 +36,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	// List service
-	res, err := listServices(token)
+	res, err := listServices(cmd.Context(), token)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -48,7 +48,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func listServices(token string) (*serviceapi.ListServiceResult, error) {
+func listServices(ctx context.Context, token string) (*serviceapi.ListServiceResult, error) {
 	service, err := httpclientwrapper.NewService(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func listServices(token string) (*serviceapi.ListServiceResult, error) {
 		Token: token,
 	}
 
-	res, err := service.ListService(context.Background(), &request)
+	res, err := service.ListService(ctx, &request)
 	if err != nil {
 		return nil, err
 	}

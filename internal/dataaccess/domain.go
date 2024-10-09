@@ -20,7 +20,7 @@ func ListDomains(ctx context.Context, token string) (*saasportalapi.ListSaaSPort
 		Token: token,
 	}
 
-	res, err := domain.ListSaaSPortalCustomDomains(context.Background(), &request)
+	res, err := domain.ListSaaSPortalCustomDomains(ctx, &request)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func DeleteDomain(ctx context.Context, token, environmentType string) error {
 		EnvironmentType: saasportalapi.EnvironmentType(environmentType),
 	}
 
-	err = service.DeleteSaaSPortalCustomDomain(context.Background(), &request)
+	err = service.DeleteSaaSPortalCustomDomain(ctx, &request)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func CreateDomain(ctx context.Context, request *saasportalapi.CreateSaaSPortalCu
 		return err
 	}
 
-	err = service.CreateSaaSPortalCustomDomain(context.Background(), request)
+	err = service.CreateSaaSPortalCustomDomain(ctx, request)
 	if err != nil {
 		return err
 	}

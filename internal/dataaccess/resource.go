@@ -8,7 +8,7 @@ import (
 	"github.com/omnistrate/ctl/internal/config"
 )
 
-func DescribeResource(ctx context.Context,token, serviceID, resourceID string, productTierID, productTierVersion *string) (resource *resourceapi.DescribeResourceResult, err error) {
+func DescribeResource(ctx context.Context, token, serviceID, resourceID string, productTierID, productTierVersion *string) (resource *resourceapi.DescribeResourceResult, err error) {
 	service, err := httpclientwrapper.NewResource(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return
@@ -22,7 +22,7 @@ func DescribeResource(ctx context.Context,token, serviceID, resourceID string, p
 		ProductTierID:      (*resourceapi.ProductTierID)(productTierID),
 	}
 
-	if resource, err = service.DescribeResource(context.Background(), request); err != nil {
+	if resource, err = service.DescribeResource(ctx, request); err != nil {
 		return
 	}
 

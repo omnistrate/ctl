@@ -26,13 +26,13 @@ func SearchInventory(ctx context.Context, token, query string) (*inventoryapi.Se
 	return res, nil
 }
 
-func ListServiceOfferings(token, orgID string) (*inventoryapi.InventoryListServiceOfferingsResult, error) {
+func ListServiceOfferings(ctx context.Context, token, orgID string) (*inventoryapi.InventoryListServiceOfferingsResult, error) {
 	inventory, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := inventory.ListServiceOffering(context.Background(), &inventoryapi.InventoryListServiceOfferingsRequest{
+	res, err := inventory.ListServiceOffering(ctx, &inventoryapi.InventoryListServiceOfferingsRequest{
 		Token: token,
 	})
 	if err != nil {
@@ -42,13 +42,13 @@ func ListServiceOfferings(token, orgID string) (*inventoryapi.InventoryListServi
 	return res, nil
 }
 
-func DescribeServiceOfferingResource(token, serviceID, resourceID, instanceID, productTierID, productTierVersion string) (*inventoryapi.InventoryDescribeServiceOfferingResourceResult, error) {
+func DescribeServiceOfferingResource(ctx context.Context, token, serviceID, resourceID, instanceID, productTierID, productTierVersion string) (*inventoryapi.InventoryDescribeServiceOfferingResourceResult, error) {
 	inventory, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := inventory.DescribeServiceOfferingResource(context.Background(), &inventoryapi.InventoryDescribeServiceOfferingResourceRequest{
+	res, err := inventory.DescribeServiceOfferingResource(ctx, &inventoryapi.InventoryDescribeServiceOfferingResourceRequest{
 		Token:              token,
 		ServiceID:          inventoryapi.ServiceID(serviceID),
 		ResourceID:         inventoryapi.ResourceID(resourceID),
@@ -63,13 +63,13 @@ func DescribeServiceOfferingResource(token, serviceID, resourceID, instanceID, p
 	return res, nil
 }
 
-func DescribeServiceOffering(token, serviceID, productTierID, productTierVersion string) (*inventoryapi.InventoryDescribeServiceOfferingResult, error) {
+func DescribeServiceOffering(ctx context.Context, token, serviceID, productTierID, productTierVersion string) (*inventoryapi.InventoryDescribeServiceOfferingResult, error) {
 	inventory, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := inventory.DescribeServiceOffering(context.Background(), &inventoryapi.InventoryDescribeServiceOfferingRequest{
+	res, err := inventory.DescribeServiceOffering(ctx, &inventoryapi.InventoryDescribeServiceOfferingRequest{
 		Token:              token,
 		ServiceID:          inventoryapi.ServiceID(serviceID),
 		ProductTierID:      (*inventoryapi.ProductTierID)(utils.ToPtr(productTierID)),

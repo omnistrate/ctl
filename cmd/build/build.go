@@ -363,8 +363,20 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	sm1.Start()
 
 	var undefinedResources map[string]serviceapi.ResourceID
-	ServiceID, EnvironmentID, ProductTierID, undefinedResources, err = buildService(fileData, token, name, specType, descriptionPtr, serviceLogoURLPtr,
-		environmentPtr, environmentTypePtr, release, releaseAsPreferred, releaseNamePtr)
+	ServiceID, EnvironmentID, ProductTierID, undefinedResources, err = buildService(
+		cmd.Context(),
+		fileData,
+		token,
+		name,
+		specType,
+		descriptionPtr,
+		serviceLogoURLPtr,
+		environmentPtr,
+		environmentTypePtr,
+		release,
+		releaseAsPreferred,
+		releaseNamePtr,
+	)
 	if err != nil {
 		utils.HandleSpinnerError(spinner1, sm1, err)
 		return err
@@ -544,7 +556,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func buildService(fileData []byte, token, name, specType string, description, serviceLogoURL, environment, environmentType *string, release,
+func buildService(ctx context.Context, fileData []byte, token, name, specType string, description, serviceLogoURL, environment, environmentType *string, release,
 	releaseAsPreferred bool, releaseName *string) (serviceID string, environmentID string, productTierID string, undefinedResources map[string]serviceapi.ResourceID, err error) {
 	if name == "" {
 		return "", "", "", make(map[string]serviceapi.ResourceID), errors.New("name is required")
@@ -572,7 +584,7 @@ func buildService(fileData []byte, token, name, specType string, description, se
 		}
 
 		var buildRes *serviceapi.BuildServiceFromServicePlanSpecResult
-		buildRes, err = service.BuildServiceFromServicePlanSpec(context.Background(), &request)
+		buildRes, err = service.BuildServiceFromServicePlanSpec(ctx, &request)
 		if err != nil {
 			var serviceError *goa.ServiceError
 			if errors.As(err, &serviceError) {
@@ -608,7 +620,7 @@ func buildService(fileData []byte, token, name, specType string, description, se
 
 		// Decode spec YAML into a compose project
 		var project *types.Project
-		if project, err = loader.LoadWithContext(context.Background(), types.ConfigDetails{
+		if project, err = loader.LoadWithContext(ctx, types.ConfigDetails{
 			ConfigFiles: []types.ConfigFile{
 				{
 					Config: parsedYaml,
@@ -664,7 +676,7 @@ func buildService(fileData []byte, token, name, specType string, description, se
 		}
 
 		var buildRes *serviceapi.BuildServiceFromComposeSpecResult
-		buildRes, err = service.BuildServiceFromComposeSpec(context.Background(), &request)
+		buildRes, err = service.BuildServiceFromComposeSpec(ctx, &request)
 		if err != nil {
 			var serviceError *goa.ServiceError
 			if errors.As(err, &serviceError) {
