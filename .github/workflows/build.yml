@@ -197,7 +197,7 @@ jobs:
       - name: Integraiton test
         timeout-minutes: 30
         env: 
-          ENABLE_SMOKE_TEST: true
+          ENABLE_INTEGRATION_TEST: true
           TEST_EMAIL: ${{ secrets.SMOKE_TEST_EMAIL }}
           TEST_PASSWORD: ${{ secrets.SMOKE_TEST_PASSWORD}}
           OMNISTRATE_ROOT_DOMAIN: ${{ vars.OMNISTRATE_ROOT_DOMAIN}}
