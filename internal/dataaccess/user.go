@@ -3,24 +3,20 @@ package dataaccess
 import (
 	"context"
 
-	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
-	usersapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/users_api"
-	"github.com/omnistrate/ctl/internal/config"
+	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 )
 
-func DescribeUser(token string) (*usersapi.DescribeUserResult, error) {
-	user, err := httpclientwrapper.NewUser(config.GetHostScheme(), config.GetHost())
+func DescribeUser(ctx context.Context, token string) (*openapiclient.DescribeUserResult, error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+
+	apiClient := getV1Client()
+	resp, r, err := apiClient.UsersApiAPI.UsersApiDescribeUser(ctxWithToken).Execute()
+
+	err = handleV1Error(err)
 	if err != nil {
 		return nil, err
 	}
 
-	request := usersapi.DescribeUserRequest{
-		Token: token,
-	}
-
-	res, err := user.DescribeUser(context.Background(), &request)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
+	r.Body.Close()
+	return resp, nil
 }

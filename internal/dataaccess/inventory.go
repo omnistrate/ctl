@@ -9,13 +9,13 @@ import (
 	"github.com/omnistrate/ctl/internal/utils"
 )
 
-func SearchInventory(token, query string) (*inventoryapi.SearchInventoryResult, error) {
+func SearchInventory(ctx context.Context, token, query string) (*inventoryapi.SearchInventoryResult, error) {
 	inventory, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := inventory.SearchInventory(context.Background(), &inventoryapi.SearchInventoryRequest{
+	res, err := inventory.SearchInventory(ctx, &inventoryapi.SearchInventoryRequest{
 		Token: token,
 		Query: query,
 	})

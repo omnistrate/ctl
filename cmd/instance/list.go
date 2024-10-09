@@ -67,7 +67,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	// Get all instances
-	searchRes, err := dataaccess.SearchInventory(token, "resourceinstance:i")
+	searchRes, err := dataaccess.SearchInventory(cmd.Context(), token, "resourceinstance:i")
 	if err != nil {
 		utils.PrintError(err)
 		return err

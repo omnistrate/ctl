@@ -1,6 +1,7 @@
 package instance
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -71,7 +72,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if instance exists
-	serviceID, environmentID, _, _, err := getInstance(token, instanceID)
+	serviceID, environmentID, _, _, err := getInstance(cmd.Context(), token, instanceID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -100,8 +101,8 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func getInstance(token, instanceID string) (serviceID, environmentID, productTierID, resourceID string, err error) {
-	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("resourceinstance:%s", instanceID))
+func getInstance(ctx context.Context, token, instanceID string) (serviceID, environmentID, productTierID, resourceID string, err error) {
+	searchRes, err := dataaccess.SearchInventory(ctx, token, fmt.Sprintf("resourceinstance:%s", instanceID))
 	if err != nil {
 		return
 	}

@@ -93,7 +93,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		request.Description = "AWS Account" + awsAccountID
 	} else {
 		// Get organization id
-		user, err := dataaccess.DescribeUser(token)
+		user, err := dataaccess.DescribeUser(cmd.Context(), token)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
@@ -109,7 +109,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		request.CloudProviderID = accountconfigapi.CloudProviderID(cloudProviderID)
 		request.GcpProjectID = &gcpProjectID
 		request.GcpProjectNumber = &gcpProjectNumber
-		request.GcpServiceAccountEmail = utils.ToPtr(fmt.Sprintf("bootstrap-%s@%s.iam.gserviceaccount.com", user.OrgID, gcpProjectID))
+		request.GcpServiceAccountEmail = utils.ToPtr(fmt.Sprintf("bootstrap-%s@%s.iam.gserviceaccount.com", user.OrgId, gcpProjectID))
 		request.Description = "GCP Account" + gcpProjectID
 	}
 

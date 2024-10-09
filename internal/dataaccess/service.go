@@ -4,9 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
-	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
-	"github.com/omnistrate/ctl/internal/config"
+	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 )
 
 const (
@@ -20,55 +18,47 @@ func PrintNextStepsAfterBuildMsg() {
 	fmt.Println(NextStepsAfterBuildMsgTemplate)
 }
 
-func ListServices(token string) (*serviceapi.ListServiceResult, error) {
-	service, err := httpclientwrapper.NewService(config.GetHostScheme(), config.GetHost())
+func ListServices(ctx context.Context, token string) (*openapiclient.ListServiceResult, error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+
+	apiClient := getV1Client()
+	resp, r, err := apiClient.ServiceApiAPI.ServiceApiListService(ctxWithToken).Execute()
+
+	err = handleV1Error(err)
 	if err != nil {
 		return nil, err
 	}
 
-	request := serviceapi.List{
-		Token: token,
-	}
-
-	res, err := service.ListService(context.Background(), &request)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
+	r.Body.Close()
+	return resp, nil
 }
 
-func DescribeService(token, serviceID string) (*serviceapi.DescribeServiceResult, error) {
-	service, err := httpclientwrapper.NewService(config.GetHostScheme(), config.GetHost())
+func DescribeService(ctx context.Context, token, serviceID string) (*openapiclient.DescribeServiceResult, error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+
+	apiClient := getV1Client()
+	resp, r, err := apiClient.ServiceApiAPI.ServiceApiDescribeService(ctxWithToken, serviceID).Execute()
+
+	err = handleV1Error(err)
 	if err != nil {
 		return nil, err
 	}
 
-	request := serviceapi.DescribeServiceRequest{
-		Token: token,
-		ID:    serviceapi.ServiceID(serviceID),
-	}
-
-	res, err := service.DescribeService(context.Background(), &request)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
+	r.Body.Close()
+	return resp, nil
 }
 
-func DeleteService(token, serviceID string) error {
-	service, err := httpclientwrapper.NewService(config.GetHostScheme(), config.GetHost())
+func DeleteService(ctx context.Context, token, serviceID string) error {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+
+	apiClient := getV1Client()
+	r, err := apiClient.ServiceApiAPI.ServiceApiDeleteService(ctxWithToken, serviceID).Execute()
+
+	err = handleV1Error(err)
 	if err != nil {
 		return err
 	}
+	r.Body.Close()
 
-	request := serviceapi.DeleteServiceRequest{
-		Token: token,
-		ID:    serviceapi.ServiceID(serviceID),
-	}
-
-	err = service.DeleteService(context.Background(), &request)
-	if err != nil {
-		return err
-	}
 	return nil
 }

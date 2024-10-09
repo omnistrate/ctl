@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
+	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
@@ -47,8 +47,8 @@ func run(cmd *cobra.Command, args []string) (err error) {
 		}
 
 		// Describe object
-		var svc *serviceapi.DescribeServiceResult
-		svc, err = dataaccess.DescribeService(token, describeServiceID)
+		var svc *openapiclient.DescribeServiceResult
+		svc, err = dataaccess.DescribeService(cmd.Context(), token, describeServiceID)
 		if err != nil {
 			utils.PrintError(err)
 			return

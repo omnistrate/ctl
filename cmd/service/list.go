@@ -4,11 +4,11 @@ import (
 	"strings"
 
 	"github.com/chelnak/ysmrr"
-	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
 	"github.com/omnistrate/ctl/internal/utils"
+	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 	"github.com/spf13/cobra"
 )
 
@@ -68,7 +68,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	// Retrieve services and services
-	listRes, err := dataaccess.ListServices(token)
+	listRes, err := dataaccess.ListServices(cmd.Context(), token)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -115,12 +115,13 @@ func runList(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func formatService(service *serviceapi.DescribeServiceResult, truncateNames bool) (model.Service, error) {
+func formatService(service openapiclient.DescribeServiceResult, truncateNames bool) (model.Service, error) {
 	// Retrieve environments
 	environments := make([]string, 0)
 	for _, environment := range service.ServiceEnvironments {
-		if environment == nil {
+		if environment.Name == "" {
 			continue
+
 		}
 		environments = append(environments, environment.Name)
 	}
@@ -132,7 +133,7 @@ func formatService(service *serviceapi.DescribeServiceResult, truncateNames bool
 	}
 
 	return model.Service{
-		ID:           string(service.ID),
+		ID:           service.Id,
 		Name:         serviceName,
 		Environments: strings.Join(environments, ","),
 	}, nil

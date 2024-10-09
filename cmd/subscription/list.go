@@ -75,7 +75,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	// Get all subscriptions
-	searchRes, err := dataaccess.SearchInventory(token, "subscription:s")
+	searchRes, err := dataaccess.SearchInventory(cmd.Context(), token, "subscription:s")
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

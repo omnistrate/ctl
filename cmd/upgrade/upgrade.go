@@ -98,7 +98,7 @@ func run(cmd *cobra.Command, args []string) error {
 	upgrades := make(map[Args]*Res)
 	for _, instanceID := range args {
 		// Check if the instance exists
-		searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("resourceinstance:%s", instanceID))
+		searchRes, err := dataaccess.SearchInventory(cmd.Context(), token, fmt.Sprintf("resourceinstance:%s", instanceID))
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err

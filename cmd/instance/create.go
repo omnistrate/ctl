@@ -1,6 +1,7 @@
 package instance
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -149,7 +150,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if resource exists
-	serviceID, _, productTierID, _, err := getResource(token, service, environment, plan, resource)
+	serviceID, _, productTierID, _, err := getResource(cmd.Context(), token, service, environment, plan, resource)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -243,7 +244,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully created instance")
 
 	// Search for the instance
-	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("resourceinstance:%s", *instance.ID))
+	searchRes, err := dataaccess.SearchInventory(cmd.Context(), token, fmt.Sprintf("resourceinstance:%s", *instance.ID))
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -269,8 +270,8 @@ func runCreate(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func getResource(token, serviceNameArg, environmentArg, planNameArg, resourceNameArg string) (serviceID, environmentID, productTierID, resourceID string, err error) {
-	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("resource:%s", resourceNameArg))
+func getResource(ctx context.Context, token, serviceNameArg, environmentArg, planNameArg, resourceNameArg string) (serviceID, environmentID, productTierID, resourceID string, err error) {
+	searchRes, err := dataaccess.SearchInventory(ctx, token, fmt.Sprintf("resource:%s", resourceNameArg))
 	if err != nil {
 		return
 	}

@@ -1,6 +1,7 @@
 package serviceplan
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -82,7 +83,7 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the service plan exists
-	serviceID, _, planID, _, _, err = getServicePlan(token, serviceID, serviceName, planID, planName, environment)
+	serviceID, _, planID, _, _, err = getServicePlan(cmd.Context(), token, serviceID, serviceName, planID, planName, environment)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -105,7 +106,7 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully set default service plan")
 
 	// Get the service plan details
-	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("serviceplan:%s", planID))
+	searchRes, err := dataaccess.SearchInventory(cmd.Context(), token, fmt.Sprintf("serviceplan:%s", planID))
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -133,8 +134,8 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func getServicePlan(token, serviceIDArg, serviceNameArg, planIDArg, planNameArg, envNameArg string) (serviceID, serviceName, planID, planName, environment string, err error) {
-	searchRes, err := dataaccess.SearchInventory(token, "service:s")
+func getServicePlan(ctx context.Context, token, serviceIDArg, serviceNameArg, planIDArg, planNameArg, envNameArg string) (serviceID, serviceName, planID, planName, environment string, err error) {
+	searchRes, err := dataaccess.SearchInventory(ctx, token, "service:s")
 	if err != nil {
 		return
 	}
@@ -160,7 +161,7 @@ func getServicePlan(token, serviceIDArg, serviceNameArg, planIDArg, planNameArg,
 
 	envFound := 0
 	servicePlanFound := 0
-	describeServiceRes, err := dataaccess.DescribeService(token, serviceID)
+	describeServiceRes, err := dataaccess.DescribeService(ctx, token, serviceID)
 	if err != nil {
 		return
 	}
@@ -170,11 +171,11 @@ func getServicePlan(token, serviceIDArg, serviceNameArg, planIDArg, planNameArg,
 		}
 		envFound += 1
 		for _, servicePlan := range env.ServicePlans {
-			if !strings.EqualFold(servicePlan.Name, planNameArg) && string(servicePlan.ProductTierID) != planIDArg {
+			if !strings.EqualFold(servicePlan.Name, planNameArg) && servicePlan.ProductTierID != planIDArg {
 				continue
 			}
 			environment = env.Name
-			planID = string(servicePlan.ProductTierID)
+			planID = servicePlan.ProductTierID
 			servicePlanFound += 1
 		}
 	}

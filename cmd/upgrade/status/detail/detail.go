@@ -60,7 +60,7 @@ func run(cmd *cobra.Command, args []string) error {
 
 	formattedUpgradeStatusDetails := make([]*model.UpgradeStatusDetail, 0)
 
-	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("upgradepath:%s", upgradePathID))
+	searchRes, err := dataaccess.SearchInventory(cmd.Context(), token, fmt.Sprintf("upgradepath:%s", upgradePathID))
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

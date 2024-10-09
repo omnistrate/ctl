@@ -82,7 +82,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if instance exists
-	serviceID, environmentID, resourceID, _, err := getInstance(token, instanceID)
+	serviceID, environmentID, resourceID, _, err := getInstance(cmd.Context(), token, instanceID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

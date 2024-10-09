@@ -1,6 +1,7 @@
 package environment
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -73,7 +74,7 @@ func runPromote(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the environment exists
-	serviceID, serviceName, environmentID, _, err = getServiceEnvironment(token, serviceID, serviceName, environmentID, environmentName)
+	serviceID, serviceName, environmentID, _, err = getServiceEnvironment(cmd.Context(), token, serviceID, serviceName, environmentID, environmentName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -121,8 +122,8 @@ func validatePromoteArguments(args []string, serviceID, environmentID string) er
 	return nil
 }
 
-func getServiceEnvironment(token, serviceIDArg, serviceNameArg, environmentIDArg, environmentNameArg string) (serviceID, serviceName, environmentID, environmentName string, err error) {
-	services, err := dataaccess.ListServices(token)
+func getServiceEnvironment(ctx context.Context, token, serviceIDArg, serviceNameArg, environmentIDArg, environmentNameArg string) (serviceID, serviceName, environmentID, environmentName string, err error) {
+	services, err := dataaccess.ListServices(ctx, token)
 	if err != nil {
 		return
 	}
@@ -130,22 +131,22 @@ func getServiceEnvironment(token, serviceIDArg, serviceNameArg, environmentIDArg
 	serviceEnvironmentsMap := make(map[string]map[string]bool)
 
 	for _, service := range services.Services {
-		if string(service.ID) != serviceIDArg && !strings.EqualFold(service.Name, serviceNameArg) {
+		if service.Id != serviceIDArg && !strings.EqualFold(service.Name, serviceNameArg) {
 			continue
 		}
 
 		for _, environment := range service.ServiceEnvironments {
-			if string(environment.ID) != environmentIDArg && !strings.EqualFold(environment.Name, environmentNameArg) {
+			if environment.Id != environmentIDArg && !strings.EqualFold(environment.Name, environmentNameArg) {
 				continue
 			}
 
-			if _, exists := serviceEnvironmentsMap[string(service.ID)]; !exists {
-				serviceEnvironmentsMap[string(service.ID)] = make(map[string]bool)
+			if _, exists := serviceEnvironmentsMap[service.Id]; !exists {
+				serviceEnvironmentsMap[service.Id] = make(map[string]bool)
 			}
-			serviceEnvironmentsMap[string(service.ID)][string(environment.ID)] = true
+			serviceEnvironmentsMap[service.Id][environment.Id] = true
 
-			serviceID = string(service.ID)
-			environmentID = string(environment.ID)
+			serviceID = service.Id
+			environmentID = environment.Id
 			serviceName = service.Name
 			environmentName = environment.Name
 		}

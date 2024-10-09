@@ -81,7 +81,7 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if instance exists
-	serviceID, environmentID, _, resourceID, err := getInstance(token, instanceID)
+	serviceID, environmentID, _, resourceID, err := getInstance(cmd.Context(), token, instanceID)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -110,7 +110,7 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully updated instance")
 
 	// Search for the instance
-	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("resourceinstance:%s", instanceID))
+	searchRes, err := dataaccess.SearchInventory(cmd.Context(), token, fmt.Sprintf("resourceinstance:%s", instanceID))
 	if err != nil {
 		utils.PrintError(err)
 		return err
