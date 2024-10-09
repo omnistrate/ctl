@@ -89,7 +89,7 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	instanceUpgrades, err := dataaccess.ListEligibleInstancesPerUpgrade(token, serviceID, productTierID, upgradePathID)
+	instanceUpgrades, err := dataaccess.ListEligibleInstancesPerUpgrade(cmd.Context(), token, serviceID, productTierID, upgradePathID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

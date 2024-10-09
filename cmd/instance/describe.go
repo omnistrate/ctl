@@ -80,7 +80,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 
 	// Describe instance
 	var instance *inventoryapi.ResourceInstance
-	instance, err = dataaccess.DescribeInstance(token, serviceID, environmentID, instanceID)
+	instance, err = dataaccess.DescribeInstance(cmd.Context(), token, serviceID, environmentID, instanceID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

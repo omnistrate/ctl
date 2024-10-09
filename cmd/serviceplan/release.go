@@ -86,13 +86,13 @@ func runRelease(cmd *cobra.Command, args []string) error {
 	}
 
 	// Get service api id
-	productTier, err := dataaccess.DescribeProductTier(token, serviceID, planID)
+	productTier, err := dataaccess.DescribeProductTier(cmd.Context(), token, serviceID, planID)
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	serviceModel, err := dataaccess.DescribeServiceModel(token, serviceID, string(productTier.ServiceModelID))
+	serviceModel, err := dataaccess.DescribeServiceModel(cmd.Context(), token, serviceID, string(productTier.ServiceModelID))
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -101,7 +101,7 @@ func runRelease(cmd *cobra.Command, args []string) error {
 	serviceAPIID := string(serviceModel.ServiceAPIID)
 
 	// Release service plan
-	err = dataaccess.ReleaseServicePlan(token, serviceID, serviceAPIID, planID, getReleaseDescription(releaseDescription), releaseAsPreferred)
+	err = dataaccess.ReleaseServicePlan(cmd.Context(), token, serviceID, serviceAPIID, planID, getReleaseDescription(releaseDescription), releaseAsPreferred)
 	if err != nil {
 		spinner.Error()
 		sm.Stop()
@@ -118,7 +118,7 @@ func runRelease(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	targetVersion, err := dataaccess.FindLatestVersion(token, serviceID, planID)
+	targetVersion, err := dataaccess.FindLatestVersion(cmd.Context(), token, serviceID, planID)
 	if err != nil {
 		utils.PrintError(err)
 		return err

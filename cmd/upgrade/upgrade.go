@@ -128,7 +128,7 @@ func run(cmd *cobra.Command, args []string) error {
 		}
 
 		// Find the source version of the instance
-		describeRes, err := dataaccess.DescribeResourceInstance(token, serviceID, environmentID, instanceID)
+		describeRes, err := dataaccess.DescribeResourceInstance(cmd.Context(), token, serviceID, environmentID, instanceID)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
@@ -138,13 +138,13 @@ func run(cmd *cobra.Command, args []string) error {
 		// Get the target version
 		switch version {
 		case "latest":
-			targetVersion, err = dataaccess.FindLatestVersion(token, serviceID, productTierID)
+			targetVersion, err = dataaccess.FindLatestVersion(cmd.Context(), token, serviceID, productTierID)
 			if err != nil {
 				utils.HandleSpinnerError(spinner, sm, err)
 				return err
 			}
 		case "preferred":
-			targetVersion, err = dataaccess.FindPreferredVersion(token, serviceID, productTierID)
+			targetVersion, err = dataaccess.FindPreferredVersion(cmd.Context(), token, serviceID, productTierID)
 			if err != nil {
 				utils.HandleSpinnerError(spinner, sm, err)
 				return err
@@ -154,7 +154,7 @@ func run(cmd *cobra.Command, args []string) error {
 		}
 
 		// Check if the target version exists
-		_, err = dataaccess.DescribeVersionSet(token, serviceID, productTierID, targetVersion)
+		_, err = dataaccess.DescribeVersionSet(cmd.Context(), token, serviceID, productTierID, targetVersion)
 		if err != nil {
 			if strings.Contains(err.Error(), "Version set not found") {
 				err = errors.New(fmt.Sprintf("version %s not found", version))
@@ -201,7 +201,15 @@ func run(cmd *cobra.Command, args []string) error {
 
 	// Create upgrade path
 	for upgradeArgs, upgradeRes := range upgrades {
-		upgradePathID, err := dataaccess.CreateUpgradePath(token, upgradeArgs.ServiceID, upgradeArgs.ProductTierID, upgradeArgs.SourceVersion, upgradeArgs.TargetVersion, upgradeRes.InstanceIDs)
+		upgradePathID, err := dataaccess.CreateUpgradePath(
+			cmd.Context(),
+			token,
+			upgradeArgs.ServiceID,
+			upgradeArgs.ProductTierID,
+			upgradeArgs.SourceVersion,
+			upgradeArgs.TargetVersion,
+			upgradeRes.InstanceIDs,
+		)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err

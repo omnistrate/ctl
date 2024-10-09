@@ -48,7 +48,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	environmentTypes := make([]string, 0)
 
 	// List domains
-	listRes, err := dataaccess.ListDomains(token)
+	listRes, err := dataaccess.ListDomains(cmd.Context(), token)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -88,7 +88,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 
 	// Delete domain
 	for _, environmentType := range environmentTypes {
-		err = dataaccess.DeleteDomain(token, environmentType)
+		err = dataaccess.DeleteDomain(cmd.Context(), token, environmentType)
 		if err != nil {
 			utils.PrintError(err)
 			return err

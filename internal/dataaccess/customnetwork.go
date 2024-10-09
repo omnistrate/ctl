@@ -8,7 +8,7 @@ import (
 	"github.com/omnistrate/ctl/internal/config"
 )
 
-func CreateCustomNetwork(token string, request customnetworkapi.CreateCustomNetworkRequest) (
+func CreateCustomNetwork(ctx context.Context, token string, request customnetworkapi.CreateCustomNetworkRequest) (
 	customNetwork *customnetworkapi.CustomNetwork, err error) {
 	var service *httpclientwrapper.CustomNetwork
 	service, err = httpclientwrapper.NewCustomNetwork(config.GetHostScheme(), config.GetHost())
@@ -17,10 +17,10 @@ func CreateCustomNetwork(token string, request customnetworkapi.CreateCustomNetw
 	}
 
 	request.Token = token
-	return service.CreateCustomNetwork(context.Background(), &request)
+	return service.CreateCustomNetwork(ctx, &request)
 }
 
-func DescribeCustomNetwork(token string, request customnetworkapi.DescribeCustomNetworkRequest) (
+func DescribeCustomNetwork(ctx context.Context, token string, request customnetworkapi.DescribeCustomNetworkRequest) (
 	customNetwork *customnetworkapi.CustomNetwork, err error) {
 	var service *httpclientwrapper.CustomNetwork
 	service, err = httpclientwrapper.NewCustomNetwork(config.GetHostScheme(), config.GetHost())
@@ -29,10 +29,10 @@ func DescribeCustomNetwork(token string, request customnetworkapi.DescribeCustom
 	}
 
 	request.Token = token
-	return service.DescribeCustomNetwork(context.Background(), &request)
+	return service.DescribeCustomNetwork(ctx, &request)
 }
 
-func ListCustomNetworks(token string, request customnetworkapi.ListCustomNetworksRequest) (
+func ListCustomNetworks(ctx context.Context, token string, request customnetworkapi.ListCustomNetworksRequest) (
 	customNetwork *customnetworkapi.ListCustomNetworksResult, err error) {
 	var service *httpclientwrapper.CustomNetwork
 	service, err = httpclientwrapper.NewCustomNetwork(config.GetHostScheme(), config.GetHost())
@@ -41,10 +41,10 @@ func ListCustomNetworks(token string, request customnetworkapi.ListCustomNetwork
 	}
 
 	request.Token = token
-	return service.ListCustomNetworks(context.Background(), &request)
+	return service.ListCustomNetworks(ctx, &request)
 }
 
-func DeleteCustomNetwork(token string, request customnetworkapi.DeleteCustomNetworkRequest) (
+func DeleteCustomNetwork(ctx context.Context, token string, request customnetworkapi.DeleteCustomNetworkRequest) (
 	err error) {
 	var service *httpclientwrapper.CustomNetwork
 	service, err = httpclientwrapper.NewCustomNetwork(config.GetHostScheme(), config.GetHost())
@@ -53,5 +53,5 @@ func DeleteCustomNetwork(token string, request customnetworkapi.DeleteCustomNetw
 	}
 
 	request.Token = token
-	return service.DeleteCustomNetwork(context.Background(), &request)
+	return service.DeleteCustomNetwork(ctx, &request)
 }

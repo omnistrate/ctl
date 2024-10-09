@@ -159,13 +159,13 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	// Get the version
 	switch version {
 	case "latest":
-		version, err = dataaccess.FindLatestVersion(token, serviceID, productTierID)
+		version, err = dataaccess.FindLatestVersion(cmd.Context(), token, serviceID, productTierID)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 	case "preferred":
-		version, err = dataaccess.FindPreferredVersion(token, serviceID, productTierID)
+		version, err = dataaccess.FindPreferredVersion(cmd.Context(), token, serviceID, productTierID)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
@@ -173,7 +173,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the version exists
-	_, err = dataaccess.DescribeVersionSet(token, serviceID, productTierID, version)
+	_, err = dataaccess.DescribeVersionSet(cmd.Context(), token, serviceID, productTierID, version)
 	if err != nil {
 		if strings.Contains(err.Error(), "Version set not found") {
 			err = errors.New(fmt.Sprintf("version %s not found", version))
@@ -183,7 +183,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Describe service offering
-	res, err := dataaccess.DescribeServiceOffering(token, serviceID, productTierID, version)
+	res, err := dataaccess.DescribeServiceOffering(cmd.Context(), token, serviceID, productTierID, version)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -229,7 +229,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	if subscriptionID != "" {
 		request.SubscriptionID = (*inventoryapi.SubscriptionID)(utils.ToPtr(subscriptionID))
 	}
-	instance, err := dataaccess.CreateInstance(token, request)
+	instance, err := dataaccess.CreateInstance(cmd.Context(), token, request)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

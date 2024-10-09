@@ -1,6 +1,7 @@
 package account
 
 import (
+	"context"
 	"strings"
 
 	"github.com/chelnak/ysmrr"
@@ -81,14 +82,14 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if account exists
-	id, _, err = getAccount(token, name, id)
+	id, _, err = getAccount(cmd.Context(), token, name, id)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Describe account
-	account, err := dataaccess.DescribeAccount(token, id)
+	account, err := dataaccess.DescribeAccount(cmd.Context(), token, id)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -105,7 +106,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 
 	// Ask user to verify account if output is not JSON
 	if output != "json" {
-		dataaccess.AskVerifyAccountIfAny()
+		dataaccess.AskVerifyAccountIfAny(cmd.Context())
 	}
 
 	return nil
@@ -129,9 +130,9 @@ func validateDescribeArguments(args []string, accountIDArg, output string) error
 	return nil
 }
 
-func getAccount(token, accountNameArg, accountIDArg string) (accountID, accountName string, err error) {
+func getAccount(ctx context.Context, token, accountNameArg, accountIDArg string) (accountID, accountName string, err error) {
 	// List accounts
-	listRes, err := dataaccess.ListAccounts(token, "all")
+	listRes, err := dataaccess.ListAccounts(ctx, token, "all")
 	if err != nil {
 		return
 	}

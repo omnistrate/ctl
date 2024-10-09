@@ -10,7 +10,7 @@ import (
 	"github.com/omnistrate/ctl/internal/utils"
 )
 
-func DescribeAccount(token string, id string) (*accountconfigapi.DescribeAccountConfigResult, error) {
+func DescribeAccount(ctx context.Context, token string, id string) (*accountconfigapi.DescribeAccountConfigResult, error) {
 	account, err := httpclientwrapper.NewAccountConfig(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
@@ -21,14 +21,14 @@ func DescribeAccount(token string, id string) (*accountconfigapi.DescribeAccount
 		ID:    accountconfigapi.AccountConfigID(id),
 	}
 
-	res, err := account.DescribeAccountConfig(context.Background(), &request)
+	res, err := account.DescribeAccountConfig(ctx, &request)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func ListAccounts(token string, cloudProvider string) (*accountconfigapi.ListAccountConfigResult, error) {
+func ListAccounts(ctx context.Context, token string, cloudProvider string) (*accountconfigapi.ListAccountConfigResult, error) {
 	account, err := httpclientwrapper.NewAccountConfig(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
@@ -39,14 +39,14 @@ func ListAccounts(token string, cloudProvider string) (*accountconfigapi.ListAcc
 		CloudProviderName: accountconfigapi.CloudProvider(cloudProvider),
 	}
 
-	res, err := account.ListAccountConfig(context.Background(), &request)
+	res, err := account.ListAccountConfig(ctx, &request)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func DeleteAccount(token, accountConfigID string) error {
+func DeleteAccount(ctx context.Context, token, accountConfigID string) error {
 	service, err := httpclientwrapper.NewAccountConfig(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return err
@@ -57,20 +57,20 @@ func DeleteAccount(token, accountConfigID string) error {
 		ID:    accountconfigapi.AccountConfigID(accountConfigID),
 	}
 
-	err = service.DeleteAccountConfig(context.Background(), &request)
+	err = service.DeleteAccountConfig(ctx, &request)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func CreateAccount(accountConfig *accountconfigapi.CreateAccountConfigRequest) (accountconfigapi.AccountConfigID, error) {
+func CreateAccount(ctx context.Context, accountConfig *accountconfigapi.CreateAccountConfigRequest) (accountconfigapi.AccountConfigID, error) {
 	service, err := httpclientwrapper.NewAccountConfig(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return "", err
 	}
 
-	res, err := service.CreateAccountConfig(context.Background(), accountConfig)
+	res, err := service.CreateAccountConfig(ctx, accountConfig)
 	if err != nil {
 		return "", err
 	}
@@ -122,7 +122,7 @@ func PrintAccountNotVerifiedWarning(account *accountconfigapi.DescribeAccountCon
 		AwsCloudFormationGuideURL, AwsGcpTerraformScriptsURL, AwsGcpTerraformGuideURL))
 }
 
-func AskVerifyAccountIfAny() {
+func AskVerifyAccountIfAny(ctx context.Context) {
 	token, err := config.GetToken()
 	if err != nil {
 		utils.PrintError(err)
@@ -130,7 +130,7 @@ func AskVerifyAccountIfAny() {
 	}
 
 	// List all accounts
-	listRes, err := ListAccounts(token, "all")
+	listRes, err := ListAccounts(ctx, token, "all")
 	if err != nil {
 		utils.PrintError(err)
 		return

@@ -114,14 +114,14 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	visibility := getVisibility(envType)
-	defaultDeploymentConfigID, err := dataaccess.GetDefaultDeploymentConfigID(token)
+	defaultDeploymentConfigID, err := dataaccess.GetDefaultDeploymentConfigID(cmd.Context(), token)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	publicKeyPtr := getPublicKeyPtr(visibility)
-	environmentID, err := createEnvironment(token, envName, description, serviceID, envType, visibility, string(defaultDeploymentConfigID), sourceEnvID, publicKeyPtr)
+	environmentID, err := createEnvironment(cmd.Context(), token, envName, description, serviceID, envType, visibility, string(defaultDeploymentConfigID), sourceEnvID, publicKeyPtr)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -130,14 +130,14 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully created environment")
 
 	// Describe the environment
-	environment, err := dataaccess.DescribeServiceEnvironment(token, serviceID, string(environmentID))
+	environment, err := dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, string(environmentID))
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
 	// Format and print the environment
-	formattedEnvironment := formatEnvironmentDetails(token, serviceID, serviceName, sourceEnvName, environment)
+	formattedEnvironment := formatEnvironmentDetails(cmd.Context(), token, serviceID, serviceName, sourceEnvName, environment)
 
 	err = utils.PrintTextTableJsonOutput(output, formattedEnvironment)
 	if err != nil {
@@ -221,7 +221,7 @@ func getPublicKeyPtr(visibility string) *string {
 	return nil
 }
 
-func createEnvironment(token, envName, description, serviceID, envType, visibility, defaultDeploymentConfigID, sourceEnvID string, publicKeyPtr *string) (serviceenvironmentapi.ServiceEnvironmentID, error) {
+func createEnvironment(ctx context.Context, token, envName, description, serviceID, envType, visibility, defaultDeploymentConfigID, sourceEnvID string, publicKeyPtr *string) (serviceenvironmentapi.ServiceEnvironmentID, error) {
 	request := serviceenvironmentapi.CreateServiceEnvironmentRequest{
 		Name:                    envName,
 		Description:             description,
@@ -234,12 +234,12 @@ func createEnvironment(token, envName, description, serviceID, envType, visibili
 		SourceEnvironmentID:     (*serviceenvironmentapi.ServiceEnvironmentID)(utils.ToPtr(sourceEnvID)),
 	}
 
-	return dataaccess.CreateServiceEnvironment(token, request)
+	return dataaccess.CreateServiceEnvironment(ctx, token, request)
 }
 
-func getPromoteStatus(token, serviceID string, environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) string {
+func getPromoteStatus(ctx context.Context, token, serviceID string, environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) string {
 	if !utils.CheckIfNilOrEmpty((*string)(environment.SourceEnvironmentID)) {
-		promoteRes, err := dataaccess.PromoteServiceEnvironmentStatus(token, serviceID, string(*environment.SourceEnvironmentID))
+		promoteRes, err := dataaccess.PromoteServiceEnvironmentStatus(ctx, token, serviceID, string(*environment.SourceEnvironmentID))
 		if err == nil {
 			for _, res := range promoteRes {
 				if string(res.TargetEnvironmentID) == string(environment.ID) {

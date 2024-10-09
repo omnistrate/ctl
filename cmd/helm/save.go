@@ -98,7 +98,7 @@ func runSave(cmd *cobra.Command, args []string) error {
 	}
 
 	// Save Helm Chart
-	helmPackage, err := dataaccess.SaveHelmChart(token, chart, version, namespace, repoURL, values)
+	helmPackage, err := dataaccess.SaveHelmChart(cmd.Context(), token, chart, version, namespace, repoURL, values)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

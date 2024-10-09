@@ -81,7 +81,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 
 	if awsAccountID != "" {
 		// Get aws cloud provider id
-		cloudProviderID, err := dataaccess.GetCloudProviderByName(token, "aws")
+		cloudProviderID, err := dataaccess.GetCloudProviderByName(cmd.Context(), token, "aws")
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
@@ -100,7 +100,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		}
 
 		// Get gcp cloud provider id
-		cloudProviderID, err := dataaccess.GetCloudProviderByName(token, "gcp")
+		cloudProviderID, err := dataaccess.GetCloudProviderByName(cmd.Context(), token, "gcp")
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
@@ -114,7 +114,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Create account
-	accountConfigID, err := dataaccess.CreateAccount(request)
+	accountConfigID, err := dataaccess.CreateAccount(cmd.Context(), request)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -122,7 +122,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully created account")
 
 	// Describe account
-	account, err := dataaccess.DescribeAccount(token, string(accountConfigID))
+	account, err := dataaccess.DescribeAccount(cmd.Context(), token, string(accountConfigID))
 	if err != nil {
 		utils.PrintError(err)
 		return err

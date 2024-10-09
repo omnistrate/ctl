@@ -264,7 +264,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 			Password:      passwordPtr,
 		}
 
-		checkImageRes, err := dataaccess.CheckIfContainerImageAccessible(token, &checkImageRequest)
+		checkImageRes, err := dataaccess.CheckIfContainerImageAccessible(cmd.Context(), token, &checkImageRequest)
 		if err != nil {
 			utils.PrintError(err)
 			return err
@@ -307,7 +307,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 			Password:             passwordPtr,
 		}
 
-		generateComposeSpecRes, err := dataaccess.GenerateComposeSpecFromContainerImage(token, &generateComposeSpecRequest)
+		generateComposeSpecRes, err := dataaccess.GenerateComposeSpecFromContainerImage(cmd.Context(), token, &generateComposeSpecRequest)
 		if err != nil {
 			utils.PrintError(err)
 			return err
@@ -363,8 +363,20 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	sm1.Start()
 
 	var undefinedResources map[string]serviceapi.ResourceID
-	ServiceID, EnvironmentID, ProductTierID, undefinedResources, err = buildService(fileData, token, name, specType, descriptionPtr, serviceLogoURLPtr,
-		environmentPtr, environmentTypePtr, release, releaseAsPreferred, releaseNamePtr)
+	ServiceID, EnvironmentID, ProductTierID, undefinedResources, err = buildService(
+		cmd.Context(),
+		fileData,
+		token,
+		name,
+		specType,
+		descriptionPtr,
+		serviceLogoURLPtr,
+		environmentPtr,
+		environmentTypePtr,
+		release,
+		releaseAsPreferred,
+		releaseNamePtr,
+	)
 	if err != nil {
 		utils.HandleSpinnerError(spinner1, sm1, err)
 		return err
@@ -384,9 +396,9 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	utils.PrintURL("Check the service plan result at", fmt.Sprintf("https://%s/product-tier?serviceId=%s&environmentId=%s", config.GetRootDomain(), ServiceID, EnvironmentID))
 
 	// Ask user to verify account if there are any unverified accounts
-	dataaccess.AskVerifyAccountIfAny()
+	dataaccess.AskVerifyAccountIfAny(cmd.Context())
 
-	serviceEnvironment, err := dataaccess.DescribeServiceEnvironment(token, ServiceID, EnvironmentID)
+	serviceEnvironment, err := dataaccess.DescribeServiceEnvironment(cmd.Context(), token, ServiceID, EnvironmentID)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -413,7 +425,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 			sm2.Start()
 
 			for {
-				serviceEnvironment, err = dataaccess.DescribeServiceEnvironment(token, ServiceID, EnvironmentID)
+				serviceEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, ServiceID, EnvironmentID)
 				if err != nil {
 					utils.PrintError(err)
 					return err
@@ -447,7 +459,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 				launching := sm2.AddSpinner("Launching service to production...")
 				sm2.Start()
 
-				prodEnvironment, err := dataaccess.FindEnvironment(token, ServiceID, "prod")
+				prodEnvironment, err := dataaccess.FindEnvironment(cmd.Context(), token, ServiceID, "prod")
 				if err != nil && !errors.As(err, &dataaccess.ErrEnvironmentNotFound) {
 					utils.PrintError(err)
 					return err
@@ -456,7 +468,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 				var prodEnvironmentID serviceenvironmentapi.ServiceEnvironmentID
 				if errors.As(err, &dataaccess.ErrEnvironmentNotFound) {
 					// Get default deployment config ID
-					defaultDeploymentConfigID, err := dataaccess.GetDefaultDeploymentConfigID(token)
+					defaultDeploymentConfigID, err := dataaccess.GetDefaultDeploymentConfigID(cmd.Context(), token)
 					if err != nil {
 						utils.PrintError(err)
 						return err
@@ -473,7 +485,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 						AutoApproveSubscription: utils.ToPtr(true),
 					}
 
-					prodEnvironmentID, err = dataaccess.CreateServiceEnvironment(token, prod)
+					prodEnvironmentID, err = dataaccess.CreateServiceEnvironment(cmd.Context(), token, prod)
 					if err != nil {
 						utils.PrintError(err)
 						return err
@@ -483,7 +495,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 				}
 
 				// Promote the service to production
-				err = dataaccess.PromoteServiceEnvironment(token, ServiceID, EnvironmentID)
+				err = dataaccess.PromoteServiceEnvironment(cmd.Context(), token, ServiceID, EnvironmentID)
 				if err != nil {
 					utils.PrintError(err)
 					return err
@@ -493,7 +505,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 				sm2.Stop()
 
 				// Retrieve the prod SaaS portal URL
-				prodEnvironment, err = dataaccess.DescribeServiceEnvironment(token, ServiceID, string(prodEnvironmentID))
+				prodEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, ServiceID, string(prodEnvironmentID))
 				if err != nil {
 					utils.PrintError(err)
 					return err
@@ -517,7 +529,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 						sm3.Start()
 
 						for {
-							serviceEnvironment, err = dataaccess.DescribeServiceEnvironment(token, ServiceID, string(prodEnvironmentID))
+							serviceEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, ServiceID, string(prodEnvironmentID))
 							if err != nil {
 								utils.PrintError(err)
 								return err
@@ -544,7 +556,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func buildService(fileData []byte, token, name, specType string, description, serviceLogoURL, environment, environmentType *string, release,
+func buildService(ctx context.Context, fileData []byte, token, name, specType string, description, serviceLogoURL, environment, environmentType *string, release,
 	releaseAsPreferred bool, releaseName *string) (serviceID string, environmentID string, productTierID string, undefinedResources map[string]serviceapi.ResourceID, err error) {
 	if name == "" {
 		return "", "", "", make(map[string]serviceapi.ResourceID), errors.New("name is required")
@@ -572,7 +584,7 @@ func buildService(fileData []byte, token, name, specType string, description, se
 		}
 
 		var buildRes *serviceapi.BuildServiceFromServicePlanSpecResult
-		buildRes, err = service.BuildServiceFromServicePlanSpec(context.Background(), &request)
+		buildRes, err = service.BuildServiceFromServicePlanSpec(ctx, &request)
 		if err != nil {
 			var serviceError *goa.ServiceError
 			if errors.As(err, &serviceError) {
@@ -608,7 +620,7 @@ func buildService(fileData []byte, token, name, specType string, description, se
 
 		// Decode spec YAML into a compose project
 		var project *types.Project
-		if project, err = loader.LoadWithContext(context.Background(), types.ConfigDetails{
+		if project, err = loader.LoadWithContext(ctx, types.ConfigDetails{
 			ConfigFiles: []types.ConfigFile{
 				{
 					Config: parsedYaml,
@@ -664,7 +676,7 @@ func buildService(fileData []byte, token, name, specType string, description, se
 		}
 
 		var buildRes *serviceapi.BuildServiceFromComposeSpecResult
-		buildRes, err = service.BuildServiceFromComposeSpec(context.Background(), &request)
+		buildRes, err = service.BuildServiceFromComposeSpec(ctx, &request)
 		if err != nil {
 			var serviceError *goa.ServiceError
 			if errors.As(err, &serviceError) {

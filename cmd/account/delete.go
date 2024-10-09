@@ -78,14 +78,14 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if account exists
-	id, _, err = getAccount(token, name, id)
+	id, _, err = getAccount(cmd.Context(), token, name, id)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Delete account
-	err = dataaccess.DeleteAccount(token, id)
+	err = dataaccess.DeleteAccount(cmd.Context(), token, id)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

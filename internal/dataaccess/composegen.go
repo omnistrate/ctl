@@ -8,7 +8,7 @@ import (
 	"github.com/omnistrate/ctl/internal/config"
 )
 
-func CheckIfContainerImageAccessible(token string, request *composegenapi.CheckIfContainerImageAccessibleRequest) (res *composegenapi.CheckIfContainerImageAccessibleResult, err error) {
+func CheckIfContainerImageAccessible(ctx context.Context, token string, request *composegenapi.CheckIfContainerImageAccessibleRequest) (res *composegenapi.CheckIfContainerImageAccessibleResult, err error) {
 	request.Token = token
 
 	service, err := httpclientwrapper.NewComposeGen(config.GetHostScheme(), config.GetHost())
@@ -16,14 +16,14 @@ func CheckIfContainerImageAccessible(token string, request *composegenapi.CheckI
 		return
 	}
 
-	res, err = service.CheckIfContainerImageAccessible(context.Background(), request)
+	res, err = service.CheckIfContainerImageAccessible(ctx, request)
 	if err != nil {
 		return
 	}
 	return
 }
 
-func GenerateComposeSpecFromContainerImage(token string, request *composegenapi.GenerateComposeSpecFromContainerImageRequest) (res *composegenapi.GenerateComposeSpecFromContainerImageResult, err error) {
+func GenerateComposeSpecFromContainerImage(ctx context.Context, token string, request *composegenapi.GenerateComposeSpecFromContainerImageRequest) (res *composegenapi.GenerateComposeSpecFromContainerImageResult, err error) {
 	request.Token = token
 
 	service, err := httpclientwrapper.NewComposeGen(config.GetHostScheme(), config.GetHost())
@@ -31,7 +31,7 @@ func GenerateComposeSpecFromContainerImage(token string, request *composegenapi.
 		return
 	}
 
-	res, err = service.GenerateComposeSpecFromContainerImage(context.Background(), request)
+	res, err = service.GenerateComposeSpecFromContainerImage(ctx, request)
 	if err != nil {
 		return
 	}

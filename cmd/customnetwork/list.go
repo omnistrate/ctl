@@ -1,6 +1,7 @@
 package customnetwork
 
 import (
+	"context"
 	"strings"
 
 	"github.com/chelnak/ysmrr"
@@ -65,7 +66,7 @@ func runList(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	var listResult *customnetworkapi.ListCustomNetworksResult
-	listResult, err = listCustomNetworks(token)
+	listResult, err = listCustomNetworks(cmd.Context(), token)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -103,8 +104,8 @@ func runList(cmd *cobra.Command, args []string) (err error) {
 	return
 }
 
-func listCustomNetworks(token string) (
+func listCustomNetworks(ctx context.Context, token string) (
 	*customnetworkapi.ListCustomNetworksResult, error) {
 	request := customnetworkapi.ListCustomNetworksRequest{}
-	return dataaccess.ListCustomNetworks(token, request)
+	return dataaccess.ListCustomNetworks(ctx, token, request)
 }

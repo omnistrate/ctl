@@ -10,13 +10,13 @@ import (
 	"github.com/pkg/errors"
 )
 
-func FindLatestVersion(token, serviceID, productTierID string) (string, error) {
+func FindLatestVersion(ctx context.Context, token, serviceID, productTierID string) (string, error) {
 	versionSet, err := httpclientwrapper.NewVersionSet(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return "", err
 	}
 
-	res, err := versionSet.ListTierVersionSets(context.Background(), &tierversionsetapi.ListTierVersionSetsRequest{
+	res, err := versionSet.ListTierVersionSets(ctx, &tierversionsetapi.ListTierVersionSetsRequest{
 		Token:                  token,
 		ServiceID:              tierversionsetapi.ServiceID(serviceID),
 		ProductTierID:          tierversionsetapi.ProductTierID(productTierID),
@@ -33,13 +33,13 @@ func FindLatestVersion(token, serviceID, productTierID string) (string, error) {
 	return res.TierVersionSets[0].Version, nil
 }
 
-func FindPreferredVersion(token, serviceID, productTierID string) (string, error) {
+func FindPreferredVersion(ctx context.Context, token, serviceID, productTierID string) (string, error) {
 	versionSet, err := httpclientwrapper.NewVersionSet(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return "", err
 	}
 
-	res, err := versionSet.ListTierVersionSets(context.Background(), &tierversionsetapi.ListTierVersionSetsRequest{
+	res, err := versionSet.ListTierVersionSets(ctx, &tierversionsetapi.ListTierVersionSetsRequest{
 		Token:         token,
 		ServiceID:     tierversionsetapi.ServiceID(serviceID),
 		ProductTierID: tierversionsetapi.ProductTierID(productTierID),
@@ -61,13 +61,13 @@ func FindPreferredVersion(token, serviceID, productTierID string) (string, error
 	return "", errors.New("no preferred version found")
 }
 
-func DescribeVersionSet(token, serviceID, productTierID, version string) (*tierversionsetapi.TierVersionSet, error) {
+func DescribeVersionSet(ctx context.Context, token, serviceID, productTierID, version string) (*tierversionsetapi.TierVersionSet, error) {
 	versionSet, err := httpclientwrapper.NewVersionSet(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := versionSet.DescribeTierVersionSet(context.Background(), &tierversionsetapi.DescribeTierVersionSetRequest{
+	res, err := versionSet.DescribeTierVersionSet(ctx, &tierversionsetapi.DescribeTierVersionSetRequest{
 		Token:         token,
 		ServiceID:     tierversionsetapi.ServiceID(serviceID),
 		ProductTierID: tierversionsetapi.ProductTierID(productTierID),
@@ -80,7 +80,7 @@ func DescribeVersionSet(token, serviceID, productTierID, version string) (*tierv
 	return res, nil
 }
 
-func SetDefaultServicePlan(token, serviceID, productTierID, version string) (tierVersionSet *tierversionsetapi.TierVersionSet, err error) {
+func SetDefaultServicePlan(ctx context.Context, token, serviceID, productTierID, version string) (tierVersionSet *tierversionsetapi.TierVersionSet, err error) {
 	versionSet, err := httpclientwrapper.NewVersionSet(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return
@@ -93,7 +93,7 @@ func SetDefaultServicePlan(token, serviceID, productTierID, version string) (tie
 		Version:       version,
 	}
 
-	if tierVersionSet, err = versionSet.PromoteTierVersionSet(context.Background(), request); err != nil {
+	if tierVersionSet, err = versionSet.PromoteTierVersionSet(ctx, request); err != nil {
 		return
 	}
 

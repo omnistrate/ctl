@@ -9,6 +9,7 @@ import (
 )
 
 func SaveHelmChart(
+	ctx context.Context,
 	token string,
 	chartName string,
 	chartVersion string,
@@ -32,26 +33,26 @@ func SaveHelmChart(
 		},
 	}
 
-	if helmPackage, err = helmPackageService.SaveHelmPackage(context.Background(), request); err != nil {
+	if helmPackage, err = helmPackageService.SaveHelmPackage(ctx, request); err != nil {
 		return
 	}
 	return
 }
 
-func ListHelmCharts(token string) (helmPackages *helmpackageapi.ListHelmPackagesResult, err error) {
+func ListHelmCharts(ctx context.Context, token string) (helmPackages *helmpackageapi.ListHelmPackagesResult, err error) {
 	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
 
 	request := &helmpackageapi.ListHelmPackagesRequest{
 		Token: token,
 	}
 
-	if helmPackages, err = helmPackageService.ListHelmPackages(context.Background(), request); err != nil {
+	if helmPackages, err = helmPackageService.ListHelmPackages(ctx, request); err != nil {
 		return
 	}
 	return
 }
 
-func DescribeHelmChart(token, chartName, chartVersion string) (helmPackage *helmpackageapi.HelmPackage, err error) {
+func DescribeHelmChart(ctx context.Context, token, chartName, chartVersion string) (helmPackage *helmpackageapi.HelmPackage, err error) {
 	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
 
 	request := &helmpackageapi.DescribeHelmPackageRequest{
@@ -60,13 +61,13 @@ func DescribeHelmChart(token, chartName, chartVersion string) (helmPackage *helm
 		ChartVersion: chartVersion,
 	}
 
-	if helmPackage, err = helmPackageService.DescribeHelmPackage(context.Background(), request); err != nil {
+	if helmPackage, err = helmPackageService.DescribeHelmPackage(ctx, request); err != nil {
 		return
 	}
 	return
 }
 
-func ListHelmChartInstallations(token string, hostClusterID *helmpackageapi.HostClusterID) (helmPackageInstallations *helmpackageapi.ListHelmPackageInstallationsResult, err error) {
+func ListHelmChartInstallations(ctx context.Context, token string, hostClusterID *helmpackageapi.HostClusterID) (helmPackageInstallations *helmpackageapi.ListHelmPackageInstallationsResult, err error) {
 	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
 
 	request := &helmpackageapi.ListHelmPackageInstallationsRequest{
@@ -74,13 +75,13 @@ func ListHelmChartInstallations(token string, hostClusterID *helmpackageapi.Host
 		HostClusterID: hostClusterID,
 	}
 
-	if helmPackageInstallations, err = helmPackageService.ListHelmPackageInstallations(context.Background(), request); err != nil {
+	if helmPackageInstallations, err = helmPackageService.ListHelmPackageInstallations(ctx, request); err != nil {
 		return
 	}
 	return
 }
 
-func DeleteHelmChart(token, chartName, chartVersion string) (err error) {
+func DeleteHelmChart(ctx context.Context, token, chartName, chartVersion string) (err error) {
 	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
 
 	request := &helmpackageapi.DeleteHelmPackageRequest{
@@ -89,7 +90,7 @@ func DeleteHelmChart(token, chartName, chartVersion string) (err error) {
 		ChartVersion: chartVersion,
 	}
 
-	if err = helmPackageService.DeleteHelmPackage(context.Background(), request); err != nil {
+	if err = helmPackageService.DeleteHelmPackage(ctx, request); err != nil {
 		return
 	}
 	return

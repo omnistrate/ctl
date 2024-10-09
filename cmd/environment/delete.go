@@ -77,7 +77,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	// Delete the environment
-	if err = dataaccess.DeleteServiceEnvironment(token, serviceID, environmentID); err != nil {
+	if err = dataaccess.DeleteServiceEnvironment(cmd.Context(), token, serviceID, environmentID); err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}

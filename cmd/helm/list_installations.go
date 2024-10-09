@@ -69,7 +69,7 @@ func runListInstallations(cmd *cobra.Command, args []string) error {
 		hostClusterIDReq = utils.ToPtr(helmpackageapi.HostClusterID(hostClusterID))
 	}
 
-	helmPackageResult, err = dataaccess.ListHelmChartInstallations(token, hostClusterIDReq)
+	helmPackageResult, err = dataaccess.ListHelmChartInstallations(cmd.Context(), token, hostClusterIDReq)
 	if err != nil {
 		utils.PrintError(err)
 		return err

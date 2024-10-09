@@ -58,7 +58,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	domains, err := dataaccess.ListDomains(token)
+	domains, err := dataaccess.ListDomains(cmd.Context(), token)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -96,7 +96,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		CustomDomain:    domain,
 	}
 
-	err = dataaccess.CreateDomain(request)
+	err = dataaccess.CreateDomain(cmd.Context(), request)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -105,7 +105,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		utils.PrintSuccess("Domain created successfully")
 	}
 
-	domains, err = dataaccess.ListDomains(token)
+	domains, err = dataaccess.ListDomains(cmd.Context(), token)
 	if err != nil {
 		utils.PrintError(err)
 		return err

@@ -68,7 +68,7 @@ func runStop(cmd *cobra.Command, args []string) error {
 	}
 
 	// Stop instance
-	err = dataaccess.StopResourceInstance(token, serviceID, environmentID, resourceID, instanceID)
+	err = dataaccess.StopResourceInstance(cmd.Context(), token, serviceID, environmentID, resourceID, instanceID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

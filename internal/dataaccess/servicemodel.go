@@ -8,7 +8,7 @@ import (
 	"github.com/omnistrate/ctl/internal/config"
 )
 
-func DescribeServiceModel(token, serviceID, serviceModelID string) (serviceModel *servicemodelapi.DescribeServiceModelResult, err error) {
+func DescribeServiceModel(ctx context.Context, token, serviceID, serviceModelID string) (serviceModel *servicemodelapi.DescribeServiceModelResult, err error) {
 	fleetService, err := httpclientwrapper.NewServiceModel(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return
@@ -20,7 +20,7 @@ func DescribeServiceModel(token, serviceID, serviceModelID string) (serviceModel
 		ID:        servicemodelapi.ServiceModelID(serviceModelID),
 	}
 
-	serviceModel, err = fleetService.DescribeServiceModel(context.Background(), request)
+	serviceModel, err = fleetService.DescribeServiceModel(ctx, request)
 	if err != nil {
 		return
 	}
@@ -28,7 +28,7 @@ func DescribeServiceModel(token, serviceID, serviceModelID string) (serviceModel
 	return
 }
 
-func EnableServiceModelFeature(token, serviceID, serviceModelID, featureName string, featureConfiguration map[string]any) (err error) {
+func EnableServiceModelFeature(ctx context.Context, token, serviceID, serviceModelID, featureName string, featureConfiguration map[string]any) (err error) {
 	fleetService, err := httpclientwrapper.NewServiceModel(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return
@@ -42,7 +42,7 @@ func EnableServiceModelFeature(token, serviceID, serviceModelID, featureName str
 		Configuration: featureConfiguration,
 	}
 
-	err = fleetService.EnableServiceModelFeature(context.Background(), request)
+	err = fleetService.EnableServiceModelFeature(ctx, request)
 	if err != nil {
 		return
 	}
@@ -50,7 +50,7 @@ func EnableServiceModelFeature(token, serviceID, serviceModelID, featureName str
 	return
 }
 
-func DisableServiceModelFeature(token, serviceID, serviceModelID, featureName string) (err error) {
+func DisableServiceModelFeature(ctx context.Context, token, serviceID, serviceModelID, featureName string) (err error) {
 	fleetService, err := httpclientwrapper.NewServiceModel(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return
@@ -63,7 +63,7 @@ func DisableServiceModelFeature(token, serviceID, serviceModelID, featureName st
 		Feature:   servicemodelapi.ServiceModelFeatureName(featureName),
 	}
 
-	err = fleetService.DisableServiceModelFeature(context.Background(), request)
+	err = fleetService.DisableServiceModelFeature(ctx, request)
 	if err != nil {
 		return
 	}

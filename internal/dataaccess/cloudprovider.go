@@ -8,7 +8,7 @@ import (
 	"github.com/omnistrate/ctl/internal/config"
 )
 
-func GetCloudProviderByName(token string, cloudProvider string) (cloudproviderapi.CloudProviderID, error) {
+func GetCloudProviderByName(ctx context.Context, token string, cloudProvider string) (cloudproviderapi.CloudProviderID, error) {
 	service, err := httpclientwrapper.NewCloudProvider(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return "", err
@@ -19,7 +19,7 @@ func GetCloudProviderByName(token string, cloudProvider string) (cloudproviderap
 		Name:  cloudProvider,
 	}
 
-	res, err := service.GetCloudProviderByName(context.Background(), &request)
+	res, err := service.GetCloudProviderByName(ctx, &request)
 	if err != nil {
 		return "", err
 	}

@@ -96,7 +96,7 @@ func runModify(cmd *cobra.Command, args []string) error {
 	}
 
 	// Modify instance
-	err = dataaccess.UpdateResourceInstance(token, inventoryapi.FleetUpdateResourceInstanceRequest{
+	err = dataaccess.UpdateResourceInstance(cmd.Context(), token, inventoryapi.FleetUpdateResourceInstanceRequest{
 		ServiceID:     inventoryapi.ServiceID(serviceID),
 		EnvironmentID: inventoryapi.ServiceEnvironmentID(environmentID),
 		InstanceID:    inventoryapi.ResourceInstanceID(instanceID),

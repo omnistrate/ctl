@@ -59,7 +59,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 
 	// Retrieve Helm Chart
 	var helmPackage *helmpackageapi.HelmPackage
-	helmPackage, err = dataaccess.DescribeHelmChart(token, chart, version)
+	helmPackage, err = dataaccess.DescribeHelmChart(cmd.Context(), token, chart, version)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
