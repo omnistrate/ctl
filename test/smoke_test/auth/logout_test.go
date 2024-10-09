@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/omnistrate/ctl/internal/config"
-
 	"github.com/omnistrate/ctl/cmd"
 	"github.com/omnistrate/ctl/test/testutils"
 
