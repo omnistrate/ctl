@@ -49,7 +49,7 @@ const (
 
 func ssoLogin(ctx context.Context, identityProviderName string) error {
 	// Step 1: Request device and user verification codes
-	deviceCodeResponse, err := requestDeviceCode(identityProviderName)
+	deviceCodeResponse, err := requestDeviceCode(ctx, identityProviderName)
 	if err != nil {
 		err = errors.New(fmt.Sprintf("Error requesting device code: %v\n", err))
 		utils.PrintError(err)
@@ -102,7 +102,7 @@ func ssoLogin(ctx context.Context, identityProviderName string) error {
 }
 
 // requestDeviceCode requests a device and user verification code from the identity provider
-func requestDeviceCode(identityProviderName string) (*DeviceCodeResponse, error) {
+func requestDeviceCode(ctx context.Context, identityProviderName string) (*DeviceCodeResponse, error) {
 	data := map[string]string{
 		"client_id": getClientID(identityProviderName),
 		"scope":     getScope(identityProviderName),
@@ -113,7 +113,7 @@ func requestDeviceCode(identityProviderName string) (*DeviceCodeResponse, error)
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(context.Background(), "POST", getDeviceCodeURL(identityProviderName), bytes.NewBuffer(dataBytes))
+	req, err := http.NewRequestWithContext(ctx, "POST", getDeviceCodeURL(identityProviderName), bytes.NewBuffer(dataBytes))
 	if err != nil {
 		return nil, err
 	}
