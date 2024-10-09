@@ -3,14 +3,9 @@ package dataaccess
 import (
 	"fmt"
 
-	"github.com/hashicorp/go-retryablehttp"
 	"github.com/omnistrate/ctl/config"
 	openapiclientv1 "github.com/omnistrate/omnistrate-sdk-go/v1"
 	"github.com/pkg/errors"
-)
-
-const (
-	defaultRetryMax = 3
 )
 
 // Configure registration api client with retries
@@ -19,21 +14,6 @@ func getV1Client() *openapiclientv1.APIClient {
 	configuration.Host = config.GetHost()
 	configuration.Scheme = config.GetHostScheme()
 	configuration.Debug = config.GetDebug()
-
-	apiClient := openapiclientv1.NewAPIClient(configuration)
-	return apiClient
-}
-
-// Configure registration api client with retries
-func getV1ClientWithRetry() *openapiclientv1.APIClient {
-	configuration := openapiclientv1.NewConfiguration()
-	configuration.Host = config.GetHost()
-	configuration.Scheme = config.GetHostScheme()
-	configuration.Debug = config.GetDebug()
-
-	retryClient := retryablehttp.NewClient()
-	retryClient.RetryMax = defaultRetryMax
-	configuration.HTTPClient = retryClient.StandardClient()
 
 	apiClient := openapiclientv1.NewAPIClient(configuration)
 	return apiClient
