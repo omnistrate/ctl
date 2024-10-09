@@ -9,6 +9,7 @@ import (
 )
 
 func SaveHelmChart(
+	ctx context.Context,
 	token string,
 	chartName string,
 	chartVersion string,
@@ -38,7 +39,7 @@ func SaveHelmChart(
 	return
 }
 
-func ListHelmCharts(token string) (helmPackages *helmpackageapi.ListHelmPackagesResult, err error) {
+func ListHelmCharts(ctx context.Context, token string) (helmPackages *helmpackageapi.ListHelmPackagesResult, err error) {
 	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
 
 	request := &helmpackageapi.ListHelmPackagesRequest{
@@ -51,7 +52,7 @@ func ListHelmCharts(token string) (helmPackages *helmpackageapi.ListHelmPackages
 	return
 }
 
-func DescribeHelmChart(token, chartName, chartVersion string) (helmPackage *helmpackageapi.HelmPackage, err error) {
+func DescribeHelmChart(ctx context.Context, token, chartName, chartVersion string) (helmPackage *helmpackageapi.HelmPackage, err error) {
 	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
 
 	request := &helmpackageapi.DescribeHelmPackageRequest{
@@ -66,7 +67,7 @@ func DescribeHelmChart(token, chartName, chartVersion string) (helmPackage *helm
 	return
 }
 
-func ListHelmChartInstallations(token string, hostClusterID *helmpackageapi.HostClusterID) (helmPackageInstallations *helmpackageapi.ListHelmPackageInstallationsResult, err error) {
+func ListHelmChartInstallations(ctx context.Context, token string, hostClusterID *helmpackageapi.HostClusterID) (helmPackageInstallations *helmpackageapi.ListHelmPackageInstallationsResult, err error) {
 	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
 
 	request := &helmpackageapi.ListHelmPackageInstallationsRequest{
@@ -80,7 +81,7 @@ func ListHelmChartInstallations(token string, hostClusterID *helmpackageapi.Host
 	return
 }
 
-func DeleteHelmChart(token, chartName, chartVersion string) (err error) {
+func DeleteHelmChart(ctx context.Context, token, chartName, chartVersion string) (err error) {
 	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
 
 	request := &helmpackageapi.DeleteHelmPackageRequest{

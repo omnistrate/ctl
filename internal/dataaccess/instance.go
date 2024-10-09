@@ -8,7 +8,7 @@ import (
 	"github.com/omnistrate/ctl/internal/config"
 )
 
-func DescribeInstance(token, serviceID, serviceEnvironmentID, instanceID string) (instance *inventoryapi.ResourceInstance, err error) {
+func DescribeInstance(ctx context.Context, token, serviceID, serviceEnvironmentID, instanceID string) (instance *inventoryapi.ResourceInstance, err error) {
 	fleetService, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return
@@ -28,7 +28,7 @@ func DescribeInstance(token, serviceID, serviceEnvironmentID, instanceID string)
 	return
 }
 
-func CreateInstance(token string, request inventoryapi.FleetCreateResourceInstanceRequest) (res *inventoryapi.CreateResourceInstanceResult, err error) {
+func CreateInstance(ctx context.Context, token string, request inventoryapi.FleetCreateResourceInstanceRequest) (res *inventoryapi.CreateResourceInstanceResult, err error) {
 	request.Token = token
 
 	fleetService, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
@@ -43,7 +43,7 @@ func CreateInstance(token string, request inventoryapi.FleetCreateResourceInstan
 	return
 }
 
-func DeleteInstance(token, serviceID, serviceEnvironmentID, resourceID, instanceID string) (err error) {
+func DeleteInstance(ctx context.Context, token, serviceID, serviceEnvironmentID, resourceID, instanceID string) (err error) {
 	fleetService, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return

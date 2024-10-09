@@ -1,6 +1,7 @@
 package serviceplan
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -89,21 +90,21 @@ func runDescribeVersion(cmd *cobra.Command, args []string) error {
 	}
 
 	// Get the target version
-	version, err = getTargetVersion(token, serviceID, planID, version)
+	version, err = getTargetVersion(cmd.Context(), token, serviceID, planID, version)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Describe the version set
-	servicePlan, err := dataaccess.DescribeVersionSet(token, serviceID, planID, version)
+	servicePlan, err := dataaccess.DescribeVersionSet(cmd.Context(), token, serviceID, planID, version)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Format the service plan details
-	formattedServicePlanVersion, err := formatServicePlanVersionDetails(token, serviceName, planName, environment, servicePlan)
+	formattedServicePlanVersion, err := formatServicePlanVersionDetails(cmd.Context(), token, serviceName, planName, environment, servicePlan)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -134,12 +135,12 @@ func validateDescribeVersionArguments(args []string, serviceID, planID, json str
 	return nil
 }
 
-func formatServicePlanVersionDetails(token, serviceName, planName, environment string, versionSet *tierversionsetapi.TierVersionSet) (model.ServicePlanVersionDetails, error) {
+func formatServicePlanVersionDetails(ctx context.Context, token, serviceName, planName, environment string, versionSet *tierversionsetapi.TierVersionSet) (model.ServicePlanVersionDetails, error) {
 	// Get resource details
 	var resources []model.Resource
 	for _, versionSetResource := range versionSet.Resources {
 		// Get resource details
-		desRes, err := dataaccess.DescribeResource(token, string(versionSet.ServiceID), string(versionSetResource.ID), utils.ToPtr(string(versionSet.ProductTierID)), &versionSet.Version)
+		desRes, err := dataaccess.DescribeResource(ctx, token, string(versionSet.ServiceID), string(versionSetResource.ID), utils.ToPtr(string(versionSet.ProductTierID)), &versionSet.Version)
 		if err != nil {
 			return model.ServicePlanVersionDetails{}, err
 		}

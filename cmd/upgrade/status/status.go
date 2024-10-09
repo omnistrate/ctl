@@ -91,7 +91,7 @@ func run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		upgrade, err := dataaccess.DescribeUpgradePath(token, serviceID, productTierID, upgradePathID)
+		upgrade, err := dataaccess.DescribeUpgradePath(cmd.Context(), token, serviceID, productTierID, upgradePathID)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err

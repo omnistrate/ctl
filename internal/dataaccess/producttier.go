@@ -10,7 +10,7 @@ import (
 	"github.com/omnistrate/ctl/internal/utils"
 )
 
-func DeleteProductTier(token, serviceID, productTierID string) (err error) {
+func DeleteProductTier(ctx context.Context, token, serviceID, productTierID string) (err error) {
 	service, err := httpclientwrapper.NewProductTier(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return
@@ -29,7 +29,7 @@ func DeleteProductTier(token, serviceID, productTierID string) (err error) {
 	return
 }
 
-func DescribeProductTier(token, serviceID, productTierID string) (productTier *producttierapi.DescribeProductTierResult, err error) {
+func DescribeProductTier(ctx context.Context, token, serviceID, productTierID string) (productTier *producttierapi.DescribeProductTierResult, err error) {
 	service, err := httpclientwrapper.NewProductTier(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return
@@ -49,7 +49,7 @@ func DescribeProductTier(token, serviceID, productTierID string) (productTier *p
 	return
 }
 
-func ListProductTiers(token, serviceID string) (productTiers []*producttierapi.DescribeProductTierResult, err error) {
+func ListProductTiers(ctx context.Context, token, serviceID string) (productTiers []*producttierapi.DescribeProductTierResult, err error) {
 	service, err := httpclientwrapper.NewProductTier(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return
@@ -66,7 +66,7 @@ func ListProductTiers(token, serviceID string) (productTiers []*producttierapi.D
 	}
 
 	for _, productTierID := range productTierIDs.Ids {
-		productTier, err := DescribeProductTier(token, serviceID, string(productTierID))
+		productTier, err := DescribeProductTier(ctx, token, serviceID, string(productTierID))
 		if err != nil {
 			return nil, err
 		}
@@ -76,7 +76,7 @@ func ListProductTiers(token, serviceID string) (productTiers []*producttierapi.D
 	return
 }
 
-func ReleaseServicePlan(token, serviceID, serviceAPIID, productTierID string, versionSetName *string, isPreferred bool) (err error) {
+func ReleaseServicePlan(ctx context.Context, token, serviceID, serviceAPIID, productTierID string, versionSetName *string, isPreferred bool) (err error) {
 	serviceApi, err := httpclientwrapper.NewServiceAPI(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return
@@ -99,7 +99,7 @@ func ReleaseServicePlan(token, serviceID, serviceAPIID, productTierID string, ve
 	return
 }
 
-func DescribePendingChanges(token, serviceID, serviceAPIID, productTierID string) (pendingChanges *serviceapiapi.DescribePendingChangesResult, err error) {
+func DescribePendingChanges(ctx context.Context, token, serviceID, serviceAPIID, productTierID string) (pendingChanges *serviceapiapi.DescribePendingChangesResult, err error) {
 	serviceApi, err := httpclientwrapper.NewServiceAPI(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return

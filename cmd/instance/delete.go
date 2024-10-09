@@ -89,7 +89,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	// Delete the instance
-	err = dataaccess.DeleteInstance(token, serviceID, environmentID, resourceID, instanceID)
+	err = dataaccess.DeleteInstance(cmd.Context(), token, serviceID, environmentID, resourceID, instanceID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

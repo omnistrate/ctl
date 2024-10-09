@@ -1,6 +1,7 @@
 package environment
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -80,7 +81,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Describe the environment
-	environment, err := dataaccess.DescribeServiceEnvironment(token, serviceID, environmentID)
+	environment, err := dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, environmentID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -89,7 +90,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	// Get the source environment name
 	sourceEnvName := ""
 	if environment.SourceEnvironmentID != nil {
-		sourceEnv, err := dataaccess.DescribeServiceEnvironment(token, serviceID, string(*environment.SourceEnvironmentID))
+		sourceEnv, err := dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, string(*environment.SourceEnvironmentID))
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
@@ -98,11 +99,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Format the environment details
-	formattedEnvironment := formatEnvironmentDetails(token, serviceID, serviceName, sourceEnvName, environment)
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
+	formattedEnvironment := formatEnvironmentDetails(cmd.Context(), token, serviceID, serviceName, sourceEnvName, environment)
 
 	// Handle output based on format
 	if spinner != nil {
@@ -133,7 +130,7 @@ func validateDescribeArguments(args []string, serviceID, environmentID, output s
 	return nil
 }
 
-func formatEnvironmentDetails(token, serviceID, serviceName, sourceEnvName string, environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) model.DetailedEnvironment {
+func formatEnvironmentDetails(ctx context.Context, token, serviceID, serviceName, sourceEnvName string, environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) model.DetailedEnvironment {
 	formattedEnvironment := model.DetailedEnvironment{
 		EnvironmentID:    string(environment.ID),
 		EnvironmentName:  environment.Name,
@@ -143,7 +140,7 @@ func formatEnvironmentDetails(token, serviceID, serviceName, sourceEnvName strin
 		ServiceName:      serviceName,
 		SaaSPortalStatus: getSaaSPortalStatus(environment),
 		SaaSPortalURL:    getSaaSPortalURL(environment),
-		PromoteStatus:    getPromoteStatus(token, serviceID, environment),
+		PromoteStatus:    getPromoteStatus(ctx, token, serviceID, environment),
 	}
 
 	return formattedEnvironment

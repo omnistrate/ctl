@@ -64,7 +64,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	// Retrieve accounts and accounts
-	listRes, err := dataaccess.ListAccounts(token, "all")
+	listRes, err := dataaccess.ListAccounts(cmd.Context(), token, "all")
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -108,7 +108,7 @@ func runList(cmd *cobra.Command, args []string) error {
 
 	// Ask user to verify account if output is not JSON
 	if output != "json" {
-		dataaccess.AskVerifyAccountIfAny()
+		dataaccess.AskVerifyAccountIfAny(cmd.Context())
 	}
 
 	return nil

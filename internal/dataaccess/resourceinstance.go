@@ -8,7 +8,7 @@ import (
 	"github.com/omnistrate/ctl/internal/config"
 )
 
-func DescribeResourceInstance(token string, serviceID, environmentID, instanceID string) (*inventoryapi.ResourceInstance, error) {
+func DescribeResourceInstance(ctx context.Context,token string, serviceID, environmentID, instanceID string) (*inventoryapi.ResourceInstance, error) {
 	instance, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
@@ -28,7 +28,7 @@ func DescribeResourceInstance(token string, serviceID, environmentID, instanceID
 	return res, nil
 }
 
-func RestartResourceInstance(token string, serviceID, environmentID, resourceID, instanceID string) error {
+func RestartResourceInstance(ctx context.Context,token string, serviceID, environmentID, resourceID, instanceID string) error {
 	instance, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return err
@@ -50,7 +50,7 @@ func RestartResourceInstance(token string, serviceID, environmentID, resourceID,
 	return nil
 }
 
-func StartResourceInstance(token string, serviceID, environmentID, resourceID, instanceID string) error {
+func StartResourceInstance(ctx context.Context,token string, serviceID, environmentID, resourceID, instanceID string) error {
 	instance, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return err
@@ -72,7 +72,7 @@ func StartResourceInstance(token string, serviceID, environmentID, resourceID, i
 	return nil
 }
 
-func StopResourceInstance(token string, serviceID, environmentID, resourceID, instanceID string) error {
+func StopResourceInstance(ctx context.Context,token string, serviceID, environmentID, resourceID, instanceID string) error {
 	instance, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return err
@@ -94,7 +94,7 @@ func StopResourceInstance(token string, serviceID, environmentID, resourceID, in
 	return nil
 }
 
-func UpdateResourceInstance(token string, request inventoryapi.FleetUpdateResourceInstanceRequest) error {
+func UpdateResourceInstance(ctx context.Context,token string, request inventoryapi.FleetUpdateResourceInstanceRequest) error {
 	instance, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return err

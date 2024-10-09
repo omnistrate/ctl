@@ -1,6 +1,7 @@
 package customnetwork
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/chelnak/ysmrr"
@@ -81,7 +82,7 @@ func runCreate(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	var newNetwork *customnetworkapi.CustomNetwork
-	newNetwork, err = createCustomNetwork(token, cloudProvider, region, cidr, name)
+	newNetwork, err = createCustomNetwork(cmd.Context(), token, cloudProvider, region, cidr, name)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -115,7 +116,7 @@ func validateCreateArguments(cloudProvider, region, cidr string) error {
 	return nil
 }
 
-func createCustomNetwork(token, cloudProvider, region, cidr, name string) (*customnetworkapi.CustomNetwork, error) {
+func createCustomNetwork(ctx context.Context, token, cloudProvider, region, cidr, name string) (*customnetworkapi.CustomNetwork, error) {
 	var nameApiParam *string
 	if len(name) > 0 {
 		nameApiParam = utils.ToPtr(name)
@@ -127,5 +128,5 @@ func createCustomNetwork(token, cloudProvider, region, cidr, name string) (*cust
 		Name:                nameApiParam,
 	}
 
-	return dataaccess.CreateCustomNetwork(token, request)
+	return dataaccess.CreateCustomNetwork(ctx, token, request)
 }

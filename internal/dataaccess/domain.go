@@ -10,7 +10,7 @@ import (
 	"github.com/omnistrate/ctl/internal/utils"
 )
 
-func ListDomains(token string) (*saasportalapi.ListSaaSPortalCustomDomainsResult, error) {
+func ListDomains(ctx context.Context, token string) (*saasportalapi.ListSaaSPortalCustomDomainsResult, error) {
 	domain, err := httpclientwrapper.NewSaaSPortal(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
@@ -27,7 +27,7 @@ func ListDomains(token string) (*saasportalapi.ListSaaSPortalCustomDomainsResult
 	return res, nil
 }
 
-func DeleteDomain(token, environmentType string) error {
+func DeleteDomain(ctx context.Context, token, environmentType string) error {
 	service, err := httpclientwrapper.NewSaaSPortal(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return err
@@ -45,7 +45,7 @@ func DeleteDomain(token, environmentType string) error {
 	return nil
 }
 
-func CreateDomain(request *saasportalapi.CreateSaaSPortalCustomDomainRequest) error {
+func CreateDomain(ctx context.Context, request *saasportalapi.CreateSaaSPortalCustomDomainRequest) error {
 	service, err := httpclientwrapper.NewSaaSPortal(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return err
@@ -99,7 +99,7 @@ func PrintDomainNotVerifiedWarningMsg(domain, clusterEndpoint string) {
 	utils.PrintWarning(fmt.Sprintf(DomainNotVerifiedWarningMsgTemplate, domain, clusterEndpoint, clusterEndpoint))
 }
 
-func AskVerifyDomainIfAny() {
+func AskVerifyDomainIfAny(ctx context.Context) {
 	token, err := config.GetToken()
 	if err != nil {
 		utils.PrintError(err)
@@ -107,7 +107,7 @@ func AskVerifyDomainIfAny() {
 	}
 
 	// List all domains
-	listRes, err := ListDomains(token)
+	listRes, err := ListDomains(ctx, token)
 	if err != nil {
 		utils.PrintError(err)
 		return

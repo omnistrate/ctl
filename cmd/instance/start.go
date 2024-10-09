@@ -68,7 +68,7 @@ func runStart(cmd *cobra.Command, args []string) error {
 	}
 
 	// Start instance
-	err = dataaccess.StartResourceInstance(token, serviceID, environmentID, resourceID, instanceID)
+	err = dataaccess.StartResourceInstance(cmd.Context(), token, serviceID, environmentID, resourceID, instanceID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

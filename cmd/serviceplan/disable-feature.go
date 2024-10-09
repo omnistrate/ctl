@@ -80,7 +80,7 @@ func runDisableFeature(cmd *cobra.Command, args []string) error {
 	}
 
 	// Describe the service plan
-	servicePlan, err := dataaccess.DescribeProductTier(token, serviceID, planID)
+	servicePlan, err := dataaccess.DescribeProductTier(cmd.Context(), token, serviceID, planID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -88,7 +88,7 @@ func runDisableFeature(cmd *cobra.Command, args []string) error {
 	modelId := string(servicePlan.ServiceModelID)
 
 	// Update service model
-	err = dataaccess.DisableServiceModelFeature(token, serviceID, modelId, featureName)
+	err = dataaccess.DisableServiceModelFeature(cmd.Context(), token, serviceID, modelId, featureName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

@@ -14,7 +14,7 @@ var (
 	ErrEnvironmentNotFound = errors.New("environment not found")
 )
 
-func CreateServiceEnvironment(token string, request serviceenvironmentapi.CreateServiceEnvironmentRequest) (serviceenvironmentapi.ServiceEnvironmentID, error) {
+func CreateServiceEnvironment(ctx context.Context, token string, request serviceenvironmentapi.CreateServiceEnvironmentRequest) (serviceenvironmentapi.ServiceEnvironmentID, error) {
 	service, err := httpclientwrapper.NewServiceEnvironment(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return "", err
@@ -29,7 +29,7 @@ func CreateServiceEnvironment(token string, request serviceenvironmentapi.Create
 	return res, nil
 }
 
-func DescribeServiceEnvironment(token, serviceID, serviceEnvironmentID string) (*serviceenvironmentapi.DescribeServiceEnvironmentResult, error) {
+func DescribeServiceEnvironment(ctx context.Context, token, serviceID, serviceEnvironmentID string) (*serviceenvironmentapi.DescribeServiceEnvironmentResult, error) {
 	service, err := httpclientwrapper.NewServiceEnvironment(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func DescribeServiceEnvironment(token, serviceID, serviceEnvironmentID string) (
 	return res, nil
 }
 
-func ListServiceEnvironments(token, serviceID string) (*serviceenvironmentapi.ListServiceEnvironmentsResult, error) {
+func ListServiceEnvironments(ctx context.Context, token, serviceID string) (*serviceenvironmentapi.ListServiceEnvironmentsResult, error) {
 	service, err := httpclientwrapper.NewServiceEnvironment(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func ListServiceEnvironments(token, serviceID string) (*serviceenvironmentapi.Li
 	return res, nil
 }
 
-func PromoteServiceEnvironment(token, serviceID, serviceEnvironmentID string) error {
+func PromoteServiceEnvironment(ctx context.Context, token, serviceID, serviceEnvironmentID string) error {
 	service, err := httpclientwrapper.NewServiceEnvironment(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return err
@@ -85,7 +85,7 @@ func PromoteServiceEnvironment(token, serviceID, serviceEnvironmentID string) er
 	return nil
 }
 
-func PromoteServiceEnvironmentStatus(token, serviceID, serviceEnvironmentID string) (serviceenvironmentapi.PromoteServiceEnvironmentStatusResult, error) {
+func PromoteServiceEnvironmentStatus(ctx context.Context, token, serviceID, serviceEnvironmentID string) (serviceenvironmentapi.PromoteServiceEnvironmentStatusResult, error) {
 	service, err := httpclientwrapper.NewServiceEnvironment(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
@@ -104,7 +104,7 @@ func PromoteServiceEnvironmentStatus(token, serviceID, serviceEnvironmentID stri
 	return res, nil
 }
 
-func DeleteServiceEnvironment(token, serviceID, serviceEnvironmentID string) error {
+func DeleteServiceEnvironment(ctx context.Context, token, serviceID, serviceEnvironmentID string) error {
 	service, err := httpclientwrapper.NewServiceEnvironment(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return err
@@ -124,14 +124,14 @@ func DeleteServiceEnvironment(token, serviceID, serviceEnvironmentID string) err
 	return nil
 }
 
-func FindEnvironment(token, serviceID, environmentType string) (*serviceenvironmentapi.DescribeServiceEnvironmentResult, error) {
-	listRes, err := ListServiceEnvironments(token, serviceID)
+func FindEnvironment(ctx context.Context, token, serviceID, environmentType string) (*serviceenvironmentapi.DescribeServiceEnvironmentResult, error) {
+	listRes, err := ListServiceEnvironments(ctx, token, serviceID)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, id := range listRes.Ids {
-		descRes, err := DescribeServiceEnvironment(token, serviceID, string(id))
+		descRes, err := DescribeServiceEnvironment(ctx, token, serviceID, string(id))
 		if err != nil {
 			return nil, err
 		}

@@ -68,7 +68,14 @@ func runRestart(cmd *cobra.Command, args []string) error {
 	}
 
 	// Restart instance
-	err = dataaccess.RestartResourceInstance(token, serviceID, environmentID, resourceID, instanceID)
+	err = dataaccess.RestartResourceInstance(
+		cmd.Context(),
+		token,
+		serviceID,
+		environmentID,
+		resourceID,
+		instanceID,
+	)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

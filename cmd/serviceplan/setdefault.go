@@ -90,14 +90,14 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 	}
 
 	// Get the target version
-	targetVersion, err := getTargetVersion(token, serviceID, planID, version)
+	targetVersion, err := getTargetVersion(cmd.Context(), token, serviceID, planID, version)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Set the default service plan
-	_, err = dataaccess.SetDefaultServicePlan(token, serviceID, planID, targetVersion)
+	_, err = dataaccess.SetDefaultServicePlan(cmd.Context(), token, serviceID, planID, targetVersion)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -203,15 +203,15 @@ func getServicePlan(ctx context.Context, token, serviceIDArg, serviceNameArg, pl
 	return
 }
 
-func getTargetVersion(token, serviceID, productTierID, version string) (targetVersion string, err error) {
+func getTargetVersion(ctx context.Context, token, serviceID, productTierID, version string) (targetVersion string, err error) {
 	switch version {
 	case "latest":
-		targetVersion, err = dataaccess.FindLatestVersion(token, serviceID, productTierID)
+		targetVersion, err = dataaccess.FindLatestVersion(ctx, token, serviceID, productTierID)
 		if err != nil {
 			return
 		}
 	case "preferred":
-		targetVersion, err = dataaccess.FindPreferredVersion(token, serviceID, productTierID)
+		targetVersion, err = dataaccess.FindPreferredVersion(ctx, token, serviceID, productTierID)
 		if err != nil {
 			return
 		}

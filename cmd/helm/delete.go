@@ -56,7 +56,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	// Delete Helm package
-	err = dataaccess.DeleteHelmChart(token, chart, version)
+	err = dataaccess.DeleteHelmChart(cmd.Context(), token, chart, version)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

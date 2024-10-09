@@ -71,7 +71,7 @@ func runDelete(cmd *cobra.Command, args []string) (err error) {
 	// Locate by name
 	if customNetworkName != nil {
 		var customNetwork *customnetworkapi.CustomNetwork
-		customNetwork, err = describeCustomNetworkByName(token, *customNetworkName)
+		customNetwork, err = describeCustomNetworkByName(cmd.Context(), token, *customNetworkName)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err

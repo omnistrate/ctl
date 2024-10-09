@@ -1,6 +1,7 @@
 package build
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"os"
@@ -357,7 +358,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 			Password:      utils.ToPtr(pat),
 		}
 
-		generateComposeSpecRes, err := dataaccess.GenerateComposeSpecFromContainerImage(token, &generateComposeSpecRequest)
+		generateComposeSpecRes, err := dataaccess.GenerateComposeSpecFromContainerImage(cmd.Context(), token, &generateComposeSpecRequest)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
@@ -429,7 +430,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	// Step 15: Check if the production environment is set up
 	spinner = sm.AddSpinner("Checking if the production environment is set up")
 	time.Sleep(1 * time.Second) // Add a delay to show the spinner
-	prodEnvironmentID, err := checkIfProdEnvExists(token, serviceID)
+	prodEnvironmentID, err := checkIfProdEnvExists(cmd.Context(), token, serviceID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -444,7 +445,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	// Step 16: Create a production environment if it does not exist
 	if prodEnvironmentID == "" {
 		spinner = sm.AddSpinner("Creating a production environment")
-		prodEnvironmentID, err = createProdEnv(token, serviceID, devEnvironmentID)
+		prodEnvironmentID, err = createProdEnv(cmd.Context(), token, serviceID, devEnvironmentID)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
@@ -455,7 +456,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	// Step 17: Promote the service to the production environment
 	spinner = sm.AddSpinner(fmt.Sprintf("Promoting the service to the %s environment", DefaultProdEnvName))
-	err = dataaccess.PromoteServiceEnvironment(token, serviceID, devEnvironmentID)
+	err = dataaccess.PromoteServiceEnvironment(cmd.Context(), token, serviceID, devEnvironmentID)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -468,7 +469,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	// Describe the dev product tier
 	var devProductTier *producttierapi.DescribeProductTierResult
-	devProductTier, err = dataaccess.DescribeProductTier(token, serviceID, devPlanID)
+	devProductTier, err = dataaccess.DescribeProductTier(cmd.Context(), token, serviceID, devPlanID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -494,14 +495,14 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	}
 
 	// Find the latest version of the production plan
-	targetVersion, err := dataaccess.FindLatestVersion(token, serviceID, prodPlanID)
+	targetVersion, err := dataaccess.FindLatestVersion(cmd.Context(), token, serviceID, prodPlanID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Set the default service plan
-	_, err = dataaccess.SetDefaultServicePlan(token, serviceID, prodPlanID, targetVersion)
+	_, err = dataaccess.SetDefaultServicePlan(cmd.Context(), token, serviceID, prodPlanID, targetVersion)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -511,7 +512,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	// Step 19: Initialize the SaaS Portal
 	var prodEnvironment *serviceenvironmentapi.DescribeServiceEnvironmentResult
-	prodEnvironment, err = dataaccess.DescribeServiceEnvironment(token, serviceID, string(prodEnvironmentID))
+	prodEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, string(prodEnvironmentID))
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -521,7 +522,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		spinner = sm.AddSpinner("Initializing the SaaS Portal. This may take a few minutes.")
 
 		for {
-			prodEnvironment, err = dataaccess.DescribeServiceEnvironment(token, serviceID, string(prodEnvironmentID))
+			prodEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, string(prodEnvironmentID))
 			if err != nil {
 				utils.PrintError(err)
 				return err
@@ -562,8 +563,8 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func checkIfProdEnvExists(token string, serviceID string) (serviceenvironmentapi.ServiceEnvironmentID, error) {
-	prodEnvironment, err := dataaccess.FindEnvironment(token, serviceID, "prod")
+func checkIfProdEnvExists(ctx context.Context, token string, serviceID string) (serviceenvironmentapi.ServiceEnvironmentID, error) {
+	prodEnvironment, err := dataaccess.FindEnvironment(ctx, token, serviceID, "prod")
 	if errors.As(err, &dataaccess.ErrEnvironmentNotFound) {
 		return "", nil
 	}
@@ -574,9 +575,9 @@ func checkIfProdEnvExists(token string, serviceID string) (serviceenvironmentapi
 	return prodEnvironment.ID, nil
 }
 
-func createProdEnv(token string, serviceID string, devEnvironmentID string) (serviceenvironmentapi.ServiceEnvironmentID, error) {
+func createProdEnv(ctx context.Context, token string, serviceID string, devEnvironmentID string) (serviceenvironmentapi.ServiceEnvironmentID, error) {
 	// Get default deployment config ID
-	defaultDeploymentConfigID, err := dataaccess.GetDefaultDeploymentConfigID(token)
+	defaultDeploymentConfigID, err := dataaccess.GetDefaultDeploymentConfigID(ctx, token)
 	if err != nil {
 		utils.PrintError(err)
 		return "", err
@@ -593,7 +594,7 @@ func createProdEnv(token string, serviceID string, devEnvironmentID string) (ser
 		AutoApproveSubscription: utils.ToPtr(true),
 	}
 
-	prodEnvironmentID, err := dataaccess.CreateServiceEnvironment(token, prod)
+	prodEnvironmentID, err := dataaccess.CreateServiceEnvironment(ctx, token, prod)
 	if err != nil {
 		utils.PrintError(err)
 		return "", err

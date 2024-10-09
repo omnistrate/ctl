@@ -81,20 +81,20 @@ func runPromote(cmd *cobra.Command, args []string) error {
 	}
 
 	// Promote the environment
-	if err = dataaccess.PromoteServiceEnvironment(token, serviceID, environmentID); err != nil {
+	if err = dataaccess.PromoteServiceEnvironment(cmd.Context(), token, serviceID, environmentID); err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Describe the promoted environment
-	environment, err := dataaccess.DescribeServiceEnvironment(token, serviceID, environmentID)
+	environment, err := dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, environmentID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Get promote status and format output
-	formattedPromotions, err := formatPromoteStatus(token, serviceID, environmentID, serviceName, environment)
+	formattedPromotions, err := formatPromoteStatus(cmd.Context(), token, serviceID, environmentID, serviceName, environment)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -163,8 +163,8 @@ func getServiceEnvironment(ctx context.Context, token, serviceIDArg, serviceName
 	return
 }
 
-func formatPromoteStatus(token, serviceID, environmentID, serviceName string, environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) ([]model.Promotion, error) {
-	promotions, err := dataaccess.PromoteServiceEnvironmentStatus(token, serviceID, environmentID)
+func formatPromoteStatus(ctx context.Context, token, serviceID, environmentID, serviceName string, environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) ([]model.Promotion, error) {
+	promotions, err := dataaccess.PromoteServiceEnvironmentStatus(ctx, token, serviceID, environmentID)
 	if err != nil {
 		return nil, err
 	}
@@ -172,7 +172,7 @@ func formatPromoteStatus(token, serviceID, environmentID, serviceName string, en
 	var formattedPromotions []model.Promotion
 	for _, promotion := range promotions {
 		targetEnvID := string(promotion.TargetEnvironmentID)
-		targetEnv, err := dataaccess.DescribeServiceEnvironment(token, serviceID, targetEnvID)
+		targetEnv, err := dataaccess.DescribeServiceEnvironment(ctx, token, serviceID, targetEnvID)
 		if err != nil {
 			return nil, err
 		}

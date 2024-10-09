@@ -80,7 +80,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	// Delete service plan
-	err = dataaccess.DeleteProductTier(token, serviceID, planID)
+	err = dataaccess.DeleteProductTier(cmd.Context(), token, serviceID, planID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

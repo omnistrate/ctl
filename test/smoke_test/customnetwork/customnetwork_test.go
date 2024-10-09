@@ -10,8 +10,8 @@ import (
 	"github.com/omnistrate/ctl/cmd/customnetwork"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
-	"github.com/omnistrate/ctl/test/testutils"
 	"github.com/omnistrate/ctl/internal/utils"
+	"github.com/omnistrate/ctl/test/testutils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -34,7 +34,7 @@ func Test_custom_network_lifecycle(t *testing.T) {
 	// Pre-test cleanup
 	token, err := config.GetToken()
 	require.NoError(err)
-	deleteCustomNetworkIfExists(t, token, "aws", "ap-south-1", "ctl-test-network")
+	deleteCustomNetworkIfExists(t, ctx, token, "aws", "ap-south-1", "ctl-test-network")
 
 	// PASS: create custom network
 	cmd.RootCmd.SetArgs([]string{"custom-network", "create", "--cloud-provider", "aws", "--region", "ap-south-1", "--cidr", "1.2.255.1/16", "--name", "ctl-test-network"})
@@ -54,7 +54,7 @@ func Test_custom_network_lifecycle(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: describe manually
-	customNetwork, err := dataaccess.DescribeCustomNetwork(token, customnetworkapi.DescribeCustomNetworkRequest{
+	customNetwork, err := dataaccess.DescribeCustomNetwork(ctx, token, customnetworkapi.DescribeCustomNetworkRequest{
 		ID: customnetworkapi.CustomNetworkID(customNetworkID),
 	})
 
@@ -78,15 +78,15 @@ func Test_custom_network_lifecycle(t *testing.T) {
 	require.NoError(err)
 
 	// FAIL: describe again
-	customNetwork, err = dataaccess.DescribeCustomNetwork(token, customnetworkapi.DescribeCustomNetworkRequest{
+	customNetwork, err = dataaccess.DescribeCustomNetwork(ctx, token, customnetworkapi.DescribeCustomNetworkRequest{
 		ID: customnetworkapi.CustomNetworkID(customNetworkID),
 	})
 	require.Error(err)
 	require.Nil(customNetwork)
 }
 
-func deleteCustomNetworkIfExists(t *testing.T, token, cloudProvider, region, customNetworkName string) {
-	customNetworks, err := dataaccess.ListCustomNetworks(token, customnetworkapi.ListCustomNetworksRequest{
+func deleteCustomNetworkIfExists(t *testing.T, ctx context.Context, token, cloudProvider, region, customNetworkName string) {
+	customNetworks, err := dataaccess.ListCustomNetworks(ctx, token, customnetworkapi.ListCustomNetworksRequest{
 		CloudProviderName:   utils.ToPtr(customnetworkapi.CloudProvider(cloudProvider)),
 		CloudProviderRegion: utils.ToPtr(region),
 	})

@@ -10,7 +10,7 @@ import (
 	"github.com/omnistrate/ctl/internal/utils"
 )
 
-func DescribeAccount(token string, id string) (*accountconfigapi.DescribeAccountConfigResult, error) {
+func DescribeAccount(ctx context.Context, token string, id string) (*accountconfigapi.DescribeAccountConfigResult, error) {
 	account, err := httpclientwrapper.NewAccountConfig(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
@@ -28,7 +28,7 @@ func DescribeAccount(token string, id string) (*accountconfigapi.DescribeAccount
 	return res, nil
 }
 
-func ListAccounts(token string, cloudProvider string) (*accountconfigapi.ListAccountConfigResult, error) {
+func ListAccounts(ctx context.Context, token string, cloudProvider string) (*accountconfigapi.ListAccountConfigResult, error) {
 	account, err := httpclientwrapper.NewAccountConfig(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func ListAccounts(token string, cloudProvider string) (*accountconfigapi.ListAcc
 	return res, nil
 }
 
-func DeleteAccount(token, accountConfigID string) error {
+func DeleteAccount(ctx context.Context, token, accountConfigID string) error {
 	service, err := httpclientwrapper.NewAccountConfig(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return err
@@ -64,7 +64,7 @@ func DeleteAccount(token, accountConfigID string) error {
 	return nil
 }
 
-func CreateAccount(accountConfig *accountconfigapi.CreateAccountConfigRequest) (accountconfigapi.AccountConfigID, error) {
+func CreateAccount(ctx context.Context, accountConfig *accountconfigapi.CreateAccountConfigRequest) (accountconfigapi.AccountConfigID, error) {
 	service, err := httpclientwrapper.NewAccountConfig(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return "", err
@@ -122,7 +122,7 @@ func PrintAccountNotVerifiedWarning(account *accountconfigapi.DescribeAccountCon
 		AwsCloudFormationGuideURL, AwsGcpTerraformScriptsURL, AwsGcpTerraformGuideURL))
 }
 
-func AskVerifyAccountIfAny() {
+func AskVerifyAccountIfAny(ctx context.Context) {
 	token, err := config.GetToken()
 	if err != nil {
 		utils.PrintError(err)
@@ -130,7 +130,7 @@ func AskVerifyAccountIfAny() {
 	}
 
 	// List all accounts
-	listRes, err := ListAccounts(token, "all")
+	listRes, err := ListAccounts(ctx, token, "all")
 	if err != nil {
 		utils.PrintError(err)
 		return

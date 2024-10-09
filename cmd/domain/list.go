@@ -52,7 +52,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	// Retrieve domains and domains
-	listRes, err := dataaccess.ListDomains(token)
+	listRes, err := dataaccess.ListDomains(cmd.Context(), token)
 	if err != nil {
 		utils.PrintError(err)
 		return err

@@ -8,7 +8,7 @@ import (
 	"github.com/omnistrate/ctl/internal/config"
 )
 
-func GetDefaultDeploymentConfigID(token string) (deploymentconfigapi.DeploymentConfigID, error) {
+func GetDefaultDeploymentConfigID(ctx context.Context, token string) (deploymentconfigapi.DeploymentConfigID, error) {
 	service, err := httpclientwrapper.NewDeploymentConfig(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return "", err

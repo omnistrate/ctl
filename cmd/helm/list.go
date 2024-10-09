@@ -46,7 +46,7 @@ func runList(cmd *cobra.Command, args []string) error {
 
 	// Retrieve Helm packages
 	var helmPackageResult *helmpackageapi.ListHelmPackagesResult
-	helmPackageResult, err = dataaccess.ListHelmCharts(token)
+	helmPackageResult, err = dataaccess.ListHelmCharts(cmd.Context(), token)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

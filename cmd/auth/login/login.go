@@ -72,7 +72,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 
 	// Login with email and password if any of the flags are set
 	if len(email) > 0 || len(password) > 0 || passwordStdin {
-		return passwordLogin(cmd, args, false)
+		return passwordLogin(cmd, false)
 	}
 
 	if gh {
@@ -119,7 +119,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		return passwordLogin(cmd, args, true)
+		return passwordLogin(cmd, true)
 	case string(loginWithGoogle):
 		return ssoLogin(cmd.Context(), identityProviderGoogle)
 	case string(loginWithGitHub):

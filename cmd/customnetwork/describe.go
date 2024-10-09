@@ -1,6 +1,7 @@
 package customnetwork
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -71,10 +72,10 @@ func runDescribe(cmd *cobra.Command, args []string) (err error) {
 	var customNetwork *customnetworkapi.CustomNetwork
 	if customNetworkName != nil {
 		// Describe by name
-		customNetwork, err = describeCustomNetworkByName(token, *customNetworkName)
+		customNetwork, err = describeCustomNetworkByName(cmd.Context(), token, *customNetworkName)
 	} else {
 		// Describe by ID
-		customNetwork, err = describeCustomNetwork(token, customNetworkId)
+		customNetwork, err = describeCustomNetwork(cmd.Context(), token, customNetworkId)
 	}
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
@@ -95,11 +96,11 @@ func runDescribe(cmd *cobra.Command, args []string) (err error) {
 	return
 }
 
-func describeCustomNetworkByName(token string, name string) (network *customnetworkapi.CustomNetwork, err error) {
+func describeCustomNetworkByName(ctx context.Context, token string, name string) (network *customnetworkapi.CustomNetwork, err error) {
 	var matching []*customnetworkapi.CustomNetwork
 	request := customnetworkapi.ListCustomNetworksRequest{}
 	var customNetworks *customnetworkapi.ListCustomNetworksResult
-	customNetworks, err = dataaccess.ListCustomNetworks(token, request)
+	customNetworks, err = dataaccess.ListCustomNetworks(ctx, token, request)
 	if err != nil {
 		return
 	}
@@ -122,12 +123,12 @@ func describeCustomNetworkByName(token string, name string) (network *customnetw
 	return
 }
 
-func describeCustomNetwork(token string, id string) (*customnetworkapi.CustomNetwork, error) {
+func describeCustomNetwork(ctx context.Context, token string, id string) (*customnetworkapi.CustomNetwork, error) {
 	request := customnetworkapi.DescribeCustomNetworkRequest{
 		ID: customnetworkapi.CustomNetworkID(id),
 	}
 
-	return dataaccess.DescribeCustomNetwork(token, request)
+	return dataaccess.DescribeCustomNetwork(ctx, token, request)
 }
 
 func validateDescribeArguments(args []string, idFlag string) error {

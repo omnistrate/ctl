@@ -8,13 +8,13 @@ import (
 	"github.com/omnistrate/ctl/internal/config"
 )
 
-func CreateUpgradePath(token, serviceID, productTierID, sourceVersion, targetVersion string, instanceIDs []string) (upgradepathapi.UpgradePathID, error) {
+func CreateUpgradePath(ctx context.Context, token, serviceID, productTierID, sourceVersion, targetVersion string, instanceIDs []string) (upgradepathapi.UpgradePathID, error) {
 	upgradePath, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return "", err
 	}
 
-	res, err := upgradePath.CreateUpgradePath(context.Background(), &upgradepathapi.CreateUpgradePathRequest{
+	res, err := upgradePath.CreateUpgradePath(ctx, &upgradepathapi.CreateUpgradePathRequest{
 		Token:         token,
 		ServiceID:     upgradepathapi.ServiceID(serviceID),
 		ProductTierID: upgradepathapi.ProductTierID(productTierID),
@@ -31,13 +31,13 @@ func CreateUpgradePath(token, serviceID, productTierID, sourceVersion, targetVer
 	return res.UpgradePathID, nil
 }
 
-func DescribeUpgradePath(token, serviceID, productTierID, upgradePathID string) (*upgradepathapi.UpgradePath, error) {
+func DescribeUpgradePath(ctx context.Context, token, serviceID, productTierID, upgradePathID string) (*upgradepathapi.UpgradePath, error) {
 	upgradePath, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := upgradePath.DescribeUpgradePath(context.Background(), &upgradepathapi.DescribeUpgradePathRequest{
+	res, err := upgradePath.DescribeUpgradePath(ctx, &upgradepathapi.DescribeUpgradePathRequest{
 		Token:         token,
 		ServiceID:     upgradepathapi.ServiceID(serviceID),
 		ProductTierID: upgradepathapi.ProductTierID(productTierID),
@@ -50,13 +50,13 @@ func DescribeUpgradePath(token, serviceID, productTierID, upgradePathID string) 
 	return res, nil
 }
 
-func ListEligibleInstancesPerUpgrade(token, serviceID, productTierID, upgradePathID string) ([]*upgradepathapi.InstanceUpgrade, error) {
+func ListEligibleInstancesPerUpgrade(ctx context.Context, token, serviceID, productTierID, upgradePathID string) ([]*upgradepathapi.InstanceUpgrade, error) {
 	upgradePath, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := upgradePath.ListEligibleInstancesPerUpgrade(context.Background(), &upgradepathapi.ListEligibleInstancesPerUpgradeRequest{
+	res, err := upgradePath.ListEligibleInstancesPerUpgrade(ctx, &upgradepathapi.ListEligibleInstancesPerUpgradeRequest{
 		Token:         token,
 		ServiceID:     upgradepathapi.ServiceID(serviceID),
 		ProductTierID: upgradepathapi.ProductTierID(productTierID),

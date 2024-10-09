@@ -1,6 +1,7 @@
 package serviceplan
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -83,14 +84,14 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Describe the service plan
-	servicePlan, err := dataaccess.DescribeProductTier(token, serviceID, planID)
+	servicePlan, err := dataaccess.DescribeProductTier(cmd.Context(), token, serviceID, planID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Format the service plan details
-	formattedServicePlan, err := formatServicePlanDetails(token, serviceName, planName, environment, servicePlan)
+	formattedServicePlan, err := formatServicePlanDetails(cmd.Context(), token, serviceName, planName, environment, servicePlan)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -121,9 +122,9 @@ func validateDescribeArguments(args []string, serviceID, planID, output string) 
 	return nil
 }
 
-func formatServicePlanDetails(token, serviceName, planName, environment string, productTier *producttierapi.DescribeProductTierResult) (model.ServicePlanDetails, error) {
+func formatServicePlanDetails(ctx context.Context, token, serviceName, planName, environment string, productTier *producttierapi.DescribeProductTierResult) (model.ServicePlanDetails, error) {
 	// Get service model
-	serviceModel, err := dataaccess.DescribeServiceModel(token, string(productTier.ServiceID), string(productTier.ServiceModelID))
+	serviceModel, err := dataaccess.DescribeServiceModel(ctx, token, string(productTier.ServiceID), string(productTier.ServiceModelID))
 	if err != nil {
 		return model.ServicePlanDetails{}, err
 	}
@@ -132,7 +133,7 @@ func formatServicePlanDetails(token, serviceName, planName, environment string, 
 	var resources []model.Resource
 	for resourceID := range productTier.APIGroups {
 		// Get resource details
-		desRes, err := dataaccess.DescribeResource(token, string(productTier.ServiceID), string(resourceID), nil, nil)
+		desRes, err := dataaccess.DescribeResource(ctx, token, string(productTier.ServiceID), string(resourceID), nil, nil)
 		if err != nil {
 			return model.ServicePlanDetails{}, err
 		}
@@ -193,7 +194,7 @@ func formatServicePlanDetails(token, serviceName, planName, environment string, 
 	}
 
 	// Describe pending changes
-	pendingChanges, err := dataaccess.DescribePendingChanges(token, string(productTier.ServiceID), string(serviceModel.ServiceAPIID), string(productTier.ID))
+	pendingChanges, err := dataaccess.DescribePendingChanges(ctx, token, string(productTier.ServiceID), string(serviceModel.ServiceAPIID), string(productTier.ID))
 	if err != nil {
 		return model.ServicePlanDetails{}, err
 	}
