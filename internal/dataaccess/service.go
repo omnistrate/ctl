@@ -6,7 +6,7 @@ import (
 
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
-	"github.com/omnistrate/ctl/config"
+	"github.com/omnistrate/ctl/internal/config"
 )
 
 const (

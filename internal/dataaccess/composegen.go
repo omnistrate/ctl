@@ -5,7 +5,7 @@ import (
 
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	composegenapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/compose_gen_api"
-	"github.com/omnistrate/ctl/config"
+	"github.com/omnistrate/ctl/internal/config"
 )
 
 func CheckIfContainerImageAccessible(token string, request *composegenapi.CheckIfContainerImageAccessibleRequest) (res *composegenapi.CheckIfContainerImageAccessibleResult, err error) {

@@ -6,9 +6,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/omnistrate/ctl/config"
-	"github.com/omnistrate/ctl/dataaccess"
-	ctlutils "github.com/omnistrate/ctl/utils"
+	"github.com/omnistrate/ctl/internal/config"
+	"github.com/omnistrate/ctl/internal/dataaccess"
+	ctlutils "github.com/omnistrate/ctl/internal/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )

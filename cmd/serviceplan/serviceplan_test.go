@@ -2,7 +2,7 @@ package serviceplan
 
 import (
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
-	"github.com/omnistrate/ctl/utils"
+	"github.com/omnistrate/ctl/internal/utils"
 
 	"testing"
 

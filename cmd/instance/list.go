@@ -3,10 +3,10 @@ package instance
 import (
 	"strings"
 
-	"github.com/omnistrate/ctl/config"
-	"github.com/omnistrate/ctl/dataaccess"
-	"github.com/omnistrate/ctl/model"
-	"github.com/omnistrate/ctl/utils"
+	"github.com/omnistrate/ctl/internal/config"
+	"github.com/omnistrate/ctl/internal/dataaccess"
+	"github.com/omnistrate/ctl/internal/model"
+	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/spf13/cobra"
 )
 

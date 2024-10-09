@@ -5,7 +5,7 @@ import (
 
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	helmpackageapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/helm_package_api"
-	"github.com/omnistrate/ctl/config"
+	"github.com/omnistrate/ctl/internal/config"
 )
 
 func SaveHelmChart(

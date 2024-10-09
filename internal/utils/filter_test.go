@@ -1,9 +1,10 @@
 package utils
 
 import (
-	"github.com/omnistrate/ctl/model"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/omnistrate/ctl/internal/model"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParseFilters(t *testing.T) {

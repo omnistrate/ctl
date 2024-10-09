@@ -2,9 +2,9 @@ package helm
 
 import (
 	"github.com/chelnak/ysmrr"
-	"github.com/omnistrate/ctl/config"
-	"github.com/omnistrate/ctl/dataaccess"
-	"github.com/omnistrate/ctl/utils"
+	"github.com/omnistrate/ctl/internal/config"
+	"github.com/omnistrate/ctl/internal/dataaccess"
+	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/spf13/cobra"
 )
 

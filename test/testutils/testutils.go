@@ -6,8 +6,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/omnistrate/ctl/config"
-	"github.com/omnistrate/ctl/utils"
+	"github.com/omnistrate/ctl/internal/config"
+	"github.com/omnistrate/ctl/internal/utils"
 )
 
 func Cleanup() {

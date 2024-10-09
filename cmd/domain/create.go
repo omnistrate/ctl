@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	saasportalapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/saas_portal_api"
-	"github.com/omnistrate/ctl/config"
-	"github.com/omnistrate/ctl/dataaccess"
-	"github.com/omnistrate/ctl/utils"
+	"github.com/omnistrate/ctl/internal/config"
+	"github.com/omnistrate/ctl/internal/dataaccess"
+	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )

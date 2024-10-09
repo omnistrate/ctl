@@ -5,7 +5,7 @@ import (
 
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	customnetworkapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/custom_network_api"
-	"github.com/omnistrate/ctl/config"
+	"github.com/omnistrate/ctl/internal/config"
 )
 
 func CreateCustomNetwork(token string, request customnetworkapi.CreateCustomNetworkRequest) (

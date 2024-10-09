@@ -5,7 +5,7 @@ import (
 
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
-	"github.com/omnistrate/ctl/config"
+	"github.com/omnistrate/ctl/internal/config"
 )
 
 func DescribeResourceInstance(token string, serviceID, environmentID, instanceID string) (*inventoryapi.ResourceInstance, error) {

@@ -4,7 +4,7 @@ import (
 	_ "embed"
 	"time"
 
-	"github.com/omnistrate/ctl/utils"
+	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
