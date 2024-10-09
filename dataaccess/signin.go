@@ -2,39 +2,27 @@ package dataaccess
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	signinapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/signin_api"
 	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/utils"
-	"github.com/pkg/errors"
-	goa "goa.design/goa/v3/pkg"
+	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 )
 
 func LoginWithPassword(email string, pass string) (token string, err error) {
-	signin, err := httpclientwrapper.NewSignin(config.GetHostScheme(), config.GetHost())
+	ctx := context.Background()
+	request := *openapiclient.NewSigninRequestBody(email)
+	request.Password = utils.ToPtr(pass)
+
+	apiClient := getV1Client()
+	resp, _, err := apiClient.SigninApiAPI.SigninApiSignin(ctx).SigninRequestBody(request).Execute()
+	err = handleV1Error(err)
 	if err != nil {
 		return "", err
 	}
 
-	request := signinapi.SigninRequest{
-		Email:    email,
-		Password: utils.ToPtr(pass),
-	}
-
-	res, err := signin.Signin(context.Background(), &request)
-	if err != nil {
-		var serviceErr *goa.ServiceError
-		ok := errors.As(err, &serviceErr)
-		if !ok {
-			return
-		}
-
-		return "", fmt.Errorf("%s\nDetail: %s", serviceErr.Name, serviceErr.Message)
-	}
-
-	token = res.JWTToken
+	token = resp.JwtToken
 	return
 }
 

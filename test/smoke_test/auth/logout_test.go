@@ -27,7 +27,7 @@ func Test_logout(t *testing.T) {
 	require.Contains(err.Error(), config.ErrConfigFileNotFound.Error())
 
 	// PASS: logout after login
-	testEmail, testPassword, err := testutils.GetSmokeTestAccount()
+	testEmail, testPassword, err := testutils.GetTestAccount()
 	require.NoError(err)
 
 	cmd.RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})

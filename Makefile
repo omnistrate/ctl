@@ -49,7 +49,18 @@ smoke-test:
 	export LOG_LEVEL=debug && \
 	export LOG_FORMAT=pretty && \
 	go clean -testcache && \
-	go test ./... -skip ./test/... $(ARGS) 
+	go test ./... -skip ./test/smoke_test/... $(ARGS) 
+
+.PHONY: integration-test
+smoke-test:
+	echo "Running integration tests for service"
+	echo you need to set the following environment variables: SMOKE_TEST_EMAIL, SMOKE_TEST_PASSWORD before running the smoke tests
+	export ENABLE_SMOKE_TEST=true && \
+	export OMNISTRATE_ROOT_DOMAIN=omnistrate.dev && \
+	export LOG_LEVEL=debug && \
+	export LOG_FORMAT=pretty && \
+	go clean -testcache && \
+	go test ./... -skip ./test/smoke_test/... $(ARGS) 
 
 .PHONY: build
 build:

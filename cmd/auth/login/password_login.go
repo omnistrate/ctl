@@ -2,14 +2,15 @@ package login
 
 import (
 	"fmt"
+	"io"
+	"os"
+	"strings"
+
 	"github.com/omnistrate/ctl/config"
 	"github.com/omnistrate/ctl/dataaccess"
 	ctlutils "github.com/omnistrate/ctl/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"io"
-	"os"
-	"strings"
 )
 
 func PasswordLogin(cmd *cobra.Command, args []string, calledByInteractiveMode bool) error {

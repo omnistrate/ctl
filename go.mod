@@ -1,6 +1,6 @@
 module github.com/omnistrate/ctl
 
-go 1.23.0
+go 1.23.1
 
 require (
 	github.com/atotto/clipboard v0.1.4
@@ -10,11 +10,13 @@ require (
 	github.com/cqroot/prompt v0.9.4
 	github.com/fatih/color v1.17.0
 	github.com/google/uuid v1.6.0
+	github.com/hashicorp/go-retryablehttp v0.7.7
 	github.com/jedib0t/go-pretty/v6 v6.5.9
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-wordwrap v1.0.1
 	github.com/omnistrate/api-design v0.7.4
 	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20241001141101-537ace327d87
+	github.com/omnistrate/omnistrate-sdk-go v0.0.3
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.33.0
@@ -43,6 +45,7 @@ require (
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/go-chi/chi/v5 v5.1.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
+	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kr/text v0.2.0 // indirect

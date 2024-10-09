@@ -194,12 +194,24 @@ jobs:
         with:
           gotestsum_version: 1.11.0
 
+      - name: Integraiton test
+        timeout-minutes: 30
+        env: 
+          ENABLE_SMOKE_TEST: true
+          TEST_EMAIL: ${{ secrets.SMOKE_TEST_EMAIL }}
+          TEST_PASSWORD: ${{ secrets.SMOKE_TEST_PASSWORD}}
+          OMNISTRATE_ROOT_DOMAIN: ${{ vars.OMNISTRATE_ROOT_DOMAIN}}
+          LOG_LEVEL: debug
+          LOG_FORMAT: pretty
+          DRY_RUN: true
+        run: gotestsum --format github-actions -- ./test/integration_test/... -timeout 1800s -p 1 -p 1 -v
+
       - name: Smoke test ${{ matrix.test-group }}
         timeout-minutes: 30
         env: 
           ENABLE_SMOKE_TEST: true
-          SMOKE_TEST_EMAIL: ${{ secrets.SMOKE_TEST_EMAIL }}
-          SMOKE_TEST_PASSWORD: ${{ secrets.SMOKE_TEST_PASSWORD}}
+          TEST_EMAIL: ${{ secrets.SMOKE_TEST_EMAIL }}
+          TEST_PASSWORD: ${{ secrets.SMOKE_TEST_PASSWORD}}
           OMNISTRATE_ROOT_DOMAIN: ${{ vars.OMNISTRATE_ROOT_DOMAIN}}
           LOG_LEVEL: debug
           LOG_FORMAT: pretty

@@ -33,6 +33,10 @@ func GetHostScheme() string {
 	return utils.GetEnv("OMNISTRATE_HOST_SCHEME", "https")
 }
 
+func GetDebug() bool {
+	return utils.GetEnvAsBoolean("OMNISTRATE_DEBUG", "false")
+}
+
 //go:embed public_key.pem
 var publicKey []byte
 
