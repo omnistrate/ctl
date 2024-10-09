@@ -1,6 +1,7 @@
 package environment
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"strings"
@@ -94,14 +95,14 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the service exists
-	serviceID, serviceName, err = getService(token, serviceID, serviceName)
+	serviceID, serviceName, err = getService(cmd.Context(), token, serviceID, serviceName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Check if source environment exists
-	sourceEnvID, err := getSourceEnvironmentID(token, serviceID, sourceEnvName)
+	sourceEnvID, err := getSourceEnvironmentID(cmd.Context(), token, serviceID, sourceEnvName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -168,8 +169,8 @@ func validateEnvironmentType(envType string) error {
 	return nil
 }
 
-func getService(token, serviceIDArg, serviceNameArg string) (serviceID string, serviceName string, err error) {
-	searchRes, err := dataaccess.SearchInventory(token, "service:s")
+func getService(ctx context.Context, token, serviceIDArg, serviceNameArg string) (serviceID string, serviceName string, err error) {
+	searchRes, err := dataaccess.SearchInventory(ctx, token, "service:s")
 	if err != nil {
 		return "", "", err
 	}
@@ -183,19 +184,19 @@ func getService(token, serviceIDArg, serviceNameArg string) (serviceID string, s
 	return "", "", errors.New("service not found")
 }
 
-func getSourceEnvironmentID(token, serviceID, sourceEnvName string) (string, error) {
+func getSourceEnvironmentID(ctx context.Context, token, serviceID, sourceEnvName string) (string, error) {
 	if sourceEnvName == "" {
 		return "", nil
 	}
 
-	describeServiceRes, err := dataaccess.DescribeService(token, serviceID)
+	describeServiceRes, err := dataaccess.DescribeService(ctx, token, serviceID)
 	if err != nil {
 		return "", err
 	}
 
 	for _, env := range describeServiceRes.ServiceEnvironments {
 		if strings.EqualFold(env.Name, sourceEnvName) {
-			return string(env.ID), nil
+			return env.Id, nil
 		}
 	}
 

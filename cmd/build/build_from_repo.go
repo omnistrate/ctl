@@ -476,18 +476,18 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	// Find the production plan with the same name as the dev plan
 	var prodPlanID string
-	service, err := dataaccess.DescribeService(token, serviceID)
+	service, err := dataaccess.DescribeService(cmd.Context(), token, serviceID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 	for _, env := range service.ServiceEnvironments {
-		if string(env.ID) != string(prodEnvironmentID) {
+		if env.Id != string(prodEnvironmentID) {
 			continue
 		}
 		for _, plan := range env.ServicePlans {
 			if plan.Name == devProductTier.Name {
-				prodPlanID = string(plan.ProductTierID)
+				prodPlanID = plan.ProductTierID
 				break
 			}
 		}

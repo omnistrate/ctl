@@ -1,6 +1,7 @@
 package subscription
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/chelnak/ysmrr"
@@ -69,7 +70,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the subscription exists
-	subscription, err := getSubscription(token, subscriptionID)
+	subscription, err := getSubscription(cmd.Context(), token, subscriptionID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -92,8 +93,8 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func getSubscription(token, subscriptionID string) (*inventoryapi.SubscriptionSearchRecord, error) {
-	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("subscription:%s", subscriptionID))
+func getSubscription(ctx context.Context, token, subscriptionID string) (*inventoryapi.SubscriptionSearchRecord, error) {
+	searchRes, err := dataaccess.SearchInventory(ctx, token, fmt.Sprintf("subscription:%s", subscriptionID))
 	if err != nil {
 		return nil, err
 	}

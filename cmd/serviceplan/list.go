@@ -4,11 +4,11 @@ import (
 	"strings"
 
 	"github.com/chelnak/ysmrr"
-	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
 	"github.com/omnistrate/ctl/internal/utils"
+	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 	"github.com/spf13/cobra"
 )
 
@@ -67,7 +67,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	// List services
-	listRes, err := dataaccess.ListServices(token)
+	listRes, err := dataaccess.ListServices(cmd.Context(), token)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -79,7 +79,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	for _, service := range listRes.Services {
 		for _, env := range service.ServiceEnvironments {
 			for _, servicePlan := range env.ServicePlans {
-				formattedServicePlan, err := formatServicePlan(string(service.ID), service.Name, env.Name, servicePlan, truncateNames)
+				formattedServicePlan, err := formatServicePlan(service.Id, service.Name, env.Name, servicePlan, truncateNames)
 				if err != nil {
 					utils.HandleSpinnerError(spinner, sm, err)
 					return err
@@ -117,7 +117,7 @@ func runList(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func formatServicePlan(serviceID, serviceName, envName string, servicePlan *serviceapi.ServicePlan, truncateNames bool) (model.ServicePlan, error) {
+func formatServicePlan(serviceID, serviceName, envName string, servicePlan openapiclient.ServicePlan, truncateNames bool) (model.ServicePlan, error) {
 	planName := servicePlan.Name
 
 	if truncateNames {
@@ -127,12 +127,12 @@ func formatServicePlan(serviceID, serviceName, envName string, servicePlan *serv
 	}
 
 	return model.ServicePlan{
-		PlanID:         string(servicePlan.ProductTierID),
+		PlanID:         servicePlan.ProductTierID,
 		PlanName:       planName,
 		ServiceID:      serviceID,
 		ServiceName:    serviceName,
 		Environment:    envName,
-		DeploymentType: string(servicePlan.TierType),
-		TenancyType:    string(servicePlan.ModelType),
+		DeploymentType: servicePlan.TierType,
+		TenancyType:    servicePlan.ModelType,
 	}, nil
 }

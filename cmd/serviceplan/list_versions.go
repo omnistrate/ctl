@@ -99,14 +99,14 @@ func runListVersions(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if the service plan exists
-	_, _, planID, _, _, err = getServicePlan(token, serviceID, serviceName, planID, planName, environment)
+	_, _, planID, _, _, err = getServicePlan(cmd.Context(), token, serviceID, serviceName, planID, planName, environment)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Search service plans versions
-	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("serviceplan:%s", planID))
+	searchRes, err := dataaccess.SearchInventory(cmd.Context(), token, fmt.Sprintf("serviceplan:%s", planID))
 	if err != nil {
 		utils.PrintError(err)
 		return err

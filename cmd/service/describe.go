@@ -1,15 +1,16 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
 	"github.com/chelnak/ysmrr"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
-	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
+	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -84,15 +85,15 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if service exists
-	id, _, err = getService(token, name, id)
+	id, _, err = getService(cmd.Context(), token, name, id)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Describe service
-	var service *serviceapi.DescribeServiceResult
-	service, err = dataaccess.DescribeService(token, id)
+	var service *openapiclient.DescribeServiceResult
+	service, err = dataaccess.DescribeService(cmd.Context(), token, id)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -112,11 +113,11 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func getService(token, serviceNameArg, serviceIDArg string) (serviceID, serviceName string, err error) {
+func getService(ctx context.Context, token, serviceNameArg, serviceIDArg string) (serviceID, serviceName string, err error) {
 	count := 0
 	if serviceNameArg != "" {
 		var searchRes *inventoryapi.SearchInventoryResult
-		searchRes, err = dataaccess.SearchInventory(token, fmt.Sprintf("service:%s", serviceNameArg))
+		searchRes, err = dataaccess.SearchInventory(ctx, token, fmt.Sprintf("service:%s", serviceNameArg))
 		if err != nil {
 			return
 		}
@@ -130,7 +131,7 @@ func getService(token, serviceNameArg, serviceIDArg string) (serviceID, serviceN
 		}
 	} else {
 		var searchRes *inventoryapi.SearchInventoryResult
-		searchRes, err = dataaccess.SearchInventory(token, fmt.Sprintf("service:%s", serviceIDArg))
+		searchRes, err = dataaccess.SearchInventory(ctx, token, fmt.Sprintf("service:%s", serviceIDArg))
 		if err != nil {
 			return
 		}

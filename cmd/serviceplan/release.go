@@ -79,7 +79,7 @@ func runRelease(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if service plan exists
-	serviceID, _, planID, _, _, err = getServicePlan(token, serviceID, serviceName, planID, planName, environment)
+	serviceID, _, planID, _, _, err = getServicePlan(cmd.Context(), token, serviceID, serviceName, planID, planName, environment)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -112,7 +112,7 @@ func runRelease(cmd *cobra.Command, args []string) error {
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully released service plan")
 
 	// Get the service plan details
-	searchRes, err := dataaccess.SearchInventory(token, fmt.Sprintf("serviceplan:%s", planID))
+	searchRes, err := dataaccess.SearchInventory(cmd.Context(), token, fmt.Sprintf("serviceplan:%s", planID))
 	if err != nil {
 		utils.PrintError(err)
 		return err

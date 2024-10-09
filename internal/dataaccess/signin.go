@@ -13,13 +13,13 @@ func LoginWithPassword(ctx context.Context, email string, pass string) (string, 
 
 	apiClient := getV1Client()
 	resp, r, err := apiClient.SigninApiAPI.SigninApiSignin(ctx).SigninRequestBody(request).Execute()
-	defer r.Body.Close()
 
 	err = handleV1Error(err)
 	if err != nil {
 		return "", err
 	}
 
+	r.Body.Close()
 	return resp.JwtToken, nil
 }
 
@@ -29,12 +29,12 @@ func LoginWithIdentityProvider(ctx context.Context, deviceCode, identityProvider
 
 	apiClient := getV1Client()
 	resp, r, err := apiClient.SigninApiAPI.SigninApiLoginWithIdentityProvider(ctx).LoginWithIdentityProviderRequestBody(request).Execute()
-	defer r.Body.Close()
 
 	err = handleV1Error(err)
 	if err != nil {
 		return "", err
 	}
 
+	r.Body.Close()
 	return resp.JwtToken, nil
 }

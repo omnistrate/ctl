@@ -4,11 +4,11 @@ import (
 	"strings"
 
 	"github.com/chelnak/ysmrr"
-	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
 	"github.com/omnistrate/ctl/internal/utils"
+	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 	"github.com/spf13/cobra"
 )
 
@@ -65,7 +65,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	// Retrieve services and environments
-	services, err := dataaccess.ListServices(token)
+	services, err := dataaccess.ListServices(cmd.Context(), token)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -76,10 +76,10 @@ func runList(cmd *cobra.Command, args []string) error {
 	// Process and filter environments
 	for _, service := range services.Services {
 		for _, environment := range service.ServiceEnvironments {
-			if environment == nil {
+			if environment.Name == "" {
 				continue
-			}
 
+			}
 			env, err := formatEnvironment(service, environment, truncateNames)
 			if err != nil {
 				utils.HandleSpinnerError(spinner, sm, err)
@@ -117,7 +117,7 @@ func runList(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func formatEnvironment(service *serviceapi.DescribeServiceResult, environment *serviceapi.ServiceEnvironment, truncateNames bool) (model.Environment, error) {
+func formatEnvironment(service openapiclient.DescribeServiceResult, environment openapiclient.ServiceEnvironment, truncateNames bool) (model.Environment, error) {
 	serviceName := service.Name
 	envName := environment.Name
 
@@ -128,7 +128,7 @@ func formatEnvironment(service *serviceapi.DescribeServiceResult, environment *s
 
 	envType := ""
 	if environment.Type != nil {
-		envType = string(*environment.Type)
+		envType = *environment.Type
 	}
 
 	sourceEnvName := ""
@@ -137,10 +137,10 @@ func formatEnvironment(service *serviceapi.DescribeServiceResult, environment *s
 	}
 
 	return model.Environment{
-		EnvironmentID:   string(environment.ID),
+		EnvironmentID:   environment.Id,
 		EnvironmentName: envName,
 		EnvironmentType: envType,
-		ServiceID:       string(service.ID),
+		ServiceID:       service.Id,
 		ServiceName:     serviceName,
 		SourceEnvName:   sourceEnvName,
 	}, nil
