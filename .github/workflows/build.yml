@@ -14,10 +14,6 @@ env:
   GOSUMDB: ${{ secrets.GOSUMDB }}
   # test coverage threshold
   TESTCOVERAGE_THRESHOLD: 6
-  # integration test variables
-  IAM_ROLE_ARN: arn:aws:iam::469745361314:role/github-actions-s3-store-test-role
-  IAM_ROLE_SESSION_DURATION: 900
-  AWS_REGION: us-west-2
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
