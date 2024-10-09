@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_logout(t *testing.T) {
+func TestLogout(t *testing.T) {
 	testutils.SmokeTest(t)
 
 	ctx := context.TODO()
