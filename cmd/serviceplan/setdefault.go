@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	"github.com/chelnak/ysmrr"
-	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
+	openapiclientfleet "github.com/omnistrate/omnistrate-sdk-go/fleet"
 	"github.com/spf13/cobra"
 )
 
@@ -112,9 +112,9 @@ func runSetDefault(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	var targetServicePlan *inventoryapi.ServicePlanSearchRecord
+	var targetServicePlan openapiclientfleet.ServicePlanSearchRecord
 	for _, servicePlan := range searchRes.ServicePlanResults {
-		if string(servicePlan.ServiceID) != serviceID || servicePlan.ID != planID || servicePlan.Version != targetVersion {
+		if servicePlan.ServiceId != serviceID || servicePlan.Id != planID || servicePlan.Version != targetVersion {
 			continue
 		}
 		targetServicePlan = servicePlan
@@ -142,10 +142,10 @@ func getServicePlan(ctx context.Context, token, serviceIDArg, serviceNameArg, pl
 
 	serviceFound := 0
 	for _, service := range searchRes.ServiceResults {
-		if !strings.EqualFold(service.Name, serviceNameArg) && service.ID != serviceIDArg {
+		if !strings.EqualFold(service.Name, serviceNameArg) && service.Id != serviceIDArg {
 			continue
 		}
-		serviceID = service.ID
+		serviceID = service.Id
 		serviceFound += 1
 	}
 

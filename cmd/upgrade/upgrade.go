@@ -113,10 +113,10 @@ func run(cmd *cobra.Command, args []string) error {
 		var found bool
 		var serviceID, environmentID, productTierID, sourceVersion, targetVersion string
 		for _, instance := range searchRes.ResourceInstanceResults {
-			if instance.ID == instanceID {
-				serviceID = string(instance.ServiceID)
-				environmentID = string(instance.ServiceEnvironmentID)
-				productTierID = string(instance.ProductTierID)
+			if instance.Id == instanceID {
+				serviceID = instance.ServiceId
+				environmentID = instance.ServiceEnvironmentId
+				productTierID = instance.ProductTierId
 				found = true
 				break
 			}

@@ -82,12 +82,13 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	formattedSubscriptions := make([]model.Subscription, 0)
-	for _, subscription := range searchRes.SubscriptionResults {
-		if subscription == nil {
+	for i := range searchRes.SubscriptionResults {
+		subscription := searchRes.SubscriptionResults[i]
+		if subscription.Id == "" {
 			continue
 		}
 
-		formattedSubscription := formatSubscription(subscription, truncateNames)
+		formattedSubscription := formatSubscription(&subscription, truncateNames)
 
 		// Check if the subscription matches the filters
 		ok, err := utils.MatchesFilters(formattedSubscription, filterMaps)

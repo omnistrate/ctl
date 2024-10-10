@@ -176,8 +176,8 @@ func getService(ctx context.Context, token, serviceIDArg, serviceNameArg string)
 	}
 
 	for _, service := range searchRes.ServiceResults {
-		if serviceIDArg == service.ID || strings.EqualFold(service.Name, serviceNameArg) {
-			return service.ID, service.Name, nil
+		if serviceIDArg == service.Id || strings.EqualFold(service.Name, serviceNameArg) {
+			return service.Id, service.Name, nil
 		}
 	}
 

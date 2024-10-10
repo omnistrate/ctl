@@ -12,6 +12,7 @@ import (
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
 	"github.com/omnistrate/ctl/internal/utils"
+	openapiclientfleet "github.com/omnistrate/omnistrate-sdk-go/fleet"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -257,7 +258,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Format instance
-	formattedInstance := formatInstance(searchRes.ResourceInstanceResults[0], false)
+	formattedInstance := formatInstance(&searchRes.ResourceInstanceResults[0], false)
 	InstanceID = formattedInstance.InstanceID
 
 	// Print output
@@ -278,7 +279,7 @@ func getResource(ctx context.Context, token, serviceNameArg, environmentArg, pla
 
 	found := false
 	for _, res := range searchRes.ResourceResults {
-		if res == nil {
+		if res.Id == "" {
 			continue
 		}
 		if strings.EqualFold(res.Name, resourceNameArg) &&
@@ -286,10 +287,10 @@ func getResource(ctx context.Context, token, serviceNameArg, environmentArg, pla
 			strings.EqualFold(res.ProductTierName, planNameArg) &&
 			strings.EqualFold(res.ServiceEnvironmentName, environmentArg) {
 			found = true
-			serviceID = string(res.ServiceID)
-			environmentID = string(res.ServiceEnvironmentID)
-			productTierID = string(res.ProductTierID)
-			resourceID = res.ID
+			serviceID = res.ServiceId
+			environmentID = res.ServiceEnvironmentId
+			productTierID = res.ProductTierId
+			resourceID = res.Id
 			break
 		}
 	}
@@ -302,7 +303,7 @@ func getResource(ctx context.Context, token, serviceNameArg, environmentArg, pla
 	return
 }
 
-func formatInstance(instance *inventoryapi.ResourceInstanceSearchRecord, truncateNames bool) model.Instance {
+func formatInstance(instance *openapiclientfleet.ResourceInstanceSearchRecord, truncateNames bool) model.Instance {
 	planName := ""
 	if instance.ProductTierName != nil {
 		planName = *instance.ProductTierName
@@ -317,20 +318,20 @@ func formatInstance(instance *inventoryapi.ResourceInstanceSearchRecord, truncat
 		planName = utils.TruncateString(planName, defaultMaxNameLength)
 	}
 	subscriptionID := ""
-	if instance.SubscriptionID != nil {
-		subscriptionID = string(*instance.SubscriptionID)
+	if instance.SubscriptionId != nil {
+		subscriptionID = *instance.SubscriptionId
 	}
 
 	formattedInstance := model.Instance{
-		InstanceID:     instance.ID,
+		InstanceID:     instance.Id,
 		Service:        serviceName,
 		Environment:    instance.ServiceEnvironmentName,
 		Plan:           planName,
 		Version:        planVersion,
 		Resource:       instance.ResourceName,
-		CloudProvider:  string(instance.CloudProvider),
+		CloudProvider:  instance.CloudProvider,
 		Region:         instance.RegionCode,
-		Status:         string(instance.Status),
+		Status:         instance.Status,
 		SubscriptionID: subscriptionID,
 	}
 

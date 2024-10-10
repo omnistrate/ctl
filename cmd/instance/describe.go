@@ -109,12 +109,12 @@ func getInstance(ctx context.Context, token, instanceID string) (serviceID, envi
 
 	var found bool
 	for _, instance := range searchRes.ResourceInstanceResults {
-		if instance.ID == instanceID {
-			serviceID = string(instance.ServiceID)
-			environmentID = string(instance.ServiceEnvironmentID)
-			productTierID = string(instance.ProductTierID)
-			if instance.ResourceID != nil {
-				resourceID = string(*instance.ResourceID)
+		if instance.Id == instanceID {
+			serviceID = instance.ServiceId
+			environmentID = instance.ServiceEnvironmentId
+			productTierID = instance.ProductTierId
+			if instance.ResourceId != nil {
+				resourceID = *instance.ResourceId
 			}
 			found = true
 			break
