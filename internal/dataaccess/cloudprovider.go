@@ -3,25 +3,23 @@ package dataaccess
 import (
 	"context"
 
-	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
-	cloudproviderapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/cloud_provider_api"
-	"github.com/omnistrate/ctl/internal/config"
+	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 )
 
-func GetCloudProviderByName(ctx context.Context, token string, cloudProvider string) (cloudproviderapi.CloudProviderID, error) {
-	service, err := httpclientwrapper.NewCloudProvider(config.GetHostScheme(), config.GetHost())
+func GetCloudProviderByName(ctx context.Context, token string, cloudProvider string) (string, error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+
+	apiClient := getV1Client()
+	res, r, err := apiClient.CloudProviderApiAPI.CloudProviderApiGetCloudProviderByName(
+		ctxWithToken,
+		cloudProvider,
+	).Execute()
+
+	err = handleV1Error(err)
 	if err != nil {
 		return "", err
 	}
 
-	request := cloudproviderapi.GetCloudProviderByNameRequest{
-		Token: token,
-		Name:  cloudProvider,
-	}
-
-	res, err := service.GetCloudProviderByName(ctx, &request)
-	if err != nil {
-		return "", err
-	}
+	defer r.Body.Close()
 	return res, nil
 }

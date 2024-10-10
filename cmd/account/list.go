@@ -5,11 +5,11 @@ import (
 	"strings"
 
 	"github.com/chelnak/ysmrr"
-	accountconfigapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/account_config_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
 	"github.com/omnistrate/ctl/internal/utils"
+	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 	"github.com/spf13/cobra"
 )
 
@@ -74,7 +74,7 @@ func runList(cmd *cobra.Command, args []string) error {
 
 	// Process and filter accounts
 	for _, account := range listRes.AccountConfigs {
-		formattedAccount, err := formatAccount(account)
+		formattedAccount, err := formatAccount(&account)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
@@ -116,7 +116,7 @@ func runList(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func formatAccount(account *accountconfigapi.DescribeAccountConfigResult) (model.Account, error) {
+func formatAccount(account *openapiclient.DescribeAccountConfigResult) (model.Account, error) {
 	var targetAccountID, cloudProvider string
 	if account.AwsAccountID != nil {
 		targetAccountID = *account.AwsAccountID
@@ -127,9 +127,9 @@ func formatAccount(account *accountconfigapi.DescribeAccountConfigResult) (model
 	}
 
 	return model.Account{
-		ID:              string(account.ID),
+		ID:              account.Id,
 		Name:            account.Name,
-		Status:          string(account.Status),
+		Status:          account.Status,
 		CloudProvider:   cloudProvider,
 		TargetAccountID: targetAccountID,
 	}, nil
