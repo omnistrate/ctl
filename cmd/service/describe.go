@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	"github.com/chelnak/ysmrr"
-	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
+	openapiclientfleet "github.com/omnistrate/omnistrate-sdk-go/fleet"
 	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -116,7 +116,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 func getService(ctx context.Context, token, serviceNameArg, serviceIDArg string) (serviceID, serviceName string, err error) {
 	count := 0
 	if serviceNameArg != "" {
-		var searchRes *inventoryapi.SearchInventoryResult
+		var searchRes *openapiclientfleet.SearchInventoryResult
 		searchRes, err = dataaccess.SearchInventory(ctx, token, fmt.Sprintf("service:%s", serviceNameArg))
 		if err != nil {
 			return
@@ -124,21 +124,21 @@ func getService(ctx context.Context, token, serviceNameArg, serviceIDArg string)
 
 		for _, service := range searchRes.ServiceResults {
 			if strings.EqualFold(service.Name, serviceNameArg) {
-				serviceID = service.ID
+				serviceID = service.Id
 				serviceName = service.Name
 				count++
 			}
 		}
 	} else {
-		var searchRes *inventoryapi.SearchInventoryResult
+		var searchRes *openapiclientfleet.SearchInventoryResult
 		searchRes, err = dataaccess.SearchInventory(ctx, token, fmt.Sprintf("service:%s", serviceIDArg))
 		if err != nil {
 			return
 		}
 
 		for _, service := range searchRes.ServiceResults {
-			if strings.EqualFold(service.ID, serviceIDArg) {
-				serviceID = service.ID
+			if strings.EqualFold(service.Id, serviceIDArg) {
+				serviceID = service.Id
 				serviceName = service.Name
 				count++
 			}

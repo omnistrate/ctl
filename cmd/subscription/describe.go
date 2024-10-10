@@ -5,11 +5,11 @@ import (
 	"fmt"
 
 	"github.com/chelnak/ysmrr"
-	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
 	"github.com/omnistrate/ctl/internal/utils"
+	openapiclientfleet "github.com/omnistrate/omnistrate-sdk-go/fleet"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -93,15 +93,15 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func getSubscription(ctx context.Context, token, subscriptionID string) (*inventoryapi.SubscriptionSearchRecord, error) {
+func getSubscription(ctx context.Context, token, subscriptionID string) (*openapiclientfleet.SubscriptionSearchRecord, error) {
 	searchRes, err := dataaccess.SearchInventory(ctx, token, fmt.Sprintf("subscription:%s", subscriptionID))
 	if err != nil {
 		return nil, err
 	}
 
 	for _, subscription := range searchRes.SubscriptionResults {
-		if subscription.ID == subscriptionID {
-			return subscription, nil
+		if subscription.Id == subscriptionID {
+			return &subscription, nil
 		}
 	}
 
@@ -109,7 +109,7 @@ func getSubscription(ctx context.Context, token, subscriptionID string) (*invent
 	return nil, err
 }
 
-func formatSubscription(subscription *inventoryapi.SubscriptionSearchRecord, truncateNames bool) model.Subscription {
+func formatSubscription(subscription *openapiclientfleet.SubscriptionSearchRecord, truncateNames bool) model.Subscription {
 	serviceName := subscription.ServiceName
 	planName := subscription.ServicePlanName
 	if truncateNames {
@@ -118,15 +118,15 @@ func formatSubscription(subscription *inventoryapi.SubscriptionSearchRecord, tru
 	}
 
 	formattedSubscription := model.Subscription{
-		SubscriptionID:         subscription.ID,
-		ServiceID:              string(subscription.ServiceID),
+		SubscriptionID:         subscription.Id,
+		ServiceID:              subscription.ServiceID,
 		ServiceName:            serviceName,
-		PlanID:                 string(subscription.ProductTierID),
+		PlanID:                 subscription.ProductTierID,
 		PlanName:               planName,
 		Environment:            subscription.ServiceEnvironmentName,
 		SubscriptionOwnerName:  subscription.RootUserName,
 		SubscriptionOwnerEmail: subscription.RootUserEmail,
-		Status:                 string(subscription.Status),
+		Status:                 subscription.Status,
 	}
 
 	return formattedSubscription

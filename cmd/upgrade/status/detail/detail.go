@@ -75,10 +75,10 @@ func run(cmd *cobra.Command, args []string) error {
 	found := false
 	var serviceID, productTierID string
 	for _, upgradePath := range searchRes.UpgradePathResults {
-		if string(upgradePath.ID) == upgradePathID {
+		if upgradePath.Id == upgradePathID {
 			found = true
-			serviceID = string(upgradePath.ServiceID)
-			productTierID = string(upgradePath.ProductTierID)
+			serviceID = upgradePath.ServiceId
+			productTierID = upgradePath.ProductTierID
 			break
 		}
 	}

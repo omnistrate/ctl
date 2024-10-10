@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/chelnak/ysmrr"
-	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
 	"github.com/omnistrate/ctl/internal/utils"
+	openapiclientfleet "github.com/omnistrate/omnistrate-sdk-go/fleet"
 	"github.com/spf13/cobra"
 )
 
@@ -155,7 +155,7 @@ func runListVersions(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func formatServicePlanVersion(servicePlan *inventoryapi.ServicePlanSearchRecord, truncateNames bool) (model.ServicePlanVersion, error) {
+func formatServicePlanVersion(servicePlan openapiclientfleet.ServicePlanSearchRecord, truncateNames bool) (model.ServicePlanVersion, error) {
 	serviceName := servicePlan.ServiceName
 	envName := servicePlan.ServiceEnvironmentName
 	planName := servicePlan.Name
@@ -172,9 +172,9 @@ func formatServicePlanVersion(servicePlan *inventoryapi.ServicePlanSearchRecord,
 	}
 
 	return model.ServicePlanVersion{
-		PlanID:             servicePlan.ID,
+		PlanID:             servicePlan.Id,
 		PlanName:           planName,
-		ServiceID:          string(servicePlan.ServiceID),
+		ServiceID:          servicePlan.ServiceId,
 		ServiceName:        serviceName,
 		Environment:        envName,
 		Version:            servicePlan.Version,
@@ -193,12 +193,12 @@ func validateListVersionsArguments(args []string, serviceID, planID string) erro
 	return nil
 }
 
-func filterLatestNVersions(servicePlans []*inventoryapi.ServicePlanSearchRecord, latestN int) []*inventoryapi.ServicePlanSearchRecord {
+func filterLatestNVersions(servicePlans []openapiclientfleet.ServicePlanSearchRecord, latestN int) []openapiclientfleet.ServicePlanSearchRecord {
 	if latestN == -1 {
 		return servicePlans
 	}
 
-	slices.SortFunc(servicePlans, func(a, b *inventoryapi.ServicePlanSearchRecord) int {
+	slices.SortFunc(servicePlans, func(a, b openapiclientfleet.ServicePlanSearchRecord) int {
 		if a.ReleasedAt != nil && b.ReleasedAt != nil {
 			ta, _ := time.Parse(time.RFC3339, *a.ReleasedAt)
 			tb, _ := time.Parse(time.RFC3339, *b.ReleasedAt)

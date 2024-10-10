@@ -74,13 +74,14 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	formattedInstances := make([]model.Instance, 0)
-	for _, instance := range searchRes.ResourceInstanceResults {
-		if instance == nil {
+	for i := range searchRes.ResourceInstanceResults {
+		instance := searchRes.ResourceInstanceResults[i]
+		if instance.Id == "" {
 			continue
 		}
 
 		// Format instance
-		formattedInstance := formatInstance(instance, truncateNames)
+		formattedInstance := formatInstance(&instance, truncateNames)
 
 		// Check if the instance matches the filters
 		ok, err := utils.MatchesFilters(formattedInstance, filterMaps)

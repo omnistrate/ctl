@@ -1,8 +1,8 @@
 package serviceplan
 
 import (
-	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
 	"github.com/omnistrate/ctl/internal/utils"
+	openapiclientfleet "github.com/omnistrate/omnistrate-sdk-go/fleet"
 
 	"testing"
 
@@ -14,92 +14,92 @@ func TestFilterLatestNVersions(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		servicePlans []*inventoryapi.ServicePlanSearchRecord
+		servicePlans []openapiclientfleet.ServicePlanSearchRecord
 		latestN      int
-		expected     []*inventoryapi.ServicePlanSearchRecord
+		expected     []openapiclientfleet.ServicePlanSearchRecord
 	}{
 		{
 			name: "latestN is -1, return all service plans",
-			servicePlans: []*inventoryapi.ServicePlanSearchRecord{
+			servicePlans: []openapiclientfleet.ServicePlanSearchRecord{
 				{ReleasedAt: utils.ToPtr("2023-08-01T00:00:00Z")},
 				{ReleasedAt: utils.ToPtr("2023-07-01T00:00:00Z")},
 			},
 			latestN: -1,
-			expected: []*inventoryapi.ServicePlanSearchRecord{
+			expected: []openapiclientfleet.ServicePlanSearchRecord{
 				{ReleasedAt: utils.ToPtr("2023-08-01T00:00:00Z")},
 				{ReleasedAt: utils.ToPtr("2023-07-01T00:00:00Z")},
 			},
 		},
 		{
 			name: "latestN is greater than available plans, return all service plans",
-			servicePlans: []*inventoryapi.ServicePlanSearchRecord{
+			servicePlans: []openapiclientfleet.ServicePlanSearchRecord{
 				{ReleasedAt: utils.ToPtr("2023-08-01T00:00:00Z")},
 				{ReleasedAt: utils.ToPtr("2023-07-01T00:00:00Z")},
 			},
 			latestN: 5,
-			expected: []*inventoryapi.ServicePlanSearchRecord{
+			expected: []openapiclientfleet.ServicePlanSearchRecord{
 				{ReleasedAt: utils.ToPtr("2023-08-01T00:00:00Z")},
 				{ReleasedAt: utils.ToPtr("2023-07-01T00:00:00Z")},
 			},
 		},
 		{
 			name: "latestN is 1, return only the latest service plan",
-			servicePlans: []*inventoryapi.ServicePlanSearchRecord{
+			servicePlans: []openapiclientfleet.ServicePlanSearchRecord{
 				{ReleasedAt: utils.ToPtr("2023-08-01T00:00:00Z")},
 				{ReleasedAt: utils.ToPtr("2023-07-01T00:00:00Z")},
 			},
 			latestN: 1,
-			expected: []*inventoryapi.ServicePlanSearchRecord{
+			expected: []openapiclientfleet.ServicePlanSearchRecord{
 				{ReleasedAt: utils.ToPtr("2023-08-01T00:00:00Z")},
 			},
 		},
 		{
 			name: "latestN is 2, return the latest 2 service plans",
-			servicePlans: []*inventoryapi.ServicePlanSearchRecord{
+			servicePlans: []openapiclientfleet.ServicePlanSearchRecord{
 				{ReleasedAt: utils.ToPtr("2023-08-01T00:00:00Z")},
 				{ReleasedAt: utils.ToPtr("2023-07-01T00:00:00Z")},
 				{ReleasedAt: utils.ToPtr("2023-06-01T00:00:00Z")},
 			},
 			latestN: 2,
-			expected: []*inventoryapi.ServicePlanSearchRecord{
+			expected: []openapiclientfleet.ServicePlanSearchRecord{
 				{ReleasedAt: utils.ToPtr("2023-08-01T00:00:00Z")},
 				{ReleasedAt: utils.ToPtr("2023-07-01T00:00:00Z")},
 			},
 		},
 		{
 			name: "plans with nil release dates, sort properly",
-			servicePlans: []*inventoryapi.ServicePlanSearchRecord{
+			servicePlans: []openapiclientfleet.ServicePlanSearchRecord{
 				{ReleasedAt: utils.ToPtr("2023-08-01T00:00:00Z")},
 				{ReleasedAt: utils.ToPtr("2023-07-01T00:00:00Z")},
 				{ReleasedAt: nil},
 			},
 			latestN: 2,
-			expected: []*inventoryapi.ServicePlanSearchRecord{
+			expected: []openapiclientfleet.ServicePlanSearchRecord{
 				{ReleasedAt: utils.ToPtr("2023-08-01T00:00:00Z")},
 				{ReleasedAt: utils.ToPtr("2023-07-01T00:00:00Z")},
 			},
 		},
 		{
 			name: "mix of plans with and without release dates, return correct latest plans",
-			servicePlans: []*inventoryapi.ServicePlanSearchRecord{
+			servicePlans: []openapiclientfleet.ServicePlanSearchRecord{
 				{ReleasedAt: utils.ToPtr("2023-08-01T00:00:00Z")},
 				{ReleasedAt: nil},
 				{ReleasedAt: utils.ToPtr("2023-07-01T00:00:00Z")},
 			},
 			latestN: 2,
-			expected: []*inventoryapi.ServicePlanSearchRecord{
+			expected: []openapiclientfleet.ServicePlanSearchRecord{
 				{ReleasedAt: utils.ToPtr("2023-08-01T00:00:00Z")},
 				{ReleasedAt: utils.ToPtr("2023-07-01T00:00:00Z")},
 			},
 		},
 		{
 			name: "all plans have nil release dates, return the first N plans",
-			servicePlans: []*inventoryapi.ServicePlanSearchRecord{
+			servicePlans: []openapiclientfleet.ServicePlanSearchRecord{
 				{ReleasedAt: nil},
 				{ReleasedAt: nil},
 			},
 			latestN: 1,
-			expected: []*inventoryapi.ServicePlanSearchRecord{
+			expected: []openapiclientfleet.ServicePlanSearchRecord{
 				{ReleasedAt: nil},
 			},
 		},
