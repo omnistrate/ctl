@@ -8,7 +8,7 @@ import (
 	"github.com/omnistrate/ctl/internal/config"
 )
 
-func DescribeSubscription(ctx context.Context, token string, serviceID, environmentID, instanceID string) (*inventoryapi.FleetDescribeSubscriptionResult, error) {
+func DescribeSubscription(token string, serviceID, environmentID, instanceID string) (*inventoryapi.FleetDescribeSubscriptionResult, error) {
 	subscription, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return nil, err
@@ -21,7 +21,7 @@ func DescribeSubscription(ctx context.Context, token string, serviceID, environm
 		ID:            inventoryapi.SubscriptionID(instanceID),
 	}
 
-	res, err := subscription.DescribeSubscription(ctx, &request)
+	res, err := subscription.DescribeSubscription(context.Background(), &request)
 	if err != nil {
 		return nil, err
 	}

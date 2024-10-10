@@ -6,11 +6,11 @@ import (
 	"strings"
 
 	"github.com/chelnak/ysmrr"
-	tierversionsetapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/tier_version_set_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
 	"github.com/omnistrate/ctl/internal/utils"
+	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 	"github.com/spf13/cobra"
 )
 
@@ -135,12 +135,12 @@ func validateDescribeVersionArguments(args []string, serviceID, planID, json str
 	return nil
 }
 
-func formatServicePlanVersionDetails(ctx context.Context, token, serviceName, planName, environment string, versionSet *tierversionsetapi.TierVersionSet) (model.ServicePlanVersionDetails, error) {
+func formatServicePlanVersionDetails(ctx context.Context, token, serviceName, planName, environment string, versionSet *openapiclient.TierVersionSet) (model.ServicePlanVersionDetails, error) {
 	// Get resource details
 	var resources []model.Resource
 	for _, versionSetResource := range versionSet.Resources {
 		// Get resource details
-		desRes, err := dataaccess.DescribeResource(ctx, token, string(versionSet.ServiceID), string(versionSetResource.ID), utils.ToPtr(string(versionSet.ProductTierID)), &versionSet.Version)
+		desRes, err := dataaccess.DescribeResource(ctx, token, versionSet.ServiceId, versionSetResource.Id, utils.ToPtr(versionSet.ProductTierId), &versionSet.Version)
 		if err != nil {
 			return model.ServicePlanVersionDetails{}, err
 		}
@@ -202,9 +202,9 @@ func formatServicePlanVersionDetails(ctx context.Context, token, serviceName, pl
 	}
 
 	formattedServicePlan := model.ServicePlanVersionDetails{
-		PlanID:             string(versionSet.ProductTierID),
+		PlanID:             versionSet.ProductTierId,
 		PlanName:           planName,
-		ServiceID:          string(versionSet.ServiceID),
+		ServiceID:          versionSet.ServiceId,
 		ServiceName:        serviceName,
 		Environment:        environment,
 		Version:            versionSet.Version,
