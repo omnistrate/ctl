@@ -3,28 +3,26 @@ package dataaccess
 import (
 	"context"
 
-	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
-	tierversionsetapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/tier_version_set_api"
-	"github.com/omnistrate/ctl/internal/config"
-	"github.com/omnistrate/ctl/internal/utils"
+	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 	"github.com/pkg/errors"
 )
 
 func FindLatestVersion(ctx context.Context, token, serviceID, productTierID string) (string, error) {
-	versionSet, err := httpclientwrapper.NewVersionSet(config.GetHostScheme(), config.GetHost())
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+
+	apiClient := getV1Client()
+	res, r, err := apiClient.TierVersionSetApiAPI.TierVersionSetApiListTierVersionSets(
+		ctxWithToken,
+		serviceID,
+		productTierID,
+	).Execute()
+
+	err = handleV1Error(err)
 	if err != nil {
 		return "", err
 	}
 
-	res, err := versionSet.ListTierVersionSets(ctx, &tierversionsetapi.ListTierVersionSetsRequest{
-		Token:                  token,
-		ServiceID:              tierversionsetapi.ServiceID(serviceID),
-		ProductTierID:          tierversionsetapi.ProductTierID(productTierID),
-		LatestMajorVersionOnly: utils.ToPtr(true),
-	})
-	if err != nil {
-		return "", err
-	}
+	defer r.Body.Close()
 
 	if len(res.TierVersionSets) == 0 {
 		return "", errors.New("no version found")
@@ -34,19 +32,21 @@ func FindLatestVersion(ctx context.Context, token, serviceID, productTierID stri
 }
 
 func FindPreferredVersion(ctx context.Context, token, serviceID, productTierID string) (string, error) {
-	versionSet, err := httpclientwrapper.NewVersionSet(config.GetHostScheme(), config.GetHost())
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+
+	apiClient := getV1Client()
+	res, r, err := apiClient.TierVersionSetApiAPI.TierVersionSetApiListTierVersionSets(
+		ctxWithToken,
+		serviceID,
+		productTierID,
+	).Execute()
+
+	err = handleV1Error(err)
 	if err != nil {
 		return "", err
 	}
 
-	res, err := versionSet.ListTierVersionSets(ctx, &tierversionsetapi.ListTierVersionSetsRequest{
-		Token:         token,
-		ServiceID:     tierversionsetapi.ServiceID(serviceID),
-		ProductTierID: tierversionsetapi.ProductTierID(productTierID),
-	})
-	if err != nil {
-		return "", err
-	}
+	defer r.Body.Close()
 
 	if len(res.TierVersionSets) == 0 {
 		return "", errors.New("no version found")
@@ -61,41 +61,42 @@ func FindPreferredVersion(ctx context.Context, token, serviceID, productTierID s
 	return "", errors.New("no preferred version found")
 }
 
-func DescribeVersionSet(ctx context.Context, token, serviceID, productTierID, version string) (*tierversionsetapi.TierVersionSet, error) {
-	versionSet, err := httpclientwrapper.NewVersionSet(config.GetHostScheme(), config.GetHost())
+func DescribeVersionSet(ctx context.Context, token, serviceID, productTierID, version string) (*openapiclient.TierVersionSet, error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+
+	apiClient := getV1Client()
+	res, r, err := apiClient.TierVersionSetApiAPI.TierVersionSetApiDescribeTierVersionSet(
+		ctxWithToken,
+		serviceID,
+		productTierID,
+		version,
+	).Execute()
+
+	err = handleV1Error(err)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := versionSet.DescribeTierVersionSet(ctx, &tierversionsetapi.DescribeTierVersionSetRequest{
-		Token:         token,
-		ServiceID:     tierversionsetapi.ServiceID(serviceID),
-		ProductTierID: tierversionsetapi.ProductTierID(productTierID),
-		Version:       version,
-	})
-	if err != nil {
-		return nil, err
-	}
-
+	defer r.Body.Close()
 	return res, nil
 }
 
-func SetDefaultServicePlan(ctx context.Context, token, serviceID, productTierID, version string) (tierVersionSet *tierversionsetapi.TierVersionSet, err error) {
-	versionSet, err := httpclientwrapper.NewVersionSet(config.GetHostScheme(), config.GetHost())
+func SetDefaultServicePlan(ctx context.Context, token, serviceID, productTierID, version string) (*openapiclient.TierVersionSet, error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+
+	apiClient := getV1Client()
+	res, r, err := apiClient.TierVersionSetApiAPI.TierVersionSetApiPromoteTierVersionSet(
+		ctxWithToken,
+		serviceID,
+		productTierID,
+		version,
+	).Execute()
+
+	err = handleV1Error(err)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	request := &tierversionsetapi.PromoteTierVersionSetRequest{
-		Token:         token,
-		ServiceID:     tierversionsetapi.ServiceID(serviceID),
-		ProductTierID: tierversionsetapi.ProductTierID(productTierID),
-		Version:       version,
-	}
-
-	if tierVersionSet, err = versionSet.PromoteTierVersionSet(ctx, request); err != nil {
-		return
-	}
-
-	return
+	defer r.Body.Close()
+	return res, nil
 }
