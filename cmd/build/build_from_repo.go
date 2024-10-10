@@ -12,11 +12,11 @@ import (
 
 	"github.com/chelnak/ysmrr"
 	composegenapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/compose_gen_api"
-	producttierapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/product_tier_api"
 	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
+	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 	"github.com/pkg/browser"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -480,7 +480,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	spinner = sm.AddSpinner("Setting the service plan as the default service plan in production")
 
 	// Describe the dev product tier
-	var devProductTier *producttierapi.DescribeProductTierResult
+	var devProductTier *openapiclient.DescribeProductTierResult
 	devProductTier, err = dataaccess.DescribeProductTier(cmd.Context(), token, serviceID, devPlanID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
