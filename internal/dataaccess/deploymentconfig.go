@@ -3,25 +3,23 @@ package dataaccess
 import (
 	"context"
 
-	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
-	deploymentconfigapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/deployment_config_api"
-	"github.com/omnistrate/ctl/internal/config"
+	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 )
 
-func GetDefaultDeploymentConfigID(ctx context.Context, token string) (deploymentconfigapi.DeploymentConfigID, error) {
-	service, err := httpclientwrapper.NewDeploymentConfig(config.GetHostScheme(), config.GetHost())
+func GetDefaultDeploymentConfigID(ctx context.Context, token string) (string, error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+
+	apiClient := getV1Client()
+	res, r, err := apiClient.DeploymentConfigApiAPI.DeploymentConfigApiDescribeDeploymentConfig(
+		ctxWithToken,
+		"default",
+	).Execute()
+
+	err = handleV1Error(err)
 	if err != nil {
-		return "", err
+		return "nil", err
 	}
 
-	request := deploymentconfigapi.DescribeDeploymentConfigRequest{
-		Token: token,
-		ID:    "default",
-	}
-
-	res, err := service.DescribeDeploymentConfig(ctx, &request)
-	if err != nil {
-		return "", err
-	}
-	return res.ID, nil
+	r.Body.Close()
+	return res.Id, nil
 }

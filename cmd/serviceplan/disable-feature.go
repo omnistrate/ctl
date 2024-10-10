@@ -85,7 +85,7 @@ func runDisableFeature(cmd *cobra.Command, args []string) error {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
-	modelId := string(servicePlan.ServiceModelID)
+	modelId := servicePlan.ServiceModelId
 
 	// Update service model
 	err = dataaccess.DisableServiceModelFeature(cmd.Context(), token, serviceID, modelId, featureName)

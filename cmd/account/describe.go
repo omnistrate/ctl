@@ -141,15 +141,15 @@ func getAccount(ctx context.Context, token, accountNameArg, accountIDArg string)
 	if accountNameArg != "" {
 		for _, account := range listRes.AccountConfigs {
 			if strings.EqualFold(account.Name, accountNameArg) {
-				accountID = string(account.ID)
+				accountID = account.Id
 				accountName = account.Name
 				count++
 			}
 		}
 	} else {
 		for _, account := range listRes.AccountConfigs {
-			if strings.EqualFold(string(account.ID), accountIDArg) {
-				accountID = string(account.ID)
+			if strings.EqualFold(account.Id, accountIDArg) {
+				accountID = account.Id
 				accountName = account.Name
 				count++
 			}

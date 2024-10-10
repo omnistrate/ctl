@@ -7,11 +7,11 @@ import (
 	"strings"
 
 	"github.com/chelnak/ysmrr"
-	producttierapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/product_tier_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
 	"github.com/omnistrate/ctl/internal/utils"
+	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 	"github.com/spf13/cobra"
 )
 
@@ -122,18 +122,18 @@ func validateDescribeArguments(args []string, serviceID, planID, output string) 
 	return nil
 }
 
-func formatServicePlanDetails(ctx context.Context, token, serviceName, planName, environment string, productTier *producttierapi.DescribeProductTierResult) (model.ServicePlanDetails, error) {
+func formatServicePlanDetails(ctx context.Context, token, serviceName, planName, environment string, productTier *openapiclient.DescribeProductTierResult) (model.ServicePlanDetails, error) {
 	// Get service model
-	serviceModel, err := dataaccess.DescribeServiceModel(ctx, token, string(productTier.ServiceID), string(productTier.ServiceModelID))
+	serviceModel, err := dataaccess.DescribeServiceModel(ctx, token, productTier.ServiceId, productTier.ServiceModelId)
 	if err != nil {
 		return model.ServicePlanDetails{}, err
 	}
 
 	// Get resource details
 	var resources []model.Resource
-	for resourceID := range productTier.APIGroups {
+	for resourceID := range *productTier.ApiGroups {
 		// Get resource details
-		desRes, err := dataaccess.DescribeResource(ctx, token, string(productTier.ServiceID), string(resourceID), nil, nil)
+		desRes, err := dataaccess.DescribeResource(ctx, token, productTier.ServiceId, resourceID, nil, nil)
 		if err != nil {
 			return model.ServicePlanDetails{}, err
 		}
@@ -194,7 +194,7 @@ func formatServicePlanDetails(ctx context.Context, token, serviceName, planName,
 	}
 
 	// Describe pending changes
-	pendingChanges, err := dataaccess.DescribePendingChanges(ctx, token, string(productTier.ServiceID), string(serviceModel.ServiceAPIID), string(productTier.ID))
+	pendingChanges, err := dataaccess.DescribePendingChanges(ctx, token, productTier.ServiceId, string(serviceModel.ServiceAPIID), productTier.Id)
 	if err != nil {
 		return model.ServicePlanDetails{}, err
 	}
@@ -214,12 +214,12 @@ func formatServicePlanDetails(ctx context.Context, token, serviceName, planName,
 	}
 
 	formattedServicePlan := model.ServicePlanDetails{
-		PlanID:          string(productTier.ID),
+		PlanID:          productTier.Id,
 		PlanName:        planName,
-		ServiceID:       string(productTier.ServiceID),
+		ServiceID:       productTier.ServiceId,
 		ServiceName:     serviceName,
 		Environment:     environment,
-		DeploymentType:  string(productTier.TierType),
+		DeploymentType:  productTier.TierType,
 		TenancyType:     string(serviceModel.ModelType),
 		EnabledFeatures: productTier.EnabledFeatures,
 		Resources:       resources,

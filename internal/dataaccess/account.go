@@ -4,76 +4,79 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
-	accountconfigapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/account_config_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/utils"
+	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 )
 
-func DescribeAccount(ctx context.Context, token string, id string) (*accountconfigapi.DescribeAccountConfigResult, error) {
-	account, err := httpclientwrapper.NewAccountConfig(config.GetHostScheme(), config.GetHost())
+func DescribeAccount(ctx context.Context, token string, id string) (*openapiclient.DescribeAccountConfigResult, error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+
+	apiClient := getV1Client()
+	res, r, err := apiClient.AccountConfigApiAPI.AccountConfigApiDescribeAccountConfig(
+		ctxWithToken,
+		id,
+	).Execute()
+
+	err = handleV1Error(err)
 	if err != nil {
 		return nil, err
 	}
 
-	request := accountconfigapi.DescribeAccountConfigRequest{
-		Token: token,
-		ID:    accountconfigapi.AccountConfigID(id),
-	}
-
-	res, err := account.DescribeAccountConfig(ctx, &request)
-	if err != nil {
-		return nil, err
-	}
+	r.Body.Close()
 	return res, nil
 }
 
-func ListAccounts(ctx context.Context, token string, cloudProvider string) (*accountconfigapi.ListAccountConfigResult, error) {
-	account, err := httpclientwrapper.NewAccountConfig(config.GetHostScheme(), config.GetHost())
+func ListAccounts(ctx context.Context, token string, cloudProvider string) (*openapiclient.ListAccountConfigResult, error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+
+	apiClient := getV1Client()
+	res, r, err := apiClient.AccountConfigApiAPI.AccountConfigApiListAccountConfig(
+		ctxWithToken,
+		cloudProvider,
+	).Execute()
+
+	err = handleV1Error(err)
 	if err != nil {
 		return nil, err
 	}
 
-	request := accountconfigapi.ListAccountConfigRequest{
-		Token:             token,
-		CloudProviderName: accountconfigapi.CloudProvider(cloudProvider),
-	}
-
-	res, err := account.ListAccountConfig(ctx, &request)
-	if err != nil {
-		return nil, err
-	}
+	r.Body.Close()
 	return res, nil
 }
 
 func DeleteAccount(ctx context.Context, token, accountConfigID string) error {
-	service, err := httpclientwrapper.NewAccountConfig(config.GetHostScheme(), config.GetHost())
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+
+	apiClient := getV1Client()
+	r, err := apiClient.AccountConfigApiAPI.AccountConfigApiDeleteAccountConfig(
+		ctxWithToken,
+		accountConfigID,
+	).Execute()
+
+	err = handleV1Error(err)
 	if err != nil {
 		return err
 	}
 
-	request := accountconfigapi.DeleteAccountConfigRequest{
-		Token: token,
-		ID:    accountconfigapi.AccountConfigID(accountConfigID),
-	}
-
-	err = service.DeleteAccountConfig(ctx, &request)
-	if err != nil {
-		return err
-	}
+	r.Body.Close()
 	return nil
 }
 
-func CreateAccount(ctx context.Context, accountConfig *accountconfigapi.CreateAccountConfigRequest) (accountconfigapi.AccountConfigID, error) {
-	service, err := httpclientwrapper.NewAccountConfig(config.GetHostScheme(), config.GetHost())
+func CreateAccount(ctx context.Context, token string, accountConfig openapiclient.CreateAccountConfigRequestBody) (string, error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+
+	apiClient := getV1Client()
+	res, r, err := apiClient.AccountConfigApiAPI.AccountConfigApiCreateAccountConfig(
+		ctxWithToken,
+	).CreateAccountConfigRequestBody(accountConfig).Execute()
+
+	err = handleV1Error(err)
 	if err != nil {
 		return "", err
 	}
 
-	res, err := service.CreateAccountConfig(ctx, accountConfig)
-	if err != nil {
-		return "", err
-	}
+	r.Body.Close()
 	return res, nil
 }
 
@@ -95,7 +98,7 @@ Verify your account.
 	AwsGcpTerraformGuideURL   = "https://youtu.be/eKktc4QKgaA"
 )
 
-func PrintNextStepVerifyAccountMsg(account *accountconfigapi.DescribeAccountConfigResult) {
+func PrintNextStepVerifyAccountMsg(account *openapiclient.DescribeAccountConfigResult) {
 	awsCloudFormationTemplateURL := ""
 	if account.AwsCloudFormationTemplateURL != nil {
 		awsCloudFormationTemplateURL = *account.AwsCloudFormationTemplateURL
@@ -105,7 +108,7 @@ func PrintNextStepVerifyAccountMsg(account *accountconfigapi.DescribeAccountConf
 		AwsCloudFormationGuideURL, AwsGcpTerraformScriptsURL, AwsGcpTerraformGuideURL))
 }
 
-func PrintAccountNotVerifiedWarning(account *accountconfigapi.DescribeAccountConfigResult) {
+func PrintAccountNotVerifiedWarning(account *openapiclient.DescribeAccountConfigResult) {
 	awsCloudFormationTemplateURL := ""
 	if account.AwsCloudFormationTemplateURL != nil {
 		awsCloudFormationTemplateURL = *account.AwsCloudFormationTemplateURL
@@ -139,7 +142,7 @@ func AskVerifyAccountIfAny(ctx context.Context) {
 	// Warn if any accounts are not verified
 	for _, account := range listRes.AccountConfigs {
 		if account.Status != "READY" {
-			PrintAccountNotVerifiedWarning(account)
+			PrintAccountNotVerifiedWarning(&account)
 		}
 	}
 }

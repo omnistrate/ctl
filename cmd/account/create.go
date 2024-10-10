@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/chelnak/ysmrr"
-	accountconfigapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/account_config_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/spf13/cobra"
+
+	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 )
 
 const (
@@ -74,9 +75,8 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Prepare request
-	request := &accountconfigapi.CreateAccountConfigRequest{
-		Token: token,
-		Name:  name,
+	request := openapiclient.CreateAccountConfigRequestBody{
+		Name: name,
 	}
 
 	if awsAccountID != "" {
@@ -87,7 +87,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		request.CloudProviderID = accountconfigapi.CloudProviderID(cloudProviderID)
+		request.CloudProviderId = cloudProviderID
 		request.AwsAccountID = &awsAccountID
 		request.AwsBootstrapRoleARN = utils.ToPtr("arn:aws:iam::" + awsAccountID + ":role/omnistrate-bootstrap-role")
 		request.Description = "AWS Account" + awsAccountID
@@ -106,7 +106,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		request.CloudProviderID = accountconfigapi.CloudProviderID(cloudProviderID)
+		request.CloudProviderId = cloudProviderID
 		request.GcpProjectID = &gcpProjectID
 		request.GcpProjectNumber = &gcpProjectNumber
 		request.GcpServiceAccountEmail = utils.ToPtr(fmt.Sprintf("bootstrap-%s@%s.iam.gserviceaccount.com", user.OrgId, gcpProjectID))
@@ -114,7 +114,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Create account
-	accountConfigID, err := dataaccess.CreateAccount(cmd.Context(), request)
+	accountConfigID, err := dataaccess.CreateAccount(cmd.Context(), token, request)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -122,7 +122,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully created account")
 
 	// Describe account
-	account, err := dataaccess.DescribeAccount(cmd.Context(), token, string(accountConfigID))
+	account, err := dataaccess.DescribeAccount(cmd.Context(), token, accountConfigID)
 	if err != nil {
 		utils.PrintError(err)
 		return err

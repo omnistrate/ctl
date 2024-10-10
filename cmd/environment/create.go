@@ -121,7 +121,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	publicKeyPtr := getPublicKeyPtr(visibility)
-	environmentID, err := createEnvironment(cmd.Context(), token, envName, description, serviceID, envType, visibility, string(defaultDeploymentConfigID), sourceEnvID, publicKeyPtr)
+	environmentID, err := createEnvironment(cmd.Context(), token, envName, description, serviceID, envType, visibility, defaultDeploymentConfigID, sourceEnvID, publicKeyPtr)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

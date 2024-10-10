@@ -92,7 +92,7 @@ func runRelease(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	serviceModel, err := dataaccess.DescribeServiceModel(cmd.Context(), token, serviceID, string(productTier.ServiceModelID))
+	serviceModel, err := dataaccess.DescribeServiceModel(cmd.Context(), token, serviceID, productTier.ServiceModelId)
 	if err != nil {
 		utils.PrintError(err)
 		return err

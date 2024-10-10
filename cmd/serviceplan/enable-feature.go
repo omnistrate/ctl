@@ -104,7 +104,7 @@ func runEnableFeature(cmd *cobra.Command, args []string) error {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
-	modelId := string(servicePlan.ServiceModelID)
+	modelId := servicePlan.ServiceModelId
 
 	// Update service model
 	err = dataaccess.EnableServiceModelFeature(cmd.Context(), token, serviceID, modelId, featureName, featureConfigMap)
