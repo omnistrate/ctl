@@ -13,7 +13,7 @@ endif
 GIT_USER?=$(shell gh api user -q ".login") # gets current user using github cli if the variable is not already set
 GIT_TOKEN?=$(shell gh config get -h github.com oauth_token) # gets current user using github cli if the variable is not already set
 PROJECT_NAME=omnistrate-ctl
-DOCKER_PLATFORM=linux/arm64
+DOCKER_PLATFORM=linux/arm64 
 TESTCOVERAGE_THRESHOLD=0
 REPO_ROOT=$(shell git rev-parse --show-toplevel)
 
