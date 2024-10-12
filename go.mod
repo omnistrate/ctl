@@ -10,7 +10,7 @@ require (
 	github.com/cqroot/prompt v0.9.4
 	github.com/fatih/color v1.17.0
 	github.com/google/uuid v1.6.0
-	github.com/jedib0t/go-pretty/v6 v6.5.9
+	github.com/jedib0t/go-pretty/v6 v6.6.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-wordwrap v1.0.1
 	github.com/omnistrate/api-design v0.7.4
