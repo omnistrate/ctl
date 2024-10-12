@@ -201,7 +201,7 @@ jobs:
           'auth/...',
           'build/compose/...',
           'build/image/...',
-          'build/spec/helm/...',
+          'build/helm/...',
           'domain/...',
           'environment/...',
           'helm/...',
