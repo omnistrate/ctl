@@ -5,12 +5,12 @@ on:
     paths:
     - build/Dockerfile
     branches: 
-    - master
+    - main
   pull_request:
     paths:
       - build/Dockerfile
     branches: 
-    - master
+    - main
 
 env:
   GOPRIVATE: github.com/omnistrate
