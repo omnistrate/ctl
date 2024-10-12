@@ -13,7 +13,7 @@ endif
 GIT_USER?=$(shell gh api user -q ".login") # gets current user using github cli if the variable is not already set
 GIT_TOKEN?=$(shell gh config get -h github.com oauth_token) # gets current user using github cli if the variable is not already set
 PROJECT_NAME=omnistrate-ctl
-DOCKER_PLATFORM=linux/arm64
+DOCKER_PLATFORM=linux/arm64 
 TESTCOVERAGE_THRESHOLD=0
 REPO_ROOT=$(shell git rev-parse --show-toplevel)
 
@@ -146,7 +146,7 @@ update-omnistrate-dependencies:
 .PHONY: check-dependencies
 check-dependencies:
 	@echo "Checking dependencies starting with github.com/omnistrate..."
-	@violating_deps=$$(grep -E '^\s*github.com/omnistrate' go.mod | grep -v -E 'github.com/omnistrate/api-design|github.com/omnistrate/api-design/pkg/httpclientwrapper|github.com/omnistrate/omnistrate-sdk-go'); \
+	@violating_deps=$$(grep -E '^\s*github.com/omnistrate' go.mod | grep -v -E 'github.com/omnistrate/api-design|github.com/omnistrate/api-design/pkg/httpclientwrapper|github.com/omnistrate-oss/omnistrate-sdk-go'); \
     if [ -n "$$violating_deps" ]; then \
         echo "Error: Found dependencies starting with github.com/omnistrate/commons other than allowed ones:"; \
         echo "$$violating_deps"; \

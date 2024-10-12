@@ -5,11 +5,11 @@ import (
 	"fmt"
 
 	"github.com/chelnak/ysmrr"
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
 	"github.com/omnistrate/ctl/internal/utils"
-	openapiclientfleet "github.com/omnistrate/omnistrate-sdk-go/fleet"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )

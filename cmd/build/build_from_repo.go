@@ -11,12 +11,12 @@ import (
 	"time"
 
 	"github.com/chelnak/ysmrr"
+	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	composegenapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/compose_gen_api"
 	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
-	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 	"github.com/pkg/browser"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
