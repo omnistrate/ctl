@@ -58,6 +58,15 @@ omctl build --file docker-compose.yml --name "My Service" --interactive
 
 # Build service with compose spec with service description and service logo
 omctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png"
+
+# Build service with service specification for Helm, Operator or Kustomize in dev environment
+omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Service"
+
+# Build service with service specification for Helm, Operator or Kustomize in prod environment
+omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Service" --environment prod --environment-type prod
+
+# Build service with service specification for Helm, Operator or Kustomize as preferred
+omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Service" --release-as-preferred 
 `
 
 	buildLong = `Build command can be used to build a service from image, docker compose, and service plan spec. 

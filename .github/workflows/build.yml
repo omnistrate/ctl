@@ -138,6 +138,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    concurrency:
+      group: ${{ github.workflow }}-integration-tests
+      cancel-in-progress: true
 
     steps:
       - name: Checkout repository
@@ -192,6 +195,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    concurrency:
+      group: ${{ github.workflow }}-smoke-tests-${{ matrix.test-group }}
+      cancel-in-progress: true
 
     strategy:
       fail-fast: false
@@ -199,7 +205,9 @@ jobs:
         test-group: [ 
           'account/...',
           'auth/...',
-          'build/...',
+          'build/compose/...',
+          'build/image/...',
+          'build/helm/...',
           'domain/...',
           'environment/...',
           'helm/...',
