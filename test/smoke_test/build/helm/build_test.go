@@ -32,7 +32,7 @@ func Test_build_basic(t *testing.T) {
 	require.NoError(err)
 
 	// Step 2: get spec files
-	specFiles, err := os.ReadDir("../specfiles/helm")
+	specFiles, err := os.ReadDir("../../specfiles/helm")
 	require.NoError(err)
 
 	if len(specFiles) == 0 {
@@ -47,7 +47,7 @@ func Test_build_basic(t *testing.T) {
 
 		cmd.RootCmd.SetArgs([]string{"build",
 			"--spec-type ServicePlanSpec",
-			"-f", "../specfiles/helm/" + f.Name(),
+			"-f", "../../specfiles/helm/" + f.Name(),
 			"--name", f.Name() + uuid.NewString(),
 			"--description", "My Service Description",
 			"--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png",
