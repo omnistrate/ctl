@@ -32,7 +32,7 @@ func Test_build_basic(t *testing.T) {
 	require.NoError(err)
 
 	// Step 2: get compose files
-	composeFiles, err := os.ReadDir("../composefiles")
+	composeFiles, err := os.ReadDir("../../composefiles")
 	require.NoError(err)
 
 	if len(composeFiles) == 0 {
@@ -46,7 +46,7 @@ func Test_build_basic(t *testing.T) {
 		}
 
 		cmd.RootCmd.SetArgs([]string{"build",
-			"-f", "../composefiles/" + f.Name(),
+			"-f", "../../composefiles/" + f.Name(),
 			"--name", f.Name() + uuid.NewString(),
 			"--description", "My Service Description",
 			"--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png",
@@ -87,7 +87,7 @@ func Test_build_update_service(t *testing.T) {
 
 	// PASS: create mysql cluster service
 	serviceName := "mysql cluster" + uuid.NewString()
-	cmd.RootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png", "--release"})
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "../../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png", "--release"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
@@ -96,22 +96,22 @@ func Test_build_update_service(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: update mysql cluster service
-	cmd.RootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_variation_apiparam_image_infra_capability.yaml", "--name", serviceName, "--release-as-preferred"})
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "../../composefiles/variations/mysqlcluster_variation_apiparam_image_infra_capability.yaml", "--name", serviceName, "--release-as-preferred"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// PASS: update back to original mysql cluster service
-	cmd.RootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--release-as-preferred"})
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "../../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--release-as-preferred"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// PASS: update mysql cluster service
-	cmd.RootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_variation_account_integration_resource.yaml", "--name", serviceName, "--release-as-preferred"})
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "../../composefiles/variations/mysqlcluster_variation_account_integration_resource.yaml", "--name", serviceName, "--release-as-preferred"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// PASS: update back to original mysql cluster service
-	cmd.RootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--release-as-preferred"})
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "../../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--release-as-preferred"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
@@ -121,7 +121,7 @@ func Test_build_update_service(t *testing.T) {
 
 	// PASS: create postgres cluster service
 	serviceName = "postgres cluster" + uuid.NewString()
-	cmd.RootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/postgrescluster_original.yaml", "--name", serviceName, "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png", "--release"})
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "../../composefiles/variations/postgrescluster_original.yaml", "--name", serviceName, "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png", "--release"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
@@ -130,17 +130,17 @@ func Test_build_update_service(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: update postgres cluster service
-	cmd.RootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/postgrescluster_variation_load_balancer.yaml", "--name", serviceName, "--release-as-preferred"})
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "../../composefiles/variations/postgrescluster_variation_load_balancer.yaml", "--name", serviceName, "--release-as-preferred"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// PASS: update back to original postgres cluster service
-	cmd.RootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/postgrescluster_original.yaml", "--name", serviceName, "--release-as-preferred"})
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "../../composefiles/variations/postgrescluster_original.yaml", "--name", serviceName, "--release-as-preferred"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// PASS: add new service plan to postgres cluster service
-	cmd.RootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/postgrescluster_variation_new_tier.yaml", "--name", serviceName, "--release-as-preferred"})
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "../../composefiles/variations/postgrescluster_variation_new_tier.yaml", "--name", serviceName, "--release-as-preferred"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
@@ -168,7 +168,7 @@ func Test_build_duplicate_service_plan_name(t *testing.T) {
 
 	serviceName := "mysql cluster" + uuid.NewString()
 	// PASS: create mysql cluster service in dev environment
-	cmd.RootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png", "--release"})
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "../../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png", "--release"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 	devEnvironmentID := build.EnvironmentID
@@ -177,7 +177,7 @@ func Test_build_duplicate_service_plan_name(t *testing.T) {
 	require.NotEmpty(devProductTierID)
 
 	// PASS: create mysql cluster service in prod environment
-	cmd.RootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--environment", "prod", "--environment-type", "prod", "--release"})
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "../../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--environment", "prod", "--environment-type", "prod", "--release"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 	prodEnvironmentID := build.EnvironmentID
@@ -188,14 +188,14 @@ func Test_build_duplicate_service_plan_name(t *testing.T) {
 	require.NotEqual(devProductTierID, prodProductTierID)
 
 	// PASS: update dev mysql cluster service
-	cmd.RootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_variation_apiparam_image_infra_capability.yaml", "--name", serviceName, "--release-as-preferred"})
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "../../composefiles/variations/mysqlcluster_variation_apiparam_image_infra_capability.yaml", "--name", serviceName, "--release-as-preferred"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 	require.Equal(devEnvironmentID, build.EnvironmentID)
 	require.Equal(devProductTierID, build.ProductTierID)
 
 	// PASS: update prod mysql cluster service
-	cmd.RootCmd.SetArgs([]string{"build", "-f", "../composefiles/variations/mysqlcluster_variation_apiparam_image_infra_capability.yaml", "--name", serviceName, "--environment", "prod", "--environment-type", "prod", "--release-as-preferred"})
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "../../composefiles/variations/mysqlcluster_variation_apiparam_image_infra_capability.yaml", "--name", serviceName, "--environment", "prod", "--environment-type", "prod", "--release-as-preferred"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 	require.Equal(prodEnvironmentID, build.EnvironmentID)
@@ -266,7 +266,7 @@ func Test_build_create_no_name(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"build", "-f", "../composefiles/postgresql.yaml", "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "../../composefiles/postgresql.yaml", "--description", "My Service Description", "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.Error(err)
 	require.Contains(err.Error(), "name is required")
@@ -288,7 +288,7 @@ func Test_build_create_no_description(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"build", "-f", "../composefiles/postgresql.yaml", "--name", "postgresql" + uuid.NewString(), "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "../../composefiles/postgresql.yaml", "--name", "postgresql" + uuid.NewString(), "--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
@@ -313,7 +313,7 @@ func Test_build_create_no_service_logo_url(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"build", "-f", "../composefiles/postgresql.yaml", "--name", "postgresql" + uuid.NewString(), "--description", "My Service Description"})
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "../../composefiles/postgresql.yaml", "--name", "postgresql" + uuid.NewString(), "--description", "My Service Description"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
