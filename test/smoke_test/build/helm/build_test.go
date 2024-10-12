@@ -46,8 +46,8 @@ func Test_build_basic(t *testing.T) {
 		}
 
 		cmd.RootCmd.SetArgs([]string{"build",
-			"--spec-type ServicePlanSpec",
 			"-f", "../../specfiles/helm/" + f.Name(),
+			"--spec-type ServicePlanSpec",
 			"--name", f.Name() + uuid.NewString(),
 			"--description", "My Service Description",
 			"--service-logo-url", "https://freepnglogos.com/uploads/server-png/server-computer-database-network-vector-graphic-pixabay-31.png",
