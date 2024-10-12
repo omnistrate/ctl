@@ -199,7 +199,9 @@ jobs:
         test-group: [ 
           'account/...',
           'auth/...',
-          'build/...',
+          'build/compose/...',
+          'build/image/...',
+          'build/spec/...',
           'domain/...',
           'environment/...',
           'helm/...',
