@@ -23,12 +23,23 @@ Create secrets in your repository for your Omnistrate email and password and use
     omctl --version
 ```
 
+## Automating your CI/CD process with Omnistrate with GitHub Actions
+
+Omnistrate allow you to Automate your CI/CD process and integrate with any CI/CD tool. Our community contributions provide a [guideline](https://github.com/omnistrate-community/ci-cd-example) on how to setup your build, test, release and fleet patching Actions on GitHub.
+
+To get the example from the repo you can clone it using:
+
+```
+# Template availale at
+gh repo clone omnistrate-community/ci-cd-example
+```
+
 ## Using omnistrate-ctl with Docker
 
 omnistrate-ctl is packaged and released in a container image that can be used to execute the command:
 
 ```
-docker run -t ghcr.io/omnistrate/ctl:latest 
+docker run -t ghcr.io/omnistrate/ctl:latest
 ```
 
 To log into the container and execute a series of commands, run the following command:
@@ -42,5 +53,3 @@ To persist the credentials across multiple container runs, run the following com
 ```
 docker run -it -v ~/omnistrate-ctl:/omnistrate/ -t ghcr.io/omnistrate/ctl:latest
 ```
-
-

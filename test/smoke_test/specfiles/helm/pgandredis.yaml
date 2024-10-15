@@ -1,13 +1,13 @@
 name: Redis Server # Service Plan Name
 deployment:
   byoaDeployment:
-    AwsAccountId: '339713121445'
-    AwsBootstrapRoleAccountArn: 'arn:aws:iam::339713121445:role/omnistrate-bootstrap-role'
+    AwsAccountId: "339713121445"
+    AwsBootstrapRoleAccountArn: "arn:aws:iam::339713121445:role/omnistrate-bootstrap-role"
 
 services:
   - name: Redis Cluster
     dependsOn:
-    - Postgres Database
+      - Postgres Database
     compute:
       instanceTypes:
         - apiParam: instanceType
@@ -45,32 +45,32 @@ services:
               requiredDuringSchedulingIgnoredDuringExecution:
                 nodeSelectorTerms:
                   - matchExpressions:
-                    - key: omnistrate.com/managed-by
-                      operator: In
-                      values:
-                      - omnistrate
-                    - key: topology.kubernetes.io/region
-                      operator: In
-                      values:
-                      - $sys.deploymentCell.region
-                    - key: node.kubernetes.io/instance-type
-                      operator: In
-                      values:
-                      - $sys.compute.node.instanceType
-                    - key: omnistrate.com/resource
-                      operator: In
-                      values:
-                      - $sys.deployment.resourceID
+                      - key: omnistrate.com/managed-by
+                        operator: In
+                        values:
+                          - omnistrate
+                      - key: topology.kubernetes.io/region
+                        operator: In
+                        values:
+                          - $sys.deploymentCell.region
+                      - key: node.kubernetes.io/instance-type
+                        operator: In
+                        values:
+                          - $sys.compute.node.instanceType
+                      - key: omnistrate.com/resource
+                        operator: In
+                        values:
+                          - $sys.deployment.resourceID
             podAntiAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
-              - labelSelector:
-                  matchExpressions:
-                  - key: omnistrate.com/schedule-mode
-                    operator: In
-                    values:
-                    - exclusive
-                namespaceSelector: {}
-                topologyKey: kubernetes.io/hostname
+                - labelSelector:
+                    matchExpressions:
+                      - key: omnistrate.com/schedule-mode
+                        operator: In
+                        values:
+                          - exclusive
+                  namespaceSelector: {}
+                  topologyKey: kubernetes.io/hostname
         replica:
           podLabels:
             omnistrate.com/schedule-mode: exclusive
@@ -89,32 +89,32 @@ services:
               requiredDuringSchedulingIgnoredDuringExecution:
                 nodeSelectorTerms:
                   - matchExpressions:
-                    - key: omnistrate.com/managed-by
-                      operator: In
-                      values:
-                      - omnistrate
-                    - key: topology.kubernetes.io/region
-                      operator: In
-                      values:
-                      - $sys.deploymentCell.region
-                    - key: node.kubernetes.io/instance-type
-                      operator: In
-                      values:
-                      - $sys.compute.node.instanceType
-                    - key: omnistrate.com/resource
-                      operator: In
-                      values:
-                      - $sys.deployment.resourceID
+                      - key: omnistrate.com/managed-by
+                        operator: In
+                        values:
+                          - omnistrate
+                      - key: topology.kubernetes.io/region
+                        operator: In
+                        values:
+                          - $sys.deploymentCell.region
+                      - key: node.kubernetes.io/instance-type
+                        operator: In
+                        values:
+                          - $sys.compute.node.instanceType
+                      - key: omnistrate.com/resource
+                        operator: In
+                        values:
+                          - $sys.deployment.resourceID
             podAntiAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
-              - labelSelector:
-                  matchExpressions:
-                  - key: omnistrate.com/schedule-mode
-                    operator: In
-                    values:
-                    - exclusive
-                namespaceSelector: {}
-                topologyKey: kubernetes.io/hostname
+                - labelSelector:
+                    matchExpressions:
+                      - key: omnistrate.com/schedule-mode
+                        operator: In
+                        values:
+                          - exclusive
+                  namespaceSelector: {}
+                  topologyKey: kubernetes.io/hostname
     apiParameters:
       - key: replicas
         description: Number of Replicas
@@ -207,32 +207,32 @@ services:
               requiredDuringSchedulingIgnoredDuringExecution:
                 nodeSelectorTerms:
                   - matchExpressions:
-                    - key: omnistrate.com/managed-by
-                      operator: In
-                      values:
-                      - omnistrate
-                    - key: topology.kubernetes.io/region
-                      operator: In
-                      values:
-                      - $sys.deploymentCell.region
-                    - key: node.kubernetes.io/instance-type
-                      operator: In
-                      values:
-                      - $sys.compute.node.instanceType
-                    - key: omnistrate.com/resource
-                      operator: In
-                      values:
-                      - $sys.deployment.resourceID
+                      - key: omnistrate.com/managed-by
+                        operator: In
+                        values:
+                          - omnistrate
+                      - key: topology.kubernetes.io/region
+                        operator: In
+                        values:
+                          - $sys.deploymentCell.region
+                      - key: node.kubernetes.io/instance-type
+                        operator: In
+                        values:
+                          - $sys.compute.node.instanceType
+                      - key: omnistrate.com/resource
+                        operator: In
+                        values:
+                          - $sys.deployment.resourceID
             podAntiAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
-              - labelSelector:
-                  matchExpressions:
-                  - key: omnistrate.com/schedule-mode
-                    operator: In
-                    values:
-                    - exclusive
-                namespaceSelector: {}
-                topologyKey: kubernetes.io/hostname
+                - labelSelector:
+                    matchExpressions:
+                      - key: omnistrate.com/schedule-mode
+                        operator: In
+                        values:
+                          - exclusive
+                  namespaceSelector: {}
+                  topologyKey: kubernetes.io/hostname
         readReplicas:
           replicaCount: 0
     apiParameters:
