@@ -36,5 +36,4 @@ omctl custom-network describe --custom-network-id [custom-network-id]
 
 ### SEE ALSO
 
-* [omnistrate-ctl custom-network](omnistrate-ctl_custom-network.md)	 - Manage custom networks for your org
-
+- [omnistrate-ctl custom-network](omnistrate-ctl_custom-network.md) - Manage custom networks for your org
