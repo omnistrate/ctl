@@ -8,7 +8,7 @@ Create secrets in your repository for your Omnistrate email and password and use
 
 ```
 - name: Setup Omnistrate CTL
-  uses: omnistrate/setup-omnistrate-ctl@v1
+  uses: omnistrate-oss/setup-omnistrate-ctl@v1
   with:
     email: ${{ secrets.OMNISTRATE_USERNAME }}
     password: ${{ secrets.OMNISTRATE_PASSWORD }}
