@@ -79,7 +79,7 @@ func DescribeHelmChart(ctx context.Context, token, chartName, chartVersion strin
 }
 
 func ListHelmChartInstallations(ctx context.Context, token string, hostClusterID string) (helmPackageInstallations *openapiclientfleet.ListHelmPackageInstallationsResult, err error) {
-	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
 
 	apiClient := getFleetClient()
 
