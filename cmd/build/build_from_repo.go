@@ -12,7 +12,6 @@ import (
 
 	"github.com/chelnak/ysmrr"
 	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
-	composegenapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/compose_gen_api"
 	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
@@ -351,14 +350,14 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	if !composeSpecExists {
 		spinner = sm.AddSpinner("Generating compose spec from the Docker image")
 		// Generate compose spec from image
-		generateComposeSpecRequest := composegenapi.GenerateComposeSpecFromContainerImageRequest{
+		generateComposeSpecRequest := openapiclient.GenerateComposeSpecFromContainerImageRequestBody{
 			ImageRegistry: "ghcr.io",
 			Image:         imageUrl,
 			Username:      utils.ToPtr(ghUsername),
 			Password:      utils.ToPtr(pat),
 		}
 
-		generateComposeSpecRes, err := dataaccess.GenerateComposeSpecFromContainerImage(cmd.Context(), token, &generateComposeSpecRequest)
+		generateComposeSpecRes, err := dataaccess.GenerateComposeSpecFromContainerImage(cmd.Context(), token, generateComposeSpecRequest)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
