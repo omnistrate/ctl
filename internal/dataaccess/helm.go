@@ -6,7 +6,6 @@ import (
 
 	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
-	helmpackageapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/helm_package_api"
 )
 
 func SaveHelmChart(
@@ -19,32 +18,34 @@ func SaveHelmChart(
 	repoURL string,
 	values map[string]any,
 ) (
-	helmPackage *helmpackageapi.HelmPackage,
+	helmPackage openapiclient.HelmPackage,
 	err error,
 ) {
 	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
 
 	apiClient := getV1Client()
 
+	helmPackage = openapiclient.HelmPackage{
+		ChartName:     chartName,
+		ChartVersion:  chartVersion,
+		Namespace:     namespace,
+		ChartRepoName: repoName,
+		ChartRepoUrl:  repoURL,
+		ChartValues:   values,
+	}
+
 	r, err := apiClient.HelmPackageApiAPI.
 		HelmPackageApiSaveHelmPackage(ctxWithToken).
 		SaveHelmPackageRequestBody(openapiclient.SaveHelmPackageRequestBody{
-			HelmPackage: openapiclient.HelmPackage{
-				ChartName:     chartName,
-				ChartVersion:  chartVersion,
-				Namespace:     namespace,
-				ChartRepoName: repoName,
-				ChartRepoUrl:  repoURL,
-				ChartValues:   values,
-			},
+			HelmPackage: helmPackage,
 		}).Execute()
 
 	if err != nil {
-		return nil, handleV1Error(err)
+		return helmPackage, handleV1Error(err)
 	}
 
 	r.Body.Close()
-	return
+	return 
 }
 
 func ListHelmCharts(ctx context.Context, token string) (helmPackages *openapiclient.ListHelmPackagesResult, err error) {
@@ -81,7 +82,7 @@ func ListHelmChartInstallations(ctx context.Context, token string, hostClusterID
 	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
 
 	apiClient := getFleetClient()
-	
+
 	req := apiClient.HelmPackageApiAPI.HelmPackageApiListHelmPackageInstallations(ctxWithToken)
 	if len(hostClusterID) > 0 {
 		req = req.HostClusterID(hostClusterID)
