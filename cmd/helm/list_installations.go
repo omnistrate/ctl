@@ -2,7 +2,7 @@ package helm
 
 import (
 	"github.com/chelnak/ysmrr"
-	fleetclient "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
@@ -63,7 +63,7 @@ func runListInstallations(cmd *cobra.Command, args []string) error {
 		sm.Start()
 	}
 
-	var helmPackageResult *fleetclient.ListHelmPackageInstallationsResult
+	var helmPackageResult *openapiclientfleet.ListHelmPackageInstallationsResult
 	helmPackageResult, err = dataaccess.ListHelmChartInstallations(cmd.Context(), token, hostClusterID)
 	if err != nil {
 		utils.PrintError(err)

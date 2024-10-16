@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	fleetclient "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	helmpackageapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/helm_package_api"
 )
@@ -77,7 +77,7 @@ func DescribeHelmChart(ctx context.Context, token, chartName, chartVersion strin
 	return
 }
 
-func ListHelmChartInstallations(ctx context.Context, token string, hostClusterID string) (helmPackageInstallations *fleetclient.ListHelmPackageInstallationsResult, err error) {
+func ListHelmChartInstallations(ctx context.Context, token string, hostClusterID string) (helmPackageInstallations *openapiclientfleet.ListHelmPackageInstallationsResult, err error) {
 	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
 
 	apiClient := getFleetClient()
