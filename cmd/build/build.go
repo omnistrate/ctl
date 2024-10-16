@@ -262,8 +262,8 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		// Check if the image is accessible
 		var userNamePtr, passwordPtr *string
 		if imageRegistryAuthUsername != "" && imageRegistryAuthPassword != "" {
-			userNamePtr = &imageRegistryAuthUsername
-			passwordPtr = &imageRegistryAuthPassword
+			userNamePtr = utils.ToPtr(imageRegistryAuthUsername)
+			passwordPtr = utils.ToPtr(imageRegistryAuthPassword)
 		}
 
 		checkImageRes, err := dataaccess.CheckIfContainerImageAccessible(cmd.Context(), token, imageRegistry, image, userNamePtr, passwordPtr)
