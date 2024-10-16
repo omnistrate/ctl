@@ -85,7 +85,7 @@ func ListHelmChartInstallations(ctx context.Context, token string, hostClusterID
 
 	req := apiClient.HelmPackageApiAPI.HelmPackageApiListHelmPackageInstallations(ctxWithToken)
 	if len(hostClusterID) > 0 {
-		req = req.HostClusterID(hostClusterID)
+		req.HostClusterID(hostClusterID)
 	}
 
 	var r *http.Response
