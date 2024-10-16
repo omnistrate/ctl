@@ -2,7 +2,9 @@ package dataaccess
 
 import (
 	"context"
+	"net/http"
 
+	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	helmpackageapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/helm_package_api"
 	"github.com/omnistrate/ctl/internal/config"
@@ -20,50 +22,57 @@ func SaveHelmChart(
 	helmPackage *helmpackageapi.HelmPackage,
 	err error,
 ) {
-	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
 
-	request := &helmpackageapi.SaveHelmPackageRequest{
-		Token: token,
-		HelmPackage: &helmpackageapi.HelmPackage{
-			ChartName:    chartName,
-			ChartVersion: chartVersion,
-			Namespace:    namespace,
-			RepoURL:      repoURL,
-			Values:       values,
-		},
-	}
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
 
-	if helmPackage, err = helmPackageService.SaveHelmPackage(ctx, request); err != nil {
-		return
+	apiClient := getV1Client()
+
+	r, err := apiClient.HelmPackageApiAPI.
+		HelmPackageApiSaveHelmPackage(ctxWithToken).
+		SaveHelmPackageRequestBody(openapiclient.SaveHelmPackageRequestBody{
+			HelmPackage: openapiclient.HelmPackage{
+				ChartName:    chartName,
+				ChartVersion: chartVersion,
+				Namespace:    namespace,
+				ChartValues:  values,
+			},
+		}).Execute()
+
+	if err != nil {
+		return nil, handleV1Error(err)
 	}
+	
+	r.Body.Close()
 	return
 }
 
-func ListHelmCharts(ctx context.Context, token string) (helmPackages *helmpackageapi.ListHelmPackagesResult, err error) {
-	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
+func ListHelmCharts(ctx context.Context, token string) (helmPackages *openapiclient.ListHelmPackagesResult, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
 
-	request := &helmpackageapi.ListHelmPackagesRequest{
-		Token: token,
+	apiClient := getV1Client()
+
+	var r *http.Response
+	helmPackages, r, err = apiClient.HelmPackageApiAPI.HelmPackageApiListHelmPackages(ctxWithToken).Execute()
+	if err != nil {
+		return nil, handleV1Error(err)
 	}
 
-	if helmPackages, err = helmPackageService.ListHelmPackages(ctx, request); err != nil {
-		return
-	}
+	r.Body.Close()
 	return
 }
 
-func DescribeHelmChart(ctx context.Context, token, chartName, chartVersion string) (helmPackage *helmpackageapi.HelmPackage, err error) {
-	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
+func DescribeHelmChart(ctx context.Context, token, chartName, chartVersion string) (helmPackage *openapiclient.HelmPackage, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
 
-	request := &helmpackageapi.DescribeHelmPackageRequest{
-		Token:        token,
-		ChartName:    chartName,
-		ChartVersion: chartVersion,
+	apiClient := getV1Client()
+
+	var r *http.Response
+	helmPackage, r, err = apiClient.HelmPackageApiAPI.HelmPackageApiDescribeHelmPackage(ctxWithToken, chartName, chartVersion).Execute()
+	if err != nil {
+		return nil, handleV1Error(err)
 	}
 
-	if helmPackage, err = helmPackageService.DescribeHelmPackage(ctx, request); err != nil {
-		return
-	}
+	r.Body.Close()
 	return
 }
 
@@ -82,16 +91,15 @@ func ListHelmChartInstallations(ctx context.Context, token string, hostClusterID
 }
 
 func DeleteHelmChart(ctx context.Context, token, chartName, chartVersion string) (err error) {
-	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
 
-	request := &helmpackageapi.DeleteHelmPackageRequest{
-		Token:        token,
-		ChartName:    chartName,
-		ChartVersion: chartVersion,
+	apiClient := getV1Client()
+	var r *http.Response
+	r, err = apiClient.HelmPackageApiAPI.HelmPackageApiDeleteHelmPackage(ctxWithToken, chartName, chartVersion).Execute()
+	if err != nil {
+		return handleV1Error(err)
 	}
 
-	if err = helmPackageService.DeleteHelmPackage(ctx, request); err != nil {
-		return
-	}
+	r.Body.Close()
 	return
 }
