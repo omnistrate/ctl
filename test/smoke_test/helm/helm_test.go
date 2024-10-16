@@ -25,7 +25,7 @@ func TestHelmBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	// Step 2: save helm chart
-	cmd.RootCmd.SetArgs([]string{"helm", "save", "redis-smoke-test", "--version=20.0.1", "--namespace=default", "repo-name=redis", "--repo-url=https://charts.bitnami.com/bitnami", "--values-file=./values"})
+	cmd.RootCmd.SetArgs([]string{"helm", "save", "redis-smoke-test", "--version=20.0.1", "--namespace=default", "--repo-name=redis", "--repo-url=https://charts.bitnami.com/bitnami", "--values-file=./values"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
