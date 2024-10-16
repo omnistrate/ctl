@@ -11,8 +11,8 @@ import (
 	"github.com/chelnak/ysmrr"
 	"github.com/compose-spec/compose-go/loader"
 	"github.com/compose-spec/compose-go/types"
+	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
-	composegenapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/compose_gen_api"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
 	"github.com/omnistrate/ctl/internal/config"
@@ -262,18 +262,11 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		// Check if the image is accessible
 		var userNamePtr, passwordPtr *string
 		if imageRegistryAuthUsername != "" && imageRegistryAuthPassword != "" {
-			userNamePtr = &imageRegistryAuthUsername
-			passwordPtr = &imageRegistryAuthPassword
+			userNamePtr = utils.ToPtr(imageRegistryAuthUsername)
+			passwordPtr = utils.ToPtr(imageRegistryAuthPassword)
 		}
 
-		checkImageRequest := composegenapi.CheckIfContainerImageAccessibleRequest{
-			ImageRegistry: imageRegistry,
-			Image:         image,
-			Username:      userNamePtr,
-			Password:      passwordPtr,
-		}
-
-		checkImageRes, err := dataaccess.CheckIfContainerImageAccessible(cmd.Context(), token, &checkImageRequest)
+		checkImageRes, err := dataaccess.CheckIfContainerImageAccessible(cmd.Context(), token, imageRegistry, image, userNamePtr, passwordPtr)
 		if err != nil {
 			utils.PrintError(err)
 			return err
@@ -290,7 +283,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		}
 
 		// Parse the environment variables
-		var formattedEnvVars []*composegenapi.EnvironmentVariable
+		var formattedEnvVars []openapiclient.EnvironmentVariable
 		for _, envVar := range envVars {
 			if envVar == "[]" {
 				continue
@@ -301,14 +294,14 @@ func runBuild(cmd *cobra.Command, args []string) error {
 				utils.PrintError(err)
 				return err
 			}
-			formattedEnvVars = append(formattedEnvVars, &composegenapi.EnvironmentVariable{
+			formattedEnvVars = append(formattedEnvVars, openapiclient.EnvironmentVariable{
 				Key:   envVarParts[0],
 				Value: envVarParts[1],
 			})
 		}
 
 		// Generate compose spec from image
-		generateComposeSpecRequest := composegenapi.GenerateComposeSpecFromContainerImageRequest{
+		generateComposeSpecRequest := openapiclient.GenerateComposeSpecFromContainerImageRequestBody{
 			ImageRegistry:        imageRegistry,
 			Image:                image,
 			EnvironmentVariables: formattedEnvVars,
@@ -316,7 +309,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 			Password:             passwordPtr,
 		}
 
-		generateComposeSpecRes, err := dataaccess.GenerateComposeSpecFromContainerImage(cmd.Context(), token, &generateComposeSpecRequest)
+		generateComposeSpecRes, err := dataaccess.GenerateComposeSpecFromContainerImage(cmd.Context(), token, generateComposeSpecRequest)
 		if err != nil {
 			utils.PrintError(err)
 			return err

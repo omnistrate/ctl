@@ -10,19 +10,6 @@ x-omnistrate-service-plan:
 x-omnistrate-integrations:
   - omnistrateLogging
 x-internal-integrations:
-  metrics:
-    prometheusEndpoint: ":9090"
-    provider: signoz
-    endpoint: signoz.endpoint.test
-    secretLocators:
-      # gcp: projects/my-project/secrets/my-secret/versions/latest
-      aws: arn:aws:secretsmanager:us-west-2:1234567890:secret:compose-secret
-  logs:
-    provider: signoz
-    endpoint: signoz.endpoint.test
-    secretLocators:
-      # gcp: projects/my-project/secrets/my-secret/versions/latest
-      aws: arn:aws:secretsmanager:us-west-2:1234567890:secret:compose-secret
 services:
   writer:
     image: docker.io/bitnami/mysql:8.1.0

@@ -2,38 +2,45 @@ package dataaccess
 
 import (
 	"context"
+	"net/http"
 
-	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
-	composegenapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/compose_gen_api"
-	"github.com/omnistrate/ctl/internal/config"
+	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 )
 
-func CheckIfContainerImageAccessible(ctx context.Context, token string, request *composegenapi.CheckIfContainerImageAccessibleRequest) (res *composegenapi.CheckIfContainerImageAccessibleResult, err error) {
-	request.Token = token
+func CheckIfContainerImageAccessible(ctx context.Context, token string, imageRegistry, image string, userName, password *string) (res *openapiclient.CheckIfContainerImageAccessibleResult, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
 
-	service, err := httpclientwrapper.NewComposeGen(config.GetHostScheme(), config.GetHost())
-	if err != nil {
-		return
+	apiClient := getV1Client()
+	req := apiClient.ComposeGenApiAPI.ComposeGenApiCheckIfContainerImageAccessible(ctxWithToken).
+		Image(image).
+		ImageRegistry(imageRegistry)
+	if userName != nil {
+		req = req.Username(*userName)
+	}
+	if password != nil {
+		req = req.Password(*password)
 	}
 
-	res, err = service.CheckIfContainerImageAccessible(ctx, request)
+	var r *http.Response
+	res, r, err = req.Execute()
 	if err != nil {
-		return
+		return nil, handleV1Error(err)
 	}
+
+	r.Body.Close()
 	return
 }
 
-func GenerateComposeSpecFromContainerImage(ctx context.Context, token string, request *composegenapi.GenerateComposeSpecFromContainerImageRequest) (res *composegenapi.GenerateComposeSpecFromContainerImageResult, err error) {
-	request.Token = token
+func GenerateComposeSpecFromContainerImage(ctx context.Context, token string, request openapiclient.GenerateComposeSpecFromContainerImageRequestBody) (res *openapiclient.GenerateComposeSpecFromContainerImageResult, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
 
-	service, err := httpclientwrapper.NewComposeGen(config.GetHostScheme(), config.GetHost())
+	apiClient := getV1Client()
+	var r *http.Response
+	res, r, err = apiClient.ComposeGenApiAPI.ComposeGenApiGenerateComposeSpecFromContainerImage(ctxWithToken).GenerateComposeSpecFromContainerImageRequestBody(request).Execute()
 	if err != nil {
-		return
+		return nil, handleV1Error(err)
 	}
 
-	res, err = service.GenerateComposeSpecFromContainerImage(ctx, request)
-	if err != nil {
-		return
-	}
+	r.Body.Close()
 	return
 }

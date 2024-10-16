@@ -27,19 +27,6 @@ x-omnistrate-integrations:
                 aggregationFunction: sum
 
 x-internal-integrations:
-  metrics:
-    prometheusEndpoint: ":9090"
-    provider: signoz
-    endpoint: signoz.endpoint.test
-    secretLocators:
-      # gcp: projects/my-project/secrets/my-secret/versions/latest
-      aws: arn:aws:secretsmanager:us-west-2:1234567890:secret:compose-secret
-  logs:
-    provider: signoz
-    endpoint: signoz.endpoint.test
-    secretLocators:
-      # gcp: projects/my-project/secrets/my-secret/versions/latest
-      aws: arn:aws:secretsmanager:us-west-2:1234567890:secret:compose-secret
   billing:
     S3BucketARN: arn:aws:s3:::my_billing_bucket_name
 services:

@@ -2,7 +2,7 @@ package helm
 
 import (
 	"github.com/chelnak/ysmrr"
-	helmpackageapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/helm_package_api"
+	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
@@ -45,7 +45,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	// Retrieve Helm packages
-	var helmPackageResult *helmpackageapi.ListHelmPackagesResult
+	var helmPackageResult *openapiclient.ListHelmPackagesResult
 	helmPackageResult, err = dataaccess.ListHelmCharts(cmd.Context(), token)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
