@@ -16,6 +16,7 @@ func SaveHelmChart(
 	chartName string,
 	chartVersion string,
 	namespace string,
+	repoName string,
 	repoURL string,
 	values map[string]any,
 ) (
@@ -31,17 +32,19 @@ func SaveHelmChart(
 		HelmPackageApiSaveHelmPackage(ctxWithToken).
 		SaveHelmPackageRequestBody(openapiclient.SaveHelmPackageRequestBody{
 			HelmPackage: openapiclient.HelmPackage{
-				ChartName:    chartName,
-				ChartVersion: chartVersion,
-				Namespace:    namespace,
-				ChartValues:  values,
+				ChartName:     chartName,
+				ChartVersion:  chartVersion,
+				Namespace:     namespace,
+				ChartRepoName: repoName,
+				ChartRepoUrl:  repoURL,
+				ChartValues:   values,
 			},
 		}).Execute()
 
 	if err != nil {
 		return nil, handleV1Error(err)
 	}
-	
+
 	r.Body.Close()
 	return
 }
