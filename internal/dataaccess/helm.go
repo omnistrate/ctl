@@ -4,10 +4,9 @@ import (
 	"context"
 	"net/http"
 
+	fleetclient "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
-	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	helmpackageapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/helm_package_api"
-	"github.com/omnistrate/ctl/internal/config"
 )
 
 func SaveHelmChart(
@@ -23,7 +22,6 @@ func SaveHelmChart(
 	helmPackage *helmpackageapi.HelmPackage,
 	err error,
 ) {
-
 	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
 
 	apiClient := getV1Client()
@@ -79,17 +77,23 @@ func DescribeHelmChart(ctx context.Context, token, chartName, chartVersion strin
 	return
 }
 
-func ListHelmChartInstallations(ctx context.Context, token string, hostClusterID *helmpackageapi.HostClusterID) (helmPackageInstallations *helmpackageapi.ListHelmPackageInstallationsResult, err error) {
-	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
+func ListHelmChartInstallations(ctx context.Context, token string, hostClusterID string) (helmPackageInstallations *fleetclient.ListHelmPackageInstallationsResult, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
 
-	request := &helmpackageapi.ListHelmPackageInstallationsRequest{
-		Token:         token,
-		HostClusterID: hostClusterID,
+	apiClient := getFleetClient()
+	
+	req := apiClient.HelmPackageApiAPI.HelmPackageApiListHelmPackageInstallations(ctxWithToken)
+	if len(hostClusterID) > 0 {
+		req = req.HostClusterID(hostClusterID)
 	}
 
-	if helmPackageInstallations, err = helmPackageService.ListHelmPackageInstallations(ctx, request); err != nil {
-		return
+	var r *http.Response
+	helmPackageInstallations, r, err = req.Execute()
+	if err != nil {
+		return nil, handleFleetError(err)
 	}
+
+	r.Body.Close()
 	return
 }
 
