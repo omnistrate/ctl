@@ -1,7 +1,7 @@
 package customnetwork
 
 import (
-	customnetworkapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/custom_network_api"
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	"github.com/omnistrate/ctl/internal/model"
 	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/spf13/cobra"
@@ -9,17 +9,15 @@ import (
 
 var Cmd = &cobra.Command{
 	Use:          "custom-network [operation] [flags]",
-	Short:        "Manage custom networks for your org",
-	Long:         `This command helps you manage the custom networks.`,
+	Short:        "List and describe custom networks of your customers",
+	Long:         `This command helps you explore custom networks used by your customers.`,
 	Run:          run,
 	SilenceUsage: true,
 }
 
 func init() {
-	Cmd.AddCommand(createCmd)
 	Cmd.AddCommand(listCmd)
 	Cmd.AddCommand(describeCmd)
-	Cmd.AddCommand(deleteCmd)
 }
 
 func run(cmd *cobra.Command, args []string) {
@@ -29,12 +27,25 @@ func run(cmd *cobra.Command, args []string) {
 	}
 }
 
-func formatCustomNetwork(network *customnetworkapi.CustomNetwork) model.CustomNetwork {
-	return model.CustomNetwork{
-		CustomNetworkID:   string(network.ID),
+func formatCustomNetwork(network *openapiclientfleet.FleetCustomNetwork) model.CustomNetwork {
+	model := model.CustomNetwork{
+		CustomNetworkID:   network.Id,
 		CustomNetworkName: utils.FromPtr(network.Name),
-		CloudProvider:     string(network.CloudProviderName),
+		CloudProvider:     network.CloudProviderName,
 		Region:            network.CloudProviderRegion,
 		CIDR:              network.Cidr,
+		OwningOrgID:       network.OwningOrgID,
+		OwningOrgName:     network.OwningOrgName,
 	}
+
+	if len(network.NetworkInstances) > 0 {
+		networkInstance := network.NetworkInstances[0]
+		model.AwsAccountID = networkInstance.AwsAccountID
+		model.CloudProviderNativeNetworkId = networkInstance.CloudProviderNativeNetworkId
+		model.GcpProjectID = networkInstance.GcpProjectID
+		model.GcpProjectNumber = networkInstance.GcpProjectNumber
+		model.HostClusterID = networkInstance.HostClusterID
+	}
+
+	return model
 }
