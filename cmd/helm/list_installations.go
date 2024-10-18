@@ -18,7 +18,8 @@ omctl helm list-installations --host-cluster-id=[host-cluster-id]`
 type helmPackageInstallationIntermediate struct {
 	ChartName     string
 	ChartVersion  string
-	RepoURL       string
+	ChartRepoName string
+	ChartRepoURL  string
 	Namespace     string
 	HostClusterID string
 	Status        string
@@ -76,7 +77,8 @@ func runListInstallations(cmd *cobra.Command, args []string) error {
 		intermediate := helmPackageInstallationIntermediate{
 			ChartName:     helmPackageInstallation.HelmPackage.ChartName,
 			ChartVersion:  helmPackageInstallation.HelmPackage.ChartVersion,
-			RepoURL:       helmPackageInstallation.HelmPackage.RepoURL,
+			ChartRepoName: helmPackageInstallation.HelmPackage.ChartRepoName,
+			ChartRepoURL:  helmPackageInstallation.HelmPackage.ChartRepoUrl,
 			Namespace:     helmPackageInstallation.HelmPackage.Namespace,
 			HostClusterID: helmPackageInstallation.HostClusterID,
 			Status:        helmPackageInstallation.Status,
