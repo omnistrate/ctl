@@ -71,7 +71,7 @@ func runList(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	// Process and filter environments
-	var formattedCustomNetworks []model.CustomNetwork
+	formattedCustomNetworks := make([]model.CustomNetwork, 0)
 	for _, customNetwork := range listResult.CustomNetworks {
 		var match bool
 		formattedCustomNetwork := formatCustomNetwork(utils.ToPtr(customNetwork))

@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_custom_network_lifecycle(t *testing.T) {
+func Test_custom_network_list(t *testing.T) {
 	testutils.SmokeTest(t)
 
 	ctx := context.TODO()
