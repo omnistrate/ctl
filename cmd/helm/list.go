@@ -54,7 +54,6 @@ func runList(cmd *cobra.Command, args []string) error {
 
 	if len(helmPackageResult.HelmPackages) == 0 {
 		utils.HandleSpinnerSuccess(spinner, sm, "No Helm packages found")
-		return nil
 	} else {
 		utils.HandleSpinnerSuccess(spinner, sm, "Successfully retrieved Helm packages")
 	}

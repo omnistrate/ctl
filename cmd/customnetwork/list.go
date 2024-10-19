@@ -1,6 +1,8 @@
 package customnetwork
 
 import (
+	"strings"
+
 	"github.com/chelnak/ysmrr"
 	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	"github.com/omnistrate/ctl/cmd/common"
@@ -9,7 +11,6 @@ import (
 	"github.com/omnistrate/ctl/internal/model"
 	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 const (
@@ -86,10 +87,10 @@ func runList(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
-	if len(formattedCustomNetworks) > 0 {
-		utils.HandleSpinnerSuccess(spinner, sm, "Successfully listed custom networks")
-	} else {
+	if len(formattedCustomNetworks) == 0 {
 		utils.HandleSpinnerSuccess(spinner, sm, "No custom networks found")
+	} else {
+		utils.HandleSpinnerSuccess(spinner, sm, "Successfully listed custom networks")
 	}
 
 	// Print output
