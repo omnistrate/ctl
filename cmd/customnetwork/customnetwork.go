@@ -40,11 +40,11 @@ func formatCustomNetwork(network *openapiclientfleet.FleetCustomNetwork) model.C
 
 	if len(network.NetworkInstances) > 0 {
 		networkInstance := network.NetworkInstances[0]
-		model.AwsAccountID = networkInstance.AwsAccountID
-		model.CloudProviderNativeNetworkId = networkInstance.CloudProviderNativeNetworkId
-		model.GcpProjectID = networkInstance.GcpProjectID
-		model.GcpProjectNumber = networkInstance.GcpProjectNumber
-		model.HostClusterID = networkInstance.HostClusterID
+		model.AwsAccountID = utils.FromPtr(networkInstance.AwsAccountID)
+		model.CloudProviderNativeNetworkId = utils.FromPtr(networkInstance.CloudProviderNativeNetworkId)
+		model.GcpProjectID = utils.FromPtr(networkInstance.GcpProjectID)
+		model.GcpProjectNumber = utils.FromPtr(networkInstance.GcpProjectNumber)
+		model.HostClusterID = utils.FromPtr(networkInstance.HostClusterID)
 	}
 
 	return model
