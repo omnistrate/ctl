@@ -37,7 +37,7 @@ omnistrate-ctl [flags]
 - [omnistrate-ctl account](omnistrate-ctl_account.md) - Manage your Cloud Provider Accounts
 - [omnistrate-ctl build](omnistrate-ctl_build.md) - Build Services from image, compose spec or service plan spec
 - [omnistrate-ctl build-from-repo](omnistrate-ctl_build-from-repo.md) - Build Service from Git Repository
-- [omnistrate-ctl custom-network](omnistrate-ctl_custom-network.md) - Manage custom networks for your org
+- [omnistrate-ctl custom-network](omnistrate-ctl_custom-network.md) - List and describe custom networks of your customers
 - [omnistrate-ctl domain](omnistrate-ctl_domain.md) - Manage Customer Domains for your service
 - [omnistrate-ctl environment](omnistrate-ctl_environment.md) - Manage Service Environments for your service
 - [omnistrate-ctl helm](omnistrate-ctl_helm.md) - Manage Helm Charts for your service
