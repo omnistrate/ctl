@@ -104,7 +104,6 @@ func runList(cmd *cobra.Command, args []string) error {
 
 	if len(formattedSubscriptions) == 0 {
 		utils.HandleSpinnerSuccess(spinner, sm, "No subscriptions found")
-		return nil
 	} else {
 		utils.HandleSpinnerSuccess(spinner, sm, "Successfully retrieved subscriptions")
 	}

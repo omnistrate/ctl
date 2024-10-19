@@ -94,7 +94,6 @@ func runList(cmd *cobra.Command, args []string) error {
 	// Handle case when no accounts match
 	if len(formattedAccounts) == 0 {
 		utils.HandleSpinnerSuccess(spinner, sm, "No accounts found")
-		return nil
 	} else {
 		utils.HandleSpinnerSuccess(spinner, sm, "Successfully retrieved accounts")
 	}

@@ -10,6 +10,10 @@ import (
 )
 
 func PrintText(data []string) (err error) {
+	if len(data) == 0 {
+		return
+	}
+
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 
 	// Unmarshal the first JSON data to get the columns

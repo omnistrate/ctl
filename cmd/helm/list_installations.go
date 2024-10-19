@@ -88,7 +88,6 @@ func runListInstallations(cmd *cobra.Command, args []string) error {
 
 	if len(intermediates) == 0 {
 		utils.HandleSpinnerSuccess(spinner, sm, "No Helm package installations found")
-		return nil
 	} else {
 		utils.HandleSpinnerSuccess(spinner, sm, "Successfully retrieved Helm package installations")
 	}
