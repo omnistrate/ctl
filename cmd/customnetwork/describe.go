@@ -86,7 +86,7 @@ func runDescribe(cmd *cobra.Command, args []string) (err error) {
 }
 
 func validateDescribeArguments(idFlag string) error {
-	if len(idFlag) > 0 {
+	if len(idFlag) == 0 {
 		return fmt.Errorf("invalid arguments: network ID is required")
 	}
 	return nil
