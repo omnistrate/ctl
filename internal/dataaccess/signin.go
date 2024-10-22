@@ -3,8 +3,8 @@ package dataaccess
 import (
 	"context"
 
+	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/utils"
-	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 )
 
 func LoginWithPassword(ctx context.Context, email string, pass string) (string, error) {

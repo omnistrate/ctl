@@ -3,13 +3,13 @@ services:
   imageRefWithNoTagsAndRegistry:
     image: $var.imageName
     x-omnistrate-api-params:
-    - key: imageName
-      description: Image Name
-      name: Image Name
-      type: String
-      modifiable: true
-      required: true
-      export: true
+      - key: imageName
+        description: Image Name
+        name: Image Name
+        type: String
+        modifiable: true
+        required: true
+        export: true
   imageRefWithRegistry:
     image: docker.io/$var.imageName
     x-omnistrate-api-params:

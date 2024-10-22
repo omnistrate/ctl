@@ -3,6 +3,8 @@ package instance
 import (
 	"strings"
 
+	"github.com/chelnak/ysmrr"
+	"github.com/omnistrate/ctl/cmd/common"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
@@ -66,6 +68,15 @@ func runList(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// Initialize spinner if output is not JSON
+	var sm ysmrr.SpinnerManager
+	var spinner *ysmrr.Spinner
+	if output != common.OutputTypeJson {
+		sm = ysmrr.NewSpinnerManager()
+		spinner = sm.AddSpinner("Listing custom networks...")
+		sm.Start()
+	}
+
 	// Get all instances
 	searchRes, err := dataaccess.SearchInventory(cmd.Context(), token, "resourceinstance:i")
 	if err != nil {
@@ -95,8 +106,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(formattedInstances) == 0 {
-		utils.PrintInfo("No instances found.")
-		return nil
+		utils.HandleSpinnerSuccess(spinner, sm, "No instances found.")
 	}
 
 	// Print output

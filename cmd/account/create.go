@@ -9,7 +9,7 @@ import (
 	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/spf13/cobra"
 
-	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
+	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 )
 
 const (

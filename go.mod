@@ -10,12 +10,12 @@ require (
 	github.com/cqroot/prompt v0.9.4
 	github.com/fatih/color v1.17.0
 	github.com/google/uuid v1.6.0
-	github.com/jedib0t/go-pretty/v6 v6.5.9
+	github.com/jedib0t/go-pretty/v6 v6.6.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-wordwrap v1.0.1
-	github.com/omnistrate/api-design v0.7.4
-	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20241001141101-537ace327d87
-	github.com/omnistrate/omnistrate-sdk-go v0.0.7
+	github.com/omnistrate-oss/omnistrate-sdk-go v0.0.18
+	github.com/omnistrate/api-design v0.7.50
+	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20241018000522-790dcd40235e
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.33.0

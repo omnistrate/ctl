@@ -18,7 +18,7 @@ omctl helm save redis --repo-url=https://charts.bitnami.com/bitnami --version=20
 )
 
 var saveCmd = &cobra.Command{
-	Use:          "save chart --repo-url=[repo-url] --version=[version] --namespace=[namespace] --values-file=[values-file]",
+	Use:          "save chart --repo-name=[repo-name] --repo-url=[repo-url] --version=[version] --namespace=[namespace] --values-file=[values-file]",
 	Short:        "Save a Helm Chart for your service",
 	Long:         `This command helps you save the templates for your helm charts.`,
 	Example:      saveExample,
@@ -29,6 +29,7 @@ var saveCmd = &cobra.Command{
 func init() {
 	saveCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 
+	saveCmd.Flags().String("repo-name", "", "Helm Chart repository name")
 	saveCmd.Flags().String("repo-url", "", "Helm Chart repository URL")
 	saveCmd.Flags().String("version", "", "Helm Chart version")
 	saveCmd.Flags().String("namespace", "", "Helm Chart namespace")
@@ -53,6 +54,7 @@ func init() {
 func runSave(cmd *cobra.Command, args []string) error {
 	// Get flags
 	chart := args[0]
+	repoName, _ := cmd.Flags().GetString("repo-name")
 	repoURL, _ := cmd.Flags().GetString("repo-url")
 	version, _ := cmd.Flags().GetString("version")
 	namespace, _ := cmd.Flags().GetString("namespace")
@@ -98,7 +100,7 @@ func runSave(cmd *cobra.Command, args []string) error {
 	}
 
 	// Save Helm Chart
-	helmPackage, err := dataaccess.SaveHelmChart(cmd.Context(), token, chart, version, namespace, repoURL, values)
+	helmPackage, err := dataaccess.SaveHelmChart(cmd.Context(), token, chart, version, namespace, repoName, repoURL, values)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

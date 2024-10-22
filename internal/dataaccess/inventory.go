@@ -3,7 +3,7 @@ package dataaccess
 import (
 	"context"
 
-	openapiclientfleet "github.com/omnistrate/omnistrate-sdk-go/fleet"
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 )
 
 func SearchInventory(ctx context.Context, token, query string) (*openapiclientfleet.SearchInventoryResult, error) {

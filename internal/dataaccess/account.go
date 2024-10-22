@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/utils"
-	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 )
 
 func DescribeAccount(ctx context.Context, token string, id string) (*openapiclient.DescribeAccountConfigResult, error) {
@@ -94,7 +94,7 @@ Verify your account.
 - For AWS/GCP Terraform users: Execute the Terraform scripts available at %s, by using the Account Config Identity ID below. For guidance our Terraform instructional video is at %s.`
 
 	AwsCloudFormationGuideURL = "https://youtu.be/Mu-4jppldwk"
-	AwsGcpTerraformScriptsURL = "https://github.com/omnistrate/account-setup"
+	AwsGcpTerraformScriptsURL = "https://github.com/omnistrate-oss/account-setup"
 	AwsGcpTerraformGuideURL   = "https://youtu.be/eKktc4QKgaA"
 )
 

@@ -87,6 +87,10 @@ func (t Table) PrintToWriter(finalW io.Writer) {
 }
 
 func PrintTable(jsonData []string) (err error) {
+	if len(jsonData) == 0 {
+		return
+	}
+
 	var tableWriter *Table
 	if tableWriter, err = NewTableFromJSONTemplate(json.RawMessage(jsonData[0])); err != nil {
 		// Just print the JSON directly and return

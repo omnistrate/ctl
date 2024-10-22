@@ -4,17 +4,19 @@ Build Services from image, compose spec or service plan spec
 
 ### Synopsis
 
-Build command can be used to build a service from image, docker compose, and service plan spec. 
+Build command can be used to build a service from image, docker compose, and service plan spec.
 It has two main modes of operation:
-  - Create a new service plan
-  - Update an existing service plan
+
+- Create a new service plan
+- Update an existing service plan
 
 Below info served as service plan identifiers:
-  - service name (--name, required)
-  - environment name (--environment, optional, default: Dev)
-  - environment type (--environment-type, optional, default: dev)
-  - service plan name (the name field of x-omnistrate-service-plan tag in compose spec file, required)
-If the identifiers match an existing service plan, it will update that plan. Otherwise, it'll create a new service plan. 
+
+- service name (--name, required)
+- environment name (--environment, optional, default: Dev)
+- environment type (--environment-type, optional, default: dev)
+- service plan name (the name field of x-omnistrate-service-plan tag in compose spec file, required)
+  If the identifiers match an existing service plan, it will update that plan. Otherwise, it'll create a new service plan.
 
 This command has an interactive mode. In this mode, you can choose to promote the service plan to production by interacting with the prompts.
 
@@ -49,6 +51,15 @@ omctl build --file docker-compose.yml --name "My Service" --interactive
 # Build service with compose spec with service description and service logo
 omctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png"
 
+# Build service with service specification for Helm, Operator or Kustomize in dev environment
+omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Service"
+
+# Build service with service specification for Helm, Operator or Kustomize in prod environment
+omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Service" --environment prod --environment-type prod
+
+# Build service with service specification for Helm, Operator or Kustomize as preferred
+omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Service" --release-as-preferred
+
 ```
 
 ### Options
@@ -81,5 +92,4 @@ omctl build --file docker-compose.yml --name "My Service" --description "My Serv
 
 ### SEE ALSO
 
-* [omnistrate-ctl](omnistrate-ctl.md)	 - Manage your Omnistrate SaaS from the command line
-
+- [omnistrate-ctl](omnistrate-ctl.md) - Manage your Omnistrate SaaS from the command line

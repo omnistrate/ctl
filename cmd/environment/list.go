@@ -4,11 +4,11 @@ import (
 	"strings"
 
 	"github.com/chelnak/ysmrr"
+	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
 	"github.com/omnistrate/ctl/internal/utils"
-	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 	"github.com/spf13/cobra"
 )
 
@@ -71,7 +71,7 @@ func runList(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	var formattedEnvironments []model.Environment
+	formattedEnvironments := make([]model.Environment, 0)
 
 	// Process and filter environments
 	for _, service := range services.Services {
@@ -101,7 +101,6 @@ func runList(cmd *cobra.Command, args []string) error {
 	// Handle case when no environments match
 	if len(formattedEnvironments) == 0 {
 		utils.HandleSpinnerSuccess(spinner, sm, "No environments found")
-		return nil
 	} else {
 		utils.HandleSpinnerSuccess(spinner, sm, "Successfully retrieved environments")
 	}
