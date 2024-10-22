@@ -3,6 +3,7 @@ package instance
 import (
 	"context"
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/build"
 	"testing"
 	"time"
 
@@ -34,6 +35,11 @@ func TestInstanceBasic(t *testing.T) {
 	cmd.RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
+
+	cmd.RootCmd.SetArgs([]string{"build", "--file", "../composefiles/mysql.yaml", "--name", "mysql", "--environment=dev", "--environment-type=dev"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(t, err)
+	serviceID := build.ServiceID
 
 	// PASS: create instance 1 with param
 	cmd.RootCmd.SetArgs([]string{"instance", "create",
@@ -138,6 +144,26 @@ func TestInstanceBasic(t *testing.T) {
 
 	// PASS: delete instance 2
 	cmd.RootCmd.SetArgs([]string{"instance", "delete", instanceID2, "--yes"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(t, err)
+
+	// Wait for the instances to be deleted
+	for {
+		cmd.RootCmd.SetArgs([]string{"instance", "describe", instanceID1})
+		err1 := cmd.RootCmd.ExecuteContext(ctx)
+
+		cmd.RootCmd.SetArgs([]string{"instance", "describe", instanceID2})
+		err2 := cmd.RootCmd.ExecuteContext(ctx)
+
+		if err1 != nil && err2 != nil {
+			break
+		}
+
+		time.Sleep(5 * time.Second)
+	}
+
+	// PASS: delete service
+	cmd.RootCmd.SetArgs([]string{"service", "delete", serviceID})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 }
