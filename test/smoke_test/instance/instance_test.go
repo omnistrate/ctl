@@ -43,7 +43,7 @@ func TestInstanceBasic(t *testing.T) {
 
 	// PASS: create instance 1 with param
 	cmd.RootCmd.SetArgs([]string{"instance", "create",
-		"--service=mysql",
+		fmt.Sprintf("--service=%s", serviceName),
 		"--environment=dev",
 		"--plan=mysql",
 		"--version=latest",
@@ -58,7 +58,7 @@ func TestInstanceBasic(t *testing.T) {
 
 	// PASS: create instance 2 with param file
 	cmd.RootCmd.SetArgs([]string{"instance", "create",
-		"--service=mysql",
+		fmt.Sprintf("--service=%s", serviceName),
 		"--environment=dev",
 		"--plan=mysql",
 		"--version=latest",
