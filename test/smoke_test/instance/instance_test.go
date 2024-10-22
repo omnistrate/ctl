@@ -3,7 +3,7 @@ package instance
 import (
 	"context"
 	"fmt"
-	"github.com/omnistrate/ctl/cmd/build"
+	"github.com/google/uuid"
 	"testing"
 	"time"
 
@@ -36,10 +36,10 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
-	cmd.RootCmd.SetArgs([]string{"build", "--file", "../composefiles/mysql.yaml", "--name", "mysql", "--environment=dev", "--environment-type=dev"})
+	serviceName := "mysql" + uuid.NewString()
+	cmd.RootCmd.SetArgs([]string{"build", "--file", "../composefiles/mysql.yaml", "--name", serviceName, "--environment=dev", "--environment-type=dev"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
-	serviceID := build.ServiceID
 
 	// PASS: create instance 1 with param
 	cmd.RootCmd.SetArgs([]string{"instance", "create",
@@ -163,7 +163,7 @@ func TestInstanceBasic(t *testing.T) {
 	}
 
 	// PASS: delete service
-	cmd.RootCmd.SetArgs([]string{"service", "delete", serviceID})
+	cmd.RootCmd.SetArgs([]string{"service", "delete", serviceName})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 }
