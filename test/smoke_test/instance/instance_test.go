@@ -3,6 +3,7 @@ package instance
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"testing"
 	"time"
 
@@ -35,11 +36,16 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
+	serviceName := "mysql" + uuid.NewString()
+	cmd.RootCmd.SetArgs([]string{"build", "--file", "../composefiles/mysql.yaml", "--name", serviceName, "--environment=dev", "--environment-type=dev"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(t, err)
+
 	// PASS: create instance 1 with param
 	cmd.RootCmd.SetArgs([]string{"instance", "create",
-		"--service=mysql",
+		fmt.Sprintf("--service=%s", serviceName),
 		"--environment=dev",
-		"--plan=mysql",
+		fmt.Sprintf("--plan=%s", serviceName),
 		"--version=latest",
 		"--resource=mySQL",
 		"--cloud-provider=aws",
@@ -52,9 +58,9 @@ func TestInstanceBasic(t *testing.T) {
 
 	// PASS: create instance 2 with param file
 	cmd.RootCmd.SetArgs([]string{"instance", "create",
-		"--service=mysql",
+		fmt.Sprintf("--service=%s", serviceName),
 		"--environment=dev",
-		"--plan=mysql",
+		fmt.Sprintf("--plan=%s", serviceName),
 		"--version=latest",
 		"--resource=mySQL",
 		"--cloud-provider=aws",
@@ -138,6 +144,26 @@ func TestInstanceBasic(t *testing.T) {
 
 	// PASS: delete instance 2
 	cmd.RootCmd.SetArgs([]string{"instance", "delete", instanceID2, "--yes"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(t, err)
+
+	// Wait for the instances to be deleted
+	for {
+		cmd.RootCmd.SetArgs([]string{"instance", "describe", instanceID1})
+		err1 := cmd.RootCmd.ExecuteContext(ctx)
+
+		cmd.RootCmd.SetArgs([]string{"instance", "describe", instanceID2})
+		err2 := cmd.RootCmd.ExecuteContext(ctx)
+
+		if err1 != nil && err2 != nil {
+			break
+		}
+
+		time.Sleep(5 * time.Second)
+	}
+
+	// PASS: delete service
+	cmd.RootCmd.SetArgs([]string{"service", "delete", serviceName})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 }
