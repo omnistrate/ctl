@@ -145,7 +145,8 @@ update-dependencies:
 .PHONY: update-omnistrate-dependencies
 update-omnistrate-dependencies:
 	@echo "Updating omnistrate dependencies"
-	go get -u github.com/omnistrate/... 
+	go get -u github.com/omnistrate/...
+	go get -u github.com/omnistrate-oss/...
 	make tidy
 
 .PHONY: check-dependencies

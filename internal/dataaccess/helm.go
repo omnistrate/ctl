@@ -45,7 +45,7 @@ func SaveHelmChart(
 	}
 
 	r.Body.Close()
-	return 
+	return
 }
 
 func ListHelmCharts(ctx context.Context, token string) (helmPackages *openapiclient.ListHelmPackagesResult, err error) {
@@ -85,7 +85,7 @@ func ListHelmChartInstallations(ctx context.Context, token string, hostClusterID
 
 	req := apiClient.HelmPackageApiAPI.HelmPackageApiListHelmPackageInstallations(ctxWithToken)
 	if len(hostClusterID) > 0 {
-		req.HostClusterID(hostClusterID)
+		req = req.HostClusterID(hostClusterID)
 	}
 
 	var r *http.Response
