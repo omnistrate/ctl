@@ -18,6 +18,8 @@ var Cmd = &cobra.Command{
 func init() {
 	Cmd.AddCommand(listCmd)
 	Cmd.AddCommand(describeCmd)
+	Cmd.AddCommand(createCmd)
+	Cmd.AddCommand(deleteCmd)
 }
 
 func run(cmd *cobra.Command, args []string) {
@@ -28,7 +30,7 @@ func run(cmd *cobra.Command, args []string) {
 }
 
 func formatCustomNetwork(network *openapiclientfleet.FleetCustomNetwork) model.CustomNetwork {
-	model := model.CustomNetwork{
+	networkModel := model.CustomNetwork{
 		CustomNetworkID:   network.Id,
 		CustomNetworkName: utils.FromPtr(network.Name),
 		CloudProvider:     network.CloudProviderName,
@@ -40,12 +42,12 @@ func formatCustomNetwork(network *openapiclientfleet.FleetCustomNetwork) model.C
 
 	if len(network.NetworkInstances) > 0 {
 		networkInstance := network.NetworkInstances[0]
-		model.AwsAccountID = utils.FromPtr(networkInstance.AwsAccountID)
-		model.CloudProviderNativeNetworkId = utils.FromPtr(networkInstance.CloudProviderNativeNetworkId)
-		model.GcpProjectID = utils.FromPtr(networkInstance.GcpProjectID)
-		model.GcpProjectNumber = utils.FromPtr(networkInstance.GcpProjectNumber)
-		model.HostClusterID = utils.FromPtr(networkInstance.HostClusterID)
+		networkModel.AwsAccountID = utils.FromPtr(networkInstance.AwsAccountID)
+		networkModel.CloudProviderNativeNetworkId = utils.FromPtr(networkInstance.CloudProviderNativeNetworkId)
+		networkModel.GcpProjectID = utils.FromPtr(networkInstance.GcpProjectID)
+		networkModel.GcpProjectNumber = utils.FromPtr(networkInstance.GcpProjectNumber)
+		networkModel.HostClusterID = utils.FromPtr(networkInstance.HostClusterID)
 	}
 
-	return model
+	return networkModel
 }
