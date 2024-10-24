@@ -294,13 +294,13 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	spinner = sm.AddSpinner(fmt.Sprintf("Building Docker image: %s", imageUrl))
 	spinner.Complete()
 	sm.Stop()
-	buildCmd := exec.Command("docker", "buildx", "build", "--pull", "--platform", "linux/amd64", ".", "-t", imageUrl, "--no-cache")
+	buildCmd := exec.Command("docker", "buildx", "build", "--pull", "--platform", "linux/amd64", ".", "-t", imageUrl, "--no-cache", "--load")
 
 	// Redirect stdout and stderr to the terminal
 	buildCmd.Stdout = os.Stdout
 	buildCmd.Stderr = os.Stderr
 
-	fmt.Printf("Invoking 'docker buildx build --pull --platform linux/amd64 . -t %s --no-cache'...\n", imageUrl)
+	fmt.Printf("Invoking 'docker buildx build --pull --platform linux/amd64 . -t %s --no-cache --load'...\n", imageUrl)
 	err = buildCmd.Run()
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
