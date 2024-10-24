@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 services:
   MySQL:
     image: mysql:latest
@@ -45,4 +45,4 @@ services:
         target: /var/lib/mysql
         type: bind
     ports:
-      - '3306:3306'
+      - "3306:3306"
