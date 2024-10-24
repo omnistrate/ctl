@@ -351,11 +351,17 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 				return err
 			}
 			digest = fmt.Sprintf("sha-%s", strings.TrimSpace(strings.Split(line, ":")[2]))
-			spinner.Complete()
-			fmt.Printf("Retrieved digest: %s\n", digest)
 			break
 		}
 	}
+
+	spinner.Complete()
+	sm.Stop()
+
+	fmt.Printf("Retrieved digest: %s\n", digest)
+
+	sm = ysmrr.NewSpinnerManager()
+	sm.Start()
 
 	imageUrlWithDigestTag := fmt.Sprintf("%s:%s", imageUrl, digest)
 
