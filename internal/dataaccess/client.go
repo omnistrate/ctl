@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/config"
-	openapiclientfleet "github.com/omnistrate/omnistrate-sdk-go/fleet"
 	"github.com/pkg/errors"
 )
 
@@ -20,6 +20,13 @@ func getV1Client() *openapiclientv1.APIClient {
 	configuration.HTTPClient = &http.Client{
 		Timeout: config.GetClientTimeout(),
 	}
+
+	var servers openapiclientv1.ServerConfigurations
+	for _, server := range configuration.Servers {
+		server.URL = fmt.Sprintf("%s://%s", config.GetHostScheme(), config.GetHost())
+		servers = append(servers, server)
+	}
+	configuration.Servers = servers
 
 	apiClient := openapiclientv1.NewAPIClient(configuration)
 	return apiClient
@@ -51,6 +58,13 @@ func getFleetClient() *openapiclientfleet.APIClient {
 	configuration.HTTPClient = &http.Client{
 		Timeout: config.GetClientTimeout(),
 	}
+
+	var servers openapiclientfleet.ServerConfigurations
+	for _, server := range configuration.Servers {
+		server.URL = fmt.Sprintf("%s://%s", config.GetHostScheme(), config.GetHost())
+		servers = append(servers, server)
+	}
+	configuration.Servers = servers
 
 	apiClient := openapiclientfleet.NewAPIClient(configuration)
 	return apiClient

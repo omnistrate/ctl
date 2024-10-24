@@ -1,8 +1,8 @@
 package serviceplan
 
 import (
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	"github.com/omnistrate/ctl/internal/utils"
-	openapiclientfleet "github.com/omnistrate/omnistrate-sdk-go/fleet"
 
 	"testing"
 

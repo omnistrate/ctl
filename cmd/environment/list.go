@@ -71,7 +71,7 @@ func runList(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	var formattedEnvironments []model.Environment
+	formattedEnvironments := make([]model.Environment, 0)
 
 	// Process and filter environments
 	for _, service := range services.Services {
@@ -101,7 +101,6 @@ func runList(cmd *cobra.Command, args []string) error {
 	// Handle case when no environments match
 	if len(formattedEnvironments) == 0 {
 		utils.HandleSpinnerSuccess(spinner, sm, "No environments found")
-		return nil
 	} else {
 		utils.HandleSpinnerSuccess(spinner, sm, "Successfully retrieved environments")
 	}

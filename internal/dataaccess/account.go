@@ -94,7 +94,7 @@ Verify your account.
 - For AWS/GCP Terraform users: Execute the Terraform scripts available at %s, by using the Account Config Identity ID below. For guidance our Terraform instructional video is at %s.`
 
 	AwsCloudFormationGuideURL = "https://youtu.be/Mu-4jppldwk"
-	AwsGcpTerraformScriptsURL = "https://github.com/omnistrate/account-setup"
+	AwsGcpTerraformScriptsURL = "https://github.com/omnistrate-oss/account-setup"
 	AwsGcpTerraformGuideURL   = "https://youtu.be/eKktc4QKgaA"
 )
 

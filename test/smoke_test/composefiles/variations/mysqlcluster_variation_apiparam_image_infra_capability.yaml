@@ -1,28 +1,15 @@
 # Logo: https://assets.stickpng.com/images/62debc4fff3c6e4b8b5de8d3.png
 version: "3"
 x-omnistrate-service-plan:
-  name: 'Hosted MySQL Cluster'
-  tenancyType: 'OMNISTRATE_DEDICATED_TENANCY'
+  name: "Hosted MySQL Cluster"
+  tenancyType: "OMNISTRATE_DEDICATED_TENANCY"
   deployment:
     hostedDeployment:
-      AwsAccountId: '339713121445'
-      AwsBootstrapRoleAccountArn: 'arn:aws:iam::339713121445:role/omnistrate-bootstrap-role'
+      AwsAccountId: "339713121445"
+      AwsBootstrapRoleAccountArn: "arn:aws:iam::339713121445:role/omnistrate-bootstrap-role"
 x-omnistrate-integrations:
   - omnistrateLogging
 x-internal-integrations:
-  metrics:
-    prometheusEndpoint: ':9090'
-    provider: signoz
-    endpoint: signoz.endpoint.test
-    secretLocators:
-      # gcp: projects/my-project/secrets/my-secret/versions/latest
-      aws: arn:aws:secretsmanager:us-west-2:1234567890:secret:compose-secret
-  logs:
-    provider: signoz
-    endpoint: signoz.endpoint.test
-    secretLocators:
-      # gcp: projects/my-project/secrets/my-secret/versions/latest
-      aws: arn:aws:secretsmanager:us-west-2:1234567890:secret:compose-secret
 services:
   writer:
     image: docker.io/bitnami/mysql:8.1.1
@@ -36,7 +23,7 @@ services:
       - source: my_secret
         target: /etc/config/secret_updated.yaml
     ports:
-      - '3306'
+      - "3306"
     volumes:
       - source: file_system_data_1
         target: /var/lib/postgresql/data2

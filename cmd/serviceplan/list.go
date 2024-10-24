@@ -101,7 +101,6 @@ func runList(cmd *cobra.Command, args []string) error {
 	// Handle case when no service plans match
 	if len(formattedServicePlans) == 0 {
 		utils.HandleSpinnerSuccess(spinner, sm, "No service plans found.")
-		return nil
 	} else {
 		utils.HandleSpinnerSuccess(spinner, sm, "Service plans retrieved successfully.")
 	}

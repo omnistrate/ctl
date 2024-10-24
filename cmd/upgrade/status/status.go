@@ -110,7 +110,6 @@ func run(cmd *cobra.Command, args []string) error {
 
 	if len(formattedUpgradeStatuses) == 0 {
 		utils.HandleSpinnerSuccess(spinner, sm, "No upgrades found")
-		return nil
 	} else {
 		utils.HandleSpinnerSuccess(spinner, sm, "Upgrade status retrieved")
 	}
