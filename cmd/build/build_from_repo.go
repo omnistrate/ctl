@@ -254,7 +254,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		spinner.UpdateMessage("Labeling Docker image with the repository name: Already labeled")
 	} else {
 		// Append the label to the Dockerfile
-		dockerfileData = append(dockerfileData, []byte(fmt.Sprintf("\nLABEL org.opencontainers.image.source https://github.com/%s/%s\n", ghUsername, repoName))...)
+		dockerfileData = append(dockerfileData, []byte(fmt.Sprintf("\nLABEL org.opencontainers.image.source=\"https://github.com/%s/%s\"\n", ghUsername, repoName))...)
 
 		// Write the Dockerfile back
 		err = os.WriteFile(filepath.Join(cwd, "Dockerfile"), dockerfileData, 0600)
@@ -289,18 +289,18 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	sm.Start()
 
 	// Step 10: Build docker image
-	imageUrl := fmt.Sprintf("ghcr.io/%s/%s:latest", strings.ToLower(ghUsername), repoName)
+	imageUrl := fmt.Sprintf("ghcr.io/%s/%s", strings.ToLower(ghUsername), repoName)
 
 	spinner = sm.AddSpinner(fmt.Sprintf("Building Docker image: %s", imageUrl))
 	spinner.Complete()
 	sm.Stop()
-	buildCmd := exec.Command("docker", "build", ".", "-t", imageUrl)
+	buildCmd := exec.Command("docker", "buildx", "build", "--pull", "--platform", "linux/amd64", ".", "-t", imageUrl, "--no-cache", "--load")
 
 	// Redirect stdout and stderr to the terminal
 	buildCmd.Stdout = os.Stdout
 	buildCmd.Stderr = os.Stderr
 
-	fmt.Printf("Invoking 'docker build . -t %s'...\n", imageUrl)
+	fmt.Printf("Invoking 'docker buildx build --pull --platform linux/amd64 . -t %s --no-cache --load'...\n", imageUrl)
 	err = buildCmd.Run()
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
@@ -321,6 +321,81 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	pushCmd.Stderr = os.Stderr
 
 	fmt.Printf("Invoking 'docker push %s'...\n", imageUrl)
+	err = pushCmd.Run()
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+
+	sm = ysmrr.NewSpinnerManager()
+	sm.Start()
+
+	// Retrieve the digest
+	spinner = sm.AddSpinner("Retrieving the digest for the image")
+	digestCmd := exec.Command("docker", "buildx", "imagetools", "inspect", imageUrl)
+
+	digestOutput, err := digestCmd.Output()
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+
+	// Convert output to string and search for the Digest line
+	digestOutputStr := string(digestOutput)
+	var digest string
+	for _, line := range strings.Split(digestOutputStr, "\n") {
+		if strings.Contains(line, "Digest:") {
+			parts := strings.Split(line, ":")
+			if len(parts) < 3 {
+				utils.HandleSpinnerError(spinner, sm, errors.New("unable to retrieve the digest"))
+				return err
+			}
+			digest = fmt.Sprintf("sha-%s", strings.TrimSpace(strings.Split(line, ":")[2]))
+			break
+		}
+	}
+
+	spinner.Complete()
+	sm.Stop()
+
+	fmt.Printf("Retrieved digest: %s\n", digest)
+
+	sm = ysmrr.NewSpinnerManager()
+	sm.Start()
+
+	imageUrlWithDigestTag := fmt.Sprintf("%s:%s", imageUrl, digest)
+
+	// Tag the image with the digest
+	spinner = sm.AddSpinner("Tagging the image with the digest")
+	spinner.Complete()
+	sm.Stop()
+
+	tagCmd := exec.Command("docker", "tag", imageUrl, imageUrlWithDigestTag)
+
+	tagCmd.Stdout = os.Stdout
+	tagCmd.Stderr = os.Stderr
+
+	fmt.Printf("Invoking 'docker tag %s %s'...\n", imageUrl, imageUrlWithDigestTag)
+	if err = tagCmd.Run(); err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+
+	sm = ysmrr.NewSpinnerManager()
+	sm.Start()
+
+	// Push the image with the digest tag
+	spinner = sm.AddSpinner("Pushing the image with the digest tag")
+	spinner.Complete()
+	sm.Stop()
+
+	pushCmd = exec.Command("docker", "push", imageUrlWithDigestTag)
+
+	// Redirect stdout and stderr to the terminal
+	pushCmd.Stdout = os.Stdout
+	pushCmd.Stderr = os.Stderr
+
+	fmt.Printf("Invoking 'docker push %s'...\n", imageUrlWithDigestTag)
 	err = pushCmd.Run()
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
@@ -352,7 +427,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		// Generate compose spec from image
 		generateComposeSpecRequest := openapiclient.GenerateComposeSpecFromContainerImageRequestBody{
 			ImageRegistry: "ghcr.io",
-			Image:         imageUrl,
+			Image:         strings.TrimPrefix(imageUrlWithDigestTag, "ghcr.io/"),
 			Username:      utils.ToPtr(ghUsername),
 			Password:      utils.ToPtr(pat),
 		}
@@ -372,6 +447,9 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 		// Replace the actual PAT with ${{ secrets.GitHubPAT }}
 		fileData = []byte(strings.ReplaceAll(string(fileData), pat, "${{ secrets.GitHubPAT }}"))
+
+		// Replace the digestTag with ${{ LatestImageTag }}
+		fileData = []byte(strings.ReplaceAll(string(fileData), digest, "${{ LatestImageTag }}"))
 
 		// Write the compose spec to a file
 		err = os.WriteFile(ComposeFileName, fileData, 0600)
@@ -400,6 +478,9 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	// Render the ${{ secrets.GitHubPAT }} in the compose file
 	fileData = []byte(strings.ReplaceAll(string(fileData), "${{ secrets.GitHubPAT }}", pat))
+
+	// Render the ${{ LatestImageTag }} in the compose file
+	fileData = []byte(strings.ReplaceAll(string(fileData), "${{ LatestImageTag }}", digest))
 
 	// Build the service
 	serviceID, devEnvironmentID, devPlanID, undefinedResources, err := buildService(

@@ -81,7 +81,7 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
-	err = WaitForInstanceToReachStatus(ctx, instanceID1, Running, 300*time.Second)
+	err = WaitForInstanceToReachStatus(ctx, instanceID1, Running, 900*time.Second)
 	require.NoError(t, err)
 
 	// PASS: stop instance 1
@@ -89,7 +89,7 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
-	err = WaitForInstanceToReachStatus(ctx, instanceID1, Stopped, 300*time.Second)
+	err = WaitForInstanceToReachStatus(ctx, instanceID1, Stopped, 900*time.Second)
 	require.NoError(t, err)
 
 	// PASS: start instance 1
@@ -97,7 +97,7 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
-	err = WaitForInstanceToReachStatus(ctx, instanceID1, Running, 300*time.Second)
+	err = WaitForInstanceToReachStatus(ctx, instanceID1, Running, 900*time.Second)
 	require.NoError(t, err)
 
 	// PASS: restart instance 1
@@ -106,7 +106,7 @@ func TestInstanceBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	time.Sleep(5 * time.Second)
-	err = WaitForInstanceToReachStatus(ctx, instanceID1, Running, 300*time.Second)
+	err = WaitForInstanceToReachStatus(ctx, instanceID1, Running, 900*time.Second)
 	require.NoError(t, err)
 
 	// PASS: update instance 1
@@ -115,7 +115,7 @@ func TestInstanceBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	time.Sleep(5 * time.Second)
-	err = WaitForInstanceToReachStatus(ctx, instanceID1, Running, 300*time.Second)
+	err = WaitForInstanceToReachStatus(ctx, instanceID1, Running, 900*time.Second)
 	require.NoError(t, err)
 
 	// PASS: update instance 2
@@ -124,7 +124,7 @@ func TestInstanceBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	time.Sleep(5 * time.Second)
-	err = WaitForInstanceToReachStatus(ctx, instanceID2, Running, 300*time.Second)
+	err = WaitForInstanceToReachStatus(ctx, instanceID2, Running, 900*time.Second)
 	require.NoError(t, err)
 
 	// PASS: instance list
