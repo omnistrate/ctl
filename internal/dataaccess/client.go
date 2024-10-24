@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
+	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/config"
 	openapiclientfleet "github.com/omnistrate/omnistrate-sdk-go/fleet"
-	openapiclientv1 "github.com/omnistrate/omnistrate-sdk-go/v1"
 	"github.com/pkg/errors"
 )
 
