@@ -40,6 +40,11 @@ var BuildFromRepoCmd = &cobra.Command{
 }
 
 func init() {
+	BuildFromRepoCmd.Flags().StringArray("env-var", nil, "Specify environment variables required for running the image. Effective only when the compose.yaml is absent. Use the format: --env-var key1=var1 --env-var key2=var2.")
+	BuildFromRepoCmd.Flags().String("deployment-type", "", "Set the deployment type. Options: 'hosted' or 'byoa' (Bring Your Own Account).")
+	BuildFromRepoCmd.Flags().String("aws-account-id", "", "AWS account ID. Must be used with --deployment-type")
+	BuildFromRepoCmd.Flags().String("gcp-project-id", "", "GCP project ID. Must be used with --gcp-project-number and --deployment-type")
+	BuildFromRepoCmd.Flags().String("gcp-project-number", "", "GCP project number. Must be used with --gcp-project-id and --deployment-type")
 	BuildFromRepoCmd.Flags().Bool("reset-pat", false, "Reset the GitHub Personal Access Token (PAT) for the current user.")
 	BuildFromRepoCmd.Flags().StringP("output", "o", "text", "Output format. Only text is supported")
 }
@@ -48,6 +53,31 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	defer config.CleanupArgsAndFlags(cmd, &args)
 
 	// Retrieve the flags
+	envVars, err := cmd.Flags().GetStringArray("env-var")
+	if err != nil {
+		return err
+	}
+
+	deploymentType, err := cmd.Flags().GetString("deployment-type")
+	if err != nil {
+		return err
+	}
+
+	awsAccountID, err := cmd.Flags().GetString("aws-account-id")
+	if err != nil {
+		return err
+	}
+
+	gcpProjectID, err := cmd.Flags().GetString("gcp-project-id")
+	if err != nil {
+		return err
+	}
+
+	gcpProjectNumber, err := cmd.Flags().GetString("gcp-project-number")
+	if err != nil {
+		return err
+	}
+
 	resetPAT, err := cmd.Flags().GetBool("reset-pat")
 	if err != nil {
 		utils.PrintError(err)
@@ -65,6 +95,30 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		err = errors.New("only text output format is supported")
 		utils.PrintError(err)
 		return err
+	}
+
+	// Validate deployment type and cloud provider account details
+	if deploymentType != "" {
+		if deploymentType != "hosted" && deploymentType != "byoa" {
+			err = errors.New("invalid deployment type. Options: 'hosted' or 'byoa'")
+			utils.PrintError(err)
+			return err
+		}
+		if awsAccountID == "" && gcpProjectID == "" {
+			err = errors.New(fmt.Sprintf("AWS account ID or GCP project ID are required for %s deployment type", deploymentType))
+			utils.PrintError(err)
+			return err
+		}
+		if gcpProjectID != "" && gcpProjectNumber == "" {
+			err = errors.New("GCP project number is required with GCP project ID")
+			utils.PrintError(err)
+			return err
+		}
+		if gcpProjectID == "" && gcpProjectNumber != "" {
+			err = errors.New("GCP project ID is required with GCP project number")
+			utils.PrintError(err)
+			return err
+		}
 	}
 
 	// Initialize the spinner manager
@@ -424,12 +478,32 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	// Step 13: Generate compose spec from the Docker image if it does not exist
 	if !composeSpecExists {
 		spinner = sm.AddSpinner("Generating compose spec from the Docker image")
+
+		// Parse the environment variables
+		var formattedEnvVars []openapiclient.EnvironmentVariable
+		for _, envVar := range envVars {
+			if envVar == "[]" {
+				continue
+			}
+			envVarParts := strings.Split(envVar, "=")
+			if len(envVarParts) != 2 {
+				err = errors.New("invalid environment variable format")
+				utils.PrintError(err)
+				return err
+			}
+			formattedEnvVars = append(formattedEnvVars, openapiclient.EnvironmentVariable{
+				Key:   envVarParts[0],
+				Value: envVarParts[1],
+			})
+		}
+
 		// Generate compose spec from image
 		generateComposeSpecRequest := openapiclient.GenerateComposeSpecFromContainerImageRequestBody{
-			ImageRegistry: "ghcr.io",
-			Image:         strings.TrimPrefix(imageUrlWithDigestTag, "ghcr.io/"),
-			Username:      utils.ToPtr(ghUsername),
-			Password:      utils.ToPtr(pat),
+			ImageRegistry:        "ghcr.io",
+			Image:                strings.TrimPrefix(imageUrlWithDigestTag, "ghcr.io/"),
+			Username:             utils.ToPtr(ghUsername),
+			Password:             utils.ToPtr(pat),
+			EnvironmentVariables: formattedEnvVars,
 		}
 
 		generateComposeSpecRes, err := dataaccess.GenerateComposeSpecFromContainerImage(cmd.Context(), token, generateComposeSpecRequest)
@@ -450,6 +524,38 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 		// Replace the digestTag with ${{ LatestImageTag }}
 		fileData = []byte(strings.ReplaceAll(string(fileData), digest, "${{ LatestImageTag }}"))
+
+		// Append the deployment section to the compose spec
+		switch deploymentType {
+		case "hosted":
+			fileData = append(fileData, []byte("  deployment:\n")...)
+			fileData = append(fileData, []byte("    hostedDeployment:\n")...)
+		case "byoa":
+			fileData = append(fileData, []byte("  deployment:\n")...)
+			fileData = append(fileData, []byte("    byoaDeployment:\n")...)
+		}
+
+		if deploymentType != "" {
+			if awsAccountID != "" {
+				fileData = append(fileData, []byte(fmt.Sprintf("      AwsAccountId: '%s'\n", awsAccountID))...)
+				awsBootstrapRoleARN := fmt.Sprintf("arn:aws:iam::%s:role/omnistrate-bootstrap-role", awsAccountID)
+				fileData = append(fileData, []byte(fmt.Sprintf("      AwsBootstrapRoleArn: '%s'\n", awsBootstrapRoleARN))...)
+			}
+			if gcpProjectID != "" {
+				fileData = append(fileData, []byte(fmt.Sprintf("      GcpProjectId: '%s'\n", gcpProjectID))...)
+				fileData = append(fileData, []byte(fmt.Sprintf("      GcpProjectNumber: '%s'\n", gcpProjectNumber))...)
+
+				// Get organization id
+				user, err := dataaccess.DescribeUser(cmd.Context(), token)
+				if err != nil {
+					utils.HandleSpinnerError(spinner, sm, err)
+					return err
+				}
+
+				gcpServiceAccountEmail := fmt.Sprintf("bootstrap-%s@%s.iam.gserviceaccount.com", user.OrgId, gcpProjectID)
+				fileData = append(fileData, []byte(fmt.Sprintf("      GcpServiceAccountEmail: '%s'\n", gcpServiceAccountEmail))...)
+			}
+		}
 
 		// Write the compose spec to a file
 		err = os.WriteFile(ComposeFileName, fileData, 0600)
