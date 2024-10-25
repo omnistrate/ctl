@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"github.com/fatih/color"
+	"github.com/omnistrate/api-design/v1/api/constants"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -538,8 +540,8 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		if deploymentType != "" {
 			if awsAccountID != "" {
 				fileData = append(fileData, []byte(fmt.Sprintf("      AwsAccountId: '%s'\n", awsAccountID))...)
-				awsBootstrapRoleARN := fmt.Sprintf("arn:aws:iam::%s:role/omnistrate-bootstrap-role", awsAccountID)
-				fileData = append(fileData, []byte(fmt.Sprintf("      AwsBootstrapRoleArn: '%s'\n", awsBootstrapRoleARN))...)
+				awsBootstrapRoleAccountARN := fmt.Sprintf("arn:aws:iam::%s:role/omnistrate-bootstrap-role", awsAccountID)
+				fileData = append(fileData, []byte(fmt.Sprintf("      AwsBootstrapRoleAccountArn: '%s'\n", awsBootstrapRoleAccountARN))...)
 			}
 			if gcpProjectID != "" {
 				fileData = append(fileData, []byte(fmt.Sprintf("      GcpProjectId: '%s'\n", gcpProjectID))...)
@@ -710,36 +712,38 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	// Step 19: Initialize the SaaS Portal
 	var prodEnvironment *serviceenvironmentapi.DescribeServiceEnvironmentResult
-	prodEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, string(prodEnvironmentID))
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
-	if !checkIfSaaSPortalReady(prodEnvironment) {
-		spinner = sm.AddSpinner("Initializing the SaaS Portal. This may take a few minutes.")
-
-		for {
-			prodEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, string(prodEnvironmentID))
-			if err != nil {
-				utils.PrintError(err)
-				return err
-			}
-
-			if checkIfSaaSPortalReady(prodEnvironment) {
-				break
-			}
-
-			time.Sleep(5 * time.Second)
+	if config.IsProd() {
+		prodEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, string(prodEnvironmentID))
+		if err != nil {
+			utils.PrintError(err)
+			return err
 		}
 
+		if !checkIfSaaSPortalReady(prodEnvironment) {
+			spinner = sm.AddSpinner("Initializing the SaaS Portal. This may take a few minutes.")
+
+			for {
+				prodEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, string(prodEnvironmentID))
+				if err != nil {
+					utils.PrintError(err)
+					return err
+				}
+
+				if checkIfSaaSPortalReady(prodEnvironment) {
+					break
+				}
+
+				time.Sleep(5 * time.Second)
+			}
+
+			spinner.Complete()
+		}
+
+		// Step 20: Retrieve the SaaS Portal URL
+		spinner = sm.AddSpinner("Retrieving the SaaS Portal URL")
+		time.Sleep(1 * time.Second) // Add a delay to show the spinner
 		spinner.Complete()
 	}
-
-	// Step 20: Retrieve the SaaS Portal URL
-	spinner = sm.AddSpinner("Retrieving the SaaS Portal URL")
-	time.Sleep(1 * time.Second) // Add a delay to show the spinner
-	spinner.Complete()
 
 	sm.Stop()
 
@@ -747,14 +751,70 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	println()
 	println()
 	fmt.Println("Congratulations! Your service has been successfully built and deployed.")
-	utils.PrintURL("You can access the SaaS Portal at", getSaaSPortalURL(prodEnvironment, serviceID, string(prodEnvironmentID)))
+	if config.IsProd() {
+		utils.PrintURL("You can access the SaaS Portal at", getSaaSPortalURL(prodEnvironment, serviceID, string(prodEnvironmentID)))
+	}
 
 	println()
-	fmt.Println("Next steps:")
-	fmt.Printf("1. Play around with the SaaS Portal! Subscribe to your service and create instance deployments.\n")
-	fmt.Printf("2. A compose spec has been generated from the Docker image. You can customize it further by editing the %s file. Refer to the documentation https://docs.omnistrate.com/getting-started/compose-spec/ for more information.\n", ComposeFileName)
-	fmt.Printf("3. Push any changes to the repository and automatically update the service by running 'omctl build-from-repo' again.\n")
-	fmt.Println("4. Bring your own domain for your SaaS offer. Check 'omctl create domain' command.")
+
+	// Check if the cloud provider account(s) are verified
+	awsAccountUnverified := false
+	gcpAccountUnverified := false
+	var unverifiedAwsAccountConfigID, unverifiedGcpAccountConfigID string
+	if awsAccountID != "" || gcpProjectID != "" {
+		accounts, err := dataaccess.ListAccounts(cmd.Context(), token, "all")
+		if err != nil {
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
+
+		for _, account := range accounts.AccountConfigs {
+			if account.Status == string(constants.Verifying) && account.AwsAccountID != nil && *account.AwsAccountID == awsAccountID {
+				awsAccountUnverified = true
+				unverifiedAwsAccountConfigID = account.Id
+			}
+
+			if account.Status == string(constants.Verifying) && account.GcpProjectID != nil && *account.GcpProjectID == gcpProjectID && account.GcpProjectNumber != nil && *account.GcpProjectNumber == gcpProjectNumber {
+				gcpAccountUnverified = true
+				unverifiedGcpAccountConfigID = account.Id
+			}
+		}
+	}
+
+	urlMsg := color.New(color.FgCyan).SprintFunc()
+	if awsAccountUnverified || gcpAccountUnverified {
+		fmt.Println("Next steps:")
+		fmt.Printf("1.")
+		if awsAccountUnverified {
+			account, err := dataaccess.DescribeAccount(cmd.Context(), token, unverifiedAwsAccountConfigID)
+			if err != nil {
+				utils.PrintError(err)
+				return err
+			}
+			fmt.Printf(" Verify your cloud provider account %s following the instructions below:\n", account.Name)
+			fmt.Printf("  - For CloudFormation users: Please create your CloudFormation Stack using the provided template at %s. Watch the CloudFormation guide at %s for help.\n", urlMsg(*account.AwsCloudFormationTemplateURL), urlMsg(dataaccess.AwsCloudFormationGuideURL))
+			fmt.Printf("  - For Terraform users: Execute the Terraform scripts available at %s, by using the Account Config Identity ID below. For guidance our Terraform instructional video is at %s.\n", urlMsg(dataaccess.AwsGcpTerraformScriptsURL), urlMsg(dataaccess.AwsGcpTerraformGuideURL))
+		}
+
+		if gcpAccountUnverified {
+			account, err := dataaccess.DescribeAccount(cmd.Context(), token, unverifiedGcpAccountConfigID)
+			if err != nil {
+				utils.PrintError(err)
+				return err
+			}
+			fmt.Printf(" Verify your cloud provider account %s following the instructions below:\n", account.Name)
+			fmt.Printf("  - Execute the Terraform scripts available at %s, by using the Account Config Identity ID below. For guidance our Terraform instructional video is at %s.\n", urlMsg(dataaccess.AwsGcpTerraformScriptsURL), urlMsg(dataaccess.AwsGcpTerraformGuideURL))
+		}
+
+		fmt.Printf("2. After account verified, play around with the SaaS Portal! Subscribe to your service and create instance deployments.\n")
+		fmt.Printf("3. A compose spec has been generated from the Docker image. You can customize it further by editing the %s file. Refer to the documentation %s for more information.\n", ComposeFileName, urlMsg("https://docs.omnistrate.com/getting-started/compose-spec/"))
+		fmt.Printf("4. Push any changes to the repository and automatically update the service by running 'omctl build-from-repo' again.\n")
+	} else {
+		fmt.Println("Next steps:")
+		fmt.Printf("1. Play around with the SaaS Portal! Subscribe to your service and create instance deployments.\n")
+		fmt.Printf("2. A compose spec has been generated from the Docker image. You can customize it further by editing the %s file. Refer to the documentation %s for more information.\n", ComposeFileName, urlMsg("https://docs.omnistrate.com/getting-started/compose-spec/"))
+		fmt.Printf("3. Push any changes to the repository and automatically update the service by running 'omctl build-from-repo' again.\n")
+	}
 
 	return nil
 }
