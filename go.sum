@@ -90,8 +90,8 @@ github.com/muesli/termenv v0.15.2 h1:GohcuySI0QmI3wN8Ok9PtKGkgkFIk7y6Vpb5PvrY+Wo
 github.com/muesli/termenv v0.15.2/go.mod h1:Epx+iuz8sNs7mNKhxzH4fWXGNpZwUaJKRS1noLXviQ8=
 github.com/omnistrate-oss/omnistrate-sdk-go v0.0.21 h1:b5WDGGPohSHKz+8b39zz3HOv4DcsTnOaKFS/uhT6gP0=
 github.com/omnistrate-oss/omnistrate-sdk-go v0.0.21/go.mod h1:lfpOdzsYVkUdwGmF7KkFLAH9IoxVctJAm5x7pBUd7o0=
-github.com/omnistrate/api-design v0.7.57 h1:q5dhuu9Vj3MrejIBmaYgbvo1RpxbmhlEHyNzmRGs2yc=
-github.com/omnistrate/api-design v0.7.57/go.mod h1:xHvHCUUrhT8Zr7x/8SUrrsaErBu95HAmr7bVr+Jh9kI=
+github.com/omnistrate/api-design v0.7.67 h1:2vZiqMENY+7w7AfniLUBhkSkD3C4pJAs5GQeSzvDFzs=
+github.com/omnistrate/api-design v0.7.67/go.mod h1:xHvHCUUrhT8Zr7x/8SUrrsaErBu95HAmr7bVr+Jh9kI=
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20241022161220-48dac1dfc724 h1:I6DpijBO6Kxshs4anVwuzkV9J+yBKPTiak65CxbvWaI=
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20241022161220-48dac1dfc724/go.mod h1:IoOEWoWISwWWTr/7Z5wDvqAMaDpW7i+DXj5F1Qp5T6o=
 github.com/opencontainers/go-digest v1.0.0 h1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=
