@@ -43,7 +43,7 @@ func FleetListCustomNetworks(
 		req = req.CloudProviderRegion(*cloudProviderRegion)
 	}
 
-	req.CustomNetworksOnly(false)
+	req = req.CustomNetworksOnly(false)
 
 	var r *http.Response
 	defer func() {
