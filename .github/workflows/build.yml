@@ -208,6 +208,8 @@ jobs:
             "build/compose/...",
             "build/image/...",
             "build/helm/...",
+            "build/kustomize/...",
+            "build/operator/...",
             "domain/...",
             "environment/...",
             "helm/...",
