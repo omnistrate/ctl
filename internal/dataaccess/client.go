@@ -92,10 +92,11 @@ func handleFleetError(err error) error {
 	return err
 }
 
+// Configure retryable http client
+// retryablehttp gives us automatic retries with exponential backoff.
 func getRetryableHttpClient() *http.Client {
 	// retryablehttp gives us automatic retries with exponential backoff.
 	httpClient := retryablehttp.NewClient()
-	// The TF framework will pick up the default global logger.
 	// HTTP requests are logged at DEBUG level.
 	httpClient.ErrorHandler = retryablehttp.PassthroughErrorHandler
 	httpClient.CheckRetry = retryablehttp.DefaultRetryPolicy
