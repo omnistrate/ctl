@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/hashicorp/go-retryablehttp"
 	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/config"
@@ -27,6 +28,8 @@ func getV1Client() *openapiclientv1.APIClient {
 		servers = append(servers, server)
 	}
 	configuration.Servers = servers
+
+	configuration.HTTPClient = getRetryableHttpClient()
 
 	apiClient := openapiclientv1.NewAPIClient(configuration)
 	return apiClient
@@ -66,6 +69,8 @@ func getFleetClient() *openapiclientfleet.APIClient {
 	}
 	configuration.Servers = servers
 
+	configuration.HTTPClient = getRetryableHttpClient()
+
 	apiClient := openapiclientfleet.NewAPIClient(configuration)
 	return apiClient
 }
@@ -84,4 +89,15 @@ func handleFleetError(err error) error {
 		return fmt.Errorf("%s\nDetail: %s", apiError.Name, apiError.Message)
 	}
 	return err
+}
+
+// Configure retryable http client
+// retryablehttp gives us automatic retries with exponential backoff.
+func getRetryableHttpClient() *http.Client {
+	// retryablehttp gives us automatic retries with exponential backoff.
+	httpClient := retryablehttp.NewClient()
+	// HTTP requests are logged at DEBUG level.
+	httpClient.ErrorHandler = retryablehttp.PassthroughErrorHandler
+	httpClient.CheckRetry = retryablehttp.DefaultRetryPolicy
+	return httpClient.StandardClient()
 }
