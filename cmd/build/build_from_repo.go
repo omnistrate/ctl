@@ -280,8 +280,9 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	}
 	repoURL := strings.TrimSpace(string(output))
 	repoName := filepath.Base(repoURL)
+	repoOwner := filepath.Base(filepath.Dir(repoURL))
 	repoName = strings.TrimSuffix(repoName, ".git") // Extract repo name
-	spinner.UpdateMessage(fmt.Sprintf("Retrieving repository name: %s", repoName))
+	spinner.UpdateMessage(fmt.Sprintf("Retrieving repository name: %s/%s", repoOwner, repoName))
 	spinner.Complete()
 
 	// Step 7: Retrieve the GitHub username
@@ -310,7 +311,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		spinner.UpdateMessage("Labeling Docker image with the repository name: Already labeled")
 	} else {
 		// Append the label to the Dockerfile
-		dockerfileData = append(dockerfileData, []byte(fmt.Sprintf("\nLABEL org.opencontainers.image.source=\"https://github.com/%s/%s\"\n", ghUsername, repoName))...)
+		dockerfileData = append(dockerfileData, []byte(fmt.Sprintf("\nLABEL org.opencontainers.image.source=\"https://github.com/%s/%s\"\n", repoOwner, repoName))...)
 
 		// Write the Dockerfile back
 		err = os.WriteFile(filepath.Join(cwd, "Dockerfile"), dockerfileData, 0600)
@@ -319,7 +320,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		spinner.UpdateMessage(fmt.Sprintf("Labeling Docker image with the repository name: %s", repoName))
+		spinner.UpdateMessage(fmt.Sprintf("Labeling Docker image with the repository name: %s/%s", repoOwner, repoName))
 	}
 
 	spinner.Complete()
@@ -345,7 +346,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	sm.Start()
 
 	// Step 10: Build docker image
-	imageUrl := fmt.Sprintf("ghcr.io/%s/%s", strings.ToLower(ghUsername), repoName)
+	imageUrl := fmt.Sprintf("ghcr.io/%s/%s", strings.ToLower(repoOwner), repoName)
 
 	spinner = sm.AddSpinner(fmt.Sprintf("Building Docker image: %s", imageUrl))
 	spinner.Complete()
