@@ -289,6 +289,8 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	spinner.UpdateMessage("Checking if user is in the root of the repository: Yes")
 	spinner.Complete()
 
+	rootDir := cwd
+
 	// Step 5: Check if there exists a compose spec in the repository
 	spinner = sm.AddSpinner("Checking if there exists a compose spec in the repository")
 	time.Sleep(1 * time.Second) // Add a delay to show the spinner
@@ -448,6 +450,13 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	versionTaggedImageUrls := make(map[string]string) // service -> image url with digest tag
 	for service, dockerfilePath := range dockerfilePaths {
+		// Set current working directory to the service context
+		err = os.Chdir(filepath.Dir(dockerfilePath))
+		if err != nil {
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
+
 		// Step 10: Build docker image
 		imageUrl := fmt.Sprintf("ghcr.io/%s/%s-%s", strings.ToLower(repoOwner), repoName, strings.ToLower(utils.GetFirstDifferentSegmentInFilePaths(dockerfilePath, dockerfilePathsArr)))
 
@@ -566,6 +575,13 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 		sm = ysmrr.NewSpinnerManager()
 		sm.Start()
+	}
+
+	// Change back to the root directory
+	err = os.Chdir(rootDir)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
 	}
 
 	// Step 13: Generate compose spec from the Docker image
