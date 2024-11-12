@@ -1,6 +1,10 @@
 package utils
 
-import "github.com/chelnak/ysmrr"
+import (
+	"fmt"
+	"github.com/chelnak/ysmrr"
+	"os"
+)
 
 func HandleSpinnerError(spinner *ysmrr.Spinner, sm ysmrr.SpinnerManager, err error) {
 	if spinner != nil {
@@ -16,4 +20,21 @@ func HandleSpinnerSuccess(spinner *ysmrr.Spinner, sm ysmrr.SpinnerManager, messa
 		spinner.Complete()
 		sm.Stop()
 	}
+}
+
+func CheckSpecFileExists(spinner *ysmrr.Spinner, sm ysmrr.SpinnerManager, specFile string) (err error) {
+	if _, err = os.Stat(specFile); !os.IsNotExist(err) {
+		err = fmt.Errorf("unable to access spec file: %s", specFile)
+		HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+
+	if err == nil {
+		// Spec file exists
+		err = fmt.Errorf("current directory is already initialized with an existing project")
+		HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+
+	return nil
 }
