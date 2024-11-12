@@ -39,7 +39,7 @@ omctl build-from-repo --file omnistrate-compose.yaml
 	GitHubPATGenerateURL = "https://github.com/settings/tokens"
 	ComposeFileName      = "compose.yaml"
 	DefaultProdEnvName   = "Production"
-	defafultServiceName  = "default"
+	defaultServiceName   = "default" // Default service name when no compose spec exists in the repo. It won't show up in the resulting image or compose spec. Only intermediate use.
 )
 
 var BuildFromRepoCmd = &cobra.Command{
@@ -355,7 +355,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 			}
 		}
 	} else {
-		dockerfilePaths[defafultServiceName], err = filepath.Abs("Dockerfile")
+		dockerfilePaths[defaultServiceName], err = filepath.Abs("Dockerfile")
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
@@ -625,7 +625,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		// Generate compose spec from image
 		generateComposeSpecRequest := openapiclient.GenerateComposeSpecFromContainerImageRequestBody{
 			ImageRegistry:        "ghcr.io",
-			Image:                strings.TrimPrefix(versionTaggedImageUrls[defafultServiceName], "ghcr.io/"),
+			Image:                strings.TrimPrefix(versionTaggedImageUrls[defaultServiceName], "ghcr.io/"),
 			Username:             utils.ToPtr(ghUsername),
 			Password:             utils.ToPtr(pat),
 			EnvironmentVariables: formattedEnvVars,
@@ -649,7 +649,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		fileData = []byte(strings.ReplaceAll(string(fileData), pat, "${{ secrets.GitHubPAT }}"))
 
 		// Replace the image tag with build tag
-		fileData = []byte(strings.ReplaceAll(string(fileData), fmt.Sprintf("image: %s", versionTaggedImageUrls[defafultServiceName]), "build:\n      context: .\n      dockerfile: Dockerfile"))
+		fileData = []byte(strings.ReplaceAll(string(fileData), fmt.Sprintf("image: %s", versionTaggedImageUrls[defaultServiceName]), "build:\n      context: .\n      dockerfile: Dockerfile"))
 
 		// Append the deployment section to the compose spec
 		switch deploymentType {
