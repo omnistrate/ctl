@@ -29,8 +29,8 @@ omctl build-from-repo --file omnistrate-compose.yaml
 
 ```
       --aws-account-id string       AWS account ID. Must be used with --deployment-type
-      --deployment-type string      Set the deployment type. Options: 'hosted' or 'byoa' (Bring Your Own Account).
-      --env-var stringArray         Specify environment variables required for running the image. Effective only when the compose.yaml is absent. Use the format: --env-var key1=var1 --env-var key2=var2.
+      --deployment-type string      Set the deployment type. Options: 'hosted' or 'byoa' (Bring Your Own Account). Only effective when no compose spec exists in the repo.
+      --env-var stringArray         Specify environment variables required for running the image. Effective only when the compose.yaml is absent. Use the format: --env-var key1=var1 --env-var key2=var2. Only effective when no compose spec exists in the repo.
   -f, --file string                 Specify the compose file to read and write to. (default "compose.yaml")
       --gcp-project-id string       GCP project ID. Must be used with --gcp-project-number and --deployment-type
       --gcp-project-number string   GCP project number. Must be used with --gcp-project-id and --deployment-type
