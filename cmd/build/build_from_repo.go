@@ -469,7 +469,13 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		}
 
 		// Step 10: Build docker image
-		imageUrl := fmt.Sprintf("ghcr.io/%s/%s-%s", strings.ToLower(repoOwner), repoName, strings.ToLower(utils.GetFirstDifferentSegmentInFilePaths(dockerfilePath, dockerfilePathsArr)))
+		label := strings.ToLower(utils.GetFirstDifferentSegmentInFilePaths(dockerfilePath, dockerfilePathsArr))
+		var imageUrl string
+		if label == "" {
+			imageUrl = fmt.Sprintf("ghcr.io/%s/%s", strings.ToLower(repoOwner), repoName)
+		} else {
+			imageUrl = fmt.Sprintf("ghcr.io/%s/%s-%s", strings.ToLower(repoOwner), repoName, label)
+		}
 
 		spinner = sm.AddSpinner(fmt.Sprintf("Building Docker image: %s", imageUrl))
 		spinner.Complete()
