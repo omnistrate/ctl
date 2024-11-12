@@ -757,6 +757,17 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 			}
 		}
 
+		// Append the image registry attributes to the compose spec if it doesn't exist
+		if !strings.Contains(string(fileData), "x-omnistrate-image-registry-attributes") {
+			fileData = append(fileData, []byte(fmt.Sprintf(`
+x-omnistrate-image-registry-attributes:
+  ghcr.io:
+    auth:
+      password: ${{ secrets.GitHubPAT }}
+      username: %s
+`, ghUsername))...)
+		}
+
 		// Write the compose spec to a file
 		err = os.WriteFile(file, fileData, 0600)
 		if err != nil {
