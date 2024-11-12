@@ -30,7 +30,7 @@ const (
 omctl build-from-repo"
 `
 	GitHubPATGenerateURL = "https://github.com/settings/tokens"
-	ComposeFileName      = "omnistrate-spec-root.yaml"
+	ComposeFileName      = "compose.yaml"
 	DefaultProdEnvName   = "Production"
 	defafultServiceName  = "default"
 )
@@ -52,6 +52,12 @@ func init() {
 	BuildFromRepoCmd.Flags().String("gcp-project-number", "", "GCP project number. Must be used with --gcp-project-id and --deployment-type")
 	BuildFromRepoCmd.Flags().Bool("reset-pat", false, "Reset the GitHub Personal Access Token (PAT) for the current user.")
 	BuildFromRepoCmd.Flags().StringP("output", "o", "text", "Output format. Only text is supported")
+	BuildFromRepoCmd.Flags().StringP("file", "f", ComposeFileName, "Specify the compose file to read and write to.")
+
+	err := BuildFromRepoCmd.MarkFlagFilename("file")
+	if err != nil {
+		return
+	}
 }
 
 func runBuildFromRepo(cmd *cobra.Command, args []string) error {
@@ -84,6 +90,19 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	}
 
 	resetPAT, err := cmd.Flags().GetBool("reset-pat")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	file, err := cmd.Flags().GetString("file")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	// Convert the file path to an absolute path
+	file, err = filepath.Abs(file)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -267,7 +286,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	spinner = sm.AddSpinner("Checking if there exists a compose spec in the repository")
 	time.Sleep(1 * time.Second) // Add a delay to show the spinner
 	var composeSpecExists bool
-	if _, err := os.Stat(filepath.Join(cwd, ComposeFileName)); os.IsNotExist(err) {
+	if _, err = os.Stat(file); os.IsNotExist(err) {
 		composeSpecExists = false
 	} else {
 		composeSpecExists = true
@@ -290,12 +309,12 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	if composeSpecExists {
 		// Load the compose file
-		if _, err := os.Stat(ComposeFileName); os.IsNotExist(err) {
+		if _, err = os.Stat(file); os.IsNotExist(err) {
 			utils.PrintError(err)
 			return err
 		}
 
-		fileData, err = os.ReadFile(filepath.Clean(ComposeFileName))
+		fileData, err = os.ReadFile(file)
 		if err != nil {
 			return err
 		}
@@ -624,12 +643,12 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		}
 
 		// Write the compose spec to a file
-		err = os.WriteFile(ComposeFileName, fileData, 0600)
+		err = os.WriteFile(file, fileData, 0600)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
-		spinner.UpdateMessage(fmt.Sprintf("Generating compose spec from the Docker image: saved to %s", ComposeFileName))
+		spinner.UpdateMessage(fmt.Sprintf("Generating compose spec from the Docker image: saved to %s", file))
 		spinner.Complete()
 	} else {
 		for _, service := range project.Services {
@@ -698,12 +717,12 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		}
 
 		// Write the compose spec to a file
-		err = os.WriteFile(ComposeFileName, fileData, 0600)
+		err = os.WriteFile(file, fileData, 0600)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
-		spinner.UpdateMessage(fmt.Sprintf("Generating compose spec from the Docker image: saved to %s", ComposeFileName))
+		spinner.UpdateMessage(fmt.Sprintf("Generating compose spec from the Docker image: saved to %s", file))
 		spinner.Complete()
 	}
 
@@ -936,12 +955,12 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		}
 
 		fmt.Printf("2. After account verified, play around with the SaaS Portal! Subscribe to your service and create instance deployments.\n")
-		fmt.Printf("3. A compose spec has been generated from the Docker image. You can customize it further by editing the %s file. Refer to the documentation %s for more information.\n", ComposeFileName, urlMsg("https://docs.omnistrate.com/getting-started/compose-spec/"))
+		fmt.Printf("3. A compose spec has been generated from the Docker image. You can customize it further by editing the %s file. Refer to the documentation %s for more information.\n", filepath.Base(file), urlMsg("https://docs.omnistrate.com/getting-started/compose-spec/"))
 		fmt.Printf("4. Push any changes to the repository and automatically update the service by running 'omctl build-from-repo' again.\n")
 	} else {
 		fmt.Println("Next steps:")
 		fmt.Printf("1. Play around with the SaaS Portal! Subscribe to your service and create instance deployments.\n")
-		fmt.Printf("2. A compose spec has been generated from the Docker image. You can customize it further by editing the %s file. Refer to the documentation %s for more information.\n", ComposeFileName, urlMsg("https://docs.omnistrate.com/getting-started/compose-spec/"))
+		fmt.Printf("2. A compose spec has been generated from the Docker image. You can customize it further by editing the %s file. Refer to the documentation %s for more information.\n", filepath.Base(file), urlMsg("https://docs.omnistrate.com/getting-started/compose-spec/"))
 		fmt.Printf("3. Push any changes to the repository and automatically update the service by running 'omctl build-from-repo' again.\n")
 	}
 
