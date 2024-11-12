@@ -27,7 +27,14 @@ import (
 
 const (
 	buildFromRepoExample = `# Build service from git repository
-omctl build-from-repo"
+omctl build-from-repo
+
+# Build service from git repository with environment variables, deployment type and cloud provider account details
+omctl build-from-repo --env-var POSTGRES_PASSWORD=default --deployment-type byoa --aws-account-id 442426883376
+
+# Build service from an existing compose spec in the repository
+omctl build-from-repo --file omnistrate-compose.yaml
+"
 `
 	GitHubPATGenerateURL = "https://github.com/settings/tokens"
 	ComposeFileName      = "compose.yaml"
@@ -38,7 +45,7 @@ omctl build-from-repo"
 var BuildFromRepoCmd = &cobra.Command{
 	Use:          "build-from-repo",
 	Short:        "Build Service from Git Repository",
-	Long:         "This command helps to build service from git repository. Run this command from the root of the repository. Make sure you have the Dockerfile in the root of the repository and have the Docker daemon running on your machine.",
+	Long:         "This command helps to build service from git repository. Run this command from the root of the repository. Make sure you have the Dockerfile in the repository and have the Docker daemon running on your machine.",
 	Example:      buildFromRepoExample,
 	RunE:         runBuildFromRepo,
 	SilenceUsage: true,
