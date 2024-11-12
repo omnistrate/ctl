@@ -349,11 +349,21 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 		for _, service := range project.Services {
 			if service.Build != nil {
-				dockerfilePaths[service.Name] = filepath.Join(service.Build.Context, service.Build.Dockerfile)
+				absContextPath, err := filepath.Abs(service.Build.Context)
+				if err != nil {
+					utils.HandleSpinnerError(spinner, sm, err)
+					return err
+				}
+
+				dockerfilePaths[service.Name] = filepath.Join(absContextPath, service.Build.Dockerfile)
 			}
 		}
 	} else {
-		dockerfilePaths[defafultServiceName] = filepath.Join(".", "Dockerfile")
+		dockerfilePaths[defafultServiceName], err = filepath.Abs("Dockerfile")
+		if err != nil {
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
 	}
 
 	dockerfilePathsArr := make([]string, 0)
@@ -463,18 +473,18 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		spinner = sm.AddSpinner(fmt.Sprintf("Building Docker image: %s", imageUrl))
 		spinner.Complete()
 		sm.Stop()
-		buildCmd := exec.Command("docker", "buildx", "build", "--pull", "--platform", "linux/amd64", ".", "-f", dockerfilePath, "-t", imageUrl, "--no-cache", "--load")
-
-		// Redirect stdout and stderr to the terminal
-		buildCmd.Stdout = os.Stdout
-		buildCmd.Stderr = os.Stderr
-
-		fmt.Printf("Invoking 'docker buildx build --pull --platform linux/amd64 . -f %s -t %s --no-cache --load'...\n", dockerfilePath, imageUrl)
-		err = buildCmd.Run()
-		if err != nil {
-			utils.HandleSpinnerError(spinner, sm, err)
-			return err
-		}
+		//buildCmd := exec.Command("docker", "buildx", "build", "--pull", "--platform", "linux/amd64", ".", "-f", dockerfilePath, "-t", imageUrl, "--no-cache", "--load")
+		//
+		//// Redirect stdout and stderr to the terminal
+		//buildCmd.Stdout = os.Stdout
+		//buildCmd.Stderr = os.Stderr
+		//
+		//fmt.Printf("Invoking 'docker buildx build --pull --platform linux/amd64 . -f %s -t %s --no-cache --load'...\n", dockerfilePath, imageUrl)
+		//err = buildCmd.Run()
+		//if err != nil {
+		//	utils.HandleSpinnerError(spinner, sm, err)
+		//	return err
+		//}
 
 		sm = ysmrr.NewSpinnerManager()
 		sm.Start()
@@ -761,6 +771,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	for service, imageUrl := range versionTaggedImageUrls {
 		dockerPathsToImageUrls[dockerfilePaths[service]] = imageUrl
 	}
+	fileData = []byte(utils.ReplaceBuildSection(string(fileData), dockerPathsToImageUrls))
 
 	// Build the service
 	serviceID, devEnvironmentID, devPlanID, undefinedResources, err := buildService(
