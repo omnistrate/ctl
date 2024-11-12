@@ -517,19 +517,20 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		sm = ysmrr.NewSpinnerManager()
 		sm.Start()
 
-		versionTaggedImageUrls[service] = fmt.Sprintf("%s:%s", imageUrl, digest)
+		imageUrlWithDigestTag := fmt.Sprintf("%s:%s", imageUrl, digest)
+		versionTaggedImageUrls[service] = imageUrlWithDigestTag
 
 		// Tag the image with the digest
 		spinner = sm.AddSpinner("Tagging the image with the digest")
 		spinner.Complete()
 		sm.Stop()
 
-		tagCmd := exec.Command("docker", "tag", imageUrl, versionTaggedImageUrls[service])
+		tagCmd := exec.Command("docker", "tag", imageUrl, imageUrlWithDigestTag)
 
 		tagCmd.Stdout = os.Stdout
 		tagCmd.Stderr = os.Stderr
 
-		fmt.Printf("Invoking 'docker tag %s %s'...\n", imageUrl, versionTaggedImageUrls[service])
+		fmt.Printf("Invoking 'docker tag %s %s'...\n", imageUrl, imageUrlWithDigestTag)
 		if err = tagCmd.Run(); err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
@@ -543,13 +544,13 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		spinner.Complete()
 		sm.Stop()
 
-		pushCmd = exec.Command("docker", "push", versionTaggedImageUrls[service])
+		pushCmd = exec.Command("docker", "push", imageUrlWithDigestTag)
 
 		// Redirect stdout and stderr to the terminal
 		pushCmd.Stdout = os.Stdout
 		pushCmd.Stderr = os.Stderr
 
-		fmt.Printf("Invoking 'docker push %s'...\n", versionTaggedImageUrls[service])
+		fmt.Printf("Invoking 'docker push %s'...\n", imageUrlWithDigestTag)
 		err = pushCmd.Run()
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
