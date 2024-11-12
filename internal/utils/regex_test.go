@@ -1,11 +1,14 @@
 package utils
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 )
 
 func TestReplaceBuildSection(t *testing.T) {
+	cwd, _ := os.Getwd()
+
 	// Test cases with different scenarios.
 	tests := []struct {
 		name                   string
@@ -23,11 +26,11 @@ xxxxxx
 xxxx
 `,
 			versionTaggedImageURIs: map[string]string{
-				filepath.Join("./frontend", "Dockerfile.frontend"): "ghcr.io/user/ai-chatbot-frontend:v1.0",
+				filepath.Join(cwd, "./frontend", "Dockerfile.frontend"): "ghcr.io/user/ai-chatbot-frontend:v1.0",
 			},
 			expectedOutput: `
 xxxxxx
-    images: "ghcr.io/user/ai-chatbot-frontend:v1.0"
+    image: "ghcr.io/user/ai-chatbot-frontend:v1.0"
 xxxx
 `,
 		},
@@ -49,18 +52,18 @@ xxxxxx
 xxxx
 `,
 			versionTaggedImageURIs: map[string]string{
-				filepath.Join("./frontend", "Dockerfile.frontend"): "ghcr.io/user/ai-chatbot-frontend:v1.0",
-				filepath.Join("./backend", "Dockerfile.backend"):   "ghcr.io/user/ai-chatbot-backend:v1.0",
+				filepath.Join(cwd, "./frontend", "Dockerfile.frontend"): "ghcr.io/user/ai-chatbot-frontend:v1.0",
+				filepath.Join(cwd, "./backend", "Dockerfile.backend"):   "ghcr.io/user/ai-chatbot-backend:v1.0",
 			},
 			expectedOutput: `
 xxxxxx
-    images: "ghcr.io/user/ai-chatbot-frontend:v1.0"
+    image: "ghcr.io/user/ai-chatbot-frontend:v1.0"
 xxxx
 
 another section
 
 xxxxxx
-    images: "ghcr.io/user/ai-chatbot-backend:v1.0"
+    image: "ghcr.io/user/ai-chatbot-backend:v1.0"
 xxxx
 `,
 		},
@@ -74,11 +77,11 @@ xxxxxx
 xxxx
 `,
 			versionTaggedImageURIs: map[string]string{
-				filepath.Join("./backend", "Dockerfile.backend"): "ghcr.io/user/ai-chatbot-backend:v1.0", // Missing entry for frontend
+				filepath.Join(cwd, "./backend", "Dockerfile.backend"): "ghcr.io/user/ai-chatbot-backend:v1.0", // Missing entry for frontend
 			},
 			expectedOutput: `
 xxxxxx
-    images: ""
+    image: ""
 xxxx
 `,
 		},
@@ -86,7 +89,7 @@ xxxx
 			name:  "Empty input",
 			input: ``,
 			versionTaggedImageURIs: map[string]string{
-				filepath.Join("./frontend", "Dockerfile.frontend"): "ghcr.io/user/ai-chatbot-frontend:v1.0",
+				filepath.Join(cwd, "./frontend", "Dockerfile.frontend"): "ghcr.io/user/ai-chatbot-frontend:v1.0",
 			},
 			expectedOutput: ``,
 		},
@@ -96,7 +99,7 @@ xxxx
 some random content here without build section
 `,
 			versionTaggedImageURIs: map[string]string{
-				filepath.Join("./frontend", "Dockerfile.frontend"): "ghcr.io/user/ai-chatbot-frontend:v1.0",
+				filepath.Join(cwd, "./frontend", "Dockerfile.frontend"): "ghcr.io/user/ai-chatbot-frontend:v1.0",
 			},
 			expectedOutput: `
 some random content here without build section

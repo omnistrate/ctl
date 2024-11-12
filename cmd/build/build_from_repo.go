@@ -718,7 +718,6 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	for service, imageUrl := range versionTaggedImageUrls {
 		dockerPathsToImageUrls[dockerfilePaths[service]] = imageUrl
 	}
-	fileData = []byte(utils.ReplaceBuildSection(string(fileData), dockerPathsToImageUrls))
 
 	// Build the service
 	serviceID, devEnvironmentID, devPlanID, undefinedResources, err := buildService(

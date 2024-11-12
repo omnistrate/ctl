@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -30,9 +31,11 @@ func ReplaceBuildSection(input string, dockerPathsToImageUrls map[string]string)
 			dockerfile = strings.TrimSpace(submatches[3])
 		}
 
+		cwd, _ := os.Getwd()
+
 		// Construct the replacement string based on the context and dockerfile.
 		// Here, we use fmt.Sprintf to generate the images URL and preserve the indentation.
-		replacement := fmt.Sprintf(`%simages: "%s"`, indentation, dockerPathsToImageUrls[fmt.Sprintf(filepath.Join(context, dockerfile))])
+		replacement := fmt.Sprintf(`%simage: "%s"`, indentation, dockerPathsToImageUrls[fmt.Sprintf(filepath.Join(cwd, context, dockerfile))])
 
 		return replacement
 	})
