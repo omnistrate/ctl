@@ -32,10 +32,11 @@ func ReplaceBuildSection(input string, dockerPathsToImageUrls map[string]string)
 		}
 
 		cwd, _ := os.Getwd()
+		dockerfilePath := filepath.Join(cwd, context, dockerfile)
 
 		// Construct the replacement string based on the context and dockerfile.
 		// Here, we use fmt.Sprintf to generate the images URL and preserve the indentation.
-		replacement := fmt.Sprintf(`%simage: "%s"`, indentation, dockerPathsToImageUrls[fmt.Sprintf(filepath.Join(cwd, context, dockerfile))])
+		replacement := fmt.Sprintf(`%simage: "%s"`, indentation, dockerPathsToImageUrls[dockerfilePath])
 
 		return replacement
 	})
