@@ -291,7 +291,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	rootDir := cwd
 
-	// Step 5: Check if there exists a compose spec in the repository
+	// Step 5a: Check if there exists a compose spec in the repository
 	spinner = sm.AddSpinner("Checking if there exists a compose spec in the repository")
 	time.Sleep(1 * time.Second) // Add a delay to show the spinner
 	var composeSpecExists bool
@@ -306,10 +306,6 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	}
 	spinner.UpdateMessage(fmt.Sprintf("Checking if there exists a compose spec in the repository: %s", yesOrNo))
 	spinner.Complete()
-
-	// Step 5: Check if the Dockerfile exists
-	spinner = sm.AddSpinner("Checking if Dockerfile exists in the repository")
-	time.Sleep(1 * time.Second) // Add a delay to show the spinner
 
 	var fileData []byte
 	var parsedYaml map[string]interface{}
@@ -371,14 +367,19 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		dockerfilePathsArr = append(dockerfilePathsArr, dockerfilePath)
 	}
 
+	// Step 5b: Check if the Dockerfile exists
 	for _, dockerfilePath := range dockerfilePaths {
+		spinner = sm.AddSpinner(fmt.Sprintf("Checking if %s exists in the repository", dockerfilePath))
+		time.Sleep(1 * time.Second) // Add a delay to show the spinner
+
 		if _, err = os.Stat(dockerfilePath); os.IsNotExist(err) {
 			utils.HandleSpinnerError(spinner, sm, errors.New(fmt.Sprintf("%s not found in the repository", dockerfilePath)))
 			return err
 		}
+
+		spinner.UpdateMessage(fmt.Sprintf("Checking if %s exists in the repository: Yes", dockerfilePath))
+		spinner.Complete()
 	}
-	spinner.UpdateMessage("Checking if Dockerfile exists in the repository: Yes")
-	spinner.Complete()
 
 	// Step 6: Retrieve the repository name
 	spinner = sm.AddSpinner("Retrieving repository name")
@@ -473,18 +474,18 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		spinner = sm.AddSpinner(fmt.Sprintf("Building Docker image: %s", imageUrl))
 		spinner.Complete()
 		sm.Stop()
-		//buildCmd := exec.Command("docker", "buildx", "build", "--pull", "--platform", "linux/amd64", ".", "-f", dockerfilePath, "-t", imageUrl, "--no-cache", "--load")
-		//
-		//// Redirect stdout and stderr to the terminal
-		//buildCmd.Stdout = os.Stdout
-		//buildCmd.Stderr = os.Stderr
-		//
-		//fmt.Printf("Invoking 'docker buildx build --pull --platform linux/amd64 . -f %s -t %s --no-cache --load'...\n", dockerfilePath, imageUrl)
-		//err = buildCmd.Run()
-		//if err != nil {
-		//	utils.HandleSpinnerError(spinner, sm, err)
-		//	return err
-		//}
+		buildCmd := exec.Command("docker", "buildx", "build", "--pull", "--platform", "linux/amd64", ".", "-f", dockerfilePath, "-t", imageUrl, "--no-cache", "--load")
+
+		// Redirect stdout and stderr to the terminal
+		buildCmd.Stdout = os.Stdout
+		buildCmd.Stderr = os.Stderr
+
+		fmt.Printf("Invoking 'docker buildx build --pull --platform linux/amd64 . -f %s -t %s --no-cache --load'...\n", dockerfilePath, imageUrl)
+		err = buildCmd.Run()
+		if err != nil {
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
 
 		sm = ysmrr.NewSpinnerManager()
 		sm.Start()
