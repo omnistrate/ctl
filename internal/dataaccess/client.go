@@ -93,4 +93,4 @@ func getRetryableHttpClient() *http.Client {
 	httpClient.CheckRetry = retryablehttp.DefaultRetryPolicy
 	httpClient.HTTPClient.Timeout = config.GetClientTimeout()
 	return httpClient.StandardClient()
-}x
+}
