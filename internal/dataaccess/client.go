@@ -18,10 +18,6 @@ func getV1Client() *openapiclientv1.APIClient {
 	configuration.Scheme = config.GetHostScheme()
 	configuration.Debug = config.GetDebug()
 
-	configuration.HTTPClient = &http.Client{
-		Timeout: config.GetClientTimeout(),
-	}
-
 	var servers openapiclientv1.ServerConfigurations
 	for _, server := range configuration.Servers {
 		server.URL = fmt.Sprintf("%s://%s", config.GetHostScheme(), config.GetHost())
@@ -57,10 +53,6 @@ func getFleetClient() *openapiclientfleet.APIClient {
 	configuration.Host = config.GetHost()
 	configuration.Scheme = config.GetHostScheme()
 	configuration.Debug = config.GetDebug()
-
-	configuration.HTTPClient = &http.Client{
-		Timeout: config.GetClientTimeout(),
-	}
 
 	var servers openapiclientfleet.ServerConfigurations
 	for _, server := range configuration.Servers {
@@ -99,5 +91,6 @@ func getRetryableHttpClient() *http.Client {
 	// HTTP requests are logged at DEBUG level.
 	httpClient.ErrorHandler = retryablehttp.PassthroughErrorHandler
 	httpClient.CheckRetry = retryablehttp.DefaultRetryPolicy
+	httpClient.HTTPClient.Timeout = config.GetClientTimeout()
 	return httpClient.StandardClient()
 }
