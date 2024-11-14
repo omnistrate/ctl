@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestReplaceBuildSection(t *testing.T) {
+func TestReplaceBuildContext(t *testing.T) {
 	cwd, _ := os.Getwd()
 
 	// Test cases with different scenarios.
@@ -110,7 +110,7 @@ some random content here without build section
 	// Iterate over each test case
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			actualOutput := ReplaceBuildSection(tt.input, tt.versionTaggedImageURIs)
+			actualOutput := ReplaceBuildContext(tt.input, tt.versionTaggedImageURIs)
 			if actualOutput != tt.expectedOutput {
 				t.Errorf("expected: %v, but got: %v", tt.expectedOutput, actualOutput)
 			}

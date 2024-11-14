@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func ReplaceBuildSection(input string, dockerPathsToImageUrls map[string]string) string {
+func ReplaceBuildContext(input string, dockerPathsToImageUrls map[string]string) string {
 	// Define the pattern to match the build section in the YAML structure.
 	// This pattern captures the indentation of the build section as well.
 	pattern := `(?m)(^\s*)build:\s*\n\s*context:\s*(?P<context>.+)\n\s*dockerfile:\s*(?P<dockerfile>.+)`
