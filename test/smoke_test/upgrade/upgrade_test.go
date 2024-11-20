@@ -96,6 +96,7 @@ func Test_upgrade_basic(t *testing.T) {
 	require.Len(upgrade.UpgradePathIDs, 1)
 
 	// PASS: wait for instance to reach running status
+	time.Sleep(5 * time.Second)
 	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, testutils.Running, 900*time.Second)
 	require.NoError(err)
 
@@ -105,6 +106,7 @@ func Test_upgrade_basic(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: wait for instance to reach running status
+	time.Sleep(5 * time.Second)
 	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, testutils.Running, 900*time.Second)
 	require.NoError(err)
 
