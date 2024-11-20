@@ -111,7 +111,7 @@ func Test_upgrade_basic(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: delete instance
-	cmd.RootCmd.SetArgs([]string{"instance", "delete", instanceID})
+	cmd.RootCmd.SetArgs([]string{"instance", "delete", instanceID, "--yes"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 

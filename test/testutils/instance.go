@@ -17,8 +17,14 @@ const (
 )
 
 func WaitForInstanceToReachStatus(ctx context.Context, instanceID, status string, timeout time.Duration) error {
-	b := &backoff.ConstantBackOff{
-		Interval: 10 * time.Second,
+	b := &backoff.ExponentialBackOff{
+		InitialInterval:     10 * time.Second,
+		RandomizationFactor: backoff.DefaultRandomizationFactor,
+		Multiplier:          backoff.DefaultMultiplier,
+		MaxInterval:         10 * time.Second,
+		MaxElapsedTime:      timeout,
+		Stop:                backoff.Stop,
+		Clock:               backoff.SystemClock,
 	}
 	b.Reset()
 	ticker := backoff.NewTicker(b)
