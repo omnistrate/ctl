@@ -100,6 +100,37 @@ func Test_upgrade_basic(t *testing.T) {
 	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, testutils.Running, 900*time.Second)
 	require.NoError(err)
 
+	// PASS: upgrade instance to preferred version
+	cmd.RootCmd.SetArgs([]string{"upgrade", instanceID, "--version", "preferred"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+
+	// PASS: wait for instance to reach running status
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, testutils.Running, 900*time.Second)
+	require.NoError(err)
+
+	// PASS: delete instance
+	cmd.RootCmd.SetArgs([]string{"instance", "delete", instanceID})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+
+	// Wait for the instances to be deleted
+	for {
+		cmd.RootCmd.SetArgs([]string{"instance", "describe", instanceID})
+		err1 := cmd.RootCmd.ExecuteContext(ctx)
+
+		if err1 != nil {
+			break
+		}
+
+		time.Sleep(5 * time.Second)
+	}
+
+	// PASS: delete service
+	cmd.RootCmd.SetArgs([]string{"service", "delete", serviceName})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+
 	// FAIL: upgrade instance with invalid instance ID
 	cmd.RootCmd.SetArgs([]string{"upgrade", "instance-invalid", "--version", "latest"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
