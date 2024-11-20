@@ -89,12 +89,11 @@ func Test_upgrade_basic(t *testing.T) {
 	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, testutils.Running, 900*time.Second)
 	require.NoError(err)
 
-	// PASS: upgrade instance to the original version
+	// PASS: upgrade instance to version 1.0
 	cmd.RootCmd.SetArgs([]string{"upgrade", instanceID, "--version", "1.0"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 	require.Len(upgrade.UpgradePathIDs, 1)
-	upgradeID = upgrade.UpgradePathIDs[0]
 
 	// PASS: wait for instance to reach running status
 	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, testutils.Running, 900*time.Second)
