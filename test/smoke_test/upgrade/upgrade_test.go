@@ -58,7 +58,7 @@ func Test_upgrade_basic(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: release mysql service plan
-	cmd.RootCmd.SetArgs([]string{"service-plan", "release", "--service-id", serviceID, "--plan-id", productTierID, "release-as-preferred", "true"})
+	cmd.RootCmd.SetArgs([]string{"service-plan", "release", "--service-id", serviceID, "--plan-id", productTierID, "--release-as-preferred"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
