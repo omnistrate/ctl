@@ -100,7 +100,7 @@ func PrintDomainNotVerifiedWarningMsg(domain, clusterEndpoint string) {
 }
 
 func AskVerifyDomainIfAny(ctx context.Context) {
-	token, err := common.GetTokenWithLogin()
+	token, err := config.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return

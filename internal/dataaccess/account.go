@@ -3,9 +3,9 @@ package dataaccess
 import (
 	"context"
 	"fmt"
+	"github.com/omnistrate/ctl/internal/config"
 
 	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
-	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/utils"
 )
 
@@ -126,7 +126,7 @@ func PrintAccountNotVerifiedWarning(account *openapiclient.DescribeAccountConfig
 }
 
 func AskVerifyAccountIfAny(ctx context.Context) {
-	token, err := common.GetTokenWithLogin()
+	token, err := config.GetToken()
 	if err != nil {
 		utils.PrintError(err)
 		return
