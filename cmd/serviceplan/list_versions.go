@@ -195,10 +195,6 @@ func validateListVersionsArguments(args []string, serviceID, planID string) erro
 }
 
 func filterLatestNVersions(servicePlans []openapiclientfleet.ServicePlanSearchRecord, latestN int) []openapiclientfleet.ServicePlanSearchRecord {
-	if latestN == -1 {
-		return servicePlans
-	}
-
 	slices.SortFunc(servicePlans, func(a, b openapiclientfleet.ServicePlanSearchRecord) int {
 		if a.ReleasedAt != nil && b.ReleasedAt != nil {
 			ta, _ := time.Parse(time.RFC3339, *a.ReleasedAt)
@@ -218,6 +214,10 @@ func filterLatestNVersions(servicePlans []openapiclientfleet.ServicePlanSearchRe
 
 		return 0
 	})
+
+	if latestN == -1 {
+		return servicePlans
+	}
 
 	if len(servicePlans) <= latestN {
 		return servicePlans
