@@ -2,6 +2,7 @@ package account
 
 import (
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/common"
 
 	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/internal/config"
@@ -58,7 +59,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	output, _ := cmd.Flags().GetString("output")
 
 	// Validate user login
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err

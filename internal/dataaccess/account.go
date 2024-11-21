@@ -3,9 +3,9 @@ package dataaccess
 import (
 	"context"
 	"fmt"
+	"github.com/omnistrate/ctl/internal/config"
 
 	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
-	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/utils"
 )
 

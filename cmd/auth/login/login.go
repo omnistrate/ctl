@@ -50,7 +50,7 @@ var LoginCmd = &cobra.Command{
 	Short:        "Log in to the Omnistrate platform",
 	Long:         `The login command is used to authenticate and log in to the Omnistrate platform.`,
 	Example:      loginExample,
-	RunE:         runLogin,
+	RunE:         RunLogin,
 	SilenceUsage: true,
 }
 
@@ -67,7 +67,7 @@ func init() {
 	LoginCmd.Args = cobra.NoArgs
 }
 
-func runLogin(cmd *cobra.Command, args []string) error {
+func RunLogin(cmd *cobra.Command, args []string) error {
 	defer resetLogin()
 
 	// Login with email and password if any of the flags are set

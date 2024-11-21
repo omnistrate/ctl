@@ -2,6 +2,7 @@ package serviceplan
 
 import (
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/common"
 	"slices"
 	"strings"
 	"time"
@@ -83,7 +84,7 @@ func runListVersions(cmd *cobra.Command, args []string) error {
 	}
 
 	// Ensure user is logged in
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err

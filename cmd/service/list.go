@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/omnistrate/ctl/cmd/common"
 	"strings"
 
 	"github.com/chelnak/ysmrr"
@@ -51,7 +52,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user login
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err
