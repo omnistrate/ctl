@@ -8,6 +8,7 @@ import (
 	"github.com/compose-spec/compose-go/types"
 	"github.com/fatih/color"
 	"github.com/omnistrate/api-design/v1/api/constants"
+	"github.com/omnistrate/ctl/cmd/common"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -161,17 +162,17 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	// Step 0: Validate user is currently logged in
 	spinner = sm.AddSpinner("Checking if user is logged in")
 	time.Sleep(1 * time.Second) // Add a delay to show the spinner
-	token, err := config.GetToken()
-	if errors.As(err, &config.ErrAuthConfigNotFound) {
-		utils.HandleSpinnerError(spinner, sm, errors.New("user is not logged in"))
-		return err
-	}
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
-	spinner.UpdateMessage("Checking if user is logged in: Yes")
 	spinner.Complete()
+	sm.Stop()
+
+	token, err := common.GetTokenWithLogin()
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	sm = ysmrr.NewSpinnerManager()
+	sm.Start()
 
 	spinner = sm.AddSpinner("Checking if gh installed")
 	time.Sleep(1 * time.Second) // Add a delay to show the spinner

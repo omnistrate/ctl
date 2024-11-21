@@ -1,6 +1,7 @@
 package environment
 
 import (
+	"github.com/omnistrate/ctl/cmd/common"
 	"strings"
 
 	"github.com/chelnak/ysmrr"
@@ -49,7 +50,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	// Ensure user is logged in
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err

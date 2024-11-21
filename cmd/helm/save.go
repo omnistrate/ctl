@@ -3,10 +3,10 @@ package helm
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/common"
 	"os"
 
 	"github.com/chelnak/ysmrr"
-	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/spf13/cobra"
@@ -62,7 +62,7 @@ func runSave(cmd *cobra.Command, args []string) error {
 	output, _ := cmd.Flags().GetString("output")
 
 	// Validate user is currently logged in
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err

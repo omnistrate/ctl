@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"github.com/omnistrate/ctl/cmd/common"
 	"strings"
 
 	saasportalapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/saas_portal_api"
@@ -45,7 +46,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	// Ensure user is logged in
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err

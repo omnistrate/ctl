@@ -2,6 +2,7 @@ package instance
 
 import (
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/common"
 
 	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/internal/config"
@@ -44,7 +45,7 @@ func runRestart(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user login
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err

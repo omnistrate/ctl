@@ -3,6 +3,7 @@ package environment
 import (
 	"context"
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/common"
 	"slices"
 	"strings"
 
@@ -79,7 +80,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user is logged in
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err

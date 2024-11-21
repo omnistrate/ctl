@@ -126,7 +126,7 @@ func PrintAccountNotVerifiedWarning(account *openapiclient.DescribeAccountConfig
 }
 
 func AskVerifyAccountIfAny(ctx context.Context) {
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return
