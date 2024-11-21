@@ -1,10 +1,9 @@
 package testutils
 
 import (
+	"github.com/pkg/errors"
 	"os"
 	"testing"
-
-	"github.com/pkg/errors"
 
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/utils"

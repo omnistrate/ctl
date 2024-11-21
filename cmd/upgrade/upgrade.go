@@ -54,6 +54,8 @@ type Args struct {
 	TargetVersion string
 }
 
+var UpgradePathIDs []string
+
 type Res struct {
 	UpgradePathID string
 	InstanceIDs   []string
@@ -200,6 +202,7 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	// Create upgrade path
+	UpgradePathIDs = make([]string, 0)
 	for upgradeArgs, upgradeRes := range upgrades {
 		upgradePathID, err := dataaccess.CreateUpgradePath(
 			cmd.Context(),
@@ -216,6 +219,7 @@ func run(cmd *cobra.Command, args []string) error {
 		}
 
 		upgrades[upgradeArgs].UpgradePathID = string(upgradePathID)
+		UpgradePathIDs = append(UpgradePathIDs, string(upgradePathID))
 	}
 
 	utils.HandleSpinnerSuccess(spinner, sm, "Upgrade scheduled successfully")
