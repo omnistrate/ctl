@@ -36,5 +36,5 @@ omctl custom-network create --cloud-provider=[cloud-provider-name] --region=[clo
 
 ### SEE ALSO
 
-* [omnistrate-ctl custom-network](omnistrate-ctl_custom-network.md)	 - Manage custom networks for your org
+* [omnistrate-ctl custom-network](omnistrate-ctl_custom-network.md)	 - List and describe custom networks of your customers
 

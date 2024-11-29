@@ -1,12 +1,9 @@
 package customnetwork
 
 import (
-	"context"
 	"fmt"
-	"strings"
-
 	"github.com/chelnak/ysmrr"
-	customnetworkapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/custom_network_api"
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	"github.com/omnistrate/ctl/cmd/common"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
@@ -15,10 +12,7 @@ import (
 )
 
 const (
-	describeExample = `# Describe a custom network
-omctl custom-network describe [custom-network-name]
-
-# Describe a custom network by ID
+	describeExample = `# Describe a custom network by ID
 omctl custom-network describe --custom-network-id [custom-network-id]`
 )
 
@@ -33,6 +27,11 @@ var describeCmd = &cobra.Command{
 
 func init() {
 	describeCmd.Flags().StringP(CustomNetworkIDFlag, "", "", "ID of the custom network")
+
+	err := describeCmd.MarkFlagRequired(CustomNetworkIDFlag)
+	if err != nil {
+		return
+	}
 }
 
 func runDescribe(cmd *cobra.Command, args []string) (err error) {
@@ -43,18 +42,13 @@ func runDescribe(cmd *cobra.Command, args []string) (err error) {
 	customNetworkId, _ := cmd.Flags().GetString(CustomNetworkIDFlag)
 
 	// Validate input arguments
-	if err = validateDescribeArguments(args, customNetworkId); err != nil {
+	if err = validateDescribeArguments(customNetworkId); err != nil {
 		utils.PrintError(err)
 		return
 	}
 
-	var customNetworkName *string
-	if len(args) == 1 {
-		customNetworkName = utils.ToPtr(args[0])
-	}
-
 	// Validate user is logged in
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -69,20 +63,15 @@ func runDescribe(cmd *cobra.Command, args []string) (err error) {
 		sm.Start()
 	}
 
-	var customNetwork *customnetworkapi.CustomNetwork
-	if customNetworkName != nil {
-		// Describe by name
-		customNetwork, err = describeCustomNetworkByName(cmd.Context(), token, *customNetworkName)
-	} else {
-		// Describe by ID
-		customNetwork, err = describeCustomNetwork(cmd.Context(), token, customNetworkId)
-	}
+	// Describe
+	var customNetwork *openapiclientfleet.FleetCustomNetwork
+	customNetwork, err = dataaccess.FleetDescribeCustomNetwork(cmd.Context(), token, customNetworkId)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	utils.HandleSpinnerSuccess(spinner, sm, fmt.Sprintf("Successfully described custom network %s", customNetwork.ID))
+	utils.HandleSpinnerSuccess(spinner, sm, fmt.Sprintf("Successfully described custom network %s", customNetwork.Id))
 
 	// Format and print the custom network details
 	formattedCustomNetwork := formatCustomNetwork(customNetwork)
@@ -96,50 +85,9 @@ func runDescribe(cmd *cobra.Command, args []string) (err error) {
 	return
 }
 
-func describeCustomNetworkByName(ctx context.Context, token string, name string) (network *customnetworkapi.CustomNetwork, err error) {
-	var matching []*customnetworkapi.CustomNetwork
-	request := customnetworkapi.ListCustomNetworksRequest{}
-	var customNetworks *customnetworkapi.ListCustomNetworksResult
-	customNetworks, err = dataaccess.ListCustomNetworks(ctx, token, request)
-	if err != nil {
-		return
-	}
-
-	for _, candidateNetwork := range customNetworks.CustomNetworks {
-		if candidateNetwork.Name != nil && *candidateNetwork.Name == name {
-			matching = append(matching, candidateNetwork)
-		}
-	}
-
-	if len(matching) == 0 {
-		err = fmt.Errorf("custom network %s not found", name)
-		return
-	} else if len(matching) > 1 {
-		err = fmt.Errorf("multiple custom networks found with name %s, please use custom network ID instead", name)
-		return
-	}
-
-	network = matching[0]
-	return
-}
-
-func describeCustomNetwork(ctx context.Context, token string, id string) (*customnetworkapi.CustomNetwork, error) {
-	request := customnetworkapi.DescribeCustomNetworkRequest{
-		ID: customnetworkapi.CustomNetworkID(id),
-	}
-
-	return dataaccess.DescribeCustomNetwork(ctx, token, request)
-}
-
-func validateDescribeArguments(args []string, idFlag string) error {
-	if len(args) > 1 {
-		return fmt.Errorf("invalid arguments: %s. Max 1 argument is supported: [custom-network-name]", strings.Join(args, " "))
-	}
-	if len(args) == 1 && len(idFlag) > 0 {
-		return fmt.Errorf("invalid arguments: both custom network name and ID are provided, please specify only one")
-	}
-	if len(args) == 0 && len(idFlag) == 0 {
-		return fmt.Errorf("invalid arguments: please provide custom network name or ID")
+func validateDescribeArguments(idFlag string) error {
+	if len(idFlag) == 0 {
+		return fmt.Errorf("invalid arguments: network ID is required")
 	}
 	return nil
 }

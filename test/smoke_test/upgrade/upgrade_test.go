@@ -3,7 +3,12 @@ package upgrade
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
+	"github.com/omnistrate/ctl/cmd/build"
+	"github.com/omnistrate/ctl/cmd/instance"
+	"github.com/omnistrate/ctl/cmd/upgrade"
 	"testing"
+	"time"
 
 	"github.com/omnistrate/ctl/cmd"
 	"github.com/omnistrate/ctl/test/testutils"
@@ -25,30 +30,117 @@ func Test_upgrade_basic(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
+	// PASS: build service
+	serviceName := "mysql" + uuid.NewString()
+	cmd.RootCmd.SetArgs([]string{"build", "--file", "../composefiles/mysql.yaml", "--name", serviceName, "--environment=dev", "--environment-type=dev"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+	serviceID := build.ServiceID
+	productTierID := build.ProductTierID
+
+	// PASS: create instance with param
+	cmd.RootCmd.SetArgs([]string{"instance", "create",
+		fmt.Sprintf("--service=%s", serviceName),
+		"--environment=dev",
+		fmt.Sprintf("--plan=%s", serviceName),
+		"--version=latest",
+		"--resource=mySQL",
+		"--cloud-provider=aws",
+		"--region=ca-central-1",
+		"--param", `{"databaseName":"default","password":"a_secure_password","rootPassword":"a_secure_root_password","username":"user"}`})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+	instanceID := instance.InstanceID
+	require.NotEmpty(t, instanceID)
+
+	// PASS: wait for instance to reach running status
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, testutils.Running, 900*time.Second)
+	require.NoError(err)
+
+	// PASS: release mysql service plan
+	cmd.RootCmd.SetArgs([]string{"service-plan", "release", "--service-id", serviceID, "--plan-id", productTierID, "--release-as-preferred"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+
+	// PASS: upgrade instance with latest version
+	cmd.RootCmd.SetArgs([]string{"upgrade", instanceID, "--version", "latest"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+	require.Len(upgrade.UpgradePathIDs, 1)
+	upgradeID := upgrade.UpgradePathIDs[0]
+
+	cmd.RootCmd.SetArgs([]string{"upgrade", "status", upgradeID})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+
+	cmd.RootCmd.SetArgs([]string{"upgrade", "status", upgradeID, "--output", "json"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+
+	cmd.RootCmd.SetArgs([]string{"upgrade", "status", "detail", upgradeID})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+
+	cmd.RootCmd.SetArgs([]string{"upgrade", "status", "detail", upgradeID, "--output", "json"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+
+	// PASS: wait for instance to reach running status
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, testutils.Running, 900*time.Second)
+	require.NoError(err)
+
+	// PASS: upgrade instance to version 1.0
+	cmd.RootCmd.SetArgs([]string{"upgrade", instanceID, "--version", "1.0"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+	require.Len(upgrade.UpgradePathIDs, 1)
+
+	// PASS: wait for instance to reach running status
+	time.Sleep(5 * time.Second)
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, testutils.Running, 900*time.Second)
+	require.NoError(err)
+
+	// PASS: upgrade instance to preferred version
+	cmd.RootCmd.SetArgs([]string{"upgrade", instanceID, "--version", "preferred"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+
+	// PASS: wait for instance to reach running status
+	time.Sleep(5 * time.Second)
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, testutils.Running, 900*time.Second)
+	require.NoError(err)
+
+	// PASS: delete instance
+	cmd.RootCmd.SetArgs([]string{"instance", "delete", instanceID, "--yes"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+
+	// Wait for the instances to be deleted
+	for {
+		cmd.RootCmd.SetArgs([]string{"instance", "describe", instanceID})
+		err1 := cmd.RootCmd.ExecuteContext(ctx)
+
+		if err1 != nil {
+			break
+		}
+
+		time.Sleep(5 * time.Second)
+	}
+
+	// PASS: delete service
+	cmd.RootCmd.SetArgs([]string{"service", "delete", serviceName})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+
+	// FAIL: upgrade instance with invalid instance ID
 	cmd.RootCmd.SetArgs([]string{"upgrade", "instance-invalid", "--version", "latest"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.Error(err)
 	require.Contains(err.Error(), "instance-invalid not found. Please check the instance ID and try again")
 
+	// FAIL: check upgrade status with invalid instance ID
 	cmd.RootCmd.SetArgs([]string{"upgrade", "status", "upgrade-invalid"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.Error(err)
 	require.Contains(err.Error(), "upgrade-invalid not found")
-
-	// TODO: Create real upgrade path after we added the CRUD instance cmd
-	cmd.RootCmd.SetArgs([]string{"upgrade", "status", "upgrade-qtxOTgcnDI"})
-	err = cmd.RootCmd.ExecuteContext(ctx)
-	require.NoError(err)
-
-	cmd.RootCmd.SetArgs([]string{"upgrade", "status", "upgrade-qtxOTgcnDI", "--output", "json"})
-	err = cmd.RootCmd.ExecuteContext(ctx)
-	require.NoError(err)
-
-	cmd.RootCmd.SetArgs([]string{"upgrade", "status", "detail", "upgrade-qtxOTgcnDI"})
-	err = cmd.RootCmd.ExecuteContext(ctx)
-	require.NoError(err)
-
-	cmd.RootCmd.SetArgs([]string{"upgrade", "status", "detail", "upgrade-qtxOTgcnDI", "--output", "json"})
-	err = cmd.RootCmd.ExecuteContext(ctx)
-	require.NoError(err)
 }

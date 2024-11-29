@@ -3,6 +3,7 @@ package environment
 import (
 	"context"
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/common"
 	"slices"
 	"strings"
 
@@ -79,7 +80,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user is logged in
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -102,10 +103,13 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if source environment exists
-	sourceEnvID, err := getSourceEnvironmentID(cmd.Context(), token, serviceID, sourceEnvName)
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
+	sourceEnvID := ""
+	if strings.TrimSpace(sourceEnvName) != "" {
+		sourceEnvID, err = getSourceEnvironmentID(cmd.Context(), token, serviceID, sourceEnvName)
+		if err != nil {
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
 	}
 
 	// Create the environment
@@ -231,7 +235,10 @@ func createEnvironment(ctx context.Context, token, envName, description, service
 		ServiceAuthPublicKey:    publicKeyPtr,
 		DeploymentConfigID:      serviceenvironmentapi.DeploymentConfigID(defaultDeploymentConfigID),
 		AutoApproveSubscription: utils.ToPtr(true),
-		SourceEnvironmentID:     (*serviceenvironmentapi.ServiceEnvironmentID)(utils.ToPtr(sourceEnvID)),
+	}
+
+	if sourceEnvID != "" {
+		request.SourceEnvironmentID = (*serviceenvironmentapi.ServiceEnvironmentID)(utils.ToPtr(sourceEnvID))
 	}
 
 	return dataaccess.CreateServiceEnvironment(ctx, token, request)

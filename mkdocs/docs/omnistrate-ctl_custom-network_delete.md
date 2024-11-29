@@ -13,9 +13,6 @@ omnistrate-ctl custom-network delete [custom-network-name] [flags]
 ### Examples
 
 ```
-# Delete a custom network
-omctl custom-network delete [custom-network-name]
-
 # Delete a custom network by ID
 omctl custom-network delete --custom-network-id [custom-network-id]
 ```
@@ -36,5 +33,5 @@ omctl custom-network delete --custom-network-id [custom-network-id]
 
 ### SEE ALSO
 
-* [omnistrate-ctl custom-network](omnistrate-ctl_custom-network.md)	 - Manage custom networks for your org
+* [omnistrate-ctl custom-network](omnistrate-ctl_custom-network.md)	 - List and describe custom networks of your customers
 

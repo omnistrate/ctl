@@ -3,22 +3,14 @@ package instance
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"testing"
 	"time"
 
-	"github.com/cenkalti/backoff/v4"
 	"github.com/omnistrate/ctl/cmd"
 	"github.com/omnistrate/ctl/cmd/instance"
 	"github.com/omnistrate/ctl/test/testutils"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
-)
-
-const (
-	Running   = "RUNNING"
-	Stopped   = "STOPPED"
-	Failed    = "FAILED"
-	Cancelled = "CANCELLED"
 )
 
 func TestInstanceBasic(t *testing.T) {
@@ -35,11 +27,16 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
+	serviceName := "mysql" + uuid.NewString()
+	cmd.RootCmd.SetArgs([]string{"build", "--file", "../composefiles/mysql.yaml", "--name", serviceName, "--environment=dev", "--environment-type=dev"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(t, err)
+
 	// PASS: create instance 1 with param
 	cmd.RootCmd.SetArgs([]string{"instance", "create",
-		"--service=mysql",
+		fmt.Sprintf("--service=%s", serviceName),
 		"--environment=dev",
-		"--plan=mysql",
+		fmt.Sprintf("--plan=%s", serviceName),
 		"--version=latest",
 		"--resource=mySQL",
 		"--cloud-provider=aws",
@@ -52,9 +49,9 @@ func TestInstanceBasic(t *testing.T) {
 
 	// PASS: create instance 2 with param file
 	cmd.RootCmd.SetArgs([]string{"instance", "create",
-		"--service=mysql",
+		fmt.Sprintf("--service=%s", serviceName),
 		"--environment=dev",
-		"--plan=mysql",
+		fmt.Sprintf("--plan=%s", serviceName),
 		"--version=latest",
 		"--resource=mySQL",
 		"--cloud-provider=aws",
@@ -75,7 +72,7 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
-	err = WaitForInstanceToReachStatus(ctx, instanceID1, Running, 300*time.Second)
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID1, testutils.Running, 900*time.Second)
 	require.NoError(t, err)
 
 	// PASS: stop instance 1
@@ -83,7 +80,7 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
-	err = WaitForInstanceToReachStatus(ctx, instanceID1, Stopped, 300*time.Second)
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID1, testutils.Stopped, 900*time.Second)
 	require.NoError(t, err)
 
 	// PASS: start instance 1
@@ -91,7 +88,7 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
-	err = WaitForInstanceToReachStatus(ctx, instanceID1, Running, 300*time.Second)
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID1, testutils.Running, 900*time.Second)
 	require.NoError(t, err)
 
 	// PASS: restart instance 1
@@ -100,7 +97,7 @@ func TestInstanceBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	time.Sleep(5 * time.Second)
-	err = WaitForInstanceToReachStatus(ctx, instanceID1, Running, 300*time.Second)
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID1, testutils.Running, 900*time.Second)
 	require.NoError(t, err)
 
 	// PASS: update instance 1
@@ -109,7 +106,7 @@ func TestInstanceBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	time.Sleep(5 * time.Second)
-	err = WaitForInstanceToReachStatus(ctx, instanceID1, Running, 300*time.Second)
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID1, testutils.Running, 900*time.Second)
 	require.NoError(t, err)
 
 	// PASS: update instance 2
@@ -118,7 +115,7 @@ func TestInstanceBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	time.Sleep(5 * time.Second)
-	err = WaitForInstanceToReachStatus(ctx, instanceID2, Running, 300*time.Second)
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID2, testutils.Running, 900*time.Second)
 	require.NoError(t, err)
 
 	// PASS: instance list
@@ -140,44 +137,24 @@ func TestInstanceBasic(t *testing.T) {
 	cmd.RootCmd.SetArgs([]string{"instance", "delete", instanceID2, "--yes"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
-}
 
-func WaitForInstanceToReachStatus(ctx context.Context, instanceID, status string, timeout time.Duration) error {
-	b := &backoff.ExponentialBackOff{
-		InitialInterval:     10 * time.Second,
-		RandomizationFactor: backoff.DefaultRandomizationFactor,
-		Multiplier:          backoff.DefaultMultiplier,
-		MaxInterval:         10 * time.Second,
-		MaxElapsedTime:      timeout,
-		Stop:                backoff.Stop,
-		Clock:               backoff.SystemClock,
-	}
-	b.Reset()
-	ticker := backoff.NewTicker(b)
+	// Wait for the instances to be deleted
+	for {
+		cmd.RootCmd.SetArgs([]string{"instance", "describe", instanceID1})
+		err1 := cmd.RootCmd.ExecuteContext(ctx)
 
-	for range ticker.C {
-		cmd.RootCmd.SetArgs([]string{"instance", "describe", instanceID})
-		err := cmd.RootCmd.ExecuteContext(ctx)
-		if err != nil {
-			return err
-		}
-		currentStatus := instance.InstanceStatus
+		cmd.RootCmd.SetArgs([]string{"instance", "describe", instanceID2})
+		err2 := cmd.RootCmd.ExecuteContext(ctx)
 
-		if currentStatus == status {
-			ticker.Stop()
-			return nil
+		if err1 != nil && err2 != nil {
+			break
 		}
 
-		if currentStatus == string(Failed) {
-			ticker.Stop()
-			return errors.New("instance deployment failed")
-		}
-
-		if currentStatus == string(Cancelled) {
-			ticker.Stop()
-			return errors.New("instance deployment cancelled")
-		}
+		time.Sleep(5 * time.Second)
 	}
 
-	return errors.New("instance did not reach the expected status")
+	// PASS: delete service
+	cmd.RootCmd.SetArgs([]string{"service", "delete", serviceName})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(t, err)
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/common"
 
 	"github.com/chelnak/ysmrr"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
@@ -55,7 +56,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user login
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -86,7 +87,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	utils.HandleSpinnerSuccess(spinner, sm, "Successfully created instance")
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully described instance")
 	InstanceStatus = string(instance.ConsumptionResourceInstanceResult.Status)
 
 	// Print output

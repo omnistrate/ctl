@@ -11,7 +11,7 @@ import (
 
 const (
 	dryRunEnv            = "DRY_RUN"
-	debug                = "DEBUG"
+	debug                = "OMNISTRATE_DEBUG"
 	omnistrateHost       = "OMNISTRATE_HOST"
 	omnistrateRootDomain = "OMNISTRATE_ROOT_DOMAIN"
 	omnistrateHostSchema = "OMNISTRATE_HOST_SCHEME"
@@ -45,7 +45,7 @@ func GetHostScheme() string {
 }
 
 func GetDebug() bool {
-	return utils.GetEnvAsBoolean("OMNISTRATE_DEBUG", "false")
+	return utils.GetEnvAsBoolean(debug, "false")
 }
 
 //go:embed public_key.pem

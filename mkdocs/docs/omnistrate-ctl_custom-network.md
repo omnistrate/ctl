@@ -1,10 +1,10 @@
 ## omnistrate-ctl custom-network
 
-Manage custom networks for your org
+List and describe custom networks of your customers
 
 ### Synopsis
 
-This command helps you manage the custom networks.
+This command helps you explore custom networks used by your customers.
 
 ```
 omnistrate-ctl custom-network [operation] [flags]

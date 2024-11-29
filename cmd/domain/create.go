@@ -2,10 +2,10 @@ package domain
 
 import (
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/common"
 	"strings"
 
 	saasportalapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/saas_portal_api"
-	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/pkg/errors"
@@ -52,7 +52,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	output, _ := cmd.Flags().GetString("output")
 
 	// Validate user is currently logged in
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err

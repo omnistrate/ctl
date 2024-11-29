@@ -2,8 +2,8 @@ package helm
 
 import (
 	"github.com/chelnak/ysmrr"
-	helmpackageapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/helm_package_api"
-	"github.com/omnistrate/ctl/internal/config"
+	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
+	"github.com/omnistrate/ctl/cmd/common"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/spf13/cobra"
@@ -41,7 +41,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	output, _ := cmd.Flags().GetString("output")
 
 	// Validate user is currently logged in
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -58,7 +58,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Retrieve Helm Chart
-	var helmPackage *helmpackageapi.HelmPackage
+	var helmPackage *openapiclient.HelmPackage
 	helmPackage, err = dataaccess.DescribeHelmChart(cmd.Context(), token, chart, version)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)

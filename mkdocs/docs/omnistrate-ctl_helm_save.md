@@ -7,7 +7,7 @@ Save a Helm Chart for your service
 This command helps you save the templates for your helm charts.
 
 ```
-omnistrate-ctl helm save chart --repo-url=[repo-url] --version=[version] --namespace=[namespace] --values-file=[values-file] [flags]
+omnistrate-ctl helm save chart --repo-name=[repo-name] --repo-url=[repo-url] --version=[version] --namespace=[namespace] --values-file=[values-file] [flags]
 ```
 
 ### Examples
@@ -22,6 +22,7 @@ omctl helm save redis --repo-url=https://charts.bitnami.com/bitnami --version=20
 ```
   -h, --help                 help for save
       --namespace string     Helm Chart namespace
+      --repo-name string     Helm Chart repository name
       --repo-url string      Helm Chart repository URL
       --values-file string   Helm Chart values file containing custom values defined as a JSON
       --version string       Helm Chart version
