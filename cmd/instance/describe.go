@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/omnistrate/ctl/cmd/common"
+	openapiclientfleet "github.com/omnistrate/omnistrate-sdk-go/fleet"
 
 	"github.com/chelnak/ysmrr"
-	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
@@ -80,8 +80,8 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Describe instance
-	var instance *inventoryapi.ResourceInstance
-	instance, err = dataaccess.DescribeInstance(cmd.Context(), token, serviceID, environmentID, instanceID)
+	var instance *openapiclientfleet.ResourceInstance
+	instance, err = dataaccess.DescribeResourceInstance(cmd.Context(), token, serviceID, environmentID, instanceID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
