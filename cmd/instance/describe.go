@@ -88,7 +88,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully described instance")
-	InstanceStatus = string(instance.ConsumptionResourceInstanceResult.Status)
+	InstanceStatus = instance.ConsumptionResourceInstanceResult.Status
 
 	// Print output
 	err = utils.PrintTextTableJsonOutput(output, instance)
