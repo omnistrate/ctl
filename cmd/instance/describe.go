@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	"github.com/omnistrate/ctl/cmd/common"
-	openapiclientfleet "github.com/omnistrate/omnistrate-sdk-go/fleet"
 
 	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/internal/config"

@@ -2,7 +2,7 @@ package dataaccess
 
 import (
 	"context"
-	openapiclientfleet "github.com/omnistrate/omnistrate-sdk-go/fleet"
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
