@@ -245,7 +245,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully created instance")
 
 	// Search for the instance
-	searchRes, err := dataaccess.SearchInventory(cmd.Context(), token, fmt.Sprintf("resourceinstance:%s", *instance.ID))
+	searchRes, err := dataaccess.SearchInventory(cmd.Context(), token, fmt.Sprintf("resourceinstance:%s", *instance.Id))
 	if err != nil {
 		utils.PrintError(err)
 		return err
