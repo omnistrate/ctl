@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	"github.com/omnistrate/ctl/cmd/common"
 
@@ -19,7 +20,17 @@ const (
 omctl instance describe instance-abcd1234`
 )
 
-var InstanceStatus string
+type InstanceStatusType string
+
+var InstanceStatus InstanceStatusType
+
+const (
+	InstanceStatusRunning   InstanceStatusType = "RUNNING"
+	InstanceStatusStopped   InstanceStatusType = "STOPPED"
+	InstanceStatusFailed    InstanceStatusType = "FAILED"
+	InstanceStatusCancelled InstanceStatusType = "CANCELLED"
+	InstanceStatusUnknown   InstanceStatusType = "UNKNOWN"
+)
 
 var describeCmd = &cobra.Command{
 	Use:          "describe [instance-id]",
@@ -88,7 +99,11 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully described instance")
-	InstanceStatus = instance.ConsumptionResourceInstanceResult.Status
+	if instance.ConsumptionResourceInstanceResult.Status != nil {
+		InstanceStatus = InstanceStatusType(*instance.ConsumptionResourceInstanceResult.Status)
+	} else {
+		InstanceStatus = InstanceStatusUnknown
+	}
 
 	// Print output
 	err = utils.PrintTextTableJsonOutput(output, instance)

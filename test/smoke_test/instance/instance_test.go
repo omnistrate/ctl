@@ -72,7 +72,7 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
-	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID1, testutils.Running, 900*time.Second)
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID1, instance.InstanceStatusRunning, 900*time.Second)
 	require.NoError(t, err)
 
 	// PASS: stop instance 1
@@ -80,7 +80,7 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
-	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID1, testutils.Stopped, 900*time.Second)
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID1, instance.InstanceStatusStopped, 900*time.Second)
 	require.NoError(t, err)
 
 	// PASS: start instance 1
@@ -88,7 +88,7 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
-	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID1, testutils.Running, 900*time.Second)
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID1, instance.InstanceStatusRunning, 900*time.Second)
 	require.NoError(t, err)
 
 	// PASS: restart instance 1
@@ -97,7 +97,7 @@ func TestInstanceBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	time.Sleep(5 * time.Second)
-	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID1, testutils.Running, 900*time.Second)
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID1, instance.InstanceStatusRunning, 900*time.Second)
 	require.NoError(t, err)
 
 	// PASS: update instance 1
@@ -106,7 +106,7 @@ func TestInstanceBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	time.Sleep(5 * time.Second)
-	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID1, testutils.Running, 900*time.Second)
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID1, instance.InstanceStatusRunning, 900*time.Second)
 	require.NoError(t, err)
 
 	// PASS: update instance 2
@@ -115,7 +115,7 @@ func TestInstanceBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	time.Sleep(5 * time.Second)
-	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID2, testutils.Running, 900*time.Second)
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID2, instance.InstanceStatusRunning, 900*time.Second)
 	require.NoError(t, err)
 
 	// PASS: instance list

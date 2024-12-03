@@ -3,12 +3,13 @@ package upgrade
 import (
 	"context"
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/omnistrate/ctl/cmd/build"
 	"github.com/omnistrate/ctl/cmd/instance"
 	"github.com/omnistrate/ctl/cmd/upgrade"
-	"testing"
-	"time"
 
 	"github.com/omnistrate/ctl/cmd"
 	"github.com/omnistrate/ctl/test/testutils"
@@ -54,7 +55,7 @@ func Test_upgrade_basic(t *testing.T) {
 	require.NotEmpty(t, instanceID)
 
 	// PASS: wait for instance to reach running status
-	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, testutils.Running, 900*time.Second)
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, instance.InstanceStatusRunning, 900*time.Second)
 	require.NoError(err)
 
 	// PASS: release mysql service plan
@@ -86,7 +87,7 @@ func Test_upgrade_basic(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: wait for instance to reach running status
-	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, testutils.Running, 900*time.Second)
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, instance.InstanceStatusRunning, 900*time.Second)
 	require.NoError(err)
 
 	// PASS: upgrade instance to version 1.0
@@ -97,7 +98,7 @@ func Test_upgrade_basic(t *testing.T) {
 
 	// PASS: wait for instance to reach running status
 	time.Sleep(5 * time.Second)
-	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, testutils.Running, 900*time.Second)
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, instance.InstanceStatusRunning, 900*time.Second)
 	require.NoError(err)
 
 	// PASS: upgrade instance to preferred version
@@ -107,7 +108,7 @@ func Test_upgrade_basic(t *testing.T) {
 
 	// PASS: wait for instance to reach running status
 	time.Sleep(5 * time.Second)
-	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, testutils.Running, 900*time.Second)
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, instance.InstanceStatusRunning, 900*time.Second)
 	require.NoError(err)
 
 	// PASS: delete instance
