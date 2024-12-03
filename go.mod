@@ -19,7 +19,6 @@ require (
 	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20241129225318-d5403022c6d7
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/pkg/errors v0.9.1
-	github.com/rs/zerolog v1.33.0
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.10.0

@@ -182,9 +182,7 @@ jobs:
           TEST_EMAIL: ${{ secrets.SMOKE_TEST_EMAIL }}
           TEST_PASSWORD: ${{ secrets.SMOKE_TEST_PASSWORD}}
           OMNISTRATE_ROOT_DOMAIN: ${{ vars.OMNISTRATE_ROOT_DOMAIN}}
-          LOG_LEVEL: debug
-          LOG_FORMAT: pretty
-          DRY_RUN: true
+          OMNISTRATE_DRY_RUN: true
         run: gotestsum --format github-actions -- ./test/integration_test/... -timeout 1800s -p 1 -p 1 -v
 
   smoke-tests:
@@ -261,9 +259,7 @@ jobs:
           TEST_EMAIL: ${{ secrets.SMOKE_TEST_EMAIL }}
           TEST_PASSWORD: ${{ secrets.SMOKE_TEST_PASSWORD}}
           OMNISTRATE_ROOT_DOMAIN: ${{ vars.OMNISTRATE_ROOT_DOMAIN}}
-          LOG_LEVEL: debug
-          LOG_FORMAT: pretty
-          DRY_RUN: true
+          OMNISTRATE_DRY_RUN: true
         run: gotestsum --format github-actions -- ./test/smoke_test/${{ matrix.test-group }} -timeout 1800s -p 1 -p 1 -v
 
   publish:
