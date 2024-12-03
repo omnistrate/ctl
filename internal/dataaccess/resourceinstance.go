@@ -47,7 +47,9 @@ func DeleteResourceInstance(ctx context.Context, token, serviceID, environmentID
 		serviceID,
 		environmentID,
 		instanceID,
-	)
+	).StartResourceInstanceRequestBody(openapiclientfleet.StartResourceInstanceRequestBody{
+		ResourceId: resourceID,
+	})
 
 	var r *http.Response
 	defer func() {
