@@ -97,7 +97,9 @@ func RestartResourceInstance(ctx context.Context, token string, serviceID, envir
 		serviceID,
 		environmentID,
 		instanceID,
-	)
+	).StartResourceInstanceRequestBody(openapiclientfleet.StartResourceInstanceRequestBody{
+		ResourceId: resourceID,
+	})
 
 	var r *http.Response
 	defer func() {
@@ -122,7 +124,9 @@ func StartResourceInstance(ctx context.Context, token string, serviceID, environ
 		serviceID,
 		environmentID,
 		instanceID,
-	)
+	).StartResourceInstanceRequestBody(openapiclientfleet.StartResourceInstanceRequestBody{
+		ResourceId: resourceID,
+	})
 
 	var r *http.Response
 	defer func() {
@@ -147,7 +151,9 @@ func StopResourceInstance(ctx context.Context, token string, serviceID, environm
 		serviceID,
 		environmentID,
 		instanceID,
-	)
+	).StartResourceInstanceRequestBody(openapiclientfleet.StartResourceInstanceRequestBody{
+		ResourceId: resourceID,
+	})
 
 	var r *http.Response
 	defer func() {
