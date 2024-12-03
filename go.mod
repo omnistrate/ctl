@@ -11,18 +11,18 @@ require (
 	github.com/fatih/color v1.18.0
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-retryablehttp v0.7.7
-	github.com/jedib0t/go-pretty/v6 v6.6.1
+	github.com/jedib0t/go-pretty/v6 v6.6.3
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-wordwrap v1.0.1
-	github.com/omnistrate-oss/omnistrate-sdk-go v0.0.21
-	github.com/omnistrate/api-design v0.7.57
-	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20241022161220-48dac1dfc724
+	github.com/omnistrate-oss/omnistrate-sdk-go v0.0.22
+	github.com/omnistrate/api-design v0.7.97
+	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20241129225318-d5403022c6d7
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.33.0
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	goa.design/goa/v3 v3.19.1
 	gopkg.in/yaml.v3 v3.0.1
 )

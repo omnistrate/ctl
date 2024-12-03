@@ -3,8 +3,9 @@ package serviceplan
 import (
 	"context"
 	"fmt"
-	"github.com/omnistrate/ctl/cmd/common"
 	"strings"
+
+	"github.com/omnistrate/ctl/cmd/common"
 
 	"github.com/chelnak/ysmrr"
 	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
@@ -147,10 +148,10 @@ func formatServicePlanVersionDetails(ctx context.Context, token, serviceName, pl
 		}
 
 		resource := model.Resource{
-			ResourceID:          string(desRes.ID),
+			ResourceID:          desRes.Id,
 			ResourceName:        desRes.Name,
 			ResourceDescription: desRes.Description,
-			ResourceType:        string(desRes.ResourceType),
+			ResourceType:        desRes.ResourceType,
 		}
 
 		if desRes.ActionHooks != nil {

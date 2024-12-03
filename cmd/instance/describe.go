@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	"github.com/omnistrate/ctl/cmd/common"
 
 	"github.com/chelnak/ysmrr"
-	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
@@ -19,7 +20,17 @@ const (
 omctl instance describe instance-abcd1234`
 )
 
-var InstanceStatus string
+type InstanceStatusType string
+
+var InstanceStatus InstanceStatusType
+
+const (
+	InstanceStatusRunning   InstanceStatusType = "RUNNING"
+	InstanceStatusStopped   InstanceStatusType = "STOPPED"
+	InstanceStatusFailed    InstanceStatusType = "FAILED"
+	InstanceStatusCancelled InstanceStatusType = "CANCELLED"
+	InstanceStatusUnknown   InstanceStatusType = "UNKNOWN"
+)
 
 var describeCmd = &cobra.Command{
 	Use:          "describe [instance-id]",
@@ -80,15 +91,19 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Describe instance
-	var instance *inventoryapi.ResourceInstance
-	instance, err = dataaccess.DescribeInstance(cmd.Context(), token, serviceID, environmentID, instanceID)
+	var instance *openapiclientfleet.ResourceInstance
+	instance, err = dataaccess.DescribeResourceInstance(cmd.Context(), token, serviceID, environmentID, instanceID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully described instance")
-	InstanceStatus = string(instance.ConsumptionResourceInstanceResult.Status)
+	if instance.ConsumptionResourceInstanceResult.Status != nil {
+		InstanceStatus = InstanceStatusType(*instance.ConsumptionResourceInstanceResult.Status)
+	} else {
+		InstanceStatus = InstanceStatusUnknown
+	}
 
 	// Print output
 	err = utils.PrintTextTableJsonOutput(output, instance)

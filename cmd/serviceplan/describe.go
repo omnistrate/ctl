@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/omnistrate/ctl/cmd/common"
 	"strings"
+
+	"github.com/omnistrate/ctl/cmd/common"
 
 	"github.com/chelnak/ysmrr"
 	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
@@ -139,10 +140,10 @@ func formatServicePlanDetails(ctx context.Context, token, serviceName, planName,
 			return model.ServicePlanDetails{}, err
 		}
 		resource := model.Resource{
-			ResourceID:          string(desRes.ID),
+			ResourceID:          desRes.Id,
 			ResourceName:        desRes.Name,
 			ResourceDescription: desRes.Description,
-			ResourceType:        string(desRes.ResourceType),
+			ResourceType:        desRes.ResourceType,
 		}
 
 		if desRes.ActionHooks != nil {

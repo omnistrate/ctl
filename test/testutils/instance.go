@@ -2,21 +2,15 @@ package testutils
 
 import (
 	"context"
+	"time"
+
 	"github.com/cenkalti/backoff/v4"
 	"github.com/omnistrate/ctl/cmd"
 	"github.com/omnistrate/ctl/cmd/instance"
 	"github.com/pkg/errors"
-	"time"
 )
 
-const (
-	Running   = "RUNNING"
-	Stopped   = "STOPPED"
-	Failed    = "FAILED"
-	Cancelled = "CANCELLED"
-)
-
-func WaitForInstanceToReachStatus(ctx context.Context, instanceID, status string, timeout time.Duration) error {
+func WaitForInstanceToReachStatus(ctx context.Context, instanceID string, status instance.InstanceStatusType, timeout time.Duration) error {
 	b := &backoff.ExponentialBackOff{
 		InitialInterval:     10 * time.Second,
 		RandomizationFactor: backoff.DefaultRandomizationFactor,
@@ -42,12 +36,12 @@ func WaitForInstanceToReachStatus(ctx context.Context, instanceID, status string
 			return nil
 		}
 
-		if currentStatus == string(Failed) {
+		if currentStatus == instance.InstanceStatusFailed {
 			ticker.Stop()
 			return errors.New("instance deployment failed")
 		}
 
-		if currentStatus == string(Cancelled) {
+		if currentStatus == instance.InstanceStatusCancelled {
 			ticker.Stop()
 			return errors.New("instance deployment cancelled")
 		}

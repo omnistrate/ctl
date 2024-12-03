@@ -2,28 +2,32 @@ package dataaccess
 
 import (
 	"context"
+	"net/http"
 
-	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
-	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
-	"github.com/omnistrate/ctl/internal/config"
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 )
 
-func DescribeSubscription(ctx context.Context, token string, serviceID, environmentID, instanceID string) (*inventoryapi.FleetDescribeSubscriptionResult, error) {
-	subscription, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
-	if err != nil {
-		return nil, err
-	}
+func DescribeSubscription(ctx context.Context, token string, serviceID, environmentID, instanceID string) (resp *openapiclientfleet.FleetDescribeSubscriptionResult, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
 
-	request := inventoryapi.FleetDescribeSubscriptionRequest{
-		Token:         token,
-		ServiceID:     inventoryapi.ServiceID(serviceID),
-		EnvironmentID: inventoryapi.ServiceEnvironmentID(environmentID),
-		ID:            inventoryapi.SubscriptionID(instanceID),
-	}
+	req := apiClient.InventoryApiAPI.InventoryApiDescribeSubscription(
+		ctxWithToken,
+		serviceID,
+		environmentID,
+		instanceID,
+	)
 
-	res, err := subscription.DescribeSubscription(ctx, &request)
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	resp, r, err = req.Execute()
 	if err != nil {
-		return nil, err
+		return nil, handleFleetError(err)
 	}
-	return res, nil
+	return
 }
