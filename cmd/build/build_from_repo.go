@@ -218,7 +218,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	// Step 6: Retrieve the repository name
 	spinner = sm.AddSpinner("Retrieving repository name")
 	time.Sleep(1 * time.Second) // Add a delay to show the spinner
-	output, err := exec.Command("git", "remote", "get-url", "origin").Output()
+	output, err := exec.Command("git", "config", "--get", "remote.origin.url").Output()
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
