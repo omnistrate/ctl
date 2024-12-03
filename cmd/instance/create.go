@@ -230,7 +230,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	if subscriptionID != "" {
 		request.SubscriptionID = (*inventoryapi.SubscriptionID)(utils.ToPtr(subscriptionID))
 	}
-	instance, err := dataaccess.CreateInstance(cmd.Context(), token, request)
+	instance, err := dataaccess.CreateResourceInstance(cmd.Context(), token, request)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

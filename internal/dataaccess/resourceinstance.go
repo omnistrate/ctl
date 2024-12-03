@@ -26,24 +26,28 @@ func CreateResourceInstance(ctx context.Context, token string, request inventory
 	return
 }
 
-func DeleteResourceInstance(ctx context.Context, token, serviceID, serviceEnvironmentID, resourceID, instanceID string) (err error) {
-	fleetService, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
+func DeleteResourceInstance(ctx context.Context, token, serviceID, environmentID, resourceID, instanceID string) (err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
+
+	req := apiClient.InventoryApiAPI.InventoryApiDeleteResourceInstance(
+		ctxWithToken,
+		serviceID,
+		environmentID,
+		instanceID,
+	)
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	r, err = req.Execute()
 	if err != nil {
-		return
+		return handleFleetError(err)
 	}
-
-	request := &inventoryapi.FleetDeleteResourceInstanceRequest{
-		Token:         token,
-		ServiceID:     inventoryapi.ServiceID(serviceID),
-		EnvironmentID: inventoryapi.ServiceEnvironmentID(serviceEnvironmentID),
-		InstanceID:    inventoryapi.ResourceInstanceID(instanceID),
-		ResourceID:    inventoryapi.ResourceID(resourceID),
-	}
-
-	if err = fleetService.DeleteResourceInstance(ctx, request); err != nil {
-		return
-	}
-
 	return
 }
 
@@ -69,73 +73,82 @@ func DescribeResourceInstance(ctx context.Context, token string, serviceID, envi
 	if err != nil {
 		return nil, handleFleetError(err)
 	}
-	return 
+	return
 }
 
-func RestartResourceInstance(ctx context.Context, token string, serviceID, environmentID, resourceID, instanceID string) error {
-	instance, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
+func RestartResourceInstance(ctx context.Context, token string, serviceID, environmentID, resourceID, instanceID string) (err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
+
+	req := apiClient.InventoryApiAPI.InventoryApiRestartResourceInstance(
+		ctxWithToken,
+		serviceID,
+		environmentID,
+		instanceID,
+	)
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	r, err = req.Execute()
 	if err != nil {
-		return err
+		return handleFleetError(err)
 	}
-
-	request := inventoryapi.FleetRestartResourceInstanceRequest{
-		Token:         token,
-		ServiceID:     inventoryapi.ServiceID(serviceID),
-		EnvironmentID: inventoryapi.ServiceEnvironmentID(environmentID),
-		InstanceID:    inventoryapi.ResourceInstanceID(instanceID),
-		ResourceID:    inventoryapi.ResourceID(resourceID),
-	}
-
-	err = instance.RestartResourceInstance(ctx, &request)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return
 }
 
-func StartResourceInstance(ctx context.Context, token string, serviceID, environmentID, resourceID, instanceID string) error {
-	instance, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
+func StartResourceInstance(ctx context.Context, token string, serviceID, environmentID, resourceID, instanceID string) (err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
+
+	req := apiClient.InventoryApiAPI.InventoryApiStartResourceInstance(
+		ctxWithToken,
+		serviceID,
+		environmentID,
+		instanceID,
+	)
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	r, err = req.Execute()
 	if err != nil {
-		return err
+		return handleFleetError(err)
 	}
-
-	request := inventoryapi.FleetStartResourceInstanceRequest{
-		Token:         token,
-		ServiceID:     inventoryapi.ServiceID(serviceID),
-		EnvironmentID: inventoryapi.ServiceEnvironmentID(environmentID),
-		InstanceID:    inventoryapi.ResourceInstanceID(instanceID),
-		ResourceID:    inventoryapi.ResourceID(resourceID),
-	}
-
-	err = instance.StartResourceInstance(ctx, &request)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return
 }
 
-func StopResourceInstance(ctx context.Context, token string, serviceID, environmentID, resourceID, instanceID string) error {
-	instance, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
+func StopResourceInstance(ctx context.Context, token string, serviceID, environmentID, resourceID, instanceID string) (err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
+
+	req := apiClient.InventoryApiAPI.InventoryApiStopResourceInstance(
+		ctxWithToken,
+		serviceID,
+		environmentID,
+		instanceID,
+	)
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	r, err = req.Execute()
 	if err != nil {
-		return err
+		return handleFleetError(err)
 	}
-
-	request := inventoryapi.FleetStopResourceInstanceRequest{
-		Token:         token,
-		ServiceID:     inventoryapi.ServiceID(serviceID),
-		EnvironmentID: inventoryapi.ServiceEnvironmentID(environmentID),
-		InstanceID:    inventoryapi.ResourceInstanceID(instanceID),
-		ResourceID:    inventoryapi.ResourceID(resourceID),
-	}
-
-	err = instance.StopResourceInstance(ctx, &request)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return
 }
 
 func UpdateResourceInstance(ctx context.Context, token string, request inventoryapi.FleetUpdateResourceInstanceRequest) error {
