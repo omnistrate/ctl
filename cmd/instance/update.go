@@ -98,13 +98,11 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 	err = dataaccess.UpdateResourceInstance(
 		cmd.Context(),
 		token,
-		inventoryapi.FleetUpdateResourceInstanceRequest{
-			ServiceID:     inventoryapi.ServiceID(serviceID),
-			EnvironmentID: inventoryapi.ServiceEnvironmentID(environmentID),
-			InstanceID:    inventoryapi.ResourceInstanceID(instanceID),
-			ResourceID:    inventoryapi.ResourceID(resourceID),
-			RequestParams: formattedParams,
-		})
+		serviceID,
+		environmentID,
+		instanceID,
+		resourceID, 
+		formattedParams)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
