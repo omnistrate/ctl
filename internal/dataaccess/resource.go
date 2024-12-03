@@ -2,29 +2,37 @@ package dataaccess
 
 import (
 	"context"
+	"net/http"
 
-	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
-	resourceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/resource_api"
-	"github.com/omnistrate/ctl/internal/config"
+	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 )
 
-func DescribeResource(ctx context.Context, token, serviceID, resourceID string, productTierID, productTierVersion *string) (resource *resourceapi.DescribeResourceResult, err error) {
-	service, err := httpclientwrapper.NewResource(config.GetHostScheme(), config.GetHost())
+func DescribeResource(ctx context.Context, token, serviceID, resourceID string, productTierID, productTierVersion *string) (resp *openapiclient.DescribeResourceResult, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+	apiClient := getV1Client()
+
+	req := apiClient.ResourceApiAPI.ResourceApiDescribeResource(
+		ctxWithToken,
+		serviceID,
+		resourceID,
+	)
+	if productTierID != nil {
+		req = req.ProductTierId(*productTierID)
+	}
+	if productTierVersion != nil {
+		req = req.ProductTierVersion(*productTierVersion)
+	}
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	resp, r, err = req.Execute()
 	if err != nil {
-		return
+		return nil, handleV1Error(err)
 	}
-
-	request := &resourceapi.DescribeResourceRequest{
-		Token:              token,
-		ServiceID:          resourceapi.ServiceID(serviceID),
-		ID:                 resourceapi.ResourceID(resourceID),
-		ProductTierVersion: productTierVersion,
-		ProductTierID:      (*resourceapi.ProductTierID)(productTierID),
-	}
-
-	if resource, err = service.DescribeResource(ctx, request); err != nil {
-		return
-	}
-
 	return
 }
