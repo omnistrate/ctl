@@ -3,7 +3,7 @@ package dataaccess
 import (
 	"context"
 
-	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
+	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 )
 
 func GetCloudProviderByName(ctx context.Context, token string, cloudProvider string) (string, error) {

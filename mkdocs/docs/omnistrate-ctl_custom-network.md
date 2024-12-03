@@ -1,10 +1,10 @@
 ## omnistrate-ctl custom-network
 
-Manage custom networks for your org
+List and describe custom networks of your customers
 
 ### Synopsis
 
-This command helps you manage the custom networks.
+This command helps you explore custom networks used by your customers.
 
 ```
 omnistrate-ctl custom-network [operation] [flags]
@@ -25,9 +25,8 @@ omnistrate-ctl custom-network [operation] [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl](omnistrate-ctl.md)	 - Manage your Omnistrate SaaS from the command line
-* [omnistrate-ctl custom-network create](omnistrate-ctl_custom-network_create.md)	 - Create a custom network
-* [omnistrate-ctl custom-network delete](omnistrate-ctl_custom-network_delete.md)	 - Deletes a custom network
-* [omnistrate-ctl custom-network describe](omnistrate-ctl_custom-network_describe.md)	 - Describe a custom network
-* [omnistrate-ctl custom-network list](omnistrate-ctl_custom-network_list.md)	 - List custom networks
-
+- [omnistrate-ctl](omnistrate-ctl.md) - Manage your Omnistrate SaaS from the command line
+- [omnistrate-ctl custom-network create](omnistrate-ctl_custom-network_create.md) - Create a custom network
+- [omnistrate-ctl custom-network delete](omnistrate-ctl_custom-network_delete.md) - Deletes a custom network
+- [omnistrate-ctl custom-network describe](omnistrate-ctl_custom-network_describe.md) - Describe a custom network
+- [omnistrate-ctl custom-network list](omnistrate-ctl_custom-network_list.md) - List custom networks

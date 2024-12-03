@@ -50,7 +50,7 @@ var LoginCmd = &cobra.Command{
 	Short:        "Log in to the Omnistrate platform",
 	Long:         `The login command is used to authenticate and log in to the Omnistrate platform.`,
 	Example:      loginExample,
-	RunE:         runLogin,
+	RunE:         RunLogin,
 	SilenceUsage: true,
 }
 
@@ -67,7 +67,7 @@ func init() {
 	LoginCmd.Args = cobra.NoArgs
 }
 
-func runLogin(cmd *cobra.Command, args []string) error {
+func RunLogin(cmd *cobra.Command, args []string) error {
 	defer resetLogin()
 
 	// Login with email and password if any of the flags are set
@@ -98,7 +98,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 	switch choice {
 	case string(loginWithEmailAndPassword):
 		email, err = prompt.New().Ask("Please enter your email:").
-			Input("", input.WithValidateFunc(
+			Input("Email", input.WithValidateFunc(
 				func(input string) error {
 					emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
 					if emailRegex.MatchString(input) {
@@ -113,7 +113,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 		}
 
 		password, err = prompt.New().Ask("Please enter your password:").
-			Input("", input.WithEchoMode(input.EchoPassword))
+			Input("Password", input.WithEchoMode(input.EchoPassword))
 		if err != nil {
 			utils.PrintError(err)
 			return err

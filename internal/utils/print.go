@@ -72,7 +72,11 @@ func PrintTextTableJsonArrayOutput[T any](output string, objects []T) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("%s\n", data)
+		if len(objects) == 0 {
+			fmt.Println("[]")
+		} else {
+			fmt.Printf("%s\n", data)
+		}
 	default:
 		return fmt.Errorf("unsupported output format: %s", output)
 	}

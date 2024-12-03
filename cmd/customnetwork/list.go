@@ -1,11 +1,10 @@
 package customnetwork
 
 import (
-	"context"
 	"strings"
 
 	"github.com/chelnak/ysmrr"
-	customnetworkapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/custom_network_api"
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	"github.com/omnistrate/ctl/cmd/common"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
@@ -50,7 +49,7 @@ func runList(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	// Validate user is logged in
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -65,18 +64,18 @@ func runList(cmd *cobra.Command, args []string) (err error) {
 		sm.Start()
 	}
 
-	var listResult *customnetworkapi.ListCustomNetworksResult
-	listResult, err = listCustomNetworks(cmd.Context(), token)
+	var listResult *openapiclientfleet.FleetListCustomNetworksResult
+	listResult, err = dataaccess.FleetListCustomNetworks(cmd.Context(), token, nil, nil)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Process and filter environments
-	var formattedCustomNetworks []model.CustomNetwork
+	formattedCustomNetworks := make([]model.CustomNetwork, 0)
 	for _, customNetwork := range listResult.CustomNetworks {
 		var match bool
-		formattedCustomNetwork := formatCustomNetwork(customNetwork)
+		formattedCustomNetwork := formatCustomNetwork(utils.ToPtr(customNetwork))
 		match, err = utils.MatchesFilters(formattedCustomNetwork, filterMaps)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
@@ -88,10 +87,10 @@ func runList(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
-	if len(formattedCustomNetworks) > 0 {
-		utils.HandleSpinnerSuccess(spinner, sm, "Successfully listed custom networks")
-	} else {
+	if len(formattedCustomNetworks) == 0 {
 		utils.HandleSpinnerSuccess(spinner, sm, "No custom networks found")
+	} else {
+		utils.HandleSpinnerSuccess(spinner, sm, "Successfully listed custom networks")
 	}
 
 	// Print output
@@ -102,10 +101,4 @@ func runList(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	return
-}
-
-func listCustomNetworks(ctx context.Context, token string) (
-	*customnetworkapi.ListCustomNetworksResult, error) {
-	request := customnetworkapi.ListCustomNetworksRequest{}
-	return dataaccess.ListCustomNetworks(ctx, token, request)
 }

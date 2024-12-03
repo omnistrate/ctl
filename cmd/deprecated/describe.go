@@ -3,9 +3,9 @@ package deprecated
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/common"
 
-	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
-	"github.com/omnistrate/ctl/internal/config"
+	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/spf13/cobra"
@@ -40,7 +40,7 @@ func run(cmd *cobra.Command, args []string) (err error) {
 
 		// Validate user is currently logged in
 		var token string
-		token, err = config.GetToken()
+		token, err = common.GetTokenWithLogin()
 		if err != nil {
 			utils.PrintError(err)
 			return
