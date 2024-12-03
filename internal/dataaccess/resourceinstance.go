@@ -2,6 +2,8 @@ package dataaccess
 
 import (
 	"context"
+	"net/http"
+
 	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
@@ -9,7 +11,7 @@ import (
 	"github.com/omnistrate/ctl/internal/config"
 )
 
-func CreateInstance(ctx context.Context, token string, request inventoryapi.FleetCreateResourceInstanceRequest) (res *inventoryapi.CreateResourceInstanceResult, err error) {
+func CreateResourceInstance(ctx context.Context, token string, request inventoryapi.FleetCreateResourceInstanceRequest) (res *inventoryapi.CreateResourceInstanceResult, err error) {
 	request.Token = token
 
 	fleetService, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
@@ -24,7 +26,7 @@ func CreateInstance(ctx context.Context, token string, request inventoryapi.Flee
 	return
 }
 
-func DeleteInstance(ctx context.Context, token, serviceID, serviceEnvironmentID, resourceID, instanceID string) (err error) {
+func DeleteResourceInstance(ctx context.Context, token, serviceID, serviceEnvironmentID, resourceID, instanceID string) (err error) {
 	fleetService, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return
@@ -45,25 +47,29 @@ func DeleteInstance(ctx context.Context, token, serviceID, serviceEnvironmentID,
 	return
 }
 
-func DescribeResourceInstance(ctx context.Context, token string, serviceID, environmentID, instanceID string) (*openapiclientfleet.ResourceInstance, error) {
+func DescribeResourceInstance(ctx context.Context, token string, serviceID, environmentID, instanceID string) (resp *openapiclientfleet.ResourceInstance, err error) {
 	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
 
-	configuration := openapiclientfleet.NewConfiguration()
-	apiClient := openapiclientfleet.NewAPIClient(configuration)
-	res, r, err := apiClient.InventoryApiAPI.InventoryApiDescribeResourceInstance(
+	req := apiClient.InventoryApiAPI.InventoryApiDescribeResourceInstance(
 		ctxWithToken,
 		serviceID,
 		environmentID,
 		instanceID,
-	).Execute()
+	)
 
-	err = handleFleetError(err)
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	resp, r, err = req.Execute()
 	if err != nil {
-		return nil, err
+		return nil, handleFleetError(err)
 	}
-
-	r.Body.Close()
-	return res, nil
+	return 
 }
 
 func RestartResourceInstance(ctx context.Context, token string, serviceID, environmentID, resourceID, instanceID string) error {
