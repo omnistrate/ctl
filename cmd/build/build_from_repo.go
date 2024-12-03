@@ -70,7 +70,6 @@ func init() {
 
 func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	defer config.CleanupArgsAndFlags(cmd, &args)
-
 	// Retrieve the flags
 	envVars, err := cmd.Flags().GetStringArray("env-var")
 	if err != nil {
@@ -204,7 +203,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	// Step 2: Retrieve the repository name
 	spinner = sm.AddSpinner("Retrieving repository name")
 	time.Sleep(1 * time.Second) // Add a delay to show the spinner
-	output, err := exec.Command("git", "config", "--get", "remote.origin.url").Output()
+	output, err := exec.Command("sh", "-c", `git config --get remote.origin.url | sed -E 's/:([^\/])/\/\1/g' | sed -e 's/ssh\/\/\///g' | sed -e 's/git@/https:\/\//g'`).Output()
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
