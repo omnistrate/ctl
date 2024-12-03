@@ -14,7 +14,7 @@ func DescribeResource(ctx context.Context, token, serviceID, resourceID string, 
 	req := apiClient.ResourceApiAPI.ResourceApiDescribeResource(
 		ctxWithToken,
 		serviceID,
-		resourceID,
+		resourceID, 
 	)
 	if productTierID != nil {
 		req = req.ProductTierId(*productTierID)
