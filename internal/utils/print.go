@@ -6,12 +6,13 @@ import (
 	"os"
 
 	"github.com/fatih/color"
+	"github.com/omnistrate/ctl/internal/config"
 )
 
 func PrintError(err error) {
 	errorMsg := color.New(color.FgRed, color.Bold).SprintFunc()
 	fmt.Println(errorMsg("Error: "), err.Error())
-	if !IsDryRun() {
+	if !config.IsDryRun() {
 		os.Exit(1)
 	}
 }

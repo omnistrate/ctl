@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/omnistrate/ctl/internal/config"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -13,15 +14,15 @@ var once sync.Once
 
 func ConfigureLoggingFromEnvOnce() {
 	once.Do(func() {
-		logLevel := GetEnv("LOG_LEVEL", "debug")
-		logFormat := GetEnv("LOG_FORMAT", "json")
+		logLevel := config.GetLogLevel()
+		logFormat := config.GetLogFormat()
 
 		ConfigureLogging(logLevel, logFormat)
 	})
 }
 
 func ConfigureLogging(logLevel string, logFormat string) {
-	log.Logger = log.With().Timestamp().Caller().Logger().Level(zerolog.DebugLevel)
+	log.Logger = log.With().Timestamp().Logger().Level(zerolog.DebugLevel)
 
 	if logLevel != "" {
 		level, err := zerolog.ParseLevel(logLevel)

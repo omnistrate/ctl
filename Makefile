@@ -57,8 +57,8 @@ smoke-test:
 	@echo you need to set the following environment variables: TEST_EMAIL, TEST_PASSWORD before running the smoke tests
 	export ENABLE_SMOKE_TEST=true && \
 	export OMNISTRATE_ROOT_DOMAIN=omnistrate.dev && \
-	export LOG_LEVEL=debug && \
-	export LOG_FORMAT=pretty && \
+	export OMNISTRATE_LOG_LEVEL=debug && \
+	export OMNISTRATE_LOG_FORMAT=pretty && \
 	go clean -testcache && \
 	go test ./... -skip ./test/smoke_test/... $(ARGS) 
 
@@ -68,8 +68,8 @@ integration-test:
 	@echo you need to set the following environment variables: TEST_EMAIL, TEST_PASSWORD before running the integration tests
 	export ENABLE_INTEGRATION_TEST=true && \
 	export OMNISTRATE_ROOT_DOMAIN=omnistrate.dev && \
-	export LOG_LEVEL=debug && \
-	export LOG_FORMAT=pretty && \
+	export OMNISTRATE_LOG_LEVEL=debug && \
+	export OMNISTRATE_LOG_FORMAT=pretty && \
 	go clean -testcache && \
 	go test ./... -skip ./test/integration_test/... $(ARGS) 
 
