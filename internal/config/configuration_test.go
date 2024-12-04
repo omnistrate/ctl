@@ -7,6 +7,28 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestGetLogLevel(t *testing.T) {
+	logLevel := GetLogLevel()
+	assert.Equal(t, "info", logLevel)
+}
+
+func TestGetLogLevelCustom(t *testing.T) {
+	t.Setenv(logLevel, "debug")
+	logLevel := GetLogLevel()
+	assert.Equal(t, "debug", logLevel)
+}
+
+func TestGetLogFormat(t *testing.T) {
+	logFormat := GetLogFormat()
+	assert.Equal(t, "pretty", logFormat)
+}
+
+func TestGetLogFormatCustom(t *testing.T) {
+	t.Setenv(logFormat, "json")
+	logFormat := GetLogFormat()
+	assert.Equal(t, "json", logFormat)
+}
+
 func TestGetHost(t *testing.T) {
 	host := GetHost()
 	assert.Equal(t, "api.omnistrate.cloud", host)
@@ -46,7 +68,7 @@ func TestGetDebug(t *testing.T) {
 }
 
 func TestGetDebugTrue(t *testing.T) {
-	t.Setenv(logDebug, "true")
+	t.Setenv(logLevel, "debug")
 	debug := IsDebugLogLevel()
 	assert.True(t, debug)
 }

@@ -19,6 +19,7 @@ import (
 	"github.com/omnistrate/ctl/cmd/serviceplan"
 	"github.com/omnistrate/ctl/cmd/subscription"
 	"github.com/omnistrate/ctl/cmd/upgrade"
+	"github.com/omnistrate/ctl/internal/utils"
 
 	"github.com/fatih/color"
 	"github.com/mitchellh/go-wordwrap"
@@ -94,6 +95,7 @@ const figletStr = `                  _     __           __
 // This is called by main.main(). It only needs to happen once to the RootCmd.
 func Execute() {
 	ctx := context.Background()
+	utils.ConfigureLoggingFromEnvOnce()
 	err := RootCmd.ExecuteContext(ctx)
 	if err != nil {
 		os.Exit(1)
