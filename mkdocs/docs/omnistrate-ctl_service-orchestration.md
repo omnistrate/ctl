@@ -25,9 +25,8 @@ omnistrate-ctl service-orchestration [operation] [flags]
 
 ### SEE ALSO
 
-* [omnistrate-ctl](omnistrate-ctl.md)	 - Manage your Omnistrate SaaS from the command line
-* [omnistrate-ctl service-orchestration create](omnistrate-ctl_service-orchestration_create.md)	 - Create a service orchestration deployment
-* [omnistrate-ctl service-orchestration delete](omnistrate-ctl_service-orchestration_delete.md)	 - Delete a service orchestration deployment
-* [omnistrate-ctl service-orchestration describe](omnistrate-ctl_service-orchestration_describe.md)	 - Describe an service orchestration deployment
-* [omnistrate-ctl service-orchestration list](omnistrate-ctl_service-orchestration_list.md)	 - List service orchestration deployments
-
+- [omnistrate-ctl](omnistrate-ctl.md) - Manage your Omnistrate SaaS from the command line
+- [omnistrate-ctl service-orchestration create](omnistrate-ctl_service-orchestration_create.md) - Create a service orchestration deployment
+- [omnistrate-ctl service-orchestration delete](omnistrate-ctl_service-orchestration_delete.md) - Delete a service orchestration deployment
+- [omnistrate-ctl service-orchestration describe](omnistrate-ctl_service-orchestration_describe.md) - Describe an service orchestration deployment
+- [omnistrate-ctl service-orchestration list](omnistrate-ctl_service-orchestration_list.md) - List service orchestration deployments

@@ -32,5 +32,4 @@ omctl service-orchestration describe so-abcd1234
 
 ### SEE ALSO
 
-* [omnistrate-ctl service-orchestration](omnistrate-ctl_service-orchestration.md)	 - Manage Service Orchestration Deployments across services
-
+- [omnistrate-ctl service-orchestration](omnistrate-ctl_service-orchestration.md) - Manage Service Orchestration Deployments across services
