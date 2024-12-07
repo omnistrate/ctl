@@ -37,6 +37,7 @@ func CreateServicesOrchestration(
 	if err != nil {
 		return nil, handleFleetError(err)
 	}
+
 	return
 }
 
@@ -86,7 +87,7 @@ func DescribeServicesOrchestration(ctx context.Context, token string, id string)
 	return
 }
 
-func ListServicesOrchestration(ctx context.Context, token string, serviceID, environmentID, instanceID string) (resp []openapiclientfleet.FleetDescribeServicesOrchestrationResult, err error) {
+func ListServicesOrchestration(ctx context.Context, token string) (resp []openapiclientfleet.FleetDescribeServicesOrchestrationResult, err error) {
 	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
 	apiClient := getFleetClient()
 

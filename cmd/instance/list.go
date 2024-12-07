@@ -73,7 +73,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	var spinner *ysmrr.Spinner
 	if output != common.OutputTypeJson {
 		sm = ysmrr.NewSpinnerManager()
-		spinner = sm.AddSpinner("Listing custom networks...")
+		spinner = sm.AddSpinner("Listing instance deployments...")
 		sm.Start()
 	}
 
