@@ -2,8 +2,9 @@ package dataaccess
 
 import (
 	"context"
-	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	"net/http"
+
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 )
 
 func FleetDescribeCustomNetwork(
@@ -67,13 +68,13 @@ func FleetCreateCustomNetwork(
 	apiClient := getFleetClient()
 
 	req := apiClient.FleetCustomNetworkApiAPI.FleetCustomNetworkApiCreateCustomNetwork(ctxWithToken)
-	reqNetwork := openapiclientfleet.CreateCustomNetworkRequestBody{
+	reqNetwork := openapiclientfleet.CreateCustomNetworkRequest2{
 		Cidr:                cidr,
 		CloudProviderName:   cloudProviderName,
 		CloudProviderRegion: cloudProviderRegion,
 		Name:                name,
 	}
-	req = req.CreateCustomNetworkRequestBody(reqNetwork)
+	req = req.CreateCustomNetworkRequest2(reqNetwork)
 
 	var r *http.Response
 	defer func() {

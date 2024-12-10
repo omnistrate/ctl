@@ -18,13 +18,13 @@ func CreateServicesOrchestration(
 	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
 	apiClient := getFleetClient()
 
-	request := openapiclientfleet.CreateServicesOrchestrationRequestBody{
+	request := openapiclientfleet.FleetCreateServicesOrchestrationRequest2{
 		OrchestrationCreateDSL: orchestrationCreateDSL,
 	}
 
 	req := apiClient.InventoryApiAPI.InventoryApiCreateServicesOrchestration(
 		ctxWithToken,
-	).CreateServicesOrchestrationRequestBody(request)
+	).FleetCreateServicesOrchestrationRequest2(request)
 
 	var r *http.Response
 	defer func() {
