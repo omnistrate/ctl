@@ -25,7 +25,7 @@ func TestInstanceBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	// PASS: list service orchestrations
-	cmd.RootCmd.SetArgs([]string{"service-orchestration", "list"})
+	cmd.RootCmd.SetArgs([]string{"service-orchestration", "list", "--environment-type=dev"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 }

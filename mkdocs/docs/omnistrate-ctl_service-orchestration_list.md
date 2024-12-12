@@ -20,7 +20,8 @@ omctl service-orchestration list
 ### Options
 
 ```
-  -h, --help   help for list
+      --environment-type string   Type of environment. Valid options include: 'dev', 'prod', 'qa', 'canary', 'staging', 'private') (default "dev")
+  -h, --help                      help for list
 ```
 
 ### Options inherited from parent commands
