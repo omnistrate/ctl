@@ -25,12 +25,22 @@ var listCmd = &cobra.Command{
 }
 
 func init() {
+	listCmd.Flags().StringP("environment-type", "", "dev", "Type of environment. Valid options include: 'dev', 'prod', 'qa', 'canary', 'staging', 'private')")
+	err := listCmd.MarkFlagRequired("environment-type")
+	if err != nil {
+		return
+	}
 }
 
 func runList(cmd *cobra.Command, args []string) error {
 	defer config.CleanupArgsAndFlags(cmd, &args)
 
 	// Retrieve flags
+	environmentType, err := cmd.Flags().GetString("environment-type")
+	if err != nil {
+		return err
+	}
+
 	output, err := cmd.Flags().GetString("output")
 	if err != nil {
 		utils.PrintError(err)
@@ -54,7 +64,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	// Get all instances
-	searchRes, err := dataaccess.ListServicesOrchestration(cmd.Context(), token)
+	searchRes, err := dataaccess.ListServicesOrchestration(cmd.Context(), token, environmentType)
 	if err != nil {
 		utils.PrintError(err)
 		return err

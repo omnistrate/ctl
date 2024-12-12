@@ -87,13 +87,14 @@ func DescribeServicesOrchestration(ctx context.Context, token string, id string)
 	return
 }
 
-func ListServicesOrchestration(ctx context.Context, token string) (resp []openapiclientfleet.FleetDescribeServicesOrchestrationResult, err error) {
+func ListServicesOrchestration(ctx context.Context, token string, environmentType string) (resp []openapiclientfleet.FleetDescribeServicesOrchestrationResult, err error) {
 	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
 	apiClient := getFleetClient()
 
 	req := apiClient.InventoryApiAPI.InventoryApiListServicesOrchestrations(
 		ctxWithToken,
 	)
+	req.EnvironmentType(environmentType)
 
 	var r *http.Response
 	defer func() {
