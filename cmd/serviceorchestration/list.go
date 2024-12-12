@@ -38,6 +38,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	// Retrieve flags
 	environmentType, err := cmd.Flags().GetString("environment-type")
 	if err != nil {
+		utils.PrintError(err)
 		return err
 	}
 

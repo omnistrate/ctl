@@ -94,7 +94,7 @@ func ListServicesOrchestration(ctx context.Context, token string, environmentTyp
 	req := apiClient.InventoryApiAPI.InventoryApiListServicesOrchestrations(
 		ctxWithToken,
 	)
-	req.EnvironmentType(environmentType)
+	req = req.EnvironmentType(environmentType)
 
 	var r *http.Response
 	defer func() {
