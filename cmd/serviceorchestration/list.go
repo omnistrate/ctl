@@ -11,7 +11,7 @@ import (
 
 const (
 	listExample = `# List service orchestration deployments of the service postgres in the prod and dev environments
-omctl service-orchestration list`
+omctl service-orchestration list --environment-type=prod`
 	defaultMaxNameLength = 30 // Maximum length of the name column in the table
 )
 
