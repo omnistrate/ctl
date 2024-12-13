@@ -25,7 +25,7 @@ var listCmd = &cobra.Command{
 }
 
 func init() {
-	listCmd.Flags().StringP("environment-type", "", "DEV", "Type of environment. Valid options include: 'DEV', 'PROD', 'QD', 'CANARY', 'STAGING', 'PRIVATE')")
+	listCmd.Flags().StringP("environment-type", "", "DEV", "Type of environment. Valid options include: 'DEV', 'PROD', 'QA', 'CANARY', 'STAGING', 'PRIVATE')")
 }
 
 func runList(cmd *cobra.Command, args []string) error {
