@@ -109,3 +109,38 @@ func ListServicesOrchestration(ctx context.Context, token string, environmentTyp
 	}
 	return
 }
+
+func ModifyServicesOrchestration(
+	ctx context.Context,
+	token string,
+	id string,
+	orchestrationModifyDSL string,
+) (
+	err error,
+) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
+
+	request := openapiclientfleet.ModifyServicesOrchestrationRequestBody{
+		OrchestrationModifyDSL: orchestrationModifyDSL,
+	}
+
+	req := apiClient.InventoryApiAPI.InventoryApiModifyServicesOrchestration(
+		ctxWithToken,
+		id,
+	).ModifyServicesOrchestrationRequestBody(request)
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	_, r, err = req.Execute()
+	if err != nil {
+		return handleFleetError(err)
+	}
+
+	return
+}
