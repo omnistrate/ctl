@@ -79,7 +79,8 @@ func runModify(cmd *cobra.Command, args []string) error {
 		cmd.Context(),
 		token,
 		soID,
-		dslFileContent)
+		dslFileContent,
+	)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

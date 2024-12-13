@@ -76,7 +76,8 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	orchestration, err := dataaccess.CreateServicesOrchestration(
 		cmd.Context(),
 		token,
-		dslFileContent)
+		dslFileContent,
+	)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
