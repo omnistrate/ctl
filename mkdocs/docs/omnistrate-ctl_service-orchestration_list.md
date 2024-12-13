@@ -14,7 +14,7 @@ omnistrate-ctl service-orchestration list [flags]
 
 ```
 # List service orchestration deployments of the service postgres in the prod and dev environments
-omctl service-orchestration list
+omctl service-orchestration list --environment-type=prod
 ```
 
 ### Options

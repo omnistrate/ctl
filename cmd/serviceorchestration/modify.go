@@ -6,36 +6,38 @@ import (
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
 const (
-	createExample = `# Create a service orchestration deployment from a DSL file
-omctl service-orchestration create --dsl-file /path/to/dsl.yaml`
+	modifyExample = `# Modify a service orchestration deployment from a DSL file
+omctl service-orchestration modify so-abcd1234 --dsl-file /path/to/dsl.yaml`
 )
 
-var createCmd = &cobra.Command{
-	Use:          "create --dsl-file=[file-path]",
-	Short:        "Create a service orchestration deployment",
-	Long:         `This command helps you create a service orchestration deployment, coordinating the creation of multiple services.`,
-	Example:      createExample,
-	RunE:         runCreate,
+var modifyCmd = &cobra.Command{
+	Use:          "modify [so-id] -dsl-file=[file-path]",
+	Short:        "Modify a service orchestration deployment",
+	Long:         `This command helps you modify a service orchestration deployment, coordinating the modification of multiple services.`,
+	Example:      modifyExample,
+	RunE:         runModify,
 	SilenceUsage: true,
 }
 
 func init() {
-	createCmd.Flags().String("dsl-file", "", "Yaml file containing DSL for service orchestration deployment")
+	describeCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 
-	if err := createCmd.MarkFlagRequired("dsl-file"); err != nil {
+	modifyCmd.Flags().String("dsl-file", "", "Yaml file containing DSL for service orchestration deployment")
+
+	if err := modifyCmd.MarkFlagRequired("dsl-file"); err != nil {
 		return
 	}
-
-	createCmd.Args = cobra.NoArgs // Require no arguments
 }
 
-func runCreate(cmd *cobra.Command, args []string) error {
+func runModify(cmd *cobra.Command, args []string) error {
 	defer config.CleanupArgsAndFlags(cmd, &args)
+
+	// Retrieve args
+	soID := args[0]
 
 	// Retrieve flags
 	dslFilePath, err := cmd.Flags().GetString("dsl-file")
@@ -61,7 +63,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	var spinner *ysmrr.Spinner
 	if output != "json" {
 		sm = ysmrr.NewSpinnerManager()
-		msg := "Creating service orchestration..."
+		msg := "Modifying service orchestration..."
 		spinner = sm.AddSpinner(msg)
 		sm.Start()
 	}
@@ -73,9 +75,10 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	orchestration, err := dataaccess.CreateServicesOrchestration(
+	err = dataaccess.ModifyServicesOrchestration(
 		cmd.Context(),
 		token,
+		soID,
 		dslFileContent,
 	)
 	if err != nil {
@@ -83,19 +86,13 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if orchestration.Id == nil {
-		err = errors.New("failed to create service orchestration")
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
-
-	utils.HandleSpinnerSuccess(spinner, sm, "Successfully created service orchestration")
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully modified service orchestration")
 
 	// Search for the orchestration
 	searchRes, err := dataaccess.DescribeServicesOrchestration(
 		cmd.Context(),
 		token,
-		*orchestration.Id,
+		soID,
 	)
 	if err != nil {
 		utils.PrintError(err)
