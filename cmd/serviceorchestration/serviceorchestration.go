@@ -17,6 +17,7 @@ func init() {
 	Cmd.AddCommand(describeCmd)
 	Cmd.AddCommand(deleteCmd)
 	Cmd.AddCommand(listCmd)
+	Cmd.AddCommand(modifyCmd)
 }
 
 func run(cmd *cobra.Command, args []string) {
