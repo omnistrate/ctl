@@ -20,7 +20,7 @@ omctl service-orchestration list --environment-type=prod
 ### Options
 
 ```
-      --environment-type string   Type of environment. Valid options include: 'dev', 'prod', 'qa', 'canary', 'staging', 'private') (default "dev")
+      --environment-type string   Type of environment. Valid options include: 'dev', 'prod', 'qa', 'canary', 'staging', 'private' (default "dev")
   -h, --help                      help for list
 ```
 

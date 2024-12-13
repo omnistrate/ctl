@@ -24,7 +24,17 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
-	// PASS: list service orchestrations
+	// PASS: list service orchestrations with default
+	cmd.RootCmd.SetArgs([]string{"service-orchestration", "list"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(t, err)
+
+	// PASS: list service orchestrations with environment type lowercase
+	cmd.RootCmd.SetArgs([]string{"service-orchestration", "list", "--environment-type=dev"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(t, err)
+
+	// PASS: list service orchestrations with environment type uppercase
 	cmd.RootCmd.SetArgs([]string{"service-orchestration", "list", "--environment-type=DEV"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)

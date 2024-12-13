@@ -3,6 +3,7 @@ package dataaccess
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 )
@@ -94,7 +95,7 @@ func ListServicesOrchestration(ctx context.Context, token string, environmentTyp
 	req := apiClient.InventoryApiAPI.InventoryApiListServicesOrchestrations(
 		ctxWithToken,
 	)
-	req = req.EnvironmentType(environmentType)
+	req = req.EnvironmentType(strings.ToUpper(environmentType))
 
 	var r *http.Response
 	defer func() {

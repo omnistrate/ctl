@@ -30,3 +30,4 @@ omnistrate-ctl service-orchestration [operation] [flags]
 - [omnistrate-ctl service-orchestration delete](omnistrate-ctl_service-orchestration_delete.md) - Delete a service orchestration deployment
 - [omnistrate-ctl service-orchestration describe](omnistrate-ctl_service-orchestration_describe.md) - Describe an service orchestration deployment
 - [omnistrate-ctl service-orchestration list](omnistrate-ctl_service-orchestration_list.md) - List service orchestration deployments
+- [omnistrate-ctl service-orchestration modify](omnistrate-ctl_service-orchestration_modify.md) - Modify a service orchestration deployment
