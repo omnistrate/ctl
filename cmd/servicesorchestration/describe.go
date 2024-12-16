@@ -69,7 +69,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Describe services orchestration
-	serviceOrchestration, err := dataaccess.DescribeServicesOrchestration(
+	servicesOrchestration, err := dataaccess.DescribeServicesOrchestration(
 		cmd.Context(),
 		token,
 		soID,
@@ -81,7 +81,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully described services orchestration deployment")
 	// Print output
-	err = utils.PrintTextTableJsonOutput(output, serviceOrchestration)
+	err = utils.PrintTextTableJsonOutput(output, servicesOrchestration)
 	if err != nil {
 		utils.PrintError(err)
 		return err

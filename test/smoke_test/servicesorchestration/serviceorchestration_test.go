@@ -1,4 +1,4 @@
-package serviceorchestration
+package servicesorchestration
 
 import (
 	"context"
