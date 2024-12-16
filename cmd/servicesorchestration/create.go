@@ -1,4 +1,4 @@
-package serviceorchestration
+package servicesorchestration
 
 import (
 	"github.com/chelnak/ysmrr"
@@ -11,21 +11,21 @@ import (
 )
 
 const (
-	createExample = `# Create a service orchestration deployment from a DSL file
-omctl service-orchestration create --dsl-file /path/to/dsl.yaml`
+	createExample = `# Create a services orchestration deployment from a DSL file
+omctl services-orchestration create --dsl-file /path/to/dsl.yaml`
 )
 
 var createCmd = &cobra.Command{
 	Use:          "create --dsl-file=[file-path]",
-	Short:        "Create a service orchestration deployment",
-	Long:         `This command helps you create a service orchestration deployment, coordinating the creation of multiple services.`,
+	Short:        "Create a services orchestration deployment",
+	Long:         `This command helps you create a services orchestration deployment, coordinating the creation of multiple services.`,
 	Example:      createExample,
 	RunE:         runCreate,
 	SilenceUsage: true,
 }
 
 func init() {
-	createCmd.Flags().String("dsl-file", "", "Yaml file containing DSL for service orchestration deployment")
+	createCmd.Flags().String("dsl-file", "", "Yaml file containing DSL for services orchestration deployment")
 
 	if err := createCmd.MarkFlagRequired("dsl-file"); err != nil {
 		return
@@ -61,7 +61,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	var spinner *ysmrr.Spinner
 	if output != "json" {
 		sm = ysmrr.NewSpinnerManager()
-		msg := "Creating service orchestration..."
+		msg := "Creating services orchestration..."
 		spinner = sm.AddSpinner(msg)
 		sm.Start()
 	}
@@ -84,12 +84,12 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	if orchestration.Id == nil {
-		err = errors.New("failed to create service orchestration")
+		err = errors.New("failed to create services orchestration")
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	utils.HandleSpinnerSuccess(spinner, sm, "Successfully created service orchestration")
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully created services orchestration")
 
 	// Search for the orchestration
 	searchRes, err := dataaccess.DescribeServicesOrchestration(

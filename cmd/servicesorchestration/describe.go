@@ -1,4 +1,4 @@
-package serviceorchestration
+package servicesorchestration
 
 import (
 	"errors"
@@ -13,14 +13,14 @@ import (
 )
 
 const (
-	describeExample = `# Describe an service orchestration deployment
-omctl service-orchestration describe so-abcd1234`
+	describeExample = `# Describe an services orchestration deployment
+omctl services-orchestration describe so-abcd1234`
 )
 
 var describeCmd = &cobra.Command{
 	Use:          "describe [so-id]",
-	Short:        "Describe an service orchestration deployment",
-	Long:         `This command helps you describe a service orchestration deployment.`,
+	Short:        "Describe an services orchestration deployment",
+	Long:         `This command helps you describe a services orchestration deployment.`,
 	Example:      describeExample,
 	RunE:         runDescribe,
 	SilenceUsage: true,
@@ -68,7 +68,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 		sm.Start()
 	}
 
-	// Describe service orchestration
+	// Describe services orchestration
 	serviceOrchestration, err := dataaccess.DescribeServicesOrchestration(
 		cmd.Context(),
 		token,
@@ -79,7 +79,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	utils.HandleSpinnerSuccess(spinner, sm, "Successfully described service orchestration deployment")
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully described services orchestration deployment")
 	// Print output
 	err = utils.PrintTextTableJsonOutput(output, serviceOrchestration)
 	if err != nil {

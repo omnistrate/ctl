@@ -1,4 +1,4 @@
-package serviceorchestration
+package servicesorchestration
 
 import (
 	"slices"
@@ -17,21 +17,21 @@ import (
 )
 
 const (
-	deleteExample = `# Delete an service orchestration deployment
-omctl service-orchestration delete so-abcd1234`
+	deleteExample = `# Delete an services orchestration deployment
+omctl services-orchestration delete so-abcd1234`
 )
 
 var deleteCmd = &cobra.Command{
-	Use:          "delete [service-orchestration-id] [flags]",
-	Short:        "Delete a service orchestration deployment",
-	Long:         `This command helps you delete a service orchestration deployment from your account.`,
+	Use:          "delete [services-orchestration-id] [flags]",
+	Short:        "Delete a services orchestration deployment",
+	Long:         `This command helps you delete a services orchestration deployment from your account.`,
 	Example:      deleteExample,
 	RunE:         runDelete,
 	SilenceUsage: true,
 }
 
 func init() {
-	deleteCmd.Flags().BoolP("yes", "y", false, "Pre-approve the deletion of the service orchestration deployment without prompting for confirmation")
+	deleteCmd.Flags().BoolP("yes", "y", false, "Pre-approve the deletion of the services orchestration deployment without prompting for confirmation")
 	deleteCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 }
 
@@ -54,7 +54,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 
 	// Confirm deletion
 	if !yes {
-		ok, err := prompt.New().Ask("Are you sure you want to delete this service orchestration deployment? (y/n)").
+		ok, err := prompt.New().Ask("Are you sure you want to delete this services orchestration deployment? (y/n)").
 			Input("", input.WithValidateFunc(
 				func(input string) error {
 					if slices.Contains([]string{"y", "yes", "n", "no"}, strings.ToLower(input)) {
@@ -83,7 +83,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 		sm.Start()
 	}
 
-	// Check if service orchestration exists
+	// Check if services orchestration exists
 	_, err = dataaccess.DescribeServicesOrchestration(
 		cmd.Context(),
 		token,
@@ -94,14 +94,14 @@ func runDelete(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Delete the service orchestration
+	// Delete the services orchestration
 	err = dataaccess.DeleteServicesOrchestration(cmd.Context(), token, soID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	utils.HandleSpinnerSuccess(spinner, sm, "Successfully deleted service orchestration deployment")
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully deleted services orchestration deployment")
 
 	return nil
 }

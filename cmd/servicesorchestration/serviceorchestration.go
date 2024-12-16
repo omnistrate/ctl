@@ -1,12 +1,12 @@
-package serviceorchestration
+package servicesorchestration
 
 import (
 	"github.com/spf13/cobra"
 )
 
 var Cmd = &cobra.Command{
-	Use:          "service-orchestration [operation] [flags]",
-	Short:        "Manage Service Orchestration Deployments across services",
+	Use:          "services-orchestration [operation] [flags]",
+	Short:        "Manage Services Orchestration Deployments across services",
 	Long:         `This command helps you manage orchestration of deployment across multiple services.`,
 	Run:          run,
 	SilenceUsage: true,

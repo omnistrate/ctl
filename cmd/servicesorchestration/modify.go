@@ -1,4 +1,4 @@
-package serviceorchestration
+package servicesorchestration
 
 import (
 	"github.com/chelnak/ysmrr"
@@ -10,14 +10,14 @@ import (
 )
 
 const (
-	modifyExample = `# Modify a service orchestration deployment from a DSL file
-omctl service-orchestration modify so-abcd1234 --dsl-file /path/to/dsl.yaml`
+	modifyExample = `# Modify a services orchestration deployment from a DSL file
+omctl services-orchestration modify so-abcd1234 --dsl-file /path/to/dsl.yaml`
 )
 
 var modifyCmd = &cobra.Command{
 	Use:          "modify [so-id] -dsl-file=[file-path]",
-	Short:        "Modify a service orchestration deployment",
-	Long:         `This command helps you modify a service orchestration deployment, coordinating the modification of multiple services.`,
+	Short:        "Modify a services orchestration deployment",
+	Long:         `This command helps you modify a services orchestration deployment, coordinating the modification of multiple services.`,
 	Example:      modifyExample,
 	RunE:         runModify,
 	SilenceUsage: true,
@@ -26,7 +26,7 @@ var modifyCmd = &cobra.Command{
 func init() {
 	describeCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 
-	modifyCmd.Flags().String("dsl-file", "", "Yaml file containing DSL for service orchestration deployment")
+	modifyCmd.Flags().String("dsl-file", "", "Yaml file containing DSL for services orchestration deployment")
 
 	if err := modifyCmd.MarkFlagRequired("dsl-file"); err != nil {
 		return
@@ -63,7 +63,7 @@ func runModify(cmd *cobra.Command, args []string) error {
 	var spinner *ysmrr.Spinner
 	if output != "json" {
 		sm = ysmrr.NewSpinnerManager()
-		msg := "Modifying service orchestration..."
+		msg := "Modifying services orchestration..."
 		spinner = sm.AddSpinner(msg)
 		sm.Start()
 	}
@@ -86,7 +86,7 @@ func runModify(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	utils.HandleSpinnerSuccess(spinner, sm, "Successfully modified service orchestration")
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully modified services orchestration")
 
 	// Search for the orchestration
 	searchRes, err := dataaccess.DescribeServicesOrchestration(

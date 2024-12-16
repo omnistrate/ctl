@@ -45,7 +45,7 @@ omnistrate-ctl [flags]
 - [omnistrate-ctl login](omnistrate-ctl_login.md) - Log in to the Omnistrate platform
 - [omnistrate-ctl logout](omnistrate-ctl_logout.md) - Logout
 - [omnistrate-ctl service](omnistrate-ctl_service.md) - Manage Services for your account
-- [omnistrate-ctl service-orchestration](omnistrate-ctl_service-orchestration.md) - Manage Service Orchestration Deployments across services
 - [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md) - Manage Service Plans for your service
+- [omnistrate-ctl services-orchestration](omnistrate-ctl_services-orchestration.md) - Manage Services Orchestration Deployments across services
 - [omnistrate-ctl subscription](omnistrate-ctl_subscription.md) - Manage Customer Subscriptions for your service
 - [omnistrate-ctl upgrade](omnistrate-ctl_upgrade.md) - Upgrade Instance Deployments to a newer or older version
