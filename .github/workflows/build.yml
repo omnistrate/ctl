@@ -216,7 +216,7 @@ jobs:
             "serviceplan/...",
             "upgrade/...",
             "customnetwork/...",
-            "serviceorchestration/...",
+            "servicesorchestration/...",
           ]
 
     steps:

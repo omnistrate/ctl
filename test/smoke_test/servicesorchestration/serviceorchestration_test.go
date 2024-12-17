@@ -1,4 +1,4 @@
-package serviceorchestration
+package servicesorchestration
 
 import (
 	"context"
@@ -24,18 +24,18 @@ func TestInstanceBasic(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
-	// PASS: list service orchestrations with default
-	cmd.RootCmd.SetArgs([]string{"service-orchestration", "list"})
+	// PASS: list services orchestrations with default
+	cmd.RootCmd.SetArgs([]string{"services-orchestration", "list"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
-	// PASS: list service orchestrations with environment type lowercase
-	cmd.RootCmd.SetArgs([]string{"service-orchestration", "list", "--environment-type=dev"})
+	// PASS: list services orchestrations with environment type lowercase
+	cmd.RootCmd.SetArgs([]string{"services-orchestration", "list", "--environment-type=dev"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 
-	// PASS: list service orchestrations with environment type uppercase
-	cmd.RootCmd.SetArgs([]string{"service-orchestration", "list", "--environment-type=DEV"})
+	// PASS: list services orchestrations with environment type uppercase
+	cmd.RootCmd.SetArgs([]string{"services-orchestration", "list", "--environment-type=DEV"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(t, err)
 }

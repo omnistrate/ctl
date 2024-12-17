@@ -1,4 +1,4 @@
-package serviceorchestration
+package servicesorchestration
 
 import (
 	"github.com/chelnak/ysmrr"
@@ -10,15 +10,15 @@ import (
 )
 
 const (
-	listExample = `# List service orchestration deployments of the service postgres in the prod and dev environments
-omctl service-orchestration list --environment-type=prod`
+	listExample = `# List services orchestration deployments of the service postgres in the prod and dev environments
+omctl services-orchestration list --environment-type=prod`
 	defaultMaxNameLength = 30 // Maximum length of the name column in the table
 )
 
 var listCmd = &cobra.Command{
 	Use:          "list [flags]",
-	Short:        "List service orchestration deployments",
-	Long:         `This command helps you list service orchestration deployments.`,
+	Short:        "List services orchestration deployments",
+	Long:         `This command helps you list services orchestration deployments.`,
 	Example:      listExample,
 	RunE:         runList,
 	SilenceUsage: true,
@@ -56,7 +56,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	var spinner *ysmrr.Spinner
 	if output != common.OutputTypeJson {
 		sm = ysmrr.NewSpinnerManager()
-		spinner = sm.AddSpinner("Listing service orchestration deployments...")
+		spinner = sm.AddSpinner("Listing services orchestration deployments...")
 		sm.Start()
 	}
 
@@ -68,7 +68,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(searchRes) == 0 {
-		utils.HandleSpinnerSuccess(spinner, sm, "No service orchestration deployments found.")
+		utils.HandleSpinnerSuccess(spinner, sm, "No services orchestration deployments found.")
 	}
 
 	// Print output

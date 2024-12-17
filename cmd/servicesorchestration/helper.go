@@ -1,4 +1,4 @@
-package serviceorchestration
+package servicesorchestration
 
 import (
 	"encoding/base64"
