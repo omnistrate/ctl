@@ -16,14 +16,14 @@ services:
           gitConfiguration:
             reference: refs/tags/v3.7.1
             repositoryUrl: https://github.com/omnistrate/resource-spec-samples.git
-            accessToken: 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
+            accessToken: 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
           terraformExecutionIdentity: "arn:aws:iam::339713121445:role/omnistrate-custom-terraform-execution-role"
         gcp:
           terraformPath: /e2etestv2/original/terraform
           gitConfiguration:
             reference: refs/tags/v3.7.1
             repositoryUrl: https://github.com/omnistrate/resource-spec-samples.git
-            accessToken: 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
+            accessToken: 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
           terraformExecutionIdentity: "fill in service account"
   - name: terraformChild2
     internal: true
@@ -34,14 +34,14 @@ services:
           gitConfiguration:
             reference: refs/tags/v3.7.1
             repositoryUrl: https://github.com/omnistrate/resource-spec-samples.git
-            accessToken: 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
+            accessToken: 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
           terraformExecutionIdentity: "arn:aws:iam::339713121445:role/omnistrate-custom-terraform-execution-role"
         gcp:
           terraformPath: /e2etestv2/original/terraform2
           gitConfiguration:
             reference: refs/tags/v3.7.1
             repositoryUrl: https://github.com/omnistrate/resource-spec-samples.git
-            accessToken: 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
+            accessToken: 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
           terraformExecutionIdentity: "fill in service account"
   - name: kustomizeRoot
     type: kustomize
@@ -62,7 +62,7 @@ services:
       gitConfiguration:
         reference: refs/tags/v3.7.1
         repositoryUrl: https://github.com/omnistrate/resource-spec-samples.git
-        accessToken: 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
+        accessToken: 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
     apiParameters:
       - key: username
         description: Username
