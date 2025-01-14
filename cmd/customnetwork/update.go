@@ -26,10 +26,10 @@ var updateCmd = &cobra.Command{
 }
 
 func init() {
-	describeCmd.Flags().StringP(CustomNetworkIDFlag, "", "", "ID of the custom network")
-	describeCmd.Flags().StringP(NameFlag, "", "", "New name of the custom network")
+	updateCmd.Flags().StringP(CustomNetworkIDFlag, "", "", "ID of the custom network")
+	updateCmd.Flags().StringP(NameFlag, "", "", "New name of the custom network")
 
-	err := describeCmd.MarkFlagRequired(CustomNetworkIDFlag)
+	err := updateCmd.MarkFlagRequired(CustomNetworkIDFlag)
 	if err != nil {
 		return
 	}
