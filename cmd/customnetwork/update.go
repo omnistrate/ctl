@@ -12,21 +12,22 @@ import (
 )
 
 const (
-	describeExample = `# Describe a custom network by ID
-omctl custom-network describe --custom-network-id [custom-network-id]`
+	updateExample = `# Update a custom network by ID
+omctl custom-network update --custom-network-id [custom-network-id] --name [new-custom-network-name]`
 )
 
-var describeCmd = &cobra.Command{
+var updateCmd = &cobra.Command{
 	Use:          "describe [flags]",
-	Short:        "Describe a custom network",
-	Long:         `This command helps you describe an existing custom network.`,
-	Example:      describeExample,
-	RunE:         runDescribe,
+	Short:        "Update a custom network",
+	Long:         `This command helps you update an existing custom network.`,
+	Example:      updateExample,
+	RunE:         runUpdate,
 	SilenceUsage: true,
 }
 
 func init() {
 	describeCmd.Flags().StringP(CustomNetworkIDFlag, "", "", "ID of the custom network")
+	describeCmd.Flags().StringP(NameFlag, "", "", "New name of the custom network")
 
 	err := describeCmd.MarkFlagRequired(CustomNetworkIDFlag)
 	if err != nil {
@@ -34,15 +35,16 @@ func init() {
 	}
 }
 
-func runDescribe(cmd *cobra.Command, args []string) (err error) {
+func runUpdate(cmd *cobra.Command, args []string) (err error) {
 	defer config.CleanupArgsAndFlags(cmd, &args)
 
 	// Retrieve flags
 	output, _ := cmd.Flags().GetString(common.OutputFlag)
 	customNetworkId, _ := cmd.Flags().GetString(CustomNetworkIDFlag)
+	nameFlag, _ := cmd.Flags().GetString(NameFlag)
 
 	// Validate input arguments
-	if err = validateDescribeArguments(customNetworkId); err != nil {
+	if err = validateUpdateArguments(customNetworkId); err != nil {
 		utils.PrintError(err)
 		return
 	}
@@ -59,19 +61,25 @@ func runDescribe(cmd *cobra.Command, args []string) (err error) {
 	var spinner *ysmrr.Spinner
 	if output != common.OutputTypeJson {
 		sm = ysmrr.NewSpinnerManager()
-		spinner = sm.AddSpinner(fmt.Sprintf("Describing custom network %s...", customNetworkId))
+		spinner = sm.AddSpinner(fmt.Sprintf("Updating custom network %s...", customNetworkId))
 		sm.Start()
 	}
 
-	// Describe
+	// Gather parameters
+	var updatedName *string
+	if len(nameFlag) > 0 {
+		updatedName = utils.ToPtr(nameFlag)
+	}
+
+	// Update
 	var customNetwork *openapiclientfleet.FleetCustomNetwork
-	customNetwork, err = dataaccess.FleetDescribeCustomNetwork(cmd.Context(), token, customNetworkId)
+	customNetwork, err = dataaccess.FleetUpdateCustomNetwork(cmd.Context(), token, customNetworkId, updatedName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	utils.HandleSpinnerSuccess(spinner, sm, fmt.Sprintf("Successfully described custom network %s", customNetwork.Id))
+	utils.HandleSpinnerSuccess(spinner, sm, fmt.Sprintf("Successfully updated custom network %s", customNetwork.Id))
 
 	// Format and print the custom network details
 	formattedCustomNetwork := formatCustomNetwork(customNetwork)
@@ -85,7 +93,7 @@ func runDescribe(cmd *cobra.Command, args []string) (err error) {
 	return
 }
 
-func validateDescribeArguments(idFlag string) error {
+func validateUpdateArguments(idFlag string) error {
 	if len(idFlag) == 0 {
 		return fmt.Errorf("invalid arguments: network ID is required")
 	}

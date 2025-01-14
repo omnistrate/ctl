@@ -40,6 +40,11 @@ func Test_custom_network_lifecycle(t *testing.T) {
 	customNetworkID := customnetwork.CustomNetworkID
 	require.NotEmpty(customNetworkID)
 
+	// PASS: update custom network name
+	cmd.RootCmd.SetArgs([]string{"custom-network", "update", "--custom-network-id", customNetworkID, "--name", "ctl-test-network updated"})
+	err = cmd.RootCmd.Execute()
+	require.NoError(err)
+
 	// PASS: describe custom network
 	cmd.RootCmd.SetArgs([]string{"custom-network", "describe", "--custom-network-id", customNetworkID})
 	err = cmd.RootCmd.Execute()
@@ -57,7 +62,7 @@ func Test_custom_network_lifecycle(t *testing.T) {
 	require.NotNil(customNetwork)
 	require.Equal(customNetworkID, customNetwork.Id)
 	require.NotNil(customNetwork.Name)
-	require.Equal("ctl-test-network", *customNetwork.Name)
+	require.Equal("ctl-test-network updated", *customNetwork.Name)
 	require.Equal("10.99.0.0/16", customNetwork.Cidr)
 	require.Equal("aws", customNetwork.CloudProviderName)
 	require.Equal("ap-south-1", customNetwork.CloudProviderRegion)

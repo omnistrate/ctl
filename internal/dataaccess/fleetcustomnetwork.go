@@ -29,6 +29,34 @@ func FleetDescribeCustomNetwork(
 	return
 }
 
+func FleetUpdateCustomNetwork(
+	ctx context.Context, token string, id string, updatedName *string) (
+	customNetwork *openapiclientfleet.FleetCustomNetwork, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
+
+	updates := openapiclientfleet.CreateCustomerOnboardingRequestBody{
+		Name: updatedName,
+	}
+
+	req := apiClient.FleetCustomNetworkApiAPI.FleetCustomNetworkApiUpdateCustomNetwork(ctxWithToken, id)
+	req.CreateCustomerOnboardingRequestBody(updates)
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	customNetwork, r, err = req.Execute()
+	if err != nil {
+		return nil, handleFleetError(err)
+	}
+
+	return
+}
+
 func FleetListCustomNetworks(
 	ctx context.Context, token string, cloudProviderName *string, cloudProviderRegion *string) (
 	customNetworks *openapiclientfleet.FleetListCustomNetworksResult, err error) {

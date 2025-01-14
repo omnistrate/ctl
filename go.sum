@@ -94,8 +94,8 @@ github.com/muesli/cancelreader v0.2.2 h1:3I4Kt4BQjOR54NavqnDogx/MIoWBFa0StPA8ELU
 github.com/muesli/cancelreader v0.2.2/go.mod h1:3XuTXfFS2VjM+HTLZY9Ak0l6eUKfijIfMUZ4EgX0QYo=
 github.com/muesli/termenv v0.15.2 h1:GohcuySI0QmI3wN8Ok9PtKGkgkFIk7y6Vpb5PvrY+Wo=
 github.com/muesli/termenv v0.15.2/go.mod h1:Epx+iuz8sNs7mNKhxzH4fWXGNpZwUaJKRS1noLXviQ8=
-github.com/omnistrate-oss/omnistrate-sdk-go v0.0.29 h1:M4fmwCkdAOnsEBS9iAH/+3k1ZTBU/D1jLg98hRxUmBk=
-github.com/omnistrate-oss/omnistrate-sdk-go v0.0.29/go.mod h1:tDZC+n915VJTaSepBd2tGV7mBepAlBrE5kdxsSveh5E=
+github.com/omnistrate-oss/omnistrate-sdk-go v0.0.31 h1:RYrZfCnHKr9wEiA96cW7+1YbORCZHl7J9Vus6Es3yxo=
+github.com/omnistrate-oss/omnistrate-sdk-go v0.0.31/go.mod h1:tDZC+n915VJTaSepBd2tGV7mBepAlBrE5kdxsSveh5E=
 github.com/omnistrate/api-design v0.7.97 h1:0iN2mDrbHfn1J9BWi8YHDTMLR2vWdgu0+sonDwZso0U=
 github.com/omnistrate/api-design v0.7.97/go.mod h1:R3fdBdGqssnTo6HT6UMwrqczj3n6R4+eKSP3+pYZwXs=
 github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20241129225318-d5403022c6d7 h1:SHrvIX6HQpvd/L82IMRfssqys4UMrZdrj5aeFPpVSnU=

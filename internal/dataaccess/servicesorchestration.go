@@ -138,7 +138,7 @@ func ModifyServicesOrchestration(
 		}
 	}()
 
-	_, r, err = req.Execute()
+	r, err = req.Execute()
 	if err != nil {
 		return handleFleetError(err)
 	}
