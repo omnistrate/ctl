@@ -17,7 +17,7 @@ omctl custom-network update --custom-network-id [custom-network-id] --name [new-
 )
 
 var updateCmd = &cobra.Command{
-	Use:          "describe [flags]",
+	Use:          "update [flags]",
 	Short:        "Update a custom network",
 	Long:         `This command helps you update an existing custom network.`,
 	Example:      updateExample,
