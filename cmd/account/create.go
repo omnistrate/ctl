@@ -76,7 +76,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Prepare request
-	request := openapiclient.CreateAccountConfigRequestBody{
+	request := openapiclient.CreateAccountConfigRequest2{
 		Name: name,
 	}
 

@@ -36,7 +36,7 @@ func SaveHelmChart(
 
 	r, err := apiClient.HelmPackageApiAPI.
 		HelmPackageApiSaveHelmPackage(ctxWithToken).
-		SaveHelmPackageRequestBody(openapiclient.SaveHelmPackageRequestBody{
+		SaveHelmPackageRequest2(openapiclient.SaveHelmPackageRequest2{
 			HelmPackage: helmPackage,
 		}).Execute()
 

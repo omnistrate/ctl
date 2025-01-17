@@ -31,12 +31,12 @@ func CheckIfContainerImageAccessible(ctx context.Context, token string, imageReg
 	return
 }
 
-func GenerateComposeSpecFromContainerImage(ctx context.Context, token string, request openapiclient.GenerateComposeSpecFromContainerImageRequestBody) (res *openapiclient.GenerateComposeSpecFromContainerImageResult, err error) {
+func GenerateComposeSpecFromContainerImage(ctx context.Context, token string, request openapiclient.GenerateComposeSpecFromContainerImageRequest2) (res *openapiclient.GenerateComposeSpecFromContainerImageResult, err error) {
 	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
 
 	apiClient := getV1Client()
 	var r *http.Response
-	res, r, err = apiClient.ComposeGenApiAPI.ComposeGenApiGenerateComposeSpecFromContainerImage(ctxWithToken).GenerateComposeSpecFromContainerImageRequestBody(request).Execute()
+	res, r, err = apiClient.ComposeGenApiAPI.ComposeGenApiGenerateComposeSpecFromContainerImage(ctxWithToken).GenerateComposeSpecFromContainerImageRequest2(request).Execute()
 	if err != nil {
 		return nil, handleV1Error(err)
 	}

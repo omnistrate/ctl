@@ -35,12 +35,11 @@ func FleetUpdateCustomNetwork(
 	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
 	apiClient := getFleetClient()
 
-	updates := openapiclientfleet.CreateCustomerOnboardingRequestBody{
+	updates := openapiclientfleet.FleetUpdateCustomNetworkRequest2{
 		Name: updatedName,
 	}
-
 	req := apiClient.FleetCustomNetworkApiAPI.FleetCustomNetworkApiUpdateCustomNetwork(ctxWithToken, id)
-	req.CreateCustomerOnboardingRequestBody(updates)
+	req.FleetUpdateCustomNetworkRequest2(updates)
 
 	var r *http.Response
 	defer func() {
@@ -95,13 +94,13 @@ func FleetCreateCustomNetwork(
 	apiClient := getFleetClient()
 
 	req := apiClient.FleetCustomNetworkApiAPI.FleetCustomNetworkApiCreateCustomNetwork(ctxWithToken)
-	reqNetwork := openapiclientfleet.CreateCustomNetworkRequestBody{
+	reqNetwork := openapiclientfleet.FleetCreateCustomNetworkRequest2{
 		Cidr:                cidr,
 		CloudProviderName:   cloudProviderName,
 		CloudProviderRegion: cloudProviderRegion,
 		Name:                name,
 	}
-	req = req.CreateCustomNetworkRequestBody(reqNetwork)
+	req = req.FleetCreateCustomNetworkRequest2(reqNetwork)
 
 	var r *http.Response
 	defer func() {

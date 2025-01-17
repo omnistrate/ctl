@@ -302,7 +302,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		}
 
 		// Generate compose spec from image
-		generateComposeSpecRequest := openapiclient.GenerateComposeSpecFromContainerImageRequestBody{
+		generateComposeSpecRequest := openapiclient.GenerateComposeSpecFromContainerImageRequest2{
 			ImageRegistry:        imageRegistry,
 			Image:                image,
 			EnvironmentVariables: formattedEnvVars,

@@ -63,13 +63,13 @@ func DeleteAccount(ctx context.Context, token, accountConfigID string) error {
 	return nil
 }
 
-func CreateAccount(ctx context.Context, token string, accountConfig openapiclient.CreateAccountConfigRequestBody) (string, error) {
+func CreateAccount(ctx context.Context, token string, accountConfig openapiclient.CreateAccountConfigRequest2) (string, error) {
 	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
 
 	apiClient := getV1Client()
 	res, r, err := apiClient.AccountConfigApiAPI.AccountConfigApiCreateAccountConfig(
 		ctxWithToken,
-	).CreateAccountConfigRequestBody(accountConfig).Execute()
+	).CreateAccountConfigRequest2(accountConfig).Execute()
 
 	err = handleV1Error(err)
 	if err != nil {

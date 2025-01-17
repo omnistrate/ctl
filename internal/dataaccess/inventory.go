@@ -9,12 +9,14 @@ import (
 func SearchInventory(ctx context.Context, token, query string) (*openapiclientfleet.SearchInventoryResult, error) {
 	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
 
-	req := *openapiclientfleet.NewSearchServiceInventoryRequestBody(query)
+	req := openapiclientfleet.SearchInventoryRequest2{
+		Query: query,
+	}
 
 	apiClient := getFleetClient()
 	res, r, err := apiClient.InventoryApiAPI.
 		InventoryApiSearchInventory(ctxWithToken).
-		SearchServiceInventoryRequestBody(req).
+		SearchInventoryRequest2(req).
 		Execute()
 
 	err = handleFleetError(err)

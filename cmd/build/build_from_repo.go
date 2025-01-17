@@ -627,7 +627,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 			}
 
 			// Generate compose spec from image
-			generateComposeSpecRequest := openapiclient.GenerateComposeSpecFromContainerImageRequestBody{
+			generateComposeSpecRequest := openapiclient.GenerateComposeSpecFromContainerImageRequest2{
 				ImageRegistry:        "ghcr.io",
 				Image:                strings.TrimPrefix(versionTaggedImageUrls[defaultServiceName], "ghcr.io/"),
 				Username:             utils.ToPtr(ghUsername),
