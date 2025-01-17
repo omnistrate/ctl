@@ -38,8 +38,9 @@ func FleetUpdateCustomNetwork(
 	updates := openapiclientfleet.FleetUpdateCustomNetworkRequest2{
 		Name: updatedName,
 	}
-	req := apiClient.FleetCustomNetworkApiAPI.FleetCustomNetworkApiUpdateCustomNetwork(ctxWithToken, id)
-	req.FleetUpdateCustomNetworkRequest2(updates)
+
+	req := apiClient.FleetCustomNetworkApiAPI.FleetCustomNetworkApiUpdateCustomNetwork(ctxWithToken, id).
+		FleetUpdateCustomNetworkRequest2(updates)
 
 	var r *http.Response
 	defer func() {
