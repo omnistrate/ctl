@@ -15,3 +15,4 @@ Omnistrate CTL support configuration using environment variables
 | `OMNISTRATE_LOG_FORMAT_LEVEL` | Determines the format of log output (e.g., json, pretty).                                       |
 | `OMNISTRATE_ROOT_DOMAIN`      | The root domain for the Omnistrate platform.                                                    |
 | `OMNISTRATE_HOST_SCHEME`      | The protocol scheme to use for the host (e.g., HTTP, HTTPS).                                    |
+
