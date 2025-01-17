@@ -31,17 +31,15 @@ func Test_account_basic(t *testing.T) {
 	awsAccountName := "aws" + uuid.NewString()
 	gcpAccountName := "gcp" + uuid.NewString()
 
-	// FAIL: create aws account
-	cmd.RootCmd.SetArgs([]string{"account", "create", awsAccountName, "--aws-account-id", "123456789012"})
+	// PASS: create aws account
+	cmd.RootCmd.SetArgs([]string{"account", "create", awsAccountName, "--aws-account-id", "4353256597"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
-	require.Error(err)
-	require.Contains(err.Error(), "unauthorized: only root users can onboard accounts")
+	require.NoError(err)
 
-	// FAIL: create gcp account
+	// PASS: create gcp account
 	cmd.RootCmd.SetArgs([]string{"account", "create", gcpAccountName, "--gcp-project-id", "project-id", "--gcp-project-number", "project-number"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
-	require.Error(err)
-	require.Contains(err.Error(), "unauthorized: only root users can onboard accounts")
+	require.NoError(err)
 
 	// PASS: list accounts
 	cmd.RootCmd.SetArgs([]string{"account", "list"})
@@ -56,22 +54,18 @@ func Test_account_basic(t *testing.T) {
 	// PASS: describe account
 	cmd.RootCmd.SetArgs([]string{"account", "describe", awsAccountName})
 	err = cmd.RootCmd.ExecuteContext(ctx)
-	require.Error(err)
-	require.Contains(err.Error(), "account not found")
+	require.NoError(err)
 
 	cmd.RootCmd.SetArgs([]string{"account", "describe", gcpAccountName})
 	err = cmd.RootCmd.ExecuteContext(ctx)
-	require.Error(err)
-	require.Contains(err.Error(), "account not found")
+	require.NoError(err)
 
-	// FAIL: delete account
+	// PASS: delete account
 	cmd.RootCmd.SetArgs([]string{"account", "delete", awsAccountName})
 	err = cmd.RootCmd.ExecuteContext(ctx)
-	require.Error(err)
-	require.Contains(err.Error(), "account not found")
+	require.NoError(err)
 
 	cmd.RootCmd.SetArgs([]string{"account", "delete", gcpAccountName})
 	err = cmd.RootCmd.ExecuteContext(ctx)
-	require.Error(err)
-	require.Contains(err.Error(), "account not found")
+	require.NoError(err)
 }
