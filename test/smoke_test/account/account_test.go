@@ -30,7 +30,7 @@ func Test_account_basic(t *testing.T) {
 
 	awsAccountName := "aws" + uuid.NewString()
 	gcpAccountName := "gcp" + uuid.NewString()
-	awsAccountNumber := "903112026573" // Use acc # that is not onboarded yes, otherwise
+	awsAccountNumber := "903112026573" // Use acc # that is not onboarded yet, otherwise it will fail with different error
 
 	// FAIL: create aws account
 	cmd.RootCmd.SetArgs([]string{"account", "create", awsAccountName, "--aws-account-id", awsAccountNumber})
