@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/omnistrate/ctl/internal/config"
+	"strings"
 
 	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/utils"
@@ -77,7 +78,7 @@ func CreateAccount(ctx context.Context, token string, accountConfig openapiclien
 	}
 
 	r.Body.Close()
-	return res, nil
+	return strings.Trim(res, "\"\n"), nil
 }
 
 const (
