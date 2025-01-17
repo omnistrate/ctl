@@ -30,9 +30,10 @@ func Test_account_basic(t *testing.T) {
 
 	awsAccountName := "aws" + uuid.NewString()
 	gcpAccountName := "gcp" + uuid.NewString()
+	awsAccountNumber := "903112026573" // Use acc # that is not onboarded yes, otherwise
 
 	// FAIL: create aws account
-	cmd.RootCmd.SetArgs([]string{"account", "create", awsAccountName, "--aws-account-id", "123456789012"})
+	cmd.RootCmd.SetArgs([]string{"account", "create", awsAccountName, "--aws-account-id", awsAccountNumber})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.Error(err)
 	require.Contains(err.Error(), "unauthorized: only root users can onboard accounts")
