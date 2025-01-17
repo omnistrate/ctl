@@ -8,11 +8,11 @@ import (
 )
 
 func LoginWithPassword(ctx context.Context, email string, pass string) (string, error) {
-	request := *openapiclient.NewSigninRequestBody(email)
+	request := *openapiclient.NewSigninRequest(email)
 	request.Password = utils.ToPtr(pass)
 
 	apiClient := getV1Client()
-	resp, r, err := apiClient.SigninApiAPI.SigninApiSignin(ctx).SigninRequestBody(request).Execute()
+	resp, r, err := apiClient.SigninApiAPI.SigninApiSignin(ctx).SigninRequest(request).Execute()
 
 	err = handleV1Error(err)
 	if err != nil {
@@ -24,11 +24,11 @@ func LoginWithPassword(ctx context.Context, email string, pass string) (string, 
 }
 
 func LoginWithIdentityProvider(ctx context.Context, deviceCode, identityProviderName string) (string, error) {
-	request := *openapiclient.NewLoginWithIdentityProviderRequestBody(identityProviderName)
+	request := *openapiclient.NewLoginWithIdentityProviderRequest(identityProviderName)
 	request.DeviceCode = utils.ToPtr(deviceCode)
 
 	apiClient := getV1Client()
-	resp, r, err := apiClient.SigninApiAPI.SigninApiLoginWithIdentityProvider(ctx).LoginWithIdentityProviderRequestBody(request).Execute()
+	resp, r, err := apiClient.SigninApiAPI.SigninApiLoginWithIdentityProvider(ctx).LoginWithIdentityProviderRequest(request).Execute()
 
 	err = handleV1Error(err)
 	if err != nil {

@@ -133,7 +133,7 @@ func formatServicePlanDetails(ctx context.Context, token, serviceName, planName,
 
 	// Get resource details
 	var resources []model.Resource
-	for resourceID := range *productTier.ApiGroups {
+	for resourceID := range productTier.ApiGroups {
 		// Get resource details
 		desRes, err := dataaccess.DescribeResource(ctx, token, productTier.ServiceId, resourceID, nil, nil)
 		if err != nil {

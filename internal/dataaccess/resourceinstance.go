@@ -9,7 +9,7 @@ import (
 
 func CreateResourceInstance(ctx context.Context, token string,
 	serviceProviderId string, serviceKey string, serviceAPIVersion string, serviceEnvironmentKey string, serviceModelKey string, productTierKey string, resourceKey string,
-	request openapiclientfleet.CreateResourceInstanceRequestBody) (res *openapiclientfleet.CreateResourceInstanceResponseBody, err error) {
+	request openapiclientfleet.FleetCreateResourceInstanceRequest2) (res *openapiclientfleet.CreateResourceInstanceResponseBody, err error) {
 	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
 	apiClient := getFleetClient()
 
@@ -22,7 +22,7 @@ func CreateResourceInstance(ctx context.Context, token string,
 		serviceModelKey,
 		productTierKey,
 		resourceKey,
-	).CreateResourceInstanceRequestBody(request)
+	).FleetCreateResourceInstanceRequest2(request)
 
 	var r *http.Response
 	defer func() {
@@ -47,7 +47,7 @@ func DeleteResourceInstance(ctx context.Context, token, serviceID, environmentID
 		serviceID,
 		environmentID,
 		instanceID,
-	).StartResourceInstanceRequestBody(openapiclientfleet.StartResourceInstanceRequestBody{
+	).FleetDeleteResourceInstanceRequest2(openapiclientfleet.FleetDeleteResourceInstanceRequest2{
 		ResourceId: resourceID,
 	})
 
@@ -99,7 +99,7 @@ func RestartResourceInstance(ctx context.Context, token string, serviceID, envir
 		serviceID,
 		environmentID,
 		instanceID,
-	).StartResourceInstanceRequestBody(openapiclientfleet.StartResourceInstanceRequestBody{
+	).FleetRestartResourceInstanceRequest2(openapiclientfleet.FleetRestartResourceInstanceRequest2{
 		ResourceId: resourceID,
 	})
 
@@ -126,7 +126,7 @@ func StartResourceInstance(ctx context.Context, token string, serviceID, environ
 		serviceID,
 		environmentID,
 		instanceID,
-	).StartResourceInstanceRequestBody(openapiclientfleet.StartResourceInstanceRequestBody{
+	).FleetStartResourceInstanceRequest2(openapiclientfleet.FleetStartResourceInstanceRequest2{
 		ResourceId: resourceID,
 	})
 
@@ -153,7 +153,7 @@ func StopResourceInstance(ctx context.Context, token string, serviceID, environm
 		serviceID,
 		environmentID,
 		instanceID,
-	).StartResourceInstanceRequestBody(openapiclientfleet.StartResourceInstanceRequestBody{
+	).FleetStopResourceInstanceRequest2(openapiclientfleet.FleetStopResourceInstanceRequest2{
 		ResourceId: resourceID,
 	})
 
@@ -182,7 +182,7 @@ func UpdateResourceInstance(ctx context.Context, token string,
 		serviceID,
 		environmentID,
 		instanceID,
-	).UpdateResourceInstanceRequestBody(openapiclientfleet.UpdateResourceInstanceRequestBody{
+	).FleetUpdateResourceInstanceRequest2(openapiclientfleet.FleetUpdateResourceInstanceRequest2{
 		ResourceId:    resourceId,
 		RequestParams: requestParameters,
 	})

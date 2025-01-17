@@ -212,7 +212,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	request := openapiclientfleet.CreateResourceInstanceRequestBody{
+	request := openapiclientfleet.FleetCreateResourceInstanceRequest2{
 		ProductTierVersion: &version,
 		CloudProvider:      &cloudProvider,
 		Region:             &region,

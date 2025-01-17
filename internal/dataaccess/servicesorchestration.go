@@ -19,13 +19,13 @@ func CreateServicesOrchestration(
 	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
 	apiClient := getFleetClient()
 
-	request := openapiclientfleet.CreateServicesOrchestrationRequestBody{
+	request := openapiclientfleet.FleetCreateServicesOrchestrationRequest2{
 		OrchestrationCreateDSL: orchestrationCreateDSL,
 	}
 
 	req := apiClient.InventoryApiAPI.InventoryApiCreateServicesOrchestration(
 		ctxWithToken,
-	).CreateServicesOrchestrationRequestBody(request)
+	).FleetCreateServicesOrchestrationRequest2(request)
 
 	var r *http.Response
 	defer func() {
@@ -122,14 +122,14 @@ func ModifyServicesOrchestration(
 	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
 	apiClient := getFleetClient()
 
-	request := openapiclientfleet.ModifyServicesOrchestrationRequestBody{
+	request := openapiclientfleet.FleetModifyServicesOrchestrationRequest2{
 		OrchestrationModifyDSL: orchestrationModifyDSL,
 	}
 
 	req := apiClient.InventoryApiAPI.InventoryApiModifyServicesOrchestration(
 		ctxWithToken,
 		id,
-	).ModifyServicesOrchestrationRequestBody(request)
+	).FleetModifyServicesOrchestrationRequest2(request)
 
 	var r *http.Response
 	defer func() {
@@ -138,7 +138,7 @@ func ModifyServicesOrchestration(
 		}
 	}()
 
-	_, r, err = req.Execute()
+	r, err = req.Execute()
 	if err != nil {
 		return handleFleetError(err)
 	}
