@@ -1,5 +1,0 @@
-{
-  "policies": {
-    "aws": "{\"Statement\":[{\"Action\": [\"*\"],\"Effect\": \"Allow\",\"Resource\": \"*\"}]}"
-  }
-}
