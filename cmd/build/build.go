@@ -577,13 +577,16 @@ func buildService(ctx context.Context, fileData []byte, token, name, specType st
 	switch specType {
 	case ServicePlanSpecType:
 		request := serviceapi.BuildServiceFromServicePlanSpecRequest{
-			Token:           token,
-			Name:            name,
-			Description:     description,
-			ServiceLogoURL:  serviceLogoURL,
-			Environment:     environment,
-			EnvironmentType: (*serviceapi.EnvironmentType)(environmentType),
-			FileContent:     base64.StdEncoding.EncodeToString(fileData),
+			Token:              token,
+			Name:               name,
+			Description:        description,
+			ServiceLogoURL:     serviceLogoURL,
+			Environment:        environment,
+			EnvironmentType:    (*serviceapi.EnvironmentType)(environmentType),
+			FileContent:        base64.StdEncoding.EncodeToString(fileData),
+			Release:            utils.ToPtr(release),
+			ReleaseAsPreferred: utils.ToPtr(releaseAsPreferred),
+			ReleaseVersionName: releaseName,
 		}
 
 		var buildRes *serviceapi.BuildServiceFromServicePlanSpecResult
