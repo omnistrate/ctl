@@ -2,16 +2,17 @@ package config
 
 import (
 	_ "embed"
+	"strings"
 	"time"
 
-	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
 
 const (
-	dryRunEnv            = "DRY_RUN"
-	debug                = "DEBUG"
+	dryRunEnv            = "OMNISTRATE_DRY_RUN"
+	logLevel             = "OMNISTRATE_LOG_LEVEL"
+	logFormat            = "OMNISTRATE_LOG_FORMAT_LEVEL"
 	omnistrateHost       = "OMNISTRATE_HOST"
 	omnistrateRootDomain = "OMNISTRATE_ROOT_DOMAIN"
 	omnistrateHostSchema = "OMNISTRATE_HOST_SCHEME"
@@ -31,21 +32,29 @@ func GetToken() (string, error) {
 
 // GetHost returns the host of the Omnistrate server
 func GetHost() string {
-	return utils.GetEnv(omnistrateHost, "api"+"."+GetRootDomain())
+	return GetEnv(omnistrateHost, "api"+"."+GetRootDomain())
 }
 
 // GetRootDomain returns the root domain of the Omnistrate server
 func GetRootDomain() string {
-	return utils.GetEnv(omnistrateRootDomain, defaultRootDomain)
+	return GetEnv(omnistrateRootDomain, defaultRootDomain)
 }
 
 // GetHostScheme returns the scheme of the Omnistrate server
 func GetHostScheme() string {
-	return utils.GetEnv(omnistrateHostSchema, "https")
+	return GetEnv(omnistrateHostSchema, "https")
 }
 
-func GetDebug() bool {
-	return utils.GetEnvAsBoolean("OMNISTRATE_DEBUG", "false")
+func GetLogLevel() string {
+	return GetEnv(logLevel, "info")
+}
+
+func IsDebugLogLevel() bool {
+	return strings.EqualFold(GetLogLevel(), "debug")
+}
+
+func GetLogFormat() string {
+	return GetEnv(logFormat, "pretty")
 }
 
 //go:embed public_key.pem
@@ -61,11 +70,11 @@ func IsProd() bool {
 }
 
 func IsDryRun() bool {
-	return utils.GetEnvAsBoolean(dryRunEnv, "false")
+	return GetEnvAsBoolean(dryRunEnv, "false")
 }
 
 func GetClientTimeout() time.Duration {
-	timeoutInSeconds := utils.GetEnvAsInteger(clientTimeout, "60")
+	timeoutInSeconds := GetEnvAsInteger(clientTimeout, "60")
 	return time.Duration(timeoutInSeconds) * time.Second
 }
 

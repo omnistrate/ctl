@@ -38,5 +38,4 @@ omctl account create [account-name] --gcp-project-id=[project-id] --gcp-project-
 
 ### SEE ALSO
 
-* [omnistrate-ctl account](omnistrate-ctl_account.md)	 - Manage your Cloud Provider Accounts
-
+- [omnistrate-ctl account](omnistrate-ctl_account.md) - Manage your Cloud Provider Accounts

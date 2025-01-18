@@ -2,6 +2,7 @@ package status
 
 import (
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/common"
 
 	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/cmd/upgrade/status/detail"
@@ -43,7 +44,7 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user login
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -110,7 +111,6 @@ func run(cmd *cobra.Command, args []string) error {
 
 	if len(formattedUpgradeStatuses) == 0 {
 		utils.HandleSpinnerSuccess(spinner, sm, "No upgrades found")
-		return nil
 	} else {
 		utils.HandleSpinnerSuccess(spinner, sm, "Upgrade status retrieved")
 	}

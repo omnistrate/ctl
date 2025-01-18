@@ -3,14 +3,14 @@ name: Package
 on:
   push:
     paths:
-    - build/Dockerfile
-    branches: 
-    - master
+      - build/Dockerfile
+    branches:
+      - main
   pull_request:
     paths:
       - build/Dockerfile
-    branches: 
-    - master
+    branches:
+      - main
 
 env:
   GOPRIVATE: github.com/omnistrate
@@ -21,18 +21,17 @@ env:
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
   # platforms to build the image for
-  PLATFORMS: linux/arm64,linux/amd64  
+  PLATFORMS: linux/arm64,linux/amd64
   # default platform of the runners, used to mitigate time of building on x arch during PRs
   PR_PLATFORMS: linux/amd64
-  # name of the package 
+  # name of the package
   PACKAGE_NAME: omnistrate-ctl
-  
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
-
   package:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'pull_request' }}
@@ -42,7 +41,7 @@ jobs:
     concurrency:
       group: package-${{ github.workflow }}-${{ github.head_ref }}
       cancel-in-progress: true
-       
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -56,9 +55,9 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        with: 
+        with:
           platforms: ${{ env.PLATFORMS }}
-          
+
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
@@ -66,7 +65,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |         
+          tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
@@ -79,10 +78,10 @@ jobs:
           file: ./build/Dockerfile
           platforms: ${{ env.PR_PLATFORMS }}
           build-args: |
-              GIT_USER=api 
-              GIT_TOKEN=${{ steps.generate_token.outputs.token }}
-              GOPROXY=${{ env.GOPROXY }}
-              GOSUMDB=${{ env.GOSUMDB }}
+            GIT_USER=api 
+            GIT_TOKEN=${{ steps.generate_token.outputs.token }}
+            GOPROXY=${{ env.GOPROXY }}
+            GOSUMDB=${{ env.GOSUMDB }}
           push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -101,7 +100,7 @@ jobs:
     concurrency:
       group: package-${{ github.workflow }}-${{ github.head_ref }}
       cancel-in-progress: true
-       
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -118,9 +117,9 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        with: 
+        with:
           platforms: ${{ env.PLATFORMS }}
-          
+
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
@@ -128,7 +127,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |         
+          tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
@@ -145,13 +144,12 @@ jobs:
           file: ./build/Dockerfile
           platforms: ${{ env.PLATFORMS }}
           build-args: |
-              GIT_USER=api 
-              GIT_TOKEN=${{ steps.generate_token.outputs.token }}
-              GOPROXY=${{ env.GOPROXY }}
-              GOSUMDB=${{ env.GOSUMDB }}
+            GIT_USER=api 
+            GIT_TOKEN=${{ steps.generate_token.outputs.token }}
+            GOPROXY=${{ env.GOPROXY }}
+            GOSUMDB=${{ env.GOSUMDB }}
           push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-

@@ -2,11 +2,11 @@ name: Build
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["main"]
   merge_group:
-    branches: [ "master" ]
+    branches: ["main"]
 
 env:
   GOPRIVATE: "github.com/omnistrate/*"
@@ -20,7 +20,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   # security scan is included in linter
   lint:
     runs-on: ubuntu-latest
@@ -48,9 +47,9 @@ jobs:
       - name: Set up go
         uses: actions/setup-go@v5
         with:
-          go-version-file: 'go.mod'
+          go-version-file: "go.mod"
           token: ${{ steps.generate_token.outputs.token }}
-          cache-dependency-path: '**/go.sum'
+          cache-dependency-path: "**/go.sum"
 
       - name: Get dependencies
         timeout-minutes: 10
@@ -95,25 +94,25 @@ jobs:
 
       - name: Check dependencies
         timeout-minutes: 10
-        run: | 
+        run: |
           make check-dependencies
 
       - name: Set up go
         uses: actions/setup-go@v5
         with:
-          go-version-file: 'go.mod'
+          go-version-file: "go.mod"
           token: ${{ steps.generate_token.outputs.token }}
-          cache-dependency-path: '**/go.sum'
+          cache-dependency-path: "**/go.sum"
 
       - name: Get dependencies
         timeout-minutes: 10
         run: |
-         GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} make download
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} make download
 
       - name: Build
         timeout-minutes: 20
         run: |
-         GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} make build
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} make build
 
       - name: Gotestsum installer
         uses: autero1/action-gotestsum@v2.0.0
@@ -121,7 +120,7 @@ jobs:
           gotestsum_version: 1.11.0
 
       - name: Unit test
-        timeout-minutes: 20 
+        timeout-minutes: 20
         run: |
           gotestsum --format github-actions -- ./... -skip test -cover -coverprofile coverage.out -covermode count
           go tool cover -func=coverage.out -o coverage-report.txt
@@ -138,6 +137,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    concurrency:
+      group: ${{ github.workflow }}-integration-tests
+      cancel-in-progress: true
 
     steps:
       - name: Checkout repository
@@ -159,9 +161,9 @@ jobs:
       - name: Set up go
         uses: actions/setup-go@v5
         with:
-          go-version-file: 'go.mod'
+          go-version-file: "go.mod"
           token: ${{ steps.generate_token.outputs.token }}
-          cache-dependency-path: '**/go.sum'
+          cache-dependency-path: "**/go.sum"
 
       - name: Get dependencies
         timeout-minutes: 10
@@ -175,14 +177,12 @@ jobs:
 
       - name: Integraiton test
         timeout-minutes: 30
-        env: 
+        env:
           ENABLE_INTEGRATION_TEST: true
           TEST_EMAIL: ${{ secrets.SMOKE_TEST_EMAIL }}
           TEST_PASSWORD: ${{ secrets.SMOKE_TEST_PASSWORD}}
           OMNISTRATE_ROOT_DOMAIN: ${{ vars.OMNISTRATE_ROOT_DOMAIN}}
-          LOG_LEVEL: debug
-          LOG_FORMAT: pretty
-          DRY_RUN: true
+          OMNISTRATE_DRY_RUN: true
         run: gotestsum --format github-actions -- ./test/integration_test/... -timeout 1800s -p 1 -p 1 -v
 
   smoke-tests:
@@ -192,23 +192,32 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    concurrency:
+      group: ${{ github.workflow }}-smoke-tests-${{ matrix.test-group }}
+      cancel-in-progress: true
 
     strategy:
       fail-fast: false
       matrix:
-        test-group: [ 
-          'account/...',
-          'auth/...',
-          'build/...',
-          'domain/...',
-          'environment/...',
-          'helm/...',
-          'instance/...',
-          'service/...', 
-          'serviceplan/...',
-          'upgrade/...',
-          'customnetwork/...',
-        ]
+        test-group:
+          [
+            "account/...",
+            "auth/...",
+            "build/compose/...",
+            "build/image/...",
+            "build/helm/...",
+            "build/kustomize/...",
+            "build/operator/...",
+            "domain/...",
+            "environment/...",
+            "helm/...",
+            "instance/...",
+            "service/...",
+            "serviceplan/...",
+            "upgrade/...",
+            "customnetwork/...",
+            "servicesorchestration/...",
+          ]
 
     steps:
       - name: Checkout repository
@@ -230,9 +239,9 @@ jobs:
       - name: Set up go
         uses: actions/setup-go@v5
         with:
-          go-version-file: 'go.mod'
+          go-version-file: "go.mod"
           token: ${{ steps.generate_token.outputs.token }}
-          cache-dependency-path: '**/go.sum'
+          cache-dependency-path: "**/go.sum"
 
       - name: Get dependencies
         timeout-minutes: 10
@@ -246,14 +255,12 @@ jobs:
 
       - name: Smoke test ${{ matrix.test-group }}
         timeout-minutes: 30
-        env: 
+        env:
           ENABLE_SMOKE_TEST: true
           TEST_EMAIL: ${{ secrets.SMOKE_TEST_EMAIL }}
           TEST_PASSWORD: ${{ secrets.SMOKE_TEST_PASSWORD}}
           OMNISTRATE_ROOT_DOMAIN: ${{ vars.OMNISTRATE_ROOT_DOMAIN}}
-          LOG_LEVEL: debug
-          LOG_FORMAT: pretty
-          DRY_RUN: true
+          OMNISTRATE_DRY_RUN: true
         run: gotestsum --format github-actions -- ./test/smoke_test/${{ matrix.test-group }} -timeout 1800s -p 1 -p 1 -v
 
   publish:

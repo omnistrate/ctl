@@ -2,6 +2,7 @@ package account
 
 import (
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/common"
 
 	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/internal/config"
@@ -9,7 +10,7 @@ import (
 	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/spf13/cobra"
 
-	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
+	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 )
 
 const (
@@ -58,7 +59,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	output, _ := cmd.Flags().GetString("output")
 
 	// Validate user login
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -75,7 +76,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Prepare request
-	request := openapiclient.CreateAccountConfigRequestBody{
+	request := openapiclient.CreateAccountConfigRequest2{
 		Name: name,
 	}
 

@@ -2,10 +2,10 @@ package dataaccess
 
 import (
 	"context"
+	"net/http"
 
-	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
-	helmpackageapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/helm_package_api"
-	"github.com/omnistrate/ctl/internal/config"
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
+	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 )
 
 func SaveHelmChart(
@@ -14,84 +14,100 @@ func SaveHelmChart(
 	chartName string,
 	chartVersion string,
 	namespace string,
+	repoName string,
 	repoURL string,
 	values map[string]any,
 ) (
-	helmPackage *helmpackageapi.HelmPackage,
+	helmPackage openapiclient.HelmPackage,
 	err error,
 ) {
-	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
 
-	request := &helmpackageapi.SaveHelmPackageRequest{
-		Token: token,
-		HelmPackage: &helmpackageapi.HelmPackage{
-			ChartName:    chartName,
-			ChartVersion: chartVersion,
-			Namespace:    namespace,
-			RepoURL:      repoURL,
-			Values:       values,
-		},
+	apiClient := getV1Client()
+
+	helmPackage = openapiclient.HelmPackage{
+		ChartName:     chartName,
+		ChartVersion:  chartVersion,
+		Namespace:     namespace,
+		ChartRepoName: repoName,
+		ChartRepoUrl:  repoURL,
+		ChartValues:   values,
 	}
 
-	if helmPackage, err = helmPackageService.SaveHelmPackage(ctx, request); err != nil {
-		return
+	r, err := apiClient.HelmPackageApiAPI.
+		HelmPackageApiSaveHelmPackage(ctxWithToken).
+		SaveHelmPackageRequest2(openapiclient.SaveHelmPackageRequest2{
+			HelmPackage: helmPackage,
+		}).Execute()
+
+	if err != nil {
+		return helmPackage, handleV1Error(err)
 	}
+
+	r.Body.Close()
 	return
 }
 
-func ListHelmCharts(ctx context.Context, token string) (helmPackages *helmpackageapi.ListHelmPackagesResult, err error) {
-	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
+func ListHelmCharts(ctx context.Context, token string) (helmPackages *openapiclient.ListHelmPackagesResult, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
 
-	request := &helmpackageapi.ListHelmPackagesRequest{
-		Token: token,
+	apiClient := getV1Client()
+
+	var r *http.Response
+	helmPackages, r, err = apiClient.HelmPackageApiAPI.HelmPackageApiListHelmPackages(ctxWithToken).Execute()
+	if err != nil {
+		return nil, handleV1Error(err)
 	}
 
-	if helmPackages, err = helmPackageService.ListHelmPackages(ctx, request); err != nil {
-		return
-	}
+	r.Body.Close()
 	return
 }
 
-func DescribeHelmChart(ctx context.Context, token, chartName, chartVersion string) (helmPackage *helmpackageapi.HelmPackage, err error) {
-	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
+func DescribeHelmChart(ctx context.Context, token, chartName, chartVersion string) (helmPackage *openapiclient.HelmPackage, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
 
-	request := &helmpackageapi.DescribeHelmPackageRequest{
-		Token:        token,
-		ChartName:    chartName,
-		ChartVersion: chartVersion,
+	apiClient := getV1Client()
+
+	var r *http.Response
+	helmPackage, r, err = apiClient.HelmPackageApiAPI.HelmPackageApiDescribeHelmPackage(ctxWithToken, chartName, chartVersion).Execute()
+	if err != nil {
+		return nil, handleV1Error(err)
 	}
 
-	if helmPackage, err = helmPackageService.DescribeHelmPackage(ctx, request); err != nil {
-		return
-	}
+	r.Body.Close()
 	return
 }
 
-func ListHelmChartInstallations(ctx context.Context, token string, hostClusterID *helmpackageapi.HostClusterID) (helmPackageInstallations *helmpackageapi.ListHelmPackageInstallationsResult, err error) {
-	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
+func ListHelmChartInstallations(ctx context.Context, token string, hostClusterID string) (helmPackageInstallations *openapiclientfleet.ListHelmPackageInstallationsResult, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
 
-	request := &helmpackageapi.ListHelmPackageInstallationsRequest{
-		Token:         token,
-		HostClusterID: hostClusterID,
+	apiClient := getFleetClient()
+
+	req := apiClient.HelmPackageApiAPI.HelmPackageApiListHelmPackageInstallations(ctxWithToken)
+	if len(hostClusterID) > 0 {
+		req = req.HostClusterID(hostClusterID)
 	}
 
-	if helmPackageInstallations, err = helmPackageService.ListHelmPackageInstallations(ctx, request); err != nil {
-		return
+	var r *http.Response
+	helmPackageInstallations, r, err = req.Execute()
+	if err != nil {
+		return nil, handleFleetError(err)
 	}
+
+	r.Body.Close()
 	return
 }
 
 func DeleteHelmChart(ctx context.Context, token, chartName, chartVersion string) (err error) {
-	helmPackageService := httpclientwrapper.NewHelmPackage(config.GetHostScheme(), config.GetHost())
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
 
-	request := &helmpackageapi.DeleteHelmPackageRequest{
-		Token:        token,
-		ChartName:    chartName,
-		ChartVersion: chartVersion,
+	apiClient := getV1Client()
+	var r *http.Response
+	r, err = apiClient.HelmPackageApiAPI.HelmPackageApiDeleteHelmPackage(ctxWithToken, chartName, chartVersion).Execute()
+	if err != nil {
+		return handleV1Error(err)
 	}
 
-	if err = helmPackageService.DeleteHelmPackage(ctx, request); err != nil {
-		return
-	}
+	r.Body.Close()
 	return
 }

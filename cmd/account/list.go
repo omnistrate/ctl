@@ -2,14 +2,15 @@ package account
 
 import (
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/common"
 	"strings"
 
 	"github.com/chelnak/ysmrr"
+	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
 	"github.com/omnistrate/ctl/internal/utils"
-	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 	"github.com/spf13/cobra"
 )
 
@@ -47,7 +48,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user login
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -94,7 +95,6 @@ func runList(cmd *cobra.Command, args []string) error {
 	// Handle case when no accounts match
 	if len(formattedAccounts) == 0 {
 		utils.HandleSpinnerSuccess(spinner, sm, "No accounts found")
-		return nil
 	} else {
 		utils.HandleSpinnerSuccess(spinner, sm, "Successfully retrieved accounts")
 	}

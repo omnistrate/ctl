@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/chelnak/ysmrr"
-	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
 	"github.com/omnistrate/ctl/cmd/common"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
@@ -64,7 +63,7 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user login
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -98,13 +97,11 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 	err = dataaccess.UpdateResourceInstance(
 		cmd.Context(),
 		token,
-		inventoryapi.FleetUpdateResourceInstanceRequest{
-			ServiceID:     inventoryapi.ServiceID(serviceID),
-			EnvironmentID: inventoryapi.ServiceEnvironmentID(environmentID),
-			InstanceID:    inventoryapi.ResourceInstanceID(instanceID),
-			ResourceID:    inventoryapi.ResourceID(resourceID),
-			RequestParams: formattedParams,
-		})
+		serviceID,
+		environmentID,
+		instanceID,
+		resourceID,
+		formattedParams)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/omnistrate/ctl/cmd/common"
+
 	"github.com/chelnak/ysmrr"
+	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
 	"github.com/omnistrate/ctl/internal/utils"
-	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 	"github.com/spf13/cobra"
 )
 
@@ -67,7 +69,7 @@ func runDescribeVersion(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user login
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -146,10 +148,10 @@ func formatServicePlanVersionDetails(ctx context.Context, token, serviceName, pl
 		}
 
 		resource := model.Resource{
-			ResourceID:          string(desRes.ID),
+			ResourceID:          desRes.Id,
 			ResourceName:        desRes.Name,
 			ResourceDescription: desRes.Description,
-			ResourceType:        string(desRes.ResourceType),
+			ResourceType:        desRes.ResourceType,
 		}
 
 		if desRes.ActionHooks != nil {

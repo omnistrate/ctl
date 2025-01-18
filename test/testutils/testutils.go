@@ -24,8 +24,8 @@ func Contains(arr []string, s string) bool {
 }
 
 func GetTestAccount() (string, string, error) {
-	email := utils.GetEnv("TEST_EMAIL", "not-set")
-	password := utils.GetEnv("TEST_PASSWORD", "")
+	email := config.GetEnv("TEST_EMAIL", "not-set")
+	password := config.GetEnv("TEST_PASSWORD", "")
 	if email == "not-set" {
 		return "", "", errors.New("TEST_EMAIL environment variable is not set. Set the environment variable to run the test")
 	}
@@ -40,7 +40,7 @@ func SmokeTest(t *testing.T) {
 
 	utils.ConfigureLoggingFromEnvOnce()
 
-	if !utils.GetEnvAsBoolean("ENABLE_SMOKE_TEST", "false") {
+	if !config.GetEnvAsBoolean("ENABLE_SMOKE_TEST", "false") {
 		t.Skip("skipping smoke tests, set environment variable ENABLE_SMOKE_TEST")
 	}
 }
@@ -50,7 +50,7 @@ func IntegrationTest(t *testing.T) {
 
 	utils.ConfigureLoggingFromEnvOnce()
 
-	if !utils.GetEnvAsBoolean("ENABLE_INTEGRATION_TEST", "false") {
+	if !config.GetEnvAsBoolean("ENABLE_INTEGRATION_TEST", "false") {
 		t.Skip("skipping integration tests, set environment variable ENABLE_INTEGRATION_TEST")
 	}
 }

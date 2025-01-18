@@ -2,16 +2,17 @@ package serviceplan
 
 import (
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/common"
 	"slices"
 	"strings"
 	"time"
 
 	"github.com/chelnak/ysmrr"
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
 	"github.com/omnistrate/ctl/internal/utils"
-	openapiclientfleet "github.com/omnistrate/omnistrate-sdk-go/fleet"
 	"github.com/spf13/cobra"
 )
 
@@ -83,7 +84,7 @@ func runListVersions(cmd *cobra.Command, args []string) error {
 	}
 
 	// Ensure user is logged in
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -194,10 +195,6 @@ func validateListVersionsArguments(args []string, serviceID, planID string) erro
 }
 
 func filterLatestNVersions(servicePlans []openapiclientfleet.ServicePlanSearchRecord, latestN int) []openapiclientfleet.ServicePlanSearchRecord {
-	if latestN == -1 {
-		return servicePlans
-	}
-
 	slices.SortFunc(servicePlans, func(a, b openapiclientfleet.ServicePlanSearchRecord) int {
 		if a.ReleasedAt != nil && b.ReleasedAt != nil {
 			ta, _ := time.Parse(time.RFC3339, *a.ReleasedAt)
@@ -217,6 +214,10 @@ func filterLatestNVersions(servicePlans []openapiclientfleet.ServicePlanSearchRe
 
 		return 0
 	})
+
+	if latestN == -1 {
+		return servicePlans
+	}
 
 	if len(servicePlans) <= latestN {
 		return servicePlans

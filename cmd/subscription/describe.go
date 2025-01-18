@@ -3,13 +3,14 @@ package subscription
 import (
 	"context"
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/common"
 
 	"github.com/chelnak/ysmrr"
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
 	"github.com/omnistrate/ctl/internal/utils"
-	openapiclientfleet "github.com/omnistrate/omnistrate-sdk-go/fleet"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -53,7 +54,7 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user login
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err

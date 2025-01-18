@@ -6,12 +6,13 @@ import (
 	"os"
 
 	"github.com/fatih/color"
+	"github.com/omnistrate/ctl/internal/config"
 )
 
 func PrintError(err error) {
 	errorMsg := color.New(color.FgRed, color.Bold).SprintFunc()
 	fmt.Println(errorMsg("Error: "), err.Error())
-	if !IsDryRun() {
+	if !config.IsDryRun() {
 		os.Exit(1)
 	}
 }
@@ -72,7 +73,11 @@ func PrintTextTableJsonArrayOutput[T any](output string, objects []T) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("%s\n", data)
+		if len(objects) == 0 {
+			fmt.Println("[]")
+		} else {
+			fmt.Printf("%s\n", data)
+		}
 	default:
 		return fmt.Errorf("unsupported output format: %s", output)
 	}
