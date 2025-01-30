@@ -1,27 +1,28 @@
-## omnistrate-ctl custom-network describe
+## omnistrate-ctl custom-network update
 
-Describe a custom network
+Update a custom network
 
 ### Synopsis
 
-This command helps you describe an existing custom network.
+This command helps you update an existing custom network.
 
 ```
-omnistrate-ctl custom-network describe [flags]
+omnistrate-ctl custom-network update [flags]
 ```
 
 ### Examples
 
 ```
-# Describe a custom network by ID
-omctl custom-network describe --custom-network-id [custom-network-id]
+# Update a custom network by ID
+omctl custom-network update --custom-network-id [custom-network-id] --name [new-custom-network-name]
 ```
 
 ### Options
 
 ```
       --custom-network-id string   ID of the custom network
-  -h, --help                       help for describe
+  -h, --help                       help for update
+      --name string                New name of the custom network
 ```
 
 ### Options inherited from parent commands

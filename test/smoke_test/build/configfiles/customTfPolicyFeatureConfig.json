@@ -4,8 +4,8 @@
   },
   "roles": {
     "gcp": [
-      {"name": "roles/pubsub.admin"},
-      {"name": "roles/cloudsql.admin"}
+      { "name": "roles/pubsub.admin" },
+      { "name": "roles/cloudsql.admin" }
     ]
   }
 }
