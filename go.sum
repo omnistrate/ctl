@@ -97,8 +97,6 @@ github.com/muesli/termenv v0.15.2 h1:GohcuySI0QmI3wN8Ok9PtKGkgkFIk7y6Vpb5PvrY+Wo
 github.com/muesli/termenv v0.15.2/go.mod h1:Epx+iuz8sNs7mNKhxzH4fWXGNpZwUaJKRS1noLXviQ8=
 github.com/omnistrate-oss/omnistrate-sdk-go v0.0.33 h1:tKI+LZ8v9q01z4tqG1IvP3trGOLLAs9g8OmyKZd6Dho=
 github.com/omnistrate-oss/omnistrate-sdk-go v0.0.33/go.mod h1:tDZC+n915VJTaSepBd2tGV7mBepAlBrE5kdxsSveh5E=
-github.com/omnistrate/api-design v0.7.152 h1:r9vO9fazhvaFd4tLnCftHJ8Gv+DFpbIAV2fxh+El4Ic=
-github.com/omnistrate/api-design v0.7.152/go.mod h1:QJaVyPRU2pSL6CCHmg8BKsxlUu+VkoxAbAMq6g270ik=
 github.com/omnistrate/api-design v0.7.153 h1:+7V9yHCxY7HskPtHZtOU3f7Ru/sndHff/bstpuK5KZ8=
 github.com/omnistrate/api-design v0.7.153/go.mod h1:QJaVyPRU2pSL6CCHmg8BKsxlUu+VkoxAbAMq6g270ik=
 github.com/omnistrate/api-design v0.7.160 h1:jMh0RHu9xnRgD6PdRCTHVposO9LokdXzT7fLJZkVEKQ=

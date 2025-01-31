@@ -74,7 +74,7 @@ func IsDryRun() bool {
 }
 
 func GetClientTimeout() time.Duration {
-	timeoutInSeconds := GetEnvAsInteger(clientTimeout, "60")
+	timeoutInSeconds := GetEnvAsInteger(clientTimeout, "300")
 	return time.Duration(timeoutInSeconds) * time.Second
 }
 

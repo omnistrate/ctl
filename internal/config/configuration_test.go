@@ -75,7 +75,7 @@ func TestGetDebugTrue(t *testing.T) {
 
 func TestGetClientTimeout(t *testing.T) {
 	clientTimeout := GetClientTimeout()
-	assert.Equal(t, time.Duration(60000000000), clientTimeout)
+	assert.Equal(t, time.Duration(300000000000), clientTimeout)
 }
 
 func TestGetClientTimeoutOverride(t *testing.T) {
