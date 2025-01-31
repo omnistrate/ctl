@@ -15,8 +15,8 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-wordwrap v1.0.1
 	github.com/omnistrate-oss/omnistrate-sdk-go v0.0.33
-	github.com/omnistrate/api-design v0.7.153
-	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20250116233445-a5074b602f2e
+	github.com/omnistrate/api-design v0.7.160
+	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20250130224544-d2ad7a48ba0c
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.33.0
