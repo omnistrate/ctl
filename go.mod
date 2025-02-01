@@ -5,7 +5,7 @@ go 1.23.1
 require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/cenkalti/backoff/v4 v4.3.0
-	github.com/chelnak/ysmrr v0.5.0
+	github.com/chelnak/ysmrr v0.6.0
 	github.com/compose-spec/compose-go v1.20.2
 	github.com/cqroot/prompt v0.9.4
 	github.com/fatih/color v1.18.0
@@ -15,13 +15,13 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-wordwrap v1.0.1
 	github.com/omnistrate-oss/omnistrate-sdk-go v0.0.33
-	github.com/omnistrate/api-design v0.7.160
+	github.com/omnistrate/api-design v0.7.163
 	github.com/omnistrate/api-design/pkg/httpclientwrapper v0.0.0-20250130224544-d2ad7a48ba0c
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.33.0
 	github.com/spf13/cobra v1.8.1
-	github.com/spf13/pflag v1.0.5
+	github.com/spf13/pflag v1.0.6
 	github.com/stretchr/testify v1.10.0
 	goa.design/goa/v3 v3.19.1
 	gopkg.in/yaml.v3 v3.0.1
