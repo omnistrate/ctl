@@ -67,7 +67,7 @@ omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Servi
 omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Service" --environment prod --environment-type prod
 
 # Build service with service specification for Helm, Operator or Kustomize as preferred
-omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Service" --release-as-preferred 
+omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Service" --release-as-preferred --release-description "v1.0.0-alpha"
 `
 
 	buildLong = `Build command can be used to build a service from image, docker compose, and service plan spec. 
