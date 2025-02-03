@@ -105,7 +105,7 @@ func init() {
 	BuildCmd.Flags().BoolP("release", "", false, "Release the service after building it")
 	BuildCmd.Flags().BoolP("release-as-preferred", "", false, "Release the service as preferred after building it")
 	BuildCmd.Flags().StringP("release-name", "", "", "Custom description of the release version. Deprecated: use --release-description instead")
-	BuildCmd.Flags().StringP("release-description", "", "", "Custom description of the release version")
+	BuildCmd.Flags().StringP("release-description", "", "", "Used together with --release or --release-as-preferred flag. Provide a description for the release version")
 	BuildCmd.Flags().BoolP("interactive", "i", false, "Interactive mode")
 	BuildCmd.Flags().StringP("spec-type", "s", DockerComposeSpecType, "Spec type")
 
