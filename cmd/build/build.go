@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/omnistrate/ctl/cmd/common"
+	"github.com/omnistrate/ctl/internal/model"
 	"os"
 	"path/filepath"
 	"strings"
@@ -114,8 +115,6 @@ func init() {
 	BuildCmd.Flags().StringP("image-registry-auth-username", "", "", "Used together with --image flag. Provide the username to authenticate with the image registry if it's a private registry")
 	BuildCmd.Flags().StringP("image-registry-auth-password", "", "", "Used together with --image flag. Provide the password to authenticate with the image registry if it's a private registry")
 
-	BuildCmd.Flags().StringP("output", "o", "text", "Output format. Only text is supported")
-
 	BuildCmd.MarkFlagsRequiredTogether("image-registry-auth-username", "image-registry-auth-password")
 	err := BuildCmd.MarkFlagFilename("file")
 	if err != nil {
@@ -218,8 +217,8 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if output != "text" {
-		err = errors.New("only text output format is supported")
+	if interactive && output == "json" {
+		err := errors.New("interactive mode is not supported with json output")
 		utils.PrintError(err)
 		return err
 	}
@@ -361,9 +360,11 @@ func runBuild(cmd *cobra.Command, args []string) error {
 
 	var sm1 ysmrr.SpinnerManager
 	var spinner1 *ysmrr.Spinner
-	sm1 = ysmrr.NewSpinnerManager()
-	spinner1 = sm1.AddSpinner("Building service...")
-	sm1.Start()
+	if output != "json" {
+		sm1 = ysmrr.NewSpinnerManager()
+		spinner1 = sm1.AddSpinner("Building service...")
+		sm1.Start()
+	}
 
 	var undefinedResources map[string]serviceapi.ResourceID
 	ServiceID, EnvironmentID, ProductTierID, undefinedResources, err = buildService(
@@ -386,6 +387,37 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	}
 
 	utils.HandleSpinnerSuccess(spinner1, sm1, "Successfully built service")
+
+	// Print the service plan details
+	servicePlanDetails := model.ServicePlanVersion{
+		PlanID:      ProductTierID,
+		PlanName:    name,
+		ServiceID:   ServiceID,
+		ServiceName: name,
+		Environment: environment,
+	}
+
+	if release || releaseAsPreferred {
+		versionDetails, err := dataaccess.DescribeLatestVersion(cmd.Context(), token, ServiceID, ProductTierID)
+		if err != nil {
+			err = errors.Wrap(err, "failed to get the latest version")
+			return err
+		}
+		servicePlanDetails.Version = versionDetails.Version
+		if versionDetails.Name != nil {
+			servicePlanDetails.ReleaseDescription = *versionDetails.Name
+		}
+		servicePlanDetails.VersionSetStatus = versionDetails.Status
+	}
+
+	if err = utils.PrintTextTableJsonOutput(output, servicePlanDetails); err != nil {
+		return err
+	}
+
+	// Return early if output is json
+	if output == "json" {
+		return nil
+	}
 
 	// Print warning if there are any undefined resources
 	if len(undefinedResources) > 0 {

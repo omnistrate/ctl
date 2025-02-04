@@ -61,6 +61,30 @@ func FindPreferredVersion(ctx context.Context, token, serviceID, productTierID s
 	return "", errors.New("no preferred version found")
 }
 
+func DescribeLatestVersion(ctx context.Context, token, serviceID, productTierID string) (*openapiclient.TierVersionSet, error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+
+	apiClient := getV1Client()
+	res, r, err := apiClient.TierVersionSetApiAPI.TierVersionSetApiListTierVersionSets(
+		ctxWithToken,
+		serviceID,
+		productTierID,
+	).Execute()
+
+	err = handleV1Error(err)
+	if err != nil {
+		return nil, err
+	}
+
+	defer r.Body.Close()
+
+	if len(res.TierVersionSets) == 0 {
+		return nil, errors.New("no version found")
+	}
+
+	return &res.TierVersionSets[0], nil
+}
+
 func DescribeVersionSet(ctx context.Context, token, serviceID, productTierID, version string) (*openapiclient.TierVersionSet, error) {
 	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
 

@@ -56,7 +56,7 @@ omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Servi
 omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Service" --environment prod --environment-type prod
 
 # Build service with service specification for Helm, Operator or Kustomize as preferred
-omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Service" --release-as-preferred 
+omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Service" --release-as-preferred --release-description "v1.0.0-alpha"
 
 ```
 
@@ -74,7 +74,6 @@ omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Servi
       --image-registry-auth-username string   Used together with --image flag. Provide the username to authenticate with the image registry if it's a private registry
   -i, --interactive                           Interactive mode
   -n, --name string                           Name of the service. A service can have multiple service plans. The build command will build a new or existing service plan inside the specified service.
-  -o, --output string                         Output format. Only text is supported (default "text")
       --release                               Release the service after building it
       --release-as-preferred                  Release the service as preferred after building it
       --release-description string            Used together with --release or --release-as-preferred flag. Provide a description for the release version
@@ -85,7 +84,8 @@ omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Servi
 ### Options inherited from parent commands
 
 ```
-  -v, --version   Print the version number of omnistrate-ctl
+  -o, --output string   Output format (text|table|json) (default "table")
+  -v, --version         Print the version number of omnistrate-ctl
 ```
 
 ### SEE ALSO
