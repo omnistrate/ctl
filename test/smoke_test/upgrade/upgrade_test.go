@@ -59,7 +59,7 @@ func Test_upgrade_basic(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: release mysql service plan
-	cmd.RootCmd.SetArgs([]string{"service-plan", "release", "--service-id", serviceID, "--plan-id", productTierID, "--release-as-preferred"})
+	cmd.RootCmd.SetArgs([]string{"service-plan", "release", "--service-id", serviceID, "--plan-id", productTierID, "--release-as-preferred", "--release-description", "v1.0.0-alpha"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
@@ -110,6 +110,23 @@ func Test_upgrade_basic(t *testing.T) {
 	time.Sleep(5 * time.Second)
 	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, instance.InstanceStatusRunning, 900*time.Second)
 	require.NoError(err)
+
+	// PASS: upgrade instance to version 1.0
+	cmd.RootCmd.SetArgs([]string{"upgrade", instanceID, "--version", "1.0"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+	require.Len(upgrade.UpgradePathIDs, 1)
+
+	// PASS: wait for instance to reach running status
+	time.Sleep(5 * time.Second)
+	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, instance.InstanceStatusRunning, 900*time.Second)
+	require.NoError(err)
+
+	// PASS: upgrade instance to "v1.0.0-alpha"
+	cmd.RootCmd.SetArgs([]string{"upgrade", instanceID, "--version-name", "v1.0.0-alpha"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+	require.Len(upgrade.UpgradePathIDs, 1)
 
 	// PASS: delete instance
 	cmd.RootCmd.SetArgs([]string{"instance", "delete", instanceID, "--yes"})

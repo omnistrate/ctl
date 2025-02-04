@@ -7,6 +7,26 @@ import (
 	"github.com/pkg/errors"
 )
 
+func ListVersions(ctx context.Context, token, serviceID, productTierID string) (*openapiclient.ListTierVersionSetsResult, error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+
+	apiClient := getV1Client()
+	res, r, err := apiClient.TierVersionSetApiAPI.TierVersionSetApiListTierVersionSets(
+		ctxWithToken,
+		serviceID,
+		productTierID,
+	).Execute()
+
+	err = handleV1Error(err)
+	if err != nil {
+		return nil, err
+	}
+
+	defer r.Body.Close()
+
+	return res, nil
+}
+
 func FindLatestVersion(ctx context.Context, token, serviceID, productTierID string) (string, error) {
 	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
 
