@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/omnistrate/ctl/cmd/common"
+	"github.com/omnistrate/ctl/internal/model"
 	"os"
 	"path/filepath"
 	"strings"
@@ -386,6 +387,32 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	}
 
 	utils.HandleSpinnerSuccess(spinner1, sm1, "Successfully built service")
+
+	// Print the service plan details
+	servicePlanDetails := model.ServicePlanVersion{
+		PlanID:      ProductTierID,
+		PlanName:    name,
+		ServiceID:   ServiceID,
+		ServiceName: name,
+		Environment: environment,
+	}
+
+	if release || releaseAsPreferred {
+		versionDetails, err := dataaccess.DescribeLatestVersion(cmd.Context(), token, ServiceID, ProductTierID)
+		if err != nil {
+			err = errors.Wrap(err, "failed to get the latest version")
+			return err
+		}
+		servicePlanDetails.Version = versionDetails.Version
+		if versionDetails.Name != nil {
+			servicePlanDetails.ReleaseDescription = *versionDetails.Name
+		}
+		servicePlanDetails.VersionSetStatus = versionDetails.Status
+	}
+
+	if err = utils.PrintTextTableJsonOutput(output, servicePlanDetails); err != nil {
+		return err
+	}
 
 	// Print warning if there are any undefined resources
 	if len(undefinedResources) > 0 {
