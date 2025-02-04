@@ -149,6 +149,45 @@ func Test_build_update_service(t *testing.T) {
 	require.NoError(err)
 }
 
+func Test_build_output_format(t *testing.T) {
+	testutils.SmokeTest(t)
+
+	ctx := context.TODO()
+
+	require := require.New(t)
+	defer testutils.Cleanup()
+
+	var err error
+
+	// PASS: login
+	testEmail, testPassword, err := testutils.GetTestAccount()
+	require.NoError(err)
+	cmd.RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+
+	// PASS: json output
+	serviceName := "mysql cluster" + uuid.NewString()
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "../../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--release", "--output", "json"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+
+	// PASS: table output
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "../../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--release", "--output", "table"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+
+	// PASS: text output
+	cmd.RootCmd.SetArgs([]string{"build", "-f", "../../composefiles/variations/mysqlcluster_original.yaml", "--name", serviceName, "--release", "--output", "text"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+
+	// PASS: remove service
+	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", build.ServiceID})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+}
+
 func Test_build_duplicate_service_plan_name(t *testing.T) {
 	testutils.SmokeTest(t)
 
