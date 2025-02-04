@@ -43,8 +43,8 @@ func init() {
 
 	Cmd.Args = cobra.MinimumNArgs(1)
 
-	Cmd.Flags().StringP("version", "", "", "Specify the version number to upgrade to. Use 'latest' to upgrade to the latest version. Use 'preferred' to upgrade to the preferred version.")
-	Cmd.Flags().StringP("version-name", "", "", "Specify the version name to upgrade to. Use either this flag or the version flag to upgrade to a specific version.")
+	Cmd.Flags().StringP("version", "", "", "Specify the version number to upgrade to. Use 'latest' to upgrade to the latest version. Use 'preferred' to upgrade to the preferred version. Use either this flag or the --version-name flag to upgrade to a specific version.")
+	Cmd.Flags().StringP("version-name", "", "", "Specify the version name to upgrade to. Use either this flag or the --version flag to upgrade to a specific version.")
 }
 
 type Args struct {
@@ -194,7 +194,7 @@ func run(cmd *cobra.Command, args []string) error {
 			}
 
 			if len(targetVersions) > 1 {
-				err = fmt.Errorf("multiple versions found for version name %s", versionName)
+				err = fmt.Errorf("multiple versions found for version name %s, please specify the version number", versionName)
 				utils.HandleSpinnerError(spinner, sm, err)
 			}
 
