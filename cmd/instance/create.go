@@ -96,6 +96,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		utils.PrintError(err)
 		return err
 	}
+	version = strings.Trim(version, "\"") // Remove quotes
 	resource, err := cmd.Flags().GetString("resource")
 	if err != nil {
 		utils.PrintError(err)

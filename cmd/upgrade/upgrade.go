@@ -70,6 +70,7 @@ func run(cmd *cobra.Command, args []string) error {
 		utils.PrintError(err)
 		return err
 	}
+	version = strings.Trim(version, "\"") // Remove quotes
 
 	versionName, err := cmd.Flags().GetString("version-name")
 	if err != nil {
