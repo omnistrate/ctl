@@ -1,12 +1,8 @@
 package customnetwork
 
 import (
-	"context"
 	"fmt"
-	"strings"
-
 	"github.com/chelnak/ysmrr"
-	customnetworkapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/custom_network_api"
 	"github.com/omnistrate/ctl/cmd/common"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
@@ -15,10 +11,7 @@ import (
 )
 
 const (
-	deleteExample = `# Delete a custom network
-omctl custom-network delete [custom-network-name]
-
-# Delete a custom network by ID
+	deleteExample = `# Delete a custom network by ID
 omctl custom-network delete --custom-network-id [custom-network-id]`
 )
 
@@ -33,6 +26,11 @@ var deleteCmd = &cobra.Command{
 
 func init() {
 	deleteCmd.Flags().StringP(CustomNetworkIDFlag, "", "", "ID of the custom network")
+
+	err := describeCmd.MarkFlagRequired(CustomNetworkIDFlag)
+	if err != nil {
+		return
+	}
 }
 
 func runDelete(cmd *cobra.Command, args []string) (err error) {
@@ -43,18 +41,13 @@ func runDelete(cmd *cobra.Command, args []string) (err error) {
 	customNetworkId, _ := cmd.Flags().GetString(CustomNetworkIDFlag)
 
 	// Validate input arguments
-	if err = validateDeleteArguments(args, customNetworkId); err != nil {
+	if err = validateDeleteArguments(customNetworkId); err != nil {
 		utils.PrintError(err)
 		return
 	}
 
-	var customNetworkName *string
-	if len(args) == 1 {
-		customNetworkName = utils.ToPtr(args[0])
-	}
-
 	// Validate user is logged in
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -69,19 +62,8 @@ func runDelete(cmd *cobra.Command, args []string) (err error) {
 		sm.Start()
 	}
 
-	// Locate by name
-	if customNetworkName != nil {
-		var customNetwork *customnetworkapi.CustomNetwork
-		customNetwork, err = describeCustomNetworkByName(cmd.Context(), token, *customNetworkName)
-		if err != nil {
-			utils.HandleSpinnerError(spinner, sm, err)
-			return err
-		}
-		customNetworkId = string(customNetwork.ID)
-	}
-
 	// Delete
-	err = deleteCustomNetwork(cmd.Context(), token, customNetworkId)
+	err = dataaccess.FleetDeleteCustomNetwork(cmd.Context(), token, customNetworkId)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -91,23 +73,9 @@ func runDelete(cmd *cobra.Command, args []string) (err error) {
 	return
 }
 
-func deleteCustomNetwork(ctx context.Context, token string, id string) error {
-	request := customnetworkapi.DeleteCustomNetworkRequest{
-		ID: customnetworkapi.CustomNetworkID(id),
-	}
-
-	return dataaccess.DeleteCustomNetwork(ctx, token, request)
-}
-
-func validateDeleteArguments(args []string, idFlag string) error {
-	if len(args) > 1 {
-		return fmt.Errorf("invalid arguments: %s. Max 1 argument is supported: [custom-network-name]", strings.Join(args, " "))
-	}
-	if len(args) == 1 && len(idFlag) > 0 {
-		return fmt.Errorf("invalid arguments: both custom network name and ID are provided, please specify only one")
-	}
-	if len(args) == 0 && len(idFlag) == 0 {
-		return fmt.Errorf("invalid arguments: please provide custom network name or ID")
+func validateDeleteArguments(idFlag string) error {
+	if len(idFlag) == 0 {
+		return fmt.Errorf("invalid arguments: network ID is required")
 	}
 	return nil
 }

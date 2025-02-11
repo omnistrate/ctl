@@ -3,10 +3,11 @@ package dataaccess
 import (
 	"context"
 	"fmt"
-
 	"github.com/omnistrate/ctl/internal/config"
+	"strings"
+
+	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/utils"
-	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
 )
 
 func DescribeAccount(ctx context.Context, token string, id string) (*openapiclient.DescribeAccountConfigResult, error) {
@@ -63,13 +64,13 @@ func DeleteAccount(ctx context.Context, token, accountConfigID string) error {
 	return nil
 }
 
-func CreateAccount(ctx context.Context, token string, accountConfig openapiclient.CreateAccountConfigRequestBody) (string, error) {
+func CreateAccount(ctx context.Context, token string, accountConfig openapiclient.CreateAccountConfigRequest2) (string, error) {
 	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
 
 	apiClient := getV1Client()
 	res, r, err := apiClient.AccountConfigApiAPI.AccountConfigApiCreateAccountConfig(
 		ctxWithToken,
-	).CreateAccountConfigRequestBody(accountConfig).Execute()
+	).CreateAccountConfigRequest2(accountConfig).Execute()
 
 	err = handleV1Error(err)
 	if err != nil {
@@ -77,7 +78,7 @@ func CreateAccount(ctx context.Context, token string, accountConfig openapiclien
 	}
 
 	r.Body.Close()
-	return res, nil
+	return strings.Trim(res, "\"\n"), nil
 }
 
 const (
@@ -94,7 +95,7 @@ Verify your account.
 - For AWS/GCP Terraform users: Execute the Terraform scripts available at %s, by using the Account Config Identity ID below. For guidance our Terraform instructional video is at %s.`
 
 	AwsCloudFormationGuideURL = "https://youtu.be/Mu-4jppldwk"
-	AwsGcpTerraformScriptsURL = "https://github.com/omnistrate/account-setup"
+	AwsGcpTerraformScriptsURL = "https://github.com/omnistrate-oss/account-setup"
 	AwsGcpTerraformGuideURL   = "https://youtu.be/eKktc4QKgaA"
 )
 

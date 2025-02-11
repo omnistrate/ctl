@@ -1,10 +1,10 @@
 package subscription
 
 import (
+	"github.com/omnistrate/ctl/cmd/common"
 	"strings"
 
 	"github.com/chelnak/ysmrr"
-	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
 	"github.com/omnistrate/ctl/internal/utils"
@@ -58,7 +58,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user is currently logged in
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -104,7 +104,6 @@ func runList(cmd *cobra.Command, args []string) error {
 
 	if len(formattedSubscriptions) == 0 {
 		utils.HandleSpinnerSuccess(spinner, sm, "No subscriptions found")
-		return nil
 	} else {
 		utils.HandleSpinnerSuccess(spinner, sm, "Successfully retrieved subscriptions")
 	}

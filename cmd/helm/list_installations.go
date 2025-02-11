@@ -2,7 +2,8 @@ package helm
 
 import (
 	"github.com/chelnak/ysmrr"
-	helmpackageapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/helm_package_api"
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
+	"github.com/omnistrate/ctl/cmd/common"
 
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
@@ -18,6 +19,8 @@ omctl helm list-installations --host-cluster-id=[host-cluster-id]`
 type helmPackageInstallationIntermediate struct {
 	ChartName     string
 	ChartVersion  string
+	ChartRepoName string
+	ChartRepoURL  string
 	Namespace     string
 	HostClusterID string
 	Status        string
@@ -46,7 +49,7 @@ func runListInstallations(cmd *cobra.Command, args []string) error {
 	output, _ := cmd.Flags().GetString("output")
 
 	// Validate user is currently logged in
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -62,14 +65,8 @@ func runListInstallations(cmd *cobra.Command, args []string) error {
 		sm.Start()
 	}
 
-	var hostClusterIDReq *helmpackageapi.HostClusterID
-	var helmPackageResult *helmpackageapi.ListHelmPackageInstallationsResult
-
-	if len(hostClusterID) > 0 {
-		hostClusterIDReq = utils.ToPtr(helmpackageapi.HostClusterID(hostClusterID))
-	}
-
-	helmPackageResult, err = dataaccess.ListHelmChartInstallations(cmd.Context(), token, hostClusterIDReq)
+	var helmPackageResult *openapiclientfleet.ListHelmPackageInstallationsResult
+	helmPackageResult, err = dataaccess.ListHelmChartInstallations(cmd.Context(), token, hostClusterID)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -81,8 +78,10 @@ func runListInstallations(cmd *cobra.Command, args []string) error {
 		intermediate := helmPackageInstallationIntermediate{
 			ChartName:     helmPackageInstallation.HelmPackage.ChartName,
 			ChartVersion:  helmPackageInstallation.HelmPackage.ChartVersion,
+			ChartRepoName: helmPackageInstallation.HelmPackage.ChartRepoName,
+			ChartRepoURL:  helmPackageInstallation.HelmPackage.ChartRepoUrl,
 			Namespace:     helmPackageInstallation.HelmPackage.Namespace,
-			HostClusterID: string(helmPackageInstallation.HostClusterID),
+			HostClusterID: helmPackageInstallation.HostClusterID,
 			Status:        helmPackageInstallation.Status,
 		}
 		intermediates = append(intermediates, intermediate)
@@ -90,7 +89,6 @@ func runListInstallations(cmd *cobra.Command, args []string) error {
 
 	if len(intermediates) == 0 {
 		utils.HandleSpinnerSuccess(spinner, sm, "No Helm package installations found")
-		return nil
 	} else {
 		utils.HandleSpinnerSuccess(spinner, sm, "Successfully retrieved Helm package installations")
 	}

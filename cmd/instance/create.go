@@ -6,13 +6,12 @@ import (
 	"strings"
 
 	"github.com/chelnak/ysmrr"
-	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	"github.com/omnistrate/ctl/cmd/common"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
 	"github.com/omnistrate/ctl/internal/utils"
-	openapiclientfleet "github.com/omnistrate/omnistrate-sdk-go/fleet"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -135,7 +134,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate user login
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -214,30 +213,31 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	request := inventoryapi.FleetCreateResourceInstanceRequest{
-		ServiceProviderID:     inventoryapi.ServiceProviderID(res.ConsumptionDescribeServiceOfferingResult.ServiceProviderID),
-		ServiceKey:            res.ConsumptionDescribeServiceOfferingResult.ServiceURLKey,
-		ServiceAPIVersion:     offering.ServiceAPIVersion,
-		ServiceEnvironmentKey: offering.ServiceEnvironmentURLKey,
-		ServiceModelKey:       offering.ServiceModelURLKey,
-		ProductTierKey:        offering.ProductTierURLKey,
-		ProductTierVersion:    &version,
-		ResourceKey:           resourceKey,
-		CloudProvider:         &cloudProvider,
-		Region:                &region,
-		RequestParams:         formattedParams,
-		NetworkType:           nil,
+	request := openapiclientfleet.FleetCreateResourceInstanceRequest2{
+		ProductTierVersion: &version,
+		CloudProvider:      &cloudProvider,
+		Region:             &region,
+		RequestParams:      formattedParams,
+		NetworkType:        nil,
 	}
 	if subscriptionID != "" {
-		request.SubscriptionID = (*inventoryapi.SubscriptionID)(utils.ToPtr(subscriptionID))
+		request.SubscriptionId = utils.ToPtr(subscriptionID)
 	}
-	instance, err := dataaccess.CreateInstance(cmd.Context(), token, request)
+	instance, err := dataaccess.CreateResourceInstance(cmd.Context(), token,
+		res.ConsumptionDescribeServiceOfferingResult.ServiceProviderID,
+		res.ConsumptionDescribeServiceOfferingResult.ServiceURLKey,
+		offering.ServiceAPIVersion,
+		offering.ServiceEnvironmentURLKey,
+		offering.ServiceModelURLKey,
+		offering.ProductTierURLKey,
+		resourceKey,
+		request)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	if res == nil || instance.ID == nil {
+	if res == nil || instance.Id == nil {
 		err = errors.New("failed to create instance")
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -246,7 +246,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully created instance")
 
 	// Search for the instance
-	searchRes, err := dataaccess.SearchInventory(cmd.Context(), token, fmt.Sprintf("resourceinstance:%s", *instance.ID))
+	searchRes, err := dataaccess.SearchInventory(cmd.Context(), token, fmt.Sprintf("resourceinstance:%s", *instance.Id))
 	if err != nil {
 		utils.PrintError(err)
 		return err

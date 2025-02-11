@@ -45,7 +45,7 @@ func Test_environment_basic(t *testing.T) {
 	require.NoError(err)
 
 	envName2 := "qa"
-	cmd.RootCmd.SetArgs([]string{"environment", "create", envName2, "--type=qa", "--source=dev", "--service-id=" + serviceID})
+	cmd.RootCmd.SetArgs([]string{"environment", "create", envName2, "--type=qa", "--service-id=" + serviceID})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 	env2ID := environment.EnvironmentID

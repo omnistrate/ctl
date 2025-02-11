@@ -2,110 +2,201 @@ package dataaccess
 
 import (
 	"context"
+	"net/http"
 
-	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
-	inventoryapi "github.com/omnistrate/api-design/v1/pkg/fleet/gen/inventory_api"
-	"github.com/omnistrate/ctl/internal/config"
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 )
 
-func DescribeResourceInstance(ctx context.Context, token string, serviceID, environmentID, instanceID string) (*inventoryapi.ResourceInstance, error) {
-	instance, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
-	if err != nil {
-		return nil, err
-	}
+func CreateResourceInstance(ctx context.Context, token string,
+	serviceProviderId string, serviceKey string, serviceAPIVersion string, serviceEnvironmentKey string, serviceModelKey string, productTierKey string, resourceKey string,
+	request openapiclientfleet.FleetCreateResourceInstanceRequest2) (res *openapiclientfleet.CreateResourceInstanceResponseBody, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
 
-	request := inventoryapi.DescribeResourceInstanceRequestInternal{
-		Token:         token,
-		ServiceID:     inventoryapi.ServiceID(serviceID),
-		EnvironmentID: inventoryapi.ServiceEnvironmentID(environmentID),
-		InstanceID:    inventoryapi.ResourceInstanceID(instanceID),
-	}
+	req := apiClient.InventoryApiAPI.InventoryApiCreateResourceInstance(
+		ctxWithToken,
+		serviceProviderId,
+		serviceKey,
+		serviceAPIVersion,
+		serviceEnvironmentKey,
+		serviceModelKey,
+		productTierKey,
+		resourceKey,
+	).FleetCreateResourceInstanceRequest2(request)
 
-	res, err := instance.DescribeResourceInstance(ctx, &request)
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	res, r, err = req.Execute()
 	if err != nil {
-		return nil, err
+		return nil, handleFleetError(err)
 	}
-	return res, nil
+	return
 }
 
-func RestartResourceInstance(ctx context.Context, token string, serviceID, environmentID, resourceID, instanceID string) error {
-	instance, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
+func DeleteResourceInstance(ctx context.Context, token, serviceID, environmentID, resourceID, instanceID string) (err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
+
+	req := apiClient.InventoryApiAPI.InventoryApiDeleteResourceInstance(
+		ctxWithToken,
+		serviceID,
+		environmentID,
+		instanceID,
+	).FleetDeleteResourceInstanceRequest2(openapiclientfleet.FleetDeleteResourceInstanceRequest2{
+		ResourceId: resourceID,
+	})
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	r, err = req.Execute()
 	if err != nil {
-		return err
+		return handleFleetError(err)
 	}
-
-	request := inventoryapi.FleetRestartResourceInstanceRequest{
-		Token:         token,
-		ServiceID:     inventoryapi.ServiceID(serviceID),
-		EnvironmentID: inventoryapi.ServiceEnvironmentID(environmentID),
-		InstanceID:    inventoryapi.ResourceInstanceID(instanceID),
-		ResourceID:    inventoryapi.ResourceID(resourceID),
-	}
-
-	err = instance.RestartResourceInstance(ctx, &request)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return
 }
 
-func StartResourceInstance(ctx context.Context, token string, serviceID, environmentID, resourceID, instanceID string) error {
-	instance, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
+func DescribeResourceInstance(ctx context.Context, token string, serviceID, environmentID, instanceID string) (resp *openapiclientfleet.ResourceInstance, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
+
+	req := apiClient.InventoryApiAPI.InventoryApiDescribeResourceInstance(
+		ctxWithToken,
+		serviceID,
+		environmentID,
+		instanceID,
+	)
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	resp, r, err = req.Execute()
 	if err != nil {
-		return err
+		return nil, handleFleetError(err)
 	}
-
-	request := inventoryapi.FleetStartResourceInstanceRequest{
-		Token:         token,
-		ServiceID:     inventoryapi.ServiceID(serviceID),
-		EnvironmentID: inventoryapi.ServiceEnvironmentID(environmentID),
-		InstanceID:    inventoryapi.ResourceInstanceID(instanceID),
-		ResourceID:    inventoryapi.ResourceID(resourceID),
-	}
-
-	err = instance.StartResourceInstance(ctx, &request)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return
 }
 
-func StopResourceInstance(ctx context.Context, token string, serviceID, environmentID, resourceID, instanceID string) error {
-	instance, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
+func RestartResourceInstance(ctx context.Context, token string, serviceID, environmentID, resourceID, instanceID string) (err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
+
+	req := apiClient.InventoryApiAPI.InventoryApiRestartResourceInstance(
+		ctxWithToken,
+		serviceID,
+		environmentID,
+		instanceID,
+	).FleetRestartResourceInstanceRequest2(openapiclientfleet.FleetRestartResourceInstanceRequest2{
+		ResourceId: resourceID,
+	})
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	r, err = req.Execute()
 	if err != nil {
-		return err
+		return handleFleetError(err)
 	}
-
-	request := inventoryapi.FleetStopResourceInstanceRequest{
-		Token:         token,
-		ServiceID:     inventoryapi.ServiceID(serviceID),
-		EnvironmentID: inventoryapi.ServiceEnvironmentID(environmentID),
-		InstanceID:    inventoryapi.ResourceInstanceID(instanceID),
-		ResourceID:    inventoryapi.ResourceID(resourceID),
-	}
-
-	err = instance.StopResourceInstance(ctx, &request)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return
 }
 
-func UpdateResourceInstance(ctx context.Context, token string, request inventoryapi.FleetUpdateResourceInstanceRequest) error {
-	instance, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
+func StartResourceInstance(ctx context.Context, token string, serviceID, environmentID, resourceID, instanceID string) (err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
+
+	req := apiClient.InventoryApiAPI.InventoryApiStartResourceInstance(
+		ctxWithToken,
+		serviceID,
+		environmentID,
+		instanceID,
+	).FleetStartResourceInstanceRequest2(openapiclientfleet.FleetStartResourceInstanceRequest2{
+		ResourceId: resourceID,
+	})
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	r, err = req.Execute()
 	if err != nil {
-		return err
+		return handleFleetError(err)
 	}
+	return
+}
 
-	request.Token = token
+func StopResourceInstance(ctx context.Context, token string, serviceID, environmentID, resourceID, instanceID string) (err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
 
-	err = instance.UpdateResourceInstance(ctx, &request)
+	req := apiClient.InventoryApiAPI.InventoryApiStopResourceInstance(
+		ctxWithToken,
+		serviceID,
+		environmentID,
+		instanceID,
+	).FleetStopResourceInstanceRequest2(openapiclientfleet.FleetStopResourceInstanceRequest2{
+		ResourceId: resourceID,
+	})
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	r, err = req.Execute()
 	if err != nil {
-		return err
+		return handleFleetError(err)
 	}
+	return
+}
 
-	return nil
+func UpdateResourceInstance(ctx context.Context, token string,
+	serviceID, environmentID, instanceID string,
+	resourceId string, requestParameters map[string]any) (err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
+
+	req := apiClient.InventoryApiAPI.InventoryApiUpdateResourceInstance(
+		ctxWithToken,
+		serviceID,
+		environmentID,
+		instanceID,
+	).FleetUpdateResourceInstanceRequest2(openapiclientfleet.FleetUpdateResourceInstanceRequest2{
+		ResourceId:    resourceId,
+		RequestParams: requestParameters,
+	})
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	r, err = req.Execute()
+	if err != nil {
+		return handleFleetError(err)
+	}
+	return
 }

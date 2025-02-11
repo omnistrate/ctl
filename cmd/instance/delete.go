@@ -4,6 +4,8 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/omnistrate/ctl/cmd/common"
+
 	"github.com/chelnak/ysmrr"
 	"github.com/cqroot/prompt"
 	"github.com/cqroot/prompt/input"
@@ -44,7 +46,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	yes, _ := cmd.Flags().GetBool("yes")
 
 	// Validate user login
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -89,7 +91,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	// Delete the instance
-	err = dataaccess.DeleteInstance(cmd.Context(), token, serviceID, environmentID, resourceID, instanceID)
+	err = dataaccess.DeleteResourceInstance(cmd.Context(), token, serviceID, environmentID, resourceID, instanceID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

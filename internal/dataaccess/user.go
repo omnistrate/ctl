@@ -3,7 +3,7 @@ package dataaccess
 import (
 	"context"
 
-	openapiclient "github.com/omnistrate/omnistrate-sdk-go/v1"
+	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 )
 
 func DescribeUser(ctx context.Context, token string) (*openapiclient.DescribeUserResult, error) {

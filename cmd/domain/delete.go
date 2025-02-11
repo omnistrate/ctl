@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"github.com/omnistrate/ctl/cmd/common"
 	"slices"
 	"strings"
 
@@ -39,7 +40,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err

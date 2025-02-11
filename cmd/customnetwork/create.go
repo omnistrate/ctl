@@ -3,9 +3,8 @@ package customnetwork
 import (
 	"context"
 	"fmt"
-
 	"github.com/chelnak/ysmrr"
-	customnetworkapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/custom_network_api"
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	"github.com/omnistrate/ctl/cmd/common"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
@@ -66,7 +65,7 @@ func runCreate(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	// Validate user is logged in
-	token, err := config.GetToken()
+	token, err := common.GetTokenWithLogin()
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -81,14 +80,15 @@ func runCreate(cmd *cobra.Command, args []string) (err error) {
 		sm.Start()
 	}
 
-	var newNetwork *customnetworkapi.CustomNetwork
+	var newNetwork *openapiclientfleet.FleetCustomNetwork
 	newNetwork, err = createCustomNetwork(cmd.Context(), token, cloudProvider, region, cidr, name)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	utils.HandleSpinnerSuccess(spinner, sm, fmt.Sprintf("Successfully created custom network %s", newNetwork.ID))
+	utils.HandleSpinnerSuccess(spinner, sm, fmt.Sprintf(
+		"Successfully created custom network %s", newNetwork.Id))
 
 	// Format and print the custom network details
 	formattedCustomNetwork := formatCustomNetwork(newNetwork)
@@ -99,7 +99,7 @@ func runCreate(cmd *cobra.Command, args []string) (err error) {
 		return err
 	}
 
-	CustomNetworkID = string(newNetwork.ID)
+	CustomNetworkID = newNetwork.Id
 	return
 }
 
@@ -116,17 +116,12 @@ func validateCreateArguments(cloudProvider, region, cidr string) error {
 	return nil
 }
 
-func createCustomNetwork(ctx context.Context, token, cloudProvider, region, cidr, name string) (*customnetworkapi.CustomNetwork, error) {
+func createCustomNetwork(ctx context.Context, token, cloudProvider, region, cidr, name string) (
+	*openapiclientfleet.FleetCustomNetwork, error) {
 	var nameApiParam *string
 	if len(name) > 0 {
 		nameApiParam = utils.ToPtr(name)
 	}
-	request := customnetworkapi.CreateCustomNetworkRequest{
-		CloudProviderName:   customnetworkapi.CloudProvider(cloudProvider),
-		CloudProviderRegion: region,
-		Cidr:                cidr,
-		Name:                nameApiParam,
-	}
 
-	return dataaccess.CreateCustomNetwork(ctx, token, request)
+	return dataaccess.FleetCreateCustomNetwork(ctx, token, cloudProvider, region, cidr, nameApiParam)
 }

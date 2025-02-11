@@ -147,7 +147,7 @@ func Test_service_plan_features_modification(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: enable CUSTOM_TERRAFORM_POLICY feature
-	cmd.RootCmd.SetArgs([]string{"service-plan", "enable-feature", serviceName, "BYOA Postgres", "--feature", "CUSTOM_TERRAFORM_POLICY", "--feature-configuration-file", "../configfiles/customTfPolicyFeatureConfig.json"})
+	cmd.RootCmd.SetArgs([]string{"service-plan", "enable-feature", serviceName, "BYOA Postgres", "--feature", "CUSTOM_TERRAFORM_POLICY", "--feature-configuration-file", "../build/configfiles/customTfPolicyFeatureConfig.json"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
