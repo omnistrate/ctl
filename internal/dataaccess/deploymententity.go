@@ -20,13 +20,19 @@ func GetInstanceDeploymentEntity(ctx context.Context, token string, instanceID s
 	request = request.WithContext(ctx)
 	request.Header.Add("Authorization", token)
 
-	response, err := httpClient.Do(request)
+	var response *http.Response
+	defer func() {
+		if response != nil {
+			_ = response.Body.Close()
+		}
+	}()
+
+	response, err = httpClient.Do(request)
 	if err != nil {
 		err = errors.Wrap(err, "failed to get instance deployment entity, you need to run it on dataplane agent")
 		return "", err
 	}
 
-	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("failed to get instance deployment entity: %s", response.Status)
 	}
@@ -50,13 +56,19 @@ func PauseInstanceDeploymentEntity(ctx context.Context, token string, instanceID
 	request = request.WithContext(ctx)
 	request.Header.Add("Authorization", token)
 
-	response, err := httpClient.Do(request)
+	var response *http.Response
+	defer func() {
+		if response != nil {
+			_ = response.Body.Close()
+		}
+	}()
+	
+	response, err = httpClient.Do(request)
 	if err != nil {
 		err = errors.Wrap(err, "failed to pause instance deployment entity, you need to run it on dataplane agent")
 		return err
 	}
 
-	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
 		return fmt.Errorf("failed to pause instance deployment entity: %s", response.Status)
 	}
