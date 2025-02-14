@@ -26,6 +26,7 @@ omnistrate-ctl instance [operation] [flags]
 ### SEE ALSO
 
 - [omnistrate-ctl](omnistrate-ctl.md) - Manage your Omnistrate SaaS from the command line
+- [omnistrate-ctl instance block](omnistrate-ctl_instance_block.md) - Block an instance deployment for your service
 - [omnistrate-ctl instance create](omnistrate-ctl_instance_create.md) - Create an instance deployment
 - [omnistrate-ctl instance delete](omnistrate-ctl_instance_delete.md) - Delete an instance deployment
 - [omnistrate-ctl instance describe](omnistrate-ctl_instance_describe.md) - Describe an instance deployment for your service
