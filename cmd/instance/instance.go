@@ -22,7 +22,10 @@ func init() {
 	Cmd.AddCommand(restartCmd)
 	Cmd.AddCommand(updateCmd) // Hidden (deprecated)
 	Cmd.AddCommand(modifyCmd)
-	Cmd.AddCommand(blockCmd)
+	Cmd.AddCommand(enableOverrideCmd)
+	Cmd.AddCommand(getDeploymentCmd)
+	Cmd.AddCommand(resumeDeploymentCmd)
+	Cmd.AddCommand(patchDeploymentCmd)
 }
 
 func run(cmd *cobra.Command, args []string) {

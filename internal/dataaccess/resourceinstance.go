@@ -90,11 +90,11 @@ func DescribeResourceInstance(ctx context.Context, token string, serviceID, envi
 	return
 }
 
-func BlockResourceInstance(ctx context.Context, token string, serviceID, environmentID, instanceID string) (err error) {
+func EnableResourceInstanceOverride(ctx context.Context, token string, serviceID, environmentID, instanceID string) (err error) {
 	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
 	apiClient := getFleetClient()
 
-	req := apiClient.InventoryApiAPI.InventoryApiBlockResourceInstance(
+	req := apiClient.InventoryApiAPI.InventoryApiEnableResourceInstanceManualOverride(
 		ctxWithToken,
 		serviceID,
 		environmentID,

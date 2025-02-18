@@ -11,41 +11,43 @@ import (
 )
 
 const (
-	blockExample = `# Block an instance deployment
-omctl instance block instance-abcd1234 --deployment-type terraform --deployment-name terraform-entity-name`
-
-	TerraformDeploymentType DeploymentType = "terraform"
+	getDeploymentExample = `  # Get the deployment entity metadata of the instance
+	  omctl instance get-deployment instance-abcd1234 --deployment-type terraform --deployment-name my-terraform-deployment`
 )
 
-type DeploymentType string
-
-var blockCmd = &cobra.Command{
-	Use:          "block [instance-id] --deployment-type <deployment-type> --deployment-name <deployment-name>",
-	Short:        "Block an instance deployment for your service",
-	Long:         `This command helps you block the instance for your service.`,
-	Example:      blockExample,
-	RunE:         runBlock,
+var getDeploymentCmd = &cobra.Command{
+	Use:          "get-deployment [instance-id] --deployment-type <deployment-type> --deployment-name <deployment-name>",
+	Short:        "Get the deployment entity metadata of the instance",
+	Long:         `This command helps you get the deployment entity metadata of the instance.`,
+	Example:      getDeploymentExample,
+	RunE:         runGetDeployment,
 	SilenceUsage: true,
 }
 
 func init() {
-	blockCmd.Flags().String("deployment-type", "", "Deployment type")
-	blockCmd.Flags().String("deployment-name", "", "Deployment name")
+	getDeploymentCmd.Flags().StringP("deployment-type", "t", "", "Deployment type")
+	getDeploymentCmd.Flags().StringP("deployment-name", "n", "", "Deployment name")
 
-	blockCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
-	blockCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported")
+	getDeploymentCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
+	getDeploymentCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported")
 
 	var err error
-	if err = blockCmd.MarkFlagRequired("deployment-type"); err != nil {
+	if err = getDeploymentCmd.MarkFlagRequired("deployment-type"); err != nil {
 		return
 	}
-	if err = blockCmd.MarkFlagRequired("deployment-name"); err != nil {
+	if err = getDeploymentCmd.MarkFlagRequired("deployment-name"); err != nil {
 		return
 	}
 }
 
-func runBlock(cmd *cobra.Command, args []string) error {
+func runGetDeployment(cmd *cobra.Command, args []string) error {
 	defer config.CleanupArgsAndFlags(cmd, &args)
+
+	if len(args) == 0 {
+		err := errors.New("instance id is required")
+		utils.PrintError(err)
+		return err
+	}
 
 	// Retrieve args
 	instanceID := args[0]
@@ -104,46 +106,18 @@ func runBlock(cmd *cobra.Command, args []string) error {
 	var spinner *ysmrr.Spinner
 	if output != "json" {
 		sm = ysmrr.NewSpinnerManager()
-		msg := "Blocking instance..."
+		msg := "Getting deployment entity metadata..."
 		spinner = sm.AddSpinner(msg)
 		sm.Start()
 	}
 
-	_, err = dataaccess.GetInstanceDeploymentEntity(cmd.Context(), token, instanceID, deploymentType, deploymentName)
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
-
-	// Check if instance exists
-	serviceID, environmentID, _, _, err := getInstance(cmd.Context(), token, instanceID)
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
-
-	// Block instance
-	err = dataaccess.BlockResourceInstance(cmd.Context(), token, serviceID, environmentID, instanceID)
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
-
-	// Pause deployment
-	err = dataaccess.PauseInstanceDeploymentEntity(cmd.Context(), token, instanceID, deploymentType, deploymentName)
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
-
-	// Describe deployment entity
 	deploymentEntity, err := dataaccess.GetInstanceDeploymentEntity(cmd.Context(), token, instanceID, deploymentType, deploymentName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	utils.HandleSpinnerSuccess(spinner, sm, "Successfully blocked instance deployment")
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully got deployment entity metadata")
 	// Print output
 	err = utils.PrintTextTableJsonOutput(output, deploymentEntity)
 	if err != nil {

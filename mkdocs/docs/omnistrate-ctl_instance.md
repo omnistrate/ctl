@@ -26,12 +26,15 @@ omnistrate-ctl instance [operation] [flags]
 ### SEE ALSO
 
 - [omnistrate-ctl](omnistrate-ctl.md) - Manage your Omnistrate SaaS from the command line
-- [omnistrate-ctl instance block](omnistrate-ctl_instance_block.md) - Block an instance deployment for your service
 - [omnistrate-ctl instance create](omnistrate-ctl_instance_create.md) - Create an instance deployment
 - [omnistrate-ctl instance delete](omnistrate-ctl_instance_delete.md) - Delete an instance deployment
 - [omnistrate-ctl instance describe](omnistrate-ctl_instance_describe.md) - Describe an instance deployment for your service
+- [omnistrate-ctl instance enable-override-deployment](omnistrate-ctl_instance_enable-override-deployment.md) - Enable override for an instance deployment
+- [omnistrate-ctl instance get-deployment](omnistrate-ctl_instance_get-deployment.md) - Get the deployment entity metadata of the instance
 - [omnistrate-ctl instance list](omnistrate-ctl_instance_list.md) - List instance deployments for your service
 - [omnistrate-ctl instance modify](omnistrate-ctl_instance_modify.md) - Modify an instance deployment for your service
+- [omnistrate-ctl instance patch-deployment](omnistrate-ctl_instance_patch-deployment.md) - Patch deployment for an instance deployment
 - [omnistrate-ctl instance restart](omnistrate-ctl_instance_restart.md) - Restart an instance deployment for your service
+- [omnistrate-ctl instance resume-deployment](omnistrate-ctl_instance_resume-deployment.md) - Resume an instance deployment
 - [omnistrate-ctl instance start](omnistrate-ctl_instance_start.md) - Start an instance deployment for your service
 - [omnistrate-ctl instance stop](omnistrate-ctl_instance_stop.md) - Stop an instance deployment for your service
