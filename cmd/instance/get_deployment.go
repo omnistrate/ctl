@@ -1,14 +1,34 @@
 package instance
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/cmd/common"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
+	errors2 "github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"os"
+	"path/filepath"
 )
+
+// Define structs to match the JSON structure
+type TerraformResponse struct {
+	SyncState string   `json:"syncState,omitempty"`
+	Files     FileInfo `json:"files,omitempty"`
+	SyncError string   `json:"syncError,omitempty"`
+}
+
+type FileInfo struct {
+	FilesContents   map[string]string `json:"filesContents,omitempty"`
+	Name            string            `json:"name,omitempty"`
+	InstanceID      string            `json:"instanceID,omitempty"`
+	ResourceVersion string            `json:"resourceVersion,omitempty"`
+}
 
 const (
 	getDeploymentExample = `  # Get the deployment entity metadata of the instance
@@ -117,6 +137,26 @@ func runGetDeployment(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	switch deploymentType {
+	case string(TerraformDeploymentType):
+		// Parse JSON
+		var response TerraformResponse
+		err = json.Unmarshal([]byte(deploymentEntity), &response)
+		if err != nil {
+			utils.PrintError(errors2.Errorf("Error parsing instance deployment entity response: %v\n", err))
+			return err
+		}
+
+		// Set local space
+		err = setupTerraformWorkspace(response)
+		if err != nil {
+			fmt.Printf("Error setting up terraform workspace: %v\n", err)
+			return err
+		}
+
+		utils.PrintInfo(fmt.Sprintf("Terraform workspace setup at: %s", "/tmp/"+response.Files.Name))
+	}
+
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully got deployment entity metadata")
 	// Print output
 	err = utils.PrintTextTableJsonOutput(output, deploymentEntity)
@@ -126,4 +166,37 @@ func runGetDeployment(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+func setupTerraformWorkspace(response TerraformResponse) (err error) {
+	// Create directory for files
+	dirName := "/tmp/" + response.Files.Name
+	err = os.MkdirAll(dirName, 0755)
+	if err != nil {
+		err = errors2.Wrap(err, "Error creating tmp terraform workspace directory")
+		return
+	}
+
+	// Decode and write each file
+	for filename, content := range response.Files.FilesContents {
+		var decoded []byte
+		// Decode base64 content
+		decoded, err = base64.StdEncoding.DecodeString(content)
+		if err != nil {
+			err = errors2.Wrap(err, fmt.Sprintf("Error decoding file %s", filename))
+			return
+		}
+
+		// Create full file path
+		filePath := filepath.Join(dirName, filename)
+
+		// Write file
+		err = os.WriteFile(filePath, decoded, 0644)
+		if err != nil {
+			err = errors2.Wrap(err, fmt.Sprintf("Error writing file %s", filename))
+			return
+		}
+	}
+
+	return
 }
