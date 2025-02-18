@@ -191,7 +191,7 @@ func setupTerraformWorkspace(response TerraformResponse) (err error) {
 		filePath := filepath.Join(dirName, filename)
 
 		// Write file
-		err = os.WriteFile(filePath, decoded, 0644)
+		err = os.WriteFile(filePath, decoded, 0600)
 		if err != nil {
 			err = errors2.Wrap(err, fmt.Sprintf("Error writing file %s", filename))
 			return
