@@ -3,6 +3,7 @@ package instance
 import (
 	"errors"
 	"github.com/chelnak/ysmrr"
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	"github.com/omnistrate/ctl/cmd/common"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
@@ -27,7 +28,7 @@ var patchDeploymentCmd = &cobra.Command{
 func init() {
 	patchDeploymentCmd.Flags().StringP("deployment-type", "t", "", "Deployment type")
 	patchDeploymentCmd.Flags().StringP("deployment-name", "n", "", "Deployment name")
-	patchDeploymentCmd.Flags().StringP("entity-action", "e", "", "Entity action")
+	patchDeploymentCmd.Flags().StringP("deployment-action", "e", "", "Deployment action")
 	patchDeploymentCmd.Flags().StringP("patch-files", "p", "", "Patch files")
 
 	patchDeploymentCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
@@ -40,7 +41,7 @@ func init() {
 	if err = patchDeploymentCmd.MarkFlagRequired("deployment-name"); err != nil {
 		return
 	}
-	if err = patchDeploymentCmd.MarkFlagRequired("entity-action"); err != nil {
+	if err = patchDeploymentCmd.MarkFlagRequired("deployment-action"); err != nil {
 		return
 	}
 	if err = patchDeploymentCmd.MarkFlagRequired("patch-files"); err != nil {
@@ -117,9 +118,9 @@ func runPatchDeployment(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	var entityAction string
+	var deploymentAction string
 	if deploymentType == string(TerraformDeploymentType) {
-		entityAction, err = cmd.Flags().GetString("entity-action")
+		deploymentAction, err = cmd.Flags().GetString("deployment-action")
 		if err != nil {
 			utils.PrintError(err)
 			return err
@@ -145,7 +146,28 @@ func runPatchDeployment(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	err = dataaccess.PatchInstanceDeploymentEntity(cmd.Context(), token, instanceID, deploymentType, deploymentName, patchedFilePath, entityAction)
+	// Check if instance exists
+	serviceID, environmentID, _, _, err := getInstance(cmd.Context(), token, instanceID)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+
+	// Describe instance
+	var instance *openapiclientfleet.ResourceInstance
+	instance, err = dataaccess.DescribeResourceInstance(cmd.Context(), token, serviceID, environmentID, instanceID)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+
+	if instance.ManualOverride == nil {
+		err = errors.New("manual override is not enabled for this instance")
+		utils.PrintError(err)
+		return err
+	}
+
+	err = dataaccess.PatchInstanceDeploymentEntity(cmd.Context(), token, instanceID, deploymentType, deploymentName, patchedFilePath, deploymentAction)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

@@ -27,7 +27,7 @@ var resumeDeploymentCmd = &cobra.Command{
 func init() {
 	resumeDeploymentCmd.Flags().StringP("deployment-type", "t", "", "Deployment type")
 	resumeDeploymentCmd.Flags().StringP("deployment-name", "n", "", "Deployment name")
-	resumeDeploymentCmd.Flags().StringP("entity-action", "e", "", "Entity action")
+	resumeDeploymentCmd.Flags().StringP("deployment-action", "e", "", "Deployment action")
 
 	resumeDeploymentCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 	resumeDeploymentCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported")
@@ -39,7 +39,7 @@ func init() {
 	if err = resumeDeploymentCmd.MarkFlagRequired("deployment-name"); err != nil {
 		return
 	}
-	if err = resumeDeploymentCmd.MarkFlagRequired("entity-action"); err != nil {
+	if err = resumeDeploymentCmd.MarkFlagRequired("deployment-action"); err != nil {
 		return
 	}
 }
@@ -74,16 +74,16 @@ func runResumeDeployment(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	var entityAction string
+	var deploymentAction string
 	if deploymentType == string(TerraformDeploymentType) {
-		entityAction, err = cmd.Flags().GetString("entity-action")
+		deploymentAction, err = cmd.Flags().GetString("deployment-action")
 		if err != nil {
 			utils.PrintError(err)
 			return err
 		}
 
-		if entityAction == "" {
-			err = errors.New("entity action is required")
+		if deploymentAction == "" {
+			err = errors.New("deployment action is required")
 			utils.PrintError(err)
 			return err
 		}
@@ -127,7 +127,7 @@ func runResumeDeployment(cmd *cobra.Command, args []string) error {
 	}
 
 	// Resume instance deployment
-	err = dataaccess.ResumeInstanceDeploymentEntity(cmd.Context(), token, instanceID, deploymentType, deploymentName, entityAction)
+	err = dataaccess.ResumeInstanceDeploymentEntity(cmd.Context(), token, instanceID, deploymentType, deploymentName, deploymentAction)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
