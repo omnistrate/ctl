@@ -7,24 +7,24 @@ Resume an instance deployment
 This command helps you resume the instance deployment.
 
 ```
-omnistrate-ctl instance resume-deployment [instance-id] --deployment-type <deployment-type> --deployment-name <deployment-name> --terraform-action <terraform-action> [flags]
+omnistrate-ctl instance resume-deployment [instance-id] --deployment-type <deployment-type> --deployment-name <deployment-name> --deployment-action <deployment-action> [flags]
 ```
 
 ### Examples
 
 ```
 # Resume an instance deployment
-omctl instance resume-deployment instance-abcd1234 --deployment-type terraform --deployment-name my-terraform-deployment --terraform-action apply
+omctl instance resume-deployment instance-abcd1234 --deployment-type terraform --deployment-name my-terraform-deployment --deployment-action apply
 ```
 
 ### Options
 
 ```
-  -n, --deployment-name string    Deployment name
-  -t, --deployment-type string    Deployment type
-  -h, --help                      help for resume-deployment
-  -o, --output string             Output format. Only json is supported (default "json")
-  -a, --terraform-action string   Terraform action
+  -n, --deployment-name string   Deployment name
+  -t, --deployment-type string   Deployment type
+  -e, --entity-action string     Entity action
+  -h, --help                     help for resume-deployment
+  -o, --output string            Output format. Only json is supported (default "json")
 ```
 
 ### Options inherited from parent commands

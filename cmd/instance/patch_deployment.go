@@ -12,11 +12,11 @@ import (
 
 const (
 	patchDeploymentExample = `# Patch deployment for an instance deployment
-omctl instance patch-deployment instance-abcd1234 --deployment-type terraform --deployment-name my-terraform-deployment --terraform-action apply --patch-files /patchedFiles`
+omctl instance patch-deployment instance-abcd1234 --deployment-type terraform --deployment-name my-terraform-deployment --deployment-action apply --patch-files /patchedFiles`
 )
 
 var patchDeploymentCmd = &cobra.Command{
-	Use:          "patch-deployment [instance-id] --deployment-type <deployment-type> --deployment-name <deployment-name> --terraform-action <terraform-action> --patch-files <patch-files>",
+	Use:          "patch-deployment [instance-id] --deployment-type <deployment-type> --deployment-name <deployment-name> --deployment-action <deployment-action> --patch-files <patch-files>",
 	Short:        "Patch deployment for an instance deployment",
 	Long:         `This command helps you patch the deployment for an instance deployment.`,
 	Example:      patchDeploymentExample,
@@ -27,7 +27,7 @@ var patchDeploymentCmd = &cobra.Command{
 func init() {
 	patchDeploymentCmd.Flags().StringP("deployment-type", "t", "", "Deployment type")
 	patchDeploymentCmd.Flags().StringP("deployment-name", "n", "", "Deployment name")
-	patchDeploymentCmd.Flags().StringP("terraform-action", "a", "", "Terraform action")
+	patchDeploymentCmd.Flags().StringP("entity-action", "e", "", "Entity action")
 	patchDeploymentCmd.Flags().StringP("patch-files", "p", "", "Patch files")
 
 	patchDeploymentCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
@@ -40,7 +40,7 @@ func init() {
 	if err = patchDeploymentCmd.MarkFlagRequired("deployment-name"); err != nil {
 		return
 	}
-	if err = patchDeploymentCmd.MarkFlagRequired("terraform-action"); err != nil {
+	if err = patchDeploymentCmd.MarkFlagRequired("entity-action"); err != nil {
 		return
 	}
 	if err = patchDeploymentCmd.MarkFlagRequired("patch-files"); err != nil {
@@ -117,9 +117,9 @@ func runPatchDeployment(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	var terraformAction string
+	var entityAction string
 	if deploymentType == string(TerraformDeploymentType) {
-		terraformAction, err = cmd.Flags().GetString("terraform-action")
+		entityAction, err = cmd.Flags().GetString("entity-action")
 		if err != nil {
 			utils.PrintError(err)
 			return err
@@ -145,7 +145,7 @@ func runPatchDeployment(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	err = dataaccess.PatchInstanceDeploymentEntity(cmd.Context(), token, instanceID, deploymentType, deploymentName, patchedFilePath, &terraformAction)
+	err = dataaccess.PatchInstanceDeploymentEntity(cmd.Context(), token, instanceID, deploymentType, deploymentName, patchedFilePath, entityAction)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

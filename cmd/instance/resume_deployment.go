@@ -12,11 +12,11 @@ import (
 
 const (
 	resumeDeploymentExample = `# Resume an instance deployment
-omctl instance resume-deployment instance-abcd1234 --deployment-type terraform --deployment-name my-terraform-deployment --terraform-action apply`
+omctl instance resume-deployment instance-abcd1234 --deployment-type terraform --deployment-name my-terraform-deployment --deployment-action apply`
 )
 
 var resumeDeploymentCmd = &cobra.Command{
-	Use:          "resume-deployment [instance-id] --deployment-type <deployment-type> --deployment-name <deployment-name> --terraform-action <terraform-action>",
+	Use:          "resume-deployment [instance-id] --deployment-type <deployment-type> --deployment-name <deployment-name> --deployment-action <deployment-action>",
 	Short:        "Resume an instance deployment",
 	Long:         `This command helps you resume the instance deployment.`,
 	Example:      resumeDeploymentExample,
@@ -27,7 +27,7 @@ var resumeDeploymentCmd = &cobra.Command{
 func init() {
 	resumeDeploymentCmd.Flags().StringP("deployment-type", "t", "", "Deployment type")
 	resumeDeploymentCmd.Flags().StringP("deployment-name", "n", "", "Deployment name")
-	resumeDeploymentCmd.Flags().StringP("terraform-action", "a", "", "Terraform action")
+	resumeDeploymentCmd.Flags().StringP("entity-action", "e", "", "Entity action")
 
 	resumeDeploymentCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 	resumeDeploymentCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported")
@@ -39,7 +39,7 @@ func init() {
 	if err = resumeDeploymentCmd.MarkFlagRequired("deployment-name"); err != nil {
 		return
 	}
-	if err = resumeDeploymentCmd.MarkFlagRequired("terraform-action"); err != nil {
+	if err = resumeDeploymentCmd.MarkFlagRequired("entity-action"); err != nil {
 		return
 	}
 }
@@ -74,16 +74,16 @@ func runResumeDeployment(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	var terraformAction string
+	var entityAction string
 	if deploymentType == string(TerraformDeploymentType) {
-		terraformAction, err = cmd.Flags().GetString("terraform-action")
+		entityAction, err = cmd.Flags().GetString("entity-action")
 		if err != nil {
 			utils.PrintError(err)
 			return err
 		}
 
-		if terraformAction == "" {
-			err = errors.New("terraform action is required")
+		if entityAction == "" {
+			err = errors.New("entity action is required")
 			utils.PrintError(err)
 			return err
 		}
@@ -127,7 +127,7 @@ func runResumeDeployment(cmd *cobra.Command, args []string) error {
 	}
 
 	// Resume instance deployment
-	err = dataaccess.ResumeInstanceDeploymentEntity(cmd.Context(), token, instanceID, deploymentType, deploymentName, &terraformAction)
+	err = dataaccess.ResumeInstanceDeploymentEntity(cmd.Context(), token, instanceID, deploymentType, deploymentName, entityAction)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err

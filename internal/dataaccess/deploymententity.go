@@ -80,7 +80,7 @@ func PauseInstanceDeploymentEntity(ctx context.Context, token string, instanceID
 	return nil
 }
 
-func ResumeInstanceDeploymentEntity(ctx context.Context, token string, instanceID string, deploymentType string, deploymentName string, terraformAction *string) (err error) {
+func ResumeInstanceDeploymentEntity(ctx context.Context, token string, instanceID string, deploymentType string, deploymentName string, entityAction string) (err error) {
 	httpClient := getRetryableHttpClient()
 
 	urlPath := fmt.Sprintf("http://localhost:80/2022-09-01-00/%s/resume/%s/%s", deploymentType, instanceID, deploymentName)
@@ -88,7 +88,7 @@ func ResumeInstanceDeploymentEntity(ctx context.Context, token string, instanceI
 	var payload map[string]interface{}
 	switch deploymentType {
 	case "terraform":
-		if terraformAction == nil || *terraformAction == "" {
+		if entityAction == "" {
 			err = fmt.Errorf("terraform action is required for terraform deployment type")
 			return
 		}
@@ -97,7 +97,7 @@ func ResumeInstanceDeploymentEntity(ctx context.Context, token string, instanceI
 			"token":           token,
 			"name":            deploymentName,
 			"instanceID":      instanceID,
-			"terraformAction": *terraformAction,
+			"terraformAction": entityAction,
 		}
 	default:
 		return fmt.Errorf("unsupported deployment type: %s", deploymentType)
@@ -139,7 +139,7 @@ func ResumeInstanceDeploymentEntity(ctx context.Context, token string, instanceI
 	return nil
 }
 
-func PatchInstanceDeploymentEntity(ctx context.Context, token string, instanceID string, deploymentType string, deploymentName string, patchedFilePath string, terraformAction *string) (err error) {
+func PatchInstanceDeploymentEntity(ctx context.Context, token string, instanceID string, deploymentType string, deploymentName string, patchedFilePath string, entityAction string) (err error) {
 	httpClient := getRetryableHttpClient()
 
 	urlPath := fmt.Sprintf("http://localhost:80/2022-09-01-00/%s/%s/%s", deploymentType, instanceID, deploymentName)
@@ -147,8 +147,8 @@ func PatchInstanceDeploymentEntity(ctx context.Context, token string, instanceID
 	var payload map[string]interface{}
 	switch deploymentType {
 	case "terraform":
-		if terraformAction == nil || *terraformAction == "" {
-			err = fmt.Errorf("terraform action is required for terraform deployment type")
+		if entityAction == "" {
+			err = fmt.Errorf("entity action is required for terraform deployment type")
 			return
 		}
 
@@ -165,7 +165,7 @@ func PatchInstanceDeploymentEntity(ctx context.Context, token string, instanceID
 			"name":            deploymentName,
 			"instanceID":      instanceID,
 			"filesContents":   patchedFileContents,
-			"terraformAction": *terraformAction,
+			"terraformAction": entityAction,
 		}
 	default:
 		return fmt.Errorf("unsupported deployment type: %s", deploymentType)
