@@ -20,12 +20,12 @@ omctl instance patch-deployment instance-abcd1234 --deployment-type terraform --
 ### Options
 
 ```
-  -n, --deployment-name string   Deployment name
-  -t, --deployment-type string   Deployment type
-  -e, --deployment-action string     Deployment action
-  -h, --help                     help for patch-deployment
-  -o, --output string            Output format. Only json is supported (default "json")
-  -p, --patch-files string       Patch files
+  -e, --deployment-action string   Deployment action
+  -n, --deployment-name string     Deployment name
+  -t, --deployment-type string     Deployment type
+  -h, --help                       help for patch-deployment
+  -o, --output string              Output format. Only json is supported (default "json")
+  -p, --patch-files string         Patch files
 ```
 
 ### Options inherited from parent commands

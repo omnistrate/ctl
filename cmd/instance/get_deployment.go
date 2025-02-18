@@ -150,14 +150,30 @@ func runGetDeployment(cmd *cobra.Command, args []string) error {
 		// Set local space
 		err = setupTerraformWorkspace(response)
 		if err != nil {
-			fmt.Printf("Error setting up terraform workspace: %v\n", err)
+			utils.PrintError(errors2.Errorf("Error setting up terraform workspace: %v\n", err))
 			return err
 		}
 
 		utils.PrintInfo(fmt.Sprintf("Terraform workspace setup at: %s", "/tmp/"+response.Files.Name))
+
+		displayResource := TerraformResponse{}
+		displayResource.Files = response.Files
+		displayResource.SyncState = response.SyncState
+		displayResource.SyncError = response.SyncError
+
+		// Convert to JSON
+		var displayOutput []byte
+		displayOutput, err = json.MarshalIndent(displayResource, "", "  ")
+		if err != nil {
+			utils.PrintError(errors2.Errorf("Error converting instance deployment entity response to JSON: %v\n", err))
+			return err
+		}
+
+		deploymentEntity = string(displayOutput)
 	}
 
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully got deployment entity metadata")
+
 	// Print output
 	err = utils.PrintTextTableJsonOutput(output, deploymentEntity)
 	if err != nil {

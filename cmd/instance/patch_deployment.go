@@ -1,6 +1,7 @@
 package instance
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/chelnak/ysmrr"
 	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
@@ -8,6 +9,7 @@ import (
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
+	errors2 "github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -178,6 +180,32 @@ func runPatchDeployment(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
+	}
+
+	switch deploymentType {
+	case string(TerraformDeploymentType):
+		// Parse JSON
+		var response TerraformResponse
+		err = json.Unmarshal([]byte(deploymentEntity), &response)
+		if err != nil {
+			utils.PrintError(errors2.Errorf("Error parsing instance deployment entity response: %v\n", err))
+			return err
+		}
+
+		displayResource := TerraformResponse{}
+		displayResource.Files = response.Files
+		displayResource.SyncState = response.SyncState
+		displayResource.SyncError = response.SyncError
+
+		// Convert to JSON
+		var displayOutput []byte
+		displayOutput, err = json.MarshalIndent(displayResource, "", "  ")
+		if err != nil {
+			utils.PrintError(errors2.Errorf("Error converting instance deployment entity response to JSON: %v\n", err))
+			return err
+		}
+
+		deploymentEntity = string(displayOutput)
 	}
 
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully enabled override for instance deployment")
