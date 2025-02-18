@@ -12,7 +12,7 @@ func ListServiceOfferings(ctx context.Context, token, orgID string) (inventory *
 	apiClient := getFleetClient()
 
 	req := apiClient.InventoryApiAPI.InventoryApiListServiceOfferings(ctxWithToken)
-	req.OrgId(orgID)
+	req = req.OrgId(orgID)
 
 	var r *http.Response
 	defer func() {
@@ -34,8 +34,8 @@ func DescribeServiceOfferingResource(ctx context.Context, token, serviceID, reso
 	apiClient := getFleetClient()
 
 	req := apiClient.InventoryApiAPI.InventoryApiDescribeServiceOfferingResource(ctxWithToken, serviceID, resourceID, instanceID)
-	req.ProductTierId(productTierID)
-	req.ProductTierVersion(productTierVersion)
+	req = req.ProductTierId(productTierID)
+	req = req.ProductTierVersion(productTierVersion)
 	var r *http.Response
 	defer func() {
 		if r != nil {
@@ -56,8 +56,8 @@ func DescribeServiceOffering(ctx context.Context, token, serviceID, productTierI
 	apiClient := getFleetClient()
 
 	req := apiClient.InventoryApiAPI.InventoryApiDescribeServiceOffering(ctxWithToken, serviceID)
-	req.ProductTierId(productTierID)
-	req.ProductTierVersion(productTierVersion)
+	req = req.ProductTierId(productTierID)
+	req = req.ProductTierVersion(productTierVersion)
 	var r *http.Response
 	defer func() {
 		if r != nil {

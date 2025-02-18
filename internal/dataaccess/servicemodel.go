@@ -38,7 +38,7 @@ func EnableServiceModelFeature(ctx context.Context, token, serviceID, serviceMod
 	}()
 
 	req := apiClient.ServiceModelApiAPI.ServiceModelApiEnableServiceModelFeature(ctxWithToken, serviceID, serviceModelID)
-	req.EnableServiceModelFeatureRequest2(openapiclient.EnableServiceModelFeatureRequest2{
+	req = req.EnableServiceModelFeatureRequest2(openapiclient.EnableServiceModelFeatureRequest2{
 		Feature:       featureName,
 		Configuration: featureConfiguration,
 	})
@@ -63,7 +63,7 @@ func DisableServiceModelFeature(ctx context.Context, token, serviceID, serviceMo
 	}()
 
 	req := apiClient.ServiceModelApiAPI.ServiceModelApiDisableServiceModelFeature(ctxWithToken, serviceID, serviceModelID)
-	req.DisableServiceModelFeatureRequest2(openapiclient.DisableServiceModelFeatureRequest2{
+	req = req.DisableServiceModelFeatureRequest2(openapiclient.DisableServiceModelFeatureRequest2{
 		Feature: featureName,
 	})
 
@@ -73,6 +73,6 @@ func DisableServiceModelFeature(ctx context.Context, token, serviceID, serviceMo
 	if err != nil {
 		return err
 	}
-	
+
 	return
 }
