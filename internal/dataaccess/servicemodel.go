@@ -2,70 +2,76 @@ package dataaccess
 
 import (
 	"context"
+	"net/http"
 
-	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
-	servicemodelapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_model_api"
-	"github.com/omnistrate/ctl/internal/config"
+	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 )
 
-func DescribeServiceModel(ctx context.Context, token, serviceID, serviceModelID string) (serviceModel *servicemodelapi.DescribeServiceModelResult, err error) {
-	fleetService, err := httpclientwrapper.NewServiceModel(config.GetHostScheme(), config.GetHost())
+func DescribeServiceModel(ctx context.Context, token, serviceID, serviceModelID string) (serviceModel *openapiclient.DescribeServiceModelResult, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+	apiClient := getV1Client()
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	resp, r, err := apiClient.ServiceModelApiAPI.ServiceModelApiDescribeServiceModel(ctxWithToken, serviceID, serviceModelID).Execute()
+
+	err = handleV1Error(err)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	request := &servicemodelapi.DescribeServiceModelRequest{
-		Token:     token,
-		ServiceID: servicemodelapi.ServiceID(serviceID),
-		ID:        servicemodelapi.ServiceModelID(serviceModelID),
-	}
-
-	serviceModel, err = fleetService.DescribeServiceModel(ctx, request)
-	if err != nil {
-		return
-	}
-
-	return
+	return resp, nil
 }
 
 func EnableServiceModelFeature(ctx context.Context, token, serviceID, serviceModelID, featureName string, featureConfiguration map[string]any) (err error) {
-	fleetService, err := httpclientwrapper.NewServiceModel(config.GetHostScheme(), config.GetHost())
-	if err != nil {
-		return
-	}
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+	apiClient := getV1Client()
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
 
-	request := &servicemodelapi.EnableServiceModelFeatureRequest{
-		Token:         token,
-		ServiceID:     servicemodelapi.ServiceID(serviceID),
-		ID:            servicemodelapi.ServiceModelID(serviceModelID),
-		Feature:       servicemodelapi.ServiceModelFeatureName(featureName),
+	req := apiClient.ServiceModelApiAPI.ServiceModelApiEnableServiceModelFeature(ctxWithToken, serviceID, serviceModelID)
+	req = req.EnableServiceModelFeatureRequest2(openapiclient.EnableServiceModelFeatureRequest2{
+		Feature:       featureName,
 		Configuration: featureConfiguration,
-	}
+	})
 
-	err = fleetService.EnableServiceModelFeature(ctx, request)
+	r, err = req.Execute()
+
+	err = handleV1Error(err)
 	if err != nil {
-		return
+		return err
 	}
-
 	return
 }
 
 func DisableServiceModelFeature(ctx context.Context, token, serviceID, serviceModelID, featureName string) (err error) {
-	fleetService, err := httpclientwrapper.NewServiceModel(config.GetHostScheme(), config.GetHost())
-	if err != nil {
-		return
-	}
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+	apiClient := getV1Client()
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
 
-	request := &servicemodelapi.DisableServiceModelFeatureRequest{
-		Token:     token,
-		ServiceID: servicemodelapi.ServiceID(serviceID),
-		ID:        servicemodelapi.ServiceModelID(serviceModelID),
-		Feature:   servicemodelapi.ServiceModelFeatureName(featureName),
-	}
+	req := apiClient.ServiceModelApiAPI.ServiceModelApiDisableServiceModelFeature(ctxWithToken, serviceID, serviceModelID)
+	req = req.DisableServiceModelFeatureRequest2(openapiclient.DisableServiceModelFeatureRequest2{
+		Feature: featureName,
+	})
 
-	err = fleetService.DisableServiceModelFeature(ctx, request)
+	r, err = req.Execute()
+
+	err = handleV1Error(err)
 	if err != nil {
-		return
+		return err
 	}
 
 	return
