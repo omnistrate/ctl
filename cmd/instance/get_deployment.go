@@ -32,11 +32,11 @@ type FileInfo struct {
 
 const (
 	getDeploymentExample = `  # Get the deployment entity metadata of the instance
-	  omctl instance get-deployment instance-abcd1234 --deployment-type terraform --deployment-name my-terraform-deployment`
+	  omctl instance get-deployment instance-abcd1234 --deployment-type terraform --deployment-name my-terraform-deployment --output-path /tmp`
 )
 
 var getDeploymentCmd = &cobra.Command{
-	Use:          "get-deployment [instance-id] --deployment-type <deployment-type> --deployment-name <deployment-name>",
+	Use:          "get-deployment [instance-id] --deployment-type <deployment-type> --deployment-name <deployment-name> --output-path <output-path>",
 	Short:        "Get the deployment entity metadata of the instance",
 	Long:         `This command helps you get the deployment entity metadata of the instance.`,
 	Example:      getDeploymentExample,
@@ -47,6 +47,7 @@ var getDeploymentCmd = &cobra.Command{
 func init() {
 	getDeploymentCmd.Flags().StringP("deployment-type", "t", "", "Deployment type")
 	getDeploymentCmd.Flags().StringP("deployment-name", "n", "", "Deployment name")
+	getDeploymentCmd.Flags().StringP("output-path", "p", "", "Output path")
 
 	getDeploymentCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 	getDeploymentCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported")
@@ -147,14 +148,27 @@ func runGetDeployment(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
+		var outputPath string
+		outputPath, err = cmd.Flags().GetString("output-path")
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+
+		if outputPath == "" {
+			err = errors.New("output-path is required")
+			utils.PrintError(err)
+			return err
+		}
+
 		// Set local space
-		err = setupTerraformWorkspace(response)
+		err = setupTerraformWorkspace(response, outputPath)
 		if err != nil {
 			utils.PrintError(errors2.Errorf("Error setting up terraform workspace: %v\n", err))
 			return err
 		}
 
-		utils.PrintInfo(fmt.Sprintf("Terraform workspace setup at: %s", "/tmp/"+response.Files.Name))
+		utils.PrintInfo(fmt.Sprintf("Terraform workspace setup at: %s", outputPath))
 
 		displayResource := TerraformResponse{}
 		displayResource.Files = response.Files
@@ -185,20 +199,15 @@ func runGetDeployment(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func setupTerraformWorkspace(response TerraformResponse) (err error) {
+func setupTerraformWorkspace(response TerraformResponse, outputPath string) (err error) {
 	// Create directory for files
-	dirName := "/tmp/" + response.Files.Name
+	dirName := outputPath
 
-	// delete directory if it exists
-	err = os.RemoveAll(dirName)
-	if err != nil {
-		err = errors2.Wrap(err, "Error removing old terraform workspace directory")
-		return
-	}
-
-	err = os.MkdirAll(dirName, 0755)
-	if err != nil {
-		err = errors2.Wrap(err, "Error creating tmp terraform workspace directory")
+	// check if directory exists
+	if _, err = os.Stat(dirName); err != nil {
+		if os.IsNotExist(err) {
+			err = errors2.New("output path does not exist")
+		}
 		return
 	}
 
