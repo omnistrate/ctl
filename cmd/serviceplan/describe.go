@@ -196,7 +196,7 @@ func formatServicePlanDetails(ctx context.Context, token, serviceName, planName,
 	}
 
 	// Describe pending changes
-	pendingChanges, err := dataaccess.DescribePendingChanges(ctx, token, productTier.ServiceId, string(serviceModel.ServiceAPIID), productTier.Id)
+	pendingChanges, err := dataaccess.DescribePendingChanges(ctx, token, productTier.ServiceId, serviceModel.ServiceApiId, productTier.Id)
 	if err != nil {
 		return model.ServicePlanDetails{}, err
 	}
@@ -222,7 +222,7 @@ func formatServicePlanDetails(ctx context.Context, token, serviceName, planName,
 		ServiceName:     serviceName,
 		Environment:     environment,
 		DeploymentType:  productTier.TierType,
-		TenancyType:     string(serviceModel.ModelType),
+		TenancyType:     serviceModel.ModelType,
 		EnabledFeatures: productTier.EnabledFeatures,
 		Resources:       resources,
 		PendingChanges:  formattedPendingChanges,

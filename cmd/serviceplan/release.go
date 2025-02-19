@@ -2,8 +2,9 @@ package serviceplan
 
 import (
 	"fmt"
-	"github.com/omnistrate/ctl/cmd/common"
 	"strings"
+
+	"github.com/omnistrate/ctl/cmd/common"
 
 	"github.com/chelnak/ysmrr"
 	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
@@ -99,7 +100,7 @@ func runRelease(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	serviceAPIID := string(serviceModel.ServiceAPIID)
+	serviceAPIID := serviceModel.ServiceApiId
 
 	// Release service plan
 	err = dataaccess.ReleaseServicePlan(cmd.Context(), token, serviceID, serviceAPIID, planID, getReleaseDescription(releaseDescription), releaseAsPreferred)
