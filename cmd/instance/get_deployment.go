@@ -224,6 +224,13 @@ func setupTerraformWorkspace(response TerraformResponse, outputPath string) (err
 		// Create full file path
 		filePath := filepath.Join(dirName, filename)
 
+		// Get directory of the file
+		dir := filepath.Dir(filePath)
+		// Create the directory if it doesn't exist
+		if err = os.MkdirAll(dir, 0755); err != nil {
+			return
+		}
+
 		// Write file
 		err = os.WriteFile(filePath, decoded, 0600)
 		if err != nil {
