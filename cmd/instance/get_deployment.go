@@ -188,6 +188,14 @@ func runGetDeployment(cmd *cobra.Command, args []string) error {
 func setupTerraformWorkspace(response TerraformResponse) (err error) {
 	// Create directory for files
 	dirName := "/tmp/" + response.Files.Name
+
+	// delete directory if it exists
+	err = os.RemoveAll(dirName)
+	if err != nil {
+		err = errors2.Wrap(err, "Error removing old terraform workspace directory")
+		return
+	}
+
 	err = os.MkdirAll(dirName, 0755)
 	if err != nil {
 		err = errors2.Wrap(err, "Error creating tmp terraform workspace directory")
