@@ -157,6 +157,8 @@ func runGetDeployment(cmd *cobra.Command, args []string) error {
 		utils.PrintInfo(fmt.Sprintf("Terraform workspace setup at: %s", "/tmp/"+response.Files.Name))
 
 		displayResource := TerraformResponse{}
+		displayResource.Files = response.Files
+		displayResource.Files.FilesContents = nil
 		displayResource.SyncState = response.SyncState
 		displayResource.SyncError = response.SyncError
 
