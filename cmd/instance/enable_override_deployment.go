@@ -158,7 +158,6 @@ func runEnableOverride(cmd *cobra.Command, args []string) error {
 		}
 
 		displayResource := TerraformResponse{}
-		displayResource.Files = response.Files
 		displayResource.SyncState = response.SyncState
 		displayResource.SyncError = response.SyncError
 
