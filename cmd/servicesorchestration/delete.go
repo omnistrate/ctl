@@ -38,6 +38,12 @@ func init() {
 func runDelete(cmd *cobra.Command, args []string) error {
 	defer config.CleanupArgsAndFlags(cmd, &args)
 
+	if len(args) == 0 {
+		err := errors.New("services orchestration id is required")
+		utils.PrintError(err)
+		return err
+	}
+
 	// Retrieve args
 	soID := args[0]
 

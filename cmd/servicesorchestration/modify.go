@@ -1,6 +1,7 @@
 package servicesorchestration
 
 import (
+	"errors"
 	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/cmd/common"
 	"github.com/omnistrate/ctl/internal/config"
@@ -35,6 +36,12 @@ func init() {
 
 func runModify(cmd *cobra.Command, args []string) error {
 	defer config.CleanupArgsAndFlags(cmd, &args)
+
+	if len(args) == 0 {
+		err := errors.New("services orchestration id is required")
+		utils.PrintError(err)
+		return err
+	}
 
 	// Retrieve args
 	soID := args[0]
