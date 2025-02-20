@@ -80,7 +80,7 @@ build:
 	if [ "$(GOOS)" = "windows" ]; then \
 		binary_name="$$binary_name.exe"; \
 	fi; \
-	go build -mod=mod ${BUILD_FLAGS} -o dist/$$binary_name github.com/omnistrate/ctl
+	CGO_ENABLED=0 go build -mod=mod ${BUILD_FLAGS} -o dist/$$binary_name github.com/omnistrate/ctl
 
 .PHONY: ctl-linux-amd64
 ctl-linux-amd64: main.go
