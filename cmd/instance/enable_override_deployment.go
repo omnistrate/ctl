@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/chelnak/ysmrr"
+	"github.com/cqroot/prompt"
+	"github.com/cqroot/prompt/choose"
 	"github.com/omnistrate/ctl/cmd/common"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
@@ -14,11 +16,11 @@ import (
 
 const (
 	enableOverrideExample = `# Enable override for an instance deployment
-omctl instance enable-override-deployment <instance-id> --deployment-type terraform --deployment-name terraform-entity-name`
+omctl instance enable-override-deployment <instance-id> --deployment-type terraform --deployment-name terraform-entity-name --force`
 )
 
 var enableOverrideCmd = &cobra.Command{
-	Use:          "enable-override-deployment [instance-id] --deployment-type <deployment-type> --deployment-name <deployment-name>",
+	Use:          "enable-override-deployment [instance-id] --deployment-type <deployment-type> --deployment-name <deployment-name> --force",
 	Short:        "Enable override for an instance deployment",
 	Long:         `This command helps you enable override for an instance deployment`,
 	Example:      enableOverrideExample,
@@ -29,6 +31,7 @@ var enableOverrideCmd = &cobra.Command{
 func init() {
 	enableOverrideCmd.Flags().StringP("deployment-type", "t", "", "Deployment type")
 	enableOverrideCmd.Flags().StringP("deployment-name", "n", "", "Deployment name")
+	enableOverrideCmd.Flags().BoolP("force", "f", false, "Force enable override")
 
 	enableOverrideCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 	enableOverrideCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported")
@@ -53,6 +56,34 @@ func runEnableOverride(cmd *cobra.Command, args []string) error {
 
 	// Retrieve args
 	instanceID := args[0]
+
+	isForce, err := cmd.Flags().GetBool("force")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	if !isForce {
+		// Prompt user to confirm
+		var choice string
+		choice, err = prompt.New().Ask("Enable override will interrupt ongoing terraform operations, continue to proceed?").
+			Choose([]string{
+				"Yes",
+				"No",
+			}, choose.WithTheme(choose.ThemeArrow))
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+
+		switch choice {
+		case "Yes":
+			break
+		case "No":
+			utils.PrintInfo("Operation cancelled")
+			return nil
+		}
+	}
 
 	// Retrieve flags
 	output, err := cmd.Flags().GetString("output")
