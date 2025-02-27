@@ -206,9 +206,11 @@ func setupTerraformWorkspace(response TerraformResponse, outputPath string) (err
 	// check if directory exists
 	if _, err = os.Stat(dirName); err != nil {
 		if os.IsNotExist(err) {
-			err = errors2.New("output path does not exist")
+			// Create the directory if it doesn't exist
+			if err = os.MkdirAll(dirName, 0755); err != nil {
+				return
+			}
 		}
-		return
 	}
 
 	// Decode and write each file
