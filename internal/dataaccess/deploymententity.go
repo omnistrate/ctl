@@ -33,7 +33,7 @@ func GetInstanceDeploymentEntity(ctx context.Context, token string, instanceID s
 
 	response, err = httpClient.Do(request)
 	if err != nil {
-		err = errors.Wrap(err, "failed to get instance deployment entity, you need to run it on dataplane agent")
+		err = errors.Wrap(err, "Could not retrieve instance deployment information. Please try executing the command within the dataplane agent pod.")
 		return "", err
 	}
 

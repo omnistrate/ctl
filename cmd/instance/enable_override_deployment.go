@@ -146,7 +146,7 @@ func runEnableOverride(cmd *cobra.Command, args []string) error {
 
 	_, err = dataaccess.GetInstanceDeploymentEntity(cmd.Context(), token, instanceID, deploymentType, deploymentName)
 	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
+		utils.PrintError(err)
 		return err
 	}
 
