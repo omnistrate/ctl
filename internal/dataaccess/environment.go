@@ -141,7 +141,7 @@ func FindEnvironment(ctx context.Context, token, serviceID, environmentType stri
 		if err != nil {
 			return nil, err
 		}
-		if strings.EqualFold(descRes.GetType(), environmentType) {
+		if strings.EqualFold(descRes.Type, environmentType) {
 			return descRes, nil
 		}
 	}

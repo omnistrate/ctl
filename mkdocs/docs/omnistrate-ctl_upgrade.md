@@ -42,5 +42,6 @@ omctl upgrade [instance1] [instance2] --version-name=v0.1.1
 
 ### SEE ALSO
 
-- [omnistrate-ctl](omnistrate-ctl.md) - Manage your Omnistrate SaaS from the command line
-- [omnistrate-ctl upgrade status](omnistrate-ctl_upgrade_status.md) - Get Upgrade status
+* [omnistrate-ctl](omnistrate-ctl.md)	 - Manage your Omnistrate SaaS from the command line
+* [omnistrate-ctl upgrade status](omnistrate-ctl_upgrade_status.md)	 - Get Upgrade status
+
