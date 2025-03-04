@@ -12,6 +12,8 @@ type UpgradeStatus struct {
 	UpgradeID  string `json:"upgrade_id"`
 	Total      int64  `json:"total"`
 	Pending    int64  `json:"pending"`
+	Scheduled  int64  `json:"scheduled"`
+	Skipped    int64  `json:"skipped"`
 	InProgress int64  `json:"in_progress"`
 	Completed  int64  `json:"completed"`
 	Failed     int64  `json:"failed"`
