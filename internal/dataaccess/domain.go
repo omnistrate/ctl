@@ -41,14 +41,16 @@ func DeleteDomain(ctx context.Context, token, environmentType string) error {
 	return nil
 }
 
-func CreateDomain(ctx context.Context, token, customDomain, environmentType string) error {
+func CreateDomain(ctx context.Context, token, name, description, environmentType, customDomain string) error {
 	ctxWithToken := context.WithValue(ctx, openapiclientv1.ContextAccessToken, token)
 	apiClient := getV1Client()
 
 	r, err := apiClient.SaasPortalApiAPI.SaasPortalApiCreateSaaSPortalCustomDomain(ctxWithToken).
 		CreateSaaSPortalCustomDomainRequest2(openapiclientv1.CreateSaaSPortalCustomDomainRequest2{
-			CustomDomain:    customDomain,
+			Name:            name,
+			Description:     description,
 			EnvironmentType: environmentType,
+			CustomDomain:    customDomain,
 		}).
 		Execute()
 	defer func() {
