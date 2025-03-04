@@ -203,7 +203,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	for _, resourceEntity := range offering.ResourceParameters {
 		if strings.EqualFold(resourceEntity.Name, resource) {
 			found = true
-			resourceKey = resourceEntity.URLKey
+			resourceKey = resourceEntity.UrlKey
 		}
 	}
 
@@ -224,7 +224,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		request.SubscriptionId = utils.ToPtr(subscriptionID)
 	}
 	instance, err := dataaccess.CreateResourceInstance(cmd.Context(), token,
-		res.ConsumptionDescribeServiceOfferingResult.ServiceProviderID,
+		res.ConsumptionDescribeServiceOfferingResult.ServiceProviderId,
 		res.ConsumptionDescribeServiceOfferingResult.ServiceURLKey,
 		offering.ServiceAPIVersion,
 		offering.ServiceEnvironmentURLKey,
