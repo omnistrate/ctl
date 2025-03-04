@@ -3,12 +3,13 @@ package environment
 import (
 	"context"
 	"fmt"
-	"github.com/omnistrate/ctl/cmd/common"
 	"slices"
 	"strings"
 
+	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
+	"github.com/omnistrate/ctl/cmd/common"
+
 	"github.com/chelnak/ysmrr"
-	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
@@ -103,7 +104,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if source environment exists
-	sourceEnvID := ""
+	var sourceEnvID *string
 	if strings.TrimSpace(sourceEnvName) != "" {
 		sourceEnvID, err = getSourceEnvironmentID(cmd.Context(), token, serviceID, sourceEnvName)
 		if err != nil {
@@ -125,7 +126,17 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	publicKeyPtr := getPublicKeyPtr(visibility)
-	environmentID, err := createEnvironment(cmd.Context(), token, envName, description, serviceID, envType, visibility, defaultDeploymentConfigID, sourceEnvID, publicKeyPtr)
+	environmentID, err := dataaccess.CreateServiceEnvironment(
+		cmd.Context(), token,
+		envName, 
+		description, 
+		serviceID,
+		visibility, 
+		envType, 
+		sourceEnvID,
+		defaultDeploymentConfigID,
+		true,
+		publicKeyPtr)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -134,7 +145,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully created environment")
 
 	// Describe the environment
-	environment, err := dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, string(environmentID))
+	environment, err := dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, environmentID)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -149,7 +160,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	EnvironmentID = string(environmentID)
+	EnvironmentID = environmentID
 
 	return nil
 }
@@ -188,23 +199,23 @@ func getService(ctx context.Context, token, serviceIDArg, serviceNameArg string)
 	return "", "", errors.New("service not found")
 }
 
-func getSourceEnvironmentID(ctx context.Context, token, serviceID, sourceEnvName string) (string, error) {
+func getSourceEnvironmentID(ctx context.Context, token, serviceID, sourceEnvName string) (*string, error) {
 	if sourceEnvName == "" {
-		return "", nil
+		return nil, nil
 	}
 
 	describeServiceRes, err := dataaccess.DescribeService(ctx, token, serviceID)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	for _, env := range describeServiceRes.ServiceEnvironments {
 		if strings.EqualFold(env.Name, sourceEnvName) {
-			return env.Id, nil
+			return utils.ToPtr(env.Id), nil
 		}
 	}
 
-	return "", errors.New("source environment not found. Please provide a valid source environment name")
+	return nil, errors.New("source environment not found. Please provide a valid source environment name")
 }
 
 func getVisibility(envType string) string {
@@ -225,31 +236,12 @@ func getPublicKeyPtr(visibility string) *string {
 	return nil
 }
 
-func createEnvironment(ctx context.Context, token, envName, description, serviceID, envType, visibility, defaultDeploymentConfigID, sourceEnvID string, publicKeyPtr *string) (serviceenvironmentapi.ServiceEnvironmentID, error) {
-	request := serviceenvironmentapi.CreateServiceEnvironmentRequest{
-		Name:                    envName,
-		Description:             description,
-		ServiceID:               serviceenvironmentapi.ServiceID(serviceID),
-		Visibility:              serviceenvironmentapi.ServiceVisibility(visibility),
-		Type:                    utils.ToPtr(serviceenvironmentapi.EnvironmentType(envType)),
-		ServiceAuthPublicKey:    publicKeyPtr,
-		DeploymentConfigID:      serviceenvironmentapi.DeploymentConfigID(defaultDeploymentConfigID),
-		AutoApproveSubscription: utils.ToPtr(true),
-	}
-
-	if sourceEnvID != "" {
-		request.SourceEnvironmentID = (*serviceenvironmentapi.ServiceEnvironmentID)(utils.ToPtr(sourceEnvID))
-	}
-
-	return dataaccess.CreateServiceEnvironment(ctx, token, request)
-}
-
-func getPromoteStatus(ctx context.Context, token, serviceID string, environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) string {
-	if !utils.CheckIfNilOrEmpty((*string)(environment.SourceEnvironmentID)) {
-		promoteRes, err := dataaccess.PromoteServiceEnvironmentStatus(ctx, token, serviceID, string(*environment.SourceEnvironmentID))
+func getPromoteStatus(ctx context.Context, token, serviceID string, environment *openapiclientv1.DescribeServiceEnvironmentResult) string {
+	if !utils.CheckIfNilOrEmpty(environment.SourceEnvironmentId) {
+		promoteRes, err := dataaccess.PromoteServiceEnvironmentStatus(ctx, token, serviceID, *environment.SourceEnvironmentId)
 		if err == nil {
 			for _, res := range promoteRes {
-				if string(res.TargetEnvironmentID) == string(environment.ID) {
+				if res.TargetEnvironmentID == environment.Id {
 					return res.Status
 				}
 			}

@@ -2,10 +2,11 @@ package domain
 
 import (
 	"fmt"
-	"github.com/omnistrate/ctl/cmd/common"
 	"strings"
 
-	saasportalapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/saas_portal_api"
+	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
+	"github.com/omnistrate/ctl/cmd/common"
+
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/pkg/errors"
@@ -80,7 +81,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		}
 
 		// Check if domain of the same environment type already exists
-		if d.EnvironmentType == saasportalapi.EnvironmentType(strings.ToUpper(environmentType)) {
+		if d.EnvironmentType == strings.ToUpper(environmentType) {
 			err = errors.New("domain with the same environment type already exists, please choose a different environment type. You can use 'omnistrate-ctl get domain' to list all existing domains.")
 			utils.PrintError(err)
 			return err
@@ -88,15 +89,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Create domain
-	request := &saasportalapi.CreateSaaSPortalCustomDomainRequest{
-		Token:           token,
-		Name:            args[0],
-		Description:     "Custom domain for " + environmentType + " environment",
-		EnvironmentType: saasportalapi.EnvironmentType(strings.ToUpper(environmentType)),
-		CustomDomain:    domain,
-	}
-
-	err = dataaccess.CreateDomain(cmd.Context(), request)
+	err = dataaccess.CreateDomain(cmd.Context(), token, args[0], "Custom domain for "+environmentType+" environment", strings.ToUpper(environmentType), domain)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -111,7 +104,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	var customDomain *saasportalapi.CustomDomain
+	var customDomain openapiclientv1.CustomDomain
 	for _, d := range domains.CustomDomains {
 		if d.Name == args[0] {
 			customDomain = d

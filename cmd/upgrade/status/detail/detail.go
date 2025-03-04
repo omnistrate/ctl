@@ -2,6 +2,7 @@ package detail
 
 import (
 	"fmt"
+
 	"github.com/omnistrate/ctl/cmd/common"
 
 	"github.com/chelnak/ysmrr"
@@ -108,8 +109,8 @@ func run(cmd *cobra.Command, args []string) error {
 		}
 		formattedUpgradeStatusDetails = append(formattedUpgradeStatusDetails, &model.UpgradeStatusDetail{
 			UpgradeID:        upgradePathID,
-			InstanceID:       string(instanceUpgrade.InstanceID),
-			UpgradeStatus:    string(instanceUpgrade.Status),
+			InstanceID:       instanceUpgrade.InstanceId,
+			UpgradeStatus:    instanceUpgrade.Status,
 			UpgradeStartTime: startTime,
 			UpgradeEndTime:   endTime,
 		})

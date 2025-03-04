@@ -4,19 +4,20 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"github.com/omnistrate/ctl/cmd/common"
-	"github.com/omnistrate/ctl/internal/model"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/omnistrate/ctl/cmd/common"
+	"github.com/omnistrate/ctl/internal/model"
 
 	"github.com/chelnak/ysmrr"
 	"github.com/compose-spec/compose-go/loader"
 	"github.com/compose-spec/compose-go/types"
 	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
+	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
-	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
@@ -478,7 +479,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 
 	// Step 3: Launch service to production if the service is in dev environment
 	if interactive {
-		if strings.ToLower(string(serviceEnvironment.Type)) == "dev" {
+		if strings.ToLower(serviceEnvironment.Type) == "dev" {
 			// Ask the user if they want to launch the service to production
 			fmt.Print("Do you want to launch it to production? [Y/n] You can always promote it later: ")
 			var userInput string
@@ -500,7 +501,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 					return err
 				}
 
-				var prodEnvironmentID serviceenvironmentapi.ServiceEnvironmentID
+				var prodEnvironmentID string
 				if errors.As(err, &dataaccess.ErrEnvironmentNotFound) {
 					// Get default deployment config ID
 					defaultDeploymentConfigID, err := dataaccess.GetDefaultDeploymentConfigID(cmd.Context(), token)
@@ -508,25 +509,24 @@ func runBuild(cmd *cobra.Command, args []string) error {
 						utils.PrintError(err)
 						return err
 					}
-
-					prod := serviceenvironmentapi.CreateServiceEnvironmentRequest{
-						Name:                    "Production",
-						Description:             "Production environment",
-						ServiceID:               serviceenvironmentapi.ServiceID(ServiceID),
-						Visibility:              serviceenvironmentapi.ServiceVisibility("PUBLIC"),
-						Type:                    (*serviceenvironmentapi.EnvironmentType)(utils.ToPtr("PROD")),
-						SourceEnvironmentID:     utils.ToPtr(serviceenvironmentapi.ServiceEnvironmentID(EnvironmentID)),
-						DeploymentConfigID:      serviceenvironmentapi.DeploymentConfigID(defaultDeploymentConfigID),
-						AutoApproveSubscription: utils.ToPtr(true),
-					}
-
-					prodEnvironmentID, err = dataaccess.CreateServiceEnvironment(cmd.Context(), token, prod)
+					prodEnvironmentID, err = dataaccess.CreateServiceEnvironment(
+						cmd.Context(), 
+						token,
+						"Production", 
+						"Production environment", 
+						ServiceID,
+						"PUBLIC", 
+						"PROD",
+						utils.ToPtr(EnvironmentID),
+						defaultDeploymentConfigID,
+						true,
+						nil)
 					if err != nil {
 						utils.PrintError(err)
 						return err
 					}
 				} else {
-					prodEnvironmentID = prodEnvironment.ID
+					prodEnvironmentID = prodEnvironment.Id
 				}
 
 				// Promote the service to production
@@ -540,14 +540,14 @@ func runBuild(cmd *cobra.Command, args []string) error {
 				sm2.Stop()
 
 				// Retrieve the prod SaaS portal URL
-				prodEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, ServiceID, string(prodEnvironmentID))
+				prodEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, ServiceID, prodEnvironmentID)
 				if err != nil {
 					utils.PrintError(err)
 					return err
 				}
 
 				if checkIfSaaSPortalReady(prodEnvironment) {
-					utils.PrintURL("Your SaaS portal is ready at", getSaaSPortalURL(prodEnvironment, ServiceID, string(prodEnvironmentID)))
+					utils.PrintURL("Your SaaS portal is ready at", getSaaSPortalURL(prodEnvironment, ServiceID, prodEnvironmentID))
 				} else if interactive {
 					// Ask the user if they want to wait for the SaaS portal URL
 					fmt.Print("Do you want to wait to access the prod SaaS offer? [Y/n] It may take a few minutes: ")
@@ -564,7 +564,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 						sm3.Start()
 
 						for {
-							serviceEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, ServiceID, string(prodEnvironmentID))
+							serviceEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, ServiceID, prodEnvironmentID)
 							if err != nil {
 								utils.PrintError(err)
 								return err
@@ -573,7 +573,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 							if checkIfSaaSPortalReady(serviceEnvironment) {
 								loading.Complete()
 								sm3.Stop()
-								utils.PrintURL("Your SaaS offer is ready at", getSaaSPortalURL(serviceEnvironment, ServiceID, string(prodEnvironmentID)))
+								utils.PrintURL("Your SaaS offer is ready at", getSaaSPortalURL(serviceEnvironment, ServiceID, prodEnvironmentID))
 								break
 							}
 						}
@@ -732,17 +732,17 @@ func buildService(ctx context.Context, fileData []byte, token, name, specType st
 	}
 }
 
-func checkIfSaaSPortalReady(serviceEnvironment *serviceenvironmentapi.DescribeServiceEnvironmentResult) bool {
-	if serviceEnvironment.SaasPortalURL != nil && serviceEnvironment.SaasPortalStatus != nil && *serviceEnvironment.SaasPortalStatus == "RUNNING" {
+func checkIfSaaSPortalReady(serviceEnvironment *openapiclientv1.DescribeServiceEnvironmentResult) bool {
+	if serviceEnvironment.SaasPortalUrl != nil && serviceEnvironment.SaasPortalStatus != nil && *serviceEnvironment.SaasPortalStatus == "RUNNING" {
 		return true
 	}
 
 	return false
 }
 
-func getSaaSPortalURL(serviceEnvironment *serviceenvironmentapi.DescribeServiceEnvironmentResult, serviceID, environmentID string) string {
-	if serviceEnvironment.SaasPortalURL != nil {
-		return fmt.Sprintf("https://"+*serviceEnvironment.SaasPortalURL+"/service-plans?serviceId=%s&environmentId=%s", serviceID, environmentID)
+func getSaaSPortalURL(serviceEnvironment *openapiclientv1.DescribeServiceEnvironmentResult, serviceID, environmentID string) string {
+	if serviceEnvironment.SaasPortalUrl != nil {
+		return fmt.Sprintf("https://"+*serviceEnvironment.SaasPortalUrl+"/service-plans?serviceId=%s&environmentId=%s", serviceID, environmentID)
 	}
 
 	return ""

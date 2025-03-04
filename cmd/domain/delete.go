@@ -63,7 +63,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 
 	for _, d := range listRes.CustomDomains {
 		if slices.Contains(args, d.Name) {
-			environmentTypes = append(environmentTypes, string(d.EnvironmentType))
+			environmentTypes = append(environmentTypes, d.EnvironmentType)
 			found[d.Name] += 1
 		}
 	}
