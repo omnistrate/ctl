@@ -1,16 +1,19 @@
 package model
 
 type Upgrade struct {
-	UpgradeID     string `json:"upgrade_id"`
-	SourceVersion string `json:"source_version"`
-	TargetVersion string `json:"target_version"`
-	InstanceIDs   string `json:"instance_ids"`
+	UpgradeID     string  `json:"upgrade_id"`
+	SourceVersion string  `json:"source_version"`
+	TargetVersion string  `json:"target_version"`
+	ScheduledDate *string `json:"scheduled_date,omitempty"`
+	InstanceIDs   string  `json:"instance_ids"`
 }
 
 type UpgradeStatus struct {
 	UpgradeID  string `json:"upgrade_id"`
 	Total      int    `json:"total"`
 	Pending    int    `json:"pending"`
+	Scheduled  int    `json:"scheduled"`
+	Skipped    int    `json:"skipped"`
 	InProgress int    `json:"in_progress"`
 	Completed  int    `json:"completed"`
 	Failed     int    `json:"failed"`

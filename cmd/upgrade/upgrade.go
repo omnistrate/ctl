@@ -52,6 +52,7 @@ type Args struct {
 	ProductTierID string
 	SourceVersion string
 	TargetVersion string
+	ScheduledDate *string
 }
 
 var UpgradePathIDs []string
@@ -82,6 +83,11 @@ func run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		utils.PrintError(err)
 		return err
+	}
+	scheduledDateParam, pError := cmd.Flags().GetString("scheduled-date")
+	var scheduledDate *string
+	if pError == nil && scheduledDateParam != "" {
+		scheduledDate = &scheduledDateParam
 	}
 
 	// Validate input arguments
@@ -224,12 +230,14 @@ func run(cmd *cobra.Command, args []string) error {
 			ProductTierID: productTierID,
 			SourceVersion: sourceVersion,
 			TargetVersion: targetVersion,
+			ScheduledDate: scheduledDate,
 		}] == nil {
 			upgrades[Args{
 				ServiceID:     serviceID,
 				ProductTierID: productTierID,
 				SourceVersion: sourceVersion,
 				TargetVersion: targetVersion,
+				ScheduledDate: scheduledDate,
 			}] = &Res{
 				InstanceIDs: make([]string, 0),
 			}
@@ -240,11 +248,13 @@ func run(cmd *cobra.Command, args []string) error {
 			ProductTierID: productTierID,
 			SourceVersion: sourceVersion,
 			TargetVersion: targetVersion,
+			ScheduledDate: scheduledDate,
 		}].InstanceIDs = append(upgrades[Args{
 			ServiceID:     serviceID,
 			ProductTierID: productTierID,
 			SourceVersion: sourceVersion,
 			TargetVersion: targetVersion,
+			ScheduledDate: scheduledDate,
 		}].InstanceIDs, instanceID)
 	}
 
@@ -258,6 +268,7 @@ func run(cmd *cobra.Command, args []string) error {
 			upgradeArgs.ProductTierID,
 			upgradeArgs.SourceVersion,
 			upgradeArgs.TargetVersion,
+			upgradeArgs.ScheduledDate,
 			upgradeRes.InstanceIDs,
 		)
 		if err != nil {
@@ -279,6 +290,7 @@ func run(cmd *cobra.Command, args []string) error {
 			SourceVersion: upgradeArgs.SourceVersion,
 			TargetVersion: upgradeArgs.TargetVersion,
 			InstanceIDs:   strings.Join(upgradeRes.InstanceIDs, ","),
+			ScheduledDate: upgradeArgs.ScheduledDate,
 		}
 
 		formattedUpgrades = append(formattedUpgrades, formattedUpgrade)

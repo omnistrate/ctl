@@ -8,7 +8,7 @@ import (
 	"github.com/omnistrate/ctl/internal/config"
 )
 
-func CreateUpgradePath(ctx context.Context, token, serviceID, productTierID, sourceVersion, targetVersion string, instanceIDs []string) (upgradepathapi.UpgradePathID, error) {
+func CreateUpgradePath(ctx context.Context, token, serviceID, productTierID, sourceVersion, targetVersion string, scheduledDate *string, instanceIDs []string) (upgradepathapi.UpgradePathID, error) {
 	upgradePath, err := httpclientwrapper.NewInventory(config.GetHostScheme(), config.GetHost())
 	if err != nil {
 		return "", err
@@ -20,6 +20,7 @@ func CreateUpgradePath(ctx context.Context, token, serviceID, productTierID, sou
 		ProductTierID: upgradepathapi.ProductTierID(productTierID),
 		SourceVersion: sourceVersion,
 		TargetVersion: targetVersion,
+		ScheduledDate: scheduledDate,
 		UpgradeFilters: map[upgradepathapi.UpgradeFilterType][]string{
 			"INSTANCE_IDS": instanceIDs,
 		},
