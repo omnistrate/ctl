@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	"github.com/omnistrate/ctl/cmd/common"
@@ -140,6 +141,36 @@ func getInstance(ctx context.Context, token, instanceID string) (serviceID, envi
 	if !found {
 		err = fmt.Errorf("%s not found. Please check the instance ID and try again", instanceID)
 		return
+	}
+
+	return
+}
+
+func getResourceFromInstance(ctx context.Context, token string, instanceID string, resourceName string) (resourceID, resourceType string, err error) {
+	// Check if instance exists
+	serviceID, environmentID, _, _, err := getInstance(ctx, token, instanceID)
+	if err != nil {
+		return
+	}
+
+	// Retrieve resource ID
+	instanceDes, err := dataaccess.DescribeResourceInstance(ctx, token, serviceID, environmentID, instanceID)
+	if err != nil {
+		return
+	}
+
+	versionSetDes, err := dataaccess.DescribeVersionSet(ctx, token, serviceID, instanceDes.ProductTierId, instanceDes.TierVersion)
+	if err != nil {
+		return
+	}
+
+	for _, resource := range versionSetDes.Resources {
+		if resource.Name == resourceName {
+			resourceID = resource.Id
+			if resource.ManagedResourceType != nil {
+				resourceType = strings.ToLower(*resource.ManagedResourceType)
+			}
+		}
 	}
 
 	return

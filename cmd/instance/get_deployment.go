@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Define structs to match the JSON structure
@@ -32,11 +33,11 @@ type FileInfo struct {
 
 const (
 	getDeploymentExample = `  # Get the deployment entity metadata of the instance
-	  omctl instance get-deployment instance-abcd1234 --deployment-type terraform --deployment-name my-terraform-deployment --output-path /tmp`
+	  omctl instance get-deployment instance-abcd1234 --resource-name my-terraform-deployment --output-path /tmp`
 )
 
 var getDeploymentCmd = &cobra.Command{
-	Use:          "get-deployment [instance-id] --deployment-type <deployment-type> --deployment-name <deployment-name> --output-path <output-path>",
+	Use:          "get-deployment [instance-id] --resource-name <resource-name> --output-path <output-path>",
 	Short:        "Get the deployment entity metadata of the instance",
 	Long:         `This command helps you get the deployment entity metadata of the instance.`,
 	Example:      getDeploymentExample,
@@ -45,18 +46,14 @@ var getDeploymentCmd = &cobra.Command{
 }
 
 func init() {
-	getDeploymentCmd.Flags().StringP("deployment-type", "t", "", "Deployment type")
-	getDeploymentCmd.Flags().StringP("deployment-name", "n", "", "Deployment name")
+	getDeploymentCmd.Flags().StringP("resource-name", "r", "", "Resource name")
 	getDeploymentCmd.Flags().StringP("output-path", "p", "", "Output path")
 
 	getDeploymentCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 	getDeploymentCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported")
 
 	var err error
-	if err = getDeploymentCmd.MarkFlagRequired("deployment-type"); err != nil {
-		return
-	}
-	if err = getDeploymentCmd.MarkFlagRequired("deployment-name"); err != nil {
+	if err = getDeploymentCmd.MarkFlagRequired("resource-name"); err != nil {
 		return
 	}
 }
@@ -88,29 +85,14 @@ func runGetDeployment(cmd *cobra.Command, args []string) error {
 	}
 
 	// Retrieve flags
-	deploymentType, err := cmd.Flags().GetString("deployment-type")
+	resourceName, err := cmd.Flags().GetString("resource-name")
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	// Validate deployment type
-	if deploymentType != string(TerraformDeploymentType) {
-		err = errors.New("only terraform deployment type is supported")
-		utils.PrintError(err)
-		return err
-	}
-
-	// Retrieve flags
-	deploymentName, err := cmd.Flags().GetString("deployment-name")
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
-	// Validate deployment name
-	if deploymentName == "" {
-		err = errors.New("deployment name is required")
+	if resourceName == "" {
+		err = errors.New("resource name is required")
 		utils.PrintError(err)
 		return err
 	}
@@ -132,13 +114,32 @@ func runGetDeployment(cmd *cobra.Command, args []string) error {
 		sm.Start()
 	}
 
-	deploymentEntity, err := dataaccess.GetInstanceDeploymentEntity(cmd.Context(), token, instanceID, deploymentType, deploymentName)
+	resourceID, resourceType, err := getResourceFromInstance(cmd.Context(), token, instanceID, resourceName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	switch deploymentType {
+	// Validate deployment type
+	if strings.ToLower(resourceType) != string(TerraformDeploymentType) {
+		err = errors.New("only terraform deployment type is supported")
+		utils.PrintError(err)
+		return err
+	}
+
+	var deploymentName string
+	switch strings.ToLower(resourceType) {
+	case string(TerraformDeploymentType):
+		deploymentName = getTerraformDeploymentName(resourceID, instanceID)
+	}
+
+	deploymentEntity, err := dataaccess.GetInstanceDeploymentEntity(cmd.Context(), token, instanceID, resourceType, deploymentName)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+
+	switch resourceType {
 	case string(TerraformDeploymentType):
 		// Parse JSON
 		var response TerraformResponse

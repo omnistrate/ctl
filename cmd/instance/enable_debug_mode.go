@@ -12,40 +12,37 @@ import (
 	"github.com/omnistrate/ctl/internal/utils"
 	errors2 "github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"strings"
 )
 
 const (
-	enableOverrideExample = `# Enable override for an instance deployment
-omctl instance enable-override-deployment <instance-id> --deployment-type terraform --deployment-name terraform-entity-name --force`
+	enableDebugModeExample = `# Enable debug mode for an instance deployment
+omctl instance enable-debug-mode i-1234 --resource-name terraform --force`
 )
 
-var enableOverrideCmd = &cobra.Command{
-	Use:          "enable-override-deployment [instance-id] --deployment-type <deployment-type> --deployment-name <deployment-name> --force",
-	Short:        "Enable override for an instance deployment",
-	Long:         `This command helps you enable override for an instance deployment`,
-	Example:      enableOverrideExample,
-	RunE:         runEnableOverride,
+var enableDebugModeCmd = &cobra.Command{
+	Use:          "enable-debug-mode [instance-id] --resource-name [resource-name] --force",
+	Short:        "Enable debug mode for an instance deployment",
+	Long:         `This command helps you enable debug mode for an instance deployment`,
+	Example:      enableDebugModeExample,
+	RunE:         runEnableDebug,
 	SilenceUsage: true,
 }
 
 func init() {
-	enableOverrideCmd.Flags().StringP("deployment-type", "t", "", "Deployment type")
-	enableOverrideCmd.Flags().StringP("deployment-name", "n", "", "Deployment name")
-	enableOverrideCmd.Flags().BoolP("force", "f", false, "Force enable override")
+	enableDebugModeCmd.Flags().StringP("resource-name", "r", "", "Resource name")
+	enableDebugModeCmd.Flags().BoolP("force", "f", false, "Force enable debug mode")
 
-	enableOverrideCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
-	enableOverrideCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported")
+	enableDebugModeCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
+	enableDebugModeCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported")
 
 	var err error
-	if err = enableOverrideCmd.MarkFlagRequired("deployment-type"); err != nil {
-		return
-	}
-	if err = enableOverrideCmd.MarkFlagRequired("deployment-name"); err != nil {
+	if err = enableDebugModeCmd.MarkFlagRequired("resource-name"); err != nil {
 		return
 	}
 }
 
-func runEnableOverride(cmd *cobra.Command, args []string) error {
+func runEnableDebug(cmd *cobra.Command, args []string) error {
 	defer config.CleanupArgsAndFlags(cmd, &args)
 
 	if len(args) == 0 {
@@ -66,7 +63,7 @@ func runEnableOverride(cmd *cobra.Command, args []string) error {
 	if !isForce {
 		// Prompt user to confirm
 		var choice string
-		choice, err = prompt.New().Ask("Enable override will interrupt ongoing terraform operations, continue to proceed?").
+		choice, err = prompt.New().Ask("Enable debug mode will interrupt ongoing terraform operations, continue to proceed?").
 			Choose([]string{
 				"Yes",
 				"No",
@@ -100,29 +97,14 @@ func runEnableOverride(cmd *cobra.Command, args []string) error {
 	}
 
 	// Retrieve flags
-	deploymentType, err := cmd.Flags().GetString("deployment-type")
+	resourceName, err := cmd.Flags().GetString("resource-name")
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
-	// Validate deployment type
-	if deploymentType != string(TerraformDeploymentType) {
-		err = errors.New("only terraform deployment type is supported")
-		utils.PrintError(err)
-		return err
-	}
-
-	// Retrieve flags
-	deploymentName, err := cmd.Flags().GetString("deployment-name")
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
-	// Validate deployment name
-	if deploymentName == "" {
-		err = errors.New("deployment name is required")
+	if resourceName == "" {
+		err = errors.New("resource name is required")
 		utils.PrintError(err)
 		return err
 	}
@@ -139,15 +121,9 @@ func runEnableOverride(cmd *cobra.Command, args []string) error {
 	var spinner *ysmrr.Spinner
 	if output != "json" {
 		sm = ysmrr.NewSpinnerManager()
-		msg := "Enabling override for instance deployment..."
+		msg := "Enabling debug mode for instance deployment..."
 		spinner = sm.AddSpinner(msg)
 		sm.Start()
-	}
-
-	_, err = dataaccess.GetInstanceDeploymentEntity(cmd.Context(), token, instanceID, deploymentType, deploymentName)
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
 	}
 
 	// Check if instance exists
@@ -157,7 +133,32 @@ func runEnableOverride(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Enable override
+	resourceID, resourceType, err := getResourceFromInstance(cmd.Context(), token, instanceID, resourceName)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+
+	// Validate deployment type
+	if strings.ToLower(resourceType) != string(TerraformDeploymentType) {
+		err = errors.New("only terraform deployment type is supported")
+		utils.PrintError(err)
+		return err
+	}
+
+	var deploymentName string
+	switch strings.ToLower(resourceType) {
+	case string(TerraformDeploymentType):
+		deploymentName = getTerraformDeploymentName(resourceID, instanceID)
+	}
+
+	_, err = dataaccess.GetInstanceDeploymentEntity(cmd.Context(), token, instanceID, resourceType, deploymentName)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+
+	// Enable debug mode
 	err = dataaccess.EnableResourceInstanceOverride(cmd.Context(), token, serviceID, environmentID, instanceID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
@@ -165,20 +166,20 @@ func runEnableOverride(cmd *cobra.Command, args []string) error {
 	}
 
 	// Pause deployment
-	err = dataaccess.PauseInstanceDeploymentEntity(cmd.Context(), token, instanceID, deploymentType, deploymentName)
+	err = dataaccess.PauseInstanceDeploymentEntity(cmd.Context(), token, instanceID, resourceType, deploymentName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
 	// Describe deployment entity
-	deploymentEntity, err := dataaccess.GetInstanceDeploymentEntity(cmd.Context(), token, instanceID, deploymentType, deploymentName)
+	deploymentEntity, err := dataaccess.GetInstanceDeploymentEntity(cmd.Context(), token, instanceID, resourceType, deploymentName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	switch deploymentType {
+	switch resourceType {
 	case string(TerraformDeploymentType):
 		// Parse JSON
 		var response TerraformResponse
@@ -205,7 +206,7 @@ func runEnableOverride(cmd *cobra.Command, args []string) error {
 		deploymentEntity = string(displayOutput)
 	}
 
-	utils.HandleSpinnerSuccess(spinner, sm, "Successfully enabled override for instance deployment")
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully enabled debug mode for instance deployment")
 	// Print output
 	err = utils.PrintTextTableJsonOutput(output, deploymentEntity)
 	if err != nil {
