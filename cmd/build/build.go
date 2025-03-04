@@ -510,7 +510,8 @@ func runBuild(cmd *cobra.Command, args []string) error {
 						return err
 					}
 					prodEnvironmentID, err = dataaccess.CreateServiceEnvironment(
-						cmd.Context(), token,
+						cmd.Context(), 
+						token,
 						"Production", 
 						"Production environment", 
 						ServiceID,

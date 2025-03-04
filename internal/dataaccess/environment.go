@@ -45,7 +45,7 @@ func CreateServiceEnvironment(ctx context.Context,
 	if err != nil {
 		return "", handleV1Error(err)
 	}
-	return resp, nil
+	return strings.Trim(resp, "\""), nil // remove quotes from the response
 }
 
 func DescribeServiceEnvironment(ctx context.Context, token, serviceID, serviceEnvironmentID string) (*openapiclientv1.DescribeServiceEnvironmentResult, error) {

@@ -128,8 +128,12 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	publicKeyPtr := getPublicKeyPtr(visibility)
 	environmentID, err := dataaccess.CreateServiceEnvironment(
 		cmd.Context(), token,
-		envName, description, serviceID,
-		visibility, envType, sourceEnvID,
+		envName, 
+		description, 
+		serviceID,
+		visibility, 
+		envType, 
+		sourceEnvID,
 		defaultDeploymentConfigID,
 		true,
 		publicKeyPtr)
