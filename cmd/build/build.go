@@ -543,7 +543,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 				}
 
 				if checkIfSaaSPortalReady(prodEnvironment) {
-					utils.PrintURL("Your SaaS portal is ready at", getSaaSPortalURL(prodEnvironment, ServiceID, string(prodEnvironmentID)))
+					utils.PrintURL("Your SaaS portal is ready at", getSaaSPortalURL(prodEnvironment, ServiceID, prodEnvironmentID))
 				} else if interactive {
 					// Ask the user if they want to wait for the SaaS portal URL
 					fmt.Print("Do you want to wait to access the prod SaaS offer? [Y/n] It may take a few minutes: ")
@@ -560,7 +560,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 						sm3.Start()
 
 						for {
-							serviceEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, ServiceID, string(prodEnvironmentID))
+							serviceEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, ServiceID, prodEnvironmentID)
 							if err != nil {
 								utils.PrintError(err)
 								return err
@@ -569,7 +569,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 							if checkIfSaaSPortalReady(serviceEnvironment) {
 								loading.Complete()
 								sm3.Stop()
-								utils.PrintURL("Your SaaS offer is ready at", getSaaSPortalURL(serviceEnvironment, ServiceID, string(prodEnvironmentID)))
+								utils.PrintURL("Your SaaS offer is ready at", getSaaSPortalURL(serviceEnvironment, ServiceID, prodEnvironmentID))
 								break
 							}
 						}
