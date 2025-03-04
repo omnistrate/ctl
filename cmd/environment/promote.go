@@ -3,11 +3,12 @@ package environment
 import (
 	"context"
 	"fmt"
-	"github.com/omnistrate/ctl/cmd/common"
 	"strings"
 
+	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
+	"github.com/omnistrate/ctl/cmd/common"
+
 	"github.com/chelnak/ysmrr"
-	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
@@ -164,7 +165,7 @@ func getServiceEnvironment(ctx context.Context, token, serviceIDArg, serviceName
 	return
 }
 
-func formatPromoteStatus(ctx context.Context, token, serviceID, environmentID, serviceName string, environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) ([]model.Promotion, error) {
+func formatPromoteStatus(ctx context.Context, token, serviceID, environmentID, serviceName string, environment *openapiclientv1.DescribeServiceEnvironmentResult) ([]model.Promotion, error) {
 	promotions, err := dataaccess.PromoteServiceEnvironmentStatus(ctx, token, serviceID, environmentID)
 	if err != nil {
 		return nil, err
@@ -179,9 +180,9 @@ func formatPromoteStatus(ctx context.Context, token, serviceID, environmentID, s
 		}
 
 		formattedPromotion := model.Promotion{
-			ServiceID:             string(environment.ServiceID),
+			ServiceID:             environment.ServiceId,
 			ServiceName:           serviceName,
-			SourceEnvironmentID:   string(environment.ID),
+			SourceEnvironmentID:   environment.Id,
 			SourceEnvironmentName: environment.Name,
 			TargetEnvID:           targetEnvID,
 			TargetEnvName:         targetEnv.Name,

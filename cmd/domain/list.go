@@ -100,10 +100,10 @@ func runList(cmd *cobra.Command, args []string) error {
 
 func formatDomain(domain openapiclientv1.CustomDomain) (model.Domain, error) {
 	return model.Domain{
-		EnvironmentType: string(domain.EnvironmentType),
+		EnvironmentType: domain.EnvironmentType,
 		Name:            domain.Name,
 		Domain:          domain.CustomDomain,
-		Status:          string(domain.Status),
+		Status:          domain.Status,
 		ClusterEndpoint: domain.ClusterEndpoint,
 	}, nil
 }

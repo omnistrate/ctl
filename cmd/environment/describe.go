@@ -3,11 +3,12 @@ package environment
 import (
 	"context"
 	"fmt"
-	"github.com/omnistrate/ctl/cmd/common"
 	"strings"
 
+	"github.com/omnistrate/ctl/cmd/common"
+
 	"github.com/chelnak/ysmrr"
-	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
+	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
@@ -90,8 +91,8 @@ func runDescribe(cmd *cobra.Command, args []string) error {
 
 	// Get the source environment name
 	sourceEnvName := ""
-	if environment.SourceEnvironmentID != nil {
-		sourceEnv, err := dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, string(*environment.SourceEnvironmentID))
+	if environment.SourceEnvironmentId != nil {
+		sourceEnv, err := dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, *environment.SourceEnvironmentId)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
@@ -131,12 +132,12 @@ func validateDescribeArguments(args []string, serviceID, environmentID, output s
 	return nil
 }
 
-func formatEnvironmentDetails(ctx context.Context, token, serviceID, serviceName, sourceEnvName string, environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) model.DetailedEnvironment {
+func formatEnvironmentDetails(ctx context.Context, token, serviceID, serviceName, sourceEnvName string, environment *openapiclientv1.DescribeServiceEnvironmentResult) model.DetailedEnvironment {
 	formattedEnvironment := model.DetailedEnvironment{
-		EnvironmentID:    string(environment.ID),
+		EnvironmentID:    environment.Id,
 		EnvironmentName:  environment.Name,
-		EnvironmentType:  string(environment.Type),
-		ServiceID:        string(environment.ServiceID),
+		EnvironmentType:  environment.Type,
+		ServiceID:        environment.ServiceId,
 		SourceEnvName:    sourceEnvName,
 		ServiceName:      serviceName,
 		SaaSPortalStatus: getSaaSPortalStatus(environment),
@@ -147,16 +148,16 @@ func formatEnvironmentDetails(ctx context.Context, token, serviceID, serviceName
 	return formattedEnvironment
 }
 
-func getSaaSPortalStatus(environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) string {
+func getSaaSPortalStatus(environment *openapiclientv1.DescribeServiceEnvironmentResult) string {
 	if environment.SaasPortalStatus != nil {
 		return string(*environment.SaasPortalStatus)
 	}
 	return ""
 }
 
-func getSaaSPortalURL(environment *serviceenvironmentapi.DescribeServiceEnvironmentResult) string {
-	if environment.SaasPortalURL != nil {
-		return *environment.SaasPortalURL
+func getSaaSPortalURL(environment *openapiclientv1.DescribeServiceEnvironmentResult) string {
+	if environment.SaasPortalUrl != nil {
+		return *environment.SaasPortalUrl
 	}
 	return ""
 }
