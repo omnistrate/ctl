@@ -237,7 +237,7 @@ func getPromoteStatus(ctx context.Context, token, serviceID string, environment 
 		promoteRes, err := dataaccess.PromoteServiceEnvironmentStatus(ctx, token, serviceID, string(*environment.SourceEnvironmentId))
 		if err == nil {
 			for _, res := range promoteRes {
-				if string(res.TargetEnvironmentID) == string(environment.Id) {
+				if res.TargetEnvironmentID == environment.Id {
 					return res.Status
 				}
 			}

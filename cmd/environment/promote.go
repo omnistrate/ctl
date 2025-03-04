@@ -173,7 +173,7 @@ func formatPromoteStatus(ctx context.Context, token, serviceID, environmentID, s
 
 	var formattedPromotions []model.Promotion
 	for _, promotion := range promotions {
-		targetEnvID := string(promotion.TargetEnvironmentID)
+		targetEnvID := promotion.TargetEnvironmentID
 		targetEnv, err := dataaccess.DescribeServiceEnvironment(ctx, token, serviceID, targetEnvID)
 		if err != nil {
 			return nil, err
