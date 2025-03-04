@@ -22,9 +22,9 @@ func init() {
 	Cmd.AddCommand(restartCmd)
 	Cmd.AddCommand(updateCmd) // Hidden (deprecated)
 	Cmd.AddCommand(modifyCmd)
-	Cmd.AddCommand(enableOverrideCmd)
+	Cmd.AddCommand(enableDebugModeCmd)
 	Cmd.AddCommand(getDeploymentCmd)
-	Cmd.AddCommand(resumeDeploymentCmd)
+	Cmd.AddCommand(disableDebugModeCmd)
 	Cmd.AddCommand(patchDeploymentCmd)
 }
 
