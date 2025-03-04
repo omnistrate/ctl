@@ -156,7 +156,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	EnvironmentID = string(environmentID)
+	EnvironmentID = environmentID
 
 	return nil
 }

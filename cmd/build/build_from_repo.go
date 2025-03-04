@@ -899,7 +899,7 @@ x-omnistrate-image-registry-attributes:
 			spinner = sm.AddSpinner("Initializing the SaaS Portal. This may take a few minutes.")
 
 			for {
-				prodEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, string(prodEnvironmentID))
+				prodEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, prodEnvironmentID)
 				if err != nil {
 					utils.PrintError(err)
 					return err

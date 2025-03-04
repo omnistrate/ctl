@@ -150,7 +150,7 @@ func formatEnvironmentDetails(ctx context.Context, token, serviceID, serviceName
 
 func getSaaSPortalStatus(environment *openapiclientv1.DescribeServiceEnvironmentResult) string {
 	if environment.SaasPortalStatus != nil {
-		return string(*environment.SaasPortalStatus)
+		return *environment.SaasPortalStatus
 	}
 	return ""
 }
