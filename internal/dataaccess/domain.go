@@ -4,58 +4,61 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
-	saasportalapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/saas_portal_api"
+	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/utils"
 )
 
-func ListDomains(ctx context.Context, token string) (*saasportalapi.ListSaaSPortalCustomDomainsResult, error) {
-	domain, err := httpclientwrapper.NewSaaSPortal(config.GetHostScheme(), config.GetHost())
-	if err != nil {
-		return nil, err
-	}
+func ListDomains(ctx context.Context, token string) (*openapiclientv1.ListSaaSPortalCustomDomainsResult, error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientv1.ContextAccessToken, token)
+	apiClient := getV1Client()
 
-	request := saasportalapi.ListSaaSPortalCustomDomainsRequest{
-		Token: token,
-	}
-
-	res, err := domain.ListSaaSPortalCustomDomains(ctx, &request)
+	resp, r, err := apiClient.SaasPortalApiAPI.SaasPortalApiListSaaSPortalCustomDomains(ctxWithToken).Execute()
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
 	if err != nil {
-		return nil, err
+		return nil, handleV1Error(err)
 	}
-	return res, nil
+	return resp, nil
 }
 
 func DeleteDomain(ctx context.Context, token, environmentType string) error {
-	service, err := httpclientwrapper.NewSaaSPortal(config.GetHostScheme(), config.GetHost())
-	if err != nil {
-		return err
-	}
+	ctxWithToken := context.WithValue(ctx, openapiclientv1.ContextAccessToken, token)
+	apiClient := getV1Client()
 
-	request := saasportalapi.DeleteSaaSPortalCustomDomainRequest{
-		Token:           token,
-		EnvironmentType: saasportalapi.EnvironmentType(environmentType),
-	}
-
-	err = service.DeleteSaaSPortalCustomDomain(ctx, &request)
+	r, err := apiClient.SaasPortalApiAPI.SaasPortalApiDeleteSaaSPortalCustomDomain(ctxWithToken, environmentType).Execute()
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
 	if err != nil {
-		return err
+		return handleV1Error(err)
 	}
 	return nil
 }
 
-func CreateDomain(ctx context.Context, request *saasportalapi.CreateSaaSPortalCustomDomainRequest) error {
-	service, err := httpclientwrapper.NewSaaSPortal(config.GetHostScheme(), config.GetHost())
-	if err != nil {
-		return err
-	}
+func CreateDomain(ctx context.Context, token, customDomain, environmentType string) error {
+	ctxWithToken := context.WithValue(ctx, openapiclientv1.ContextAccessToken, token)
+	apiClient := getV1Client()
 
-	err = service.CreateSaaSPortalCustomDomain(ctx, request)
+	r, err := apiClient.SaasPortalApiAPI.SaasPortalApiCreateSaaSPortalCustomDomain(ctxWithToken).
+		CreateSaaSPortalCustomDomainRequest2(openapiclientv1.CreateSaaSPortalCustomDomainRequest2{
+			CustomDomain:    customDomain,
+			EnvironmentType: environmentType,
+		}).
+		Execute()
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
 	if err != nil {
-		return err
+		return handleV1Error(err)
 	}
-
 	return nil
 }
 

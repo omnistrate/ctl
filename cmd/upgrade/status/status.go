@@ -2,6 +2,7 @@ package status
 
 import (
 	"fmt"
+
 	"github.com/omnistrate/ctl/cmd/common"
 
 	"github.com/chelnak/ysmrr"
@@ -105,9 +106,7 @@ func run(cmd *cobra.Command, args []string) error {
 			InProgress: upgrade.InProgressCount,
 			Completed:  upgrade.CompletedCount,
 			Failed:     upgrade.FailedCount,
-			Scheduled:  utils.FromPtr(upgrade.ScheduledCount),
-			Skipped:    upgrade.SkippedCount,
-			Status:     string(upgrade.Status),
+			Status:     upgrade.Status,
 		})
 	}
 
