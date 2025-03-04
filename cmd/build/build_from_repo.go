@@ -928,7 +928,7 @@ x-omnistrate-image-registry-attributes:
 	println()
 	fmt.Println("Congratulations! Your service has been successfully built and deployed.")
 	if config.IsProd() {
-		utils.PrintURL("You can access the SaaS Portal at", getSaaSPortalURL(prodEnvironment, serviceID, string(prodEnvironmentID)))
+		utils.PrintURL("You can access the SaaS Portal at", getSaaSPortalURL(prodEnvironment, serviceID, prodEnvironmentID))
 	}
 
 	println()
