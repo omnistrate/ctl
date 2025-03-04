@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/chelnak/ysmrr"
-	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	"github.com/omnistrate/ctl/cmd/common"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
@@ -15,40 +14,36 @@ import (
 )
 
 const (
-	patchDeploymentExample = `# Patch deployment for an instance deployment
-omctl instance patch-deployment instance-abcd1234 --resource-name my-terraform-deployment --deployment-action apply --patch-files /patchedFiles`
+	disableDebugModeExample = `# Disable instance deployment debug mode
+omctl instance disable-debug-mode instance-abcd1234 --resource-name my-terraform-deployment --deployment-action apply`
 )
 
-var patchDeploymentCmd = &cobra.Command{
-	Use:          "patch-deployment [instance-id] --resource-name <deployment-name> --deployment-action <deployment-action> --patch-files <patch-files>",
-	Short:        "Patch deployment for an instance deployment",
-	Long:         `This command helps you patch the deployment for an instance deployment.`,
-	Example:      patchDeploymentExample,
-	RunE:         runPatchDeployment,
+var disableDebugModeCmd = &cobra.Command{
+	Use:          "disable-debug-mode [instance-id] --resource-name <resource-name> --deployment-action <deployment-action>",
+	Short:        "Disable instance debug mode",
+	Long:         `This command helps you disable instance debug mode.`,
+	Example:      disableDebugModeExample,
+	RunE:         runDisableDebug,
 	SilenceUsage: true,
 }
 
 func init() {
-	patchDeploymentCmd.Flags().StringP("resource-name", "r", "", "Resource name")
-	patchDeploymentCmd.Flags().StringP("deployment-action", "e", "", "Deployment action")
-	patchDeploymentCmd.Flags().StringP("patch-files", "p", "", "Patch files")
+	disableDebugModeCmd.Flags().StringP("resource-name", "r", "", "Resource name")
+	disableDebugModeCmd.Flags().StringP("deployment-action", "e", "", "Deployment action")
 
-	patchDeploymentCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
-	patchDeploymentCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported")
+	disableDebugModeCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
+	disableDebugModeCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported")
 
 	var err error
-	if err = patchDeploymentCmd.MarkFlagRequired("resource-name"); err != nil {
+	if err = disableDebugModeCmd.MarkFlagRequired("resource-name"); err != nil {
 		return
 	}
-	if err = patchDeploymentCmd.MarkFlagRequired("deployment-action"); err != nil {
-		return
-	}
-	if err = patchDeploymentCmd.MarkFlagRequired("patch-files"); err != nil {
+	if err = disableDebugModeCmd.MarkFlagRequired("deployment-action"); err != nil {
 		return
 	}
 }
 
-func runPatchDeployment(cmd *cobra.Command, args []string) error {
+func runDisableDebug(cmd *cobra.Command, args []string) error {
 	defer config.CleanupArgsAndFlags(cmd, &args)
 
 	if len(args) == 0 {
@@ -59,7 +54,6 @@ func runPatchDeployment(cmd *cobra.Command, args []string) error {
 
 	// Retrieve args
 	instanceID := args[0]
-
 	// Retrieve flags
 	resourceName, err := cmd.Flags().GetString("resource-name")
 	if err != nil {
@@ -73,13 +67,6 @@ func runPatchDeployment(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Validate user login
-	token, err := common.GetTokenWithLogin()
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
 	// Retrieve flags
 	output, err := cmd.Flags().GetString("output")
 	if err != nil {
@@ -87,9 +74,9 @@ func runPatchDeployment(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Validate output flag
-	if output != "json" {
-		err = errors.New("only json output is supported")
+	// Validate user login
+	token, err := common.GetTokenWithLogin()
+	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
@@ -99,38 +86,12 @@ func runPatchDeployment(cmd *cobra.Command, args []string) error {
 	var spinner *ysmrr.Spinner
 	if output != "json" {
 		sm = ysmrr.NewSpinnerManager()
-		msg := "Patching deployment..."
+		msg := "Resuming deployment..."
 		spinner = sm.AddSpinner(msg)
 		sm.Start()
 	}
 
-	// Check if instance exists
-	serviceID, environmentID, _, _, err := getInstance(cmd.Context(), token, instanceID)
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
-
 	resourceID, resourceType, err := getResourceFromInstance(cmd.Context(), token, instanceID, resourceName)
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
-
-	// Validate deployment type
-	if strings.ToLower(resourceType) != string(TerraformDeploymentType) {
-		err = errors.New("only terraform deployment type is supported")
-		utils.PrintError(err)
-		return err
-	}
-
-	var deploymentName string
-	switch strings.ToLower(resourceType) {
-	case string(TerraformDeploymentType):
-		deploymentName = getTerraformDeploymentName(resourceID, instanceID)
-	}
-
-	_, err = dataaccess.GetInstanceDeploymentEntity(cmd.Context(), token, instanceID, resourceType, deploymentName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
@@ -143,6 +104,12 @@ func runPatchDeployment(cmd *cobra.Command, args []string) error {
 			utils.PrintError(err)
 			return err
 		}
+
+		if deploymentAction == "" {
+			err = errors.New("deployment action is required")
+			utils.PrintError(err)
+			return err
+		}
 	}
 
 	if resourceType != string(TerraformDeploymentType) {
@@ -151,38 +118,27 @@ func runPatchDeployment(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	patchedFilePath, err := cmd.Flags().GetString("patch-files")
-	if err != nil {
-		utils.PrintError(err)
-		return err
+	var deploymentName string
+	switch strings.ToLower(resourceType) {
+	case string(TerraformDeploymentType):
+		deploymentName = getTerraformDeploymentName(resourceID, instanceID)
 	}
 
-	// validate patch files
-	if patchedFilePath == "" {
-		err = errors.New("patch files cannot be empty")
-		utils.PrintError(err)
-		return err
-	}
-
-	// Describe instance
-	var instance *openapiclientfleet.ResourceInstance
-	instance, err = dataaccess.DescribeResourceInstance(cmd.Context(), token, serviceID, environmentID, instanceID)
+	// Get instance deployment
+	_, err = dataaccess.GetInstanceDeploymentEntity(cmd.Context(), token, instanceID, resourceType, deploymentName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	if instance.ManualOverride == nil {
-		err = errors.New("debug mode is not enabled for this instance")
-		utils.PrintError(err)
-		return err
-	}
-
-	err = dataaccess.PatchInstanceDeploymentEntity(cmd.Context(), token, instanceID, resourceType, deploymentName, patchedFilePath, deploymentAction)
+	// Resume instance deployment
+	err = dataaccess.ResumeInstanceDeploymentEntity(cmd.Context(), token, instanceID, resourceType, deploymentName, deploymentAction)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
+
+	utils.PrintWarning("The instance is currently locked for operations. Debug mode has been disabled for the deployment, but to fully unlock the instance and resume normal operations, you'll need to perform an instance upgrade.")
 
 	// Describe deployment entity
 	deploymentEntity, err := dataaccess.GetInstanceDeploymentEntity(cmd.Context(), token, instanceID, resourceType, deploymentName)
@@ -227,4 +183,5 @@ func runPatchDeployment(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+
 }
