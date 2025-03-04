@@ -126,8 +126,8 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	publicKeyPtr := getPublicKeyPtr(visibility)
-	environmentID, err := dataaccess.CreateServiceEnvironment(cmd.Context(),
-		token,
+	environmentID, err := dataaccess.CreateServiceEnvironment(
+		cmd.Context(), token,
 		envName, description, serviceID,
 		visibility, envType, sourceEnvID,
 		defaultDeploymentConfigID,
@@ -141,7 +141,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	utils.HandleSpinnerSuccess(spinner, sm, "Successfully created environment")
 
 	// Describe the environment
-	environment, err := dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, string(environmentID))
+	environment, err := dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, environmentID)
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -233,8 +233,8 @@ func getPublicKeyPtr(visibility string) *string {
 }
 
 func getPromoteStatus(ctx context.Context, token, serviceID string, environment *openapiclientv1.DescribeServiceEnvironmentResult) string {
-	if !utils.CheckIfNilOrEmpty((*string)(environment.SourceEnvironmentId)) {
-		promoteRes, err := dataaccess.PromoteServiceEnvironmentStatus(ctx, token, serviceID, string(*environment.SourceEnvironmentId))
+	if !utils.CheckIfNilOrEmpty(environment.SourceEnvironmentId) {
+		promoteRes, err := dataaccess.PromoteServiceEnvironmentStatus(ctx, token, serviceID, *environment.SourceEnvironmentId)
 		if err == nil {
 			for _, res := range promoteRes {
 				if res.TargetEnvironmentID == environment.Id {

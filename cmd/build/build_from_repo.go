@@ -859,7 +859,7 @@ x-omnistrate-image-registry-attributes:
 		return err
 	}
 	for _, env := range service.ServiceEnvironments {
-		if env.Id != string(prodEnvironmentID) {
+		if env.Id != prodEnvironmentID {
 			continue
 		}
 		for _, plan := range env.ServicePlans {

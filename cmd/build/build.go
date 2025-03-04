@@ -479,7 +479,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 
 	// Step 3: Launch service to production if the service is in dev environment
 	if interactive {
-		if strings.ToLower(string(serviceEnvironment.Type)) == "dev" {
+		if strings.ToLower(serviceEnvironment.Type) == "dev" {
 			// Ask the user if they want to launch the service to production
 			fmt.Print("Do you want to launch it to production? [Y/n] You can always promote it later: ")
 			var userInput string
@@ -511,8 +511,11 @@ func runBuild(cmd *cobra.Command, args []string) error {
 					}
 					prodEnvironmentID, err = dataaccess.CreateServiceEnvironment(
 						cmd.Context(), token,
-						"Production", "Production environment", ServiceID,
-						"PUBLIC", "PROD",
+						"Production", 
+						"Production environment", 
+						ServiceID,
+						"PUBLIC", 
+						"PROD",
 						utils.ToPtr(EnvironmentID),
 						defaultDeploymentConfigID,
 						true,
@@ -536,7 +539,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 				sm2.Stop()
 
 				// Retrieve the prod SaaS portal URL
-				prodEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, ServiceID, string(prodEnvironmentID))
+				prodEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, ServiceID, prodEnvironmentID)
 				if err != nil {
 					utils.PrintError(err)
 					return err
