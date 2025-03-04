@@ -98,7 +98,7 @@ func runList(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func formatDomain(domain *openapiclientv1.CustomDomain) (model.Domain, error) {
+func formatDomain(domain openapiclientv1.CustomDomain) (model.Domain, error) {
 	return model.Domain{
 		EnvironmentType: string(domain.EnvironmentType),
 		Name:            domain.Name,
