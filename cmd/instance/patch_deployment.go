@@ -20,7 +20,7 @@ omctl instance patch-deployment instance-abcd1234 --resource-name my-terraform-d
 )
 
 var patchDeploymentCmd = &cobra.Command{
-	Use:          "patch-deployment [instance-id] --resource-name <deployment-name> --deployment-action <deployment-action> --patch-files <patch-files>",
+	Use:          "patch-deployment [instance-id] --resource-name <resource-name> --deployment-action <deployment-action> --patch-files <patch-files>",
 	Short:        "Patch deployment for an instance deployment",
 	Long:         `This command helps you patch the deployment for an instance deployment.`,
 	Example:      patchDeploymentExample,
