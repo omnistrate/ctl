@@ -10,7 +10,6 @@ import (
 	"github.com/omnistrate/ctl/cmd/auth/logout"
 	"github.com/omnistrate/ctl/cmd/build"
 	"github.com/omnistrate/ctl/cmd/customnetwork"
-	"github.com/omnistrate/ctl/cmd/deprecated"
 	"github.com/omnistrate/ctl/cmd/domain"
 	"github.com/omnistrate/ctl/cmd/environment"
 	"github.com/omnistrate/ctl/cmd/helm"
@@ -124,16 +123,6 @@ func init() {
 	RootCmd.AddCommand(environment.Cmd)
 	RootCmd.AddCommand(customnetwork.Cmd)
 	RootCmd.AddCommand(servicesorchestration.Cmd)
-
-	// Deprecated
-	RootCmd.AddCommand(deprecated.DescribeCmd)
-	RootCmd.AddCommand(deprecated.ListCmd)
-	RootCmd.AddCommand(deprecated.RemoveCmd)
-
-	// Hide deprecated commands
-	deprecated.DescribeCmd.Hidden = true
-	deprecated.ListCmd.Hidden = true
-	deprecated.RemoveCmd.Hidden = true
 
 	// Hide the default completion command
 	RootCmd.Root().CompletionOptions.DisableDefaultCmd = true

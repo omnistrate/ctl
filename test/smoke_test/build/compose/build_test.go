@@ -58,11 +58,11 @@ func Test_build_basic(t *testing.T) {
 		err = cmd.RootCmd.ExecuteContext(ctx)
 		require.NoError(err, f.Name())
 
-		cmd.RootCmd.SetArgs([]string{"describe", "--service-id", build.ServiceID})
+		cmd.RootCmd.SetArgs([]string{"service", "describe", "--id", build.ServiceID})
 		err = cmd.RootCmd.ExecuteContext(ctx)
 		require.NoError(err, f.Name())
 
-		cmd.RootCmd.SetArgs([]string{"remove", "--service-id", build.ServiceID})
+		cmd.RootCmd.SetArgs([]string{"service", "delete", "--id", build.ServiceID})
 		err = cmd.RootCmd.ExecuteContext(ctx)
 		require.NoError(err, f.Name())
 	}
@@ -91,7 +91,7 @@ func Test_build_update_service(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"describe", "--service-id", build.ServiceID})
+	cmd.RootCmd.SetArgs([]string{"service", "describe", "--id", build.ServiceID})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
@@ -115,7 +115,7 @@ func Test_build_update_service(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", build.ServiceID})
+	cmd.RootCmd.SetArgs([]string{"service", "delete", "--id", build.ServiceID})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
@@ -125,7 +125,7 @@ func Test_build_update_service(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"describe", "--service-id", build.ServiceID})
+	cmd.RootCmd.SetArgs([]string{"service", "describe", "--id", build.ServiceID})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
@@ -144,7 +144,7 @@ func Test_build_update_service(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", build.ServiceID})
+	cmd.RootCmd.SetArgs([]string{"service", "delete", "--id", build.ServiceID})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 }
@@ -183,7 +183,7 @@ func Test_build_output_format(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: remove service
-	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", build.ServiceID})
+	cmd.RootCmd.SetArgs([]string{"service", "delete", "--id", build.ServiceID})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 }
@@ -240,7 +240,7 @@ func Test_build_duplicate_service_plan_name(t *testing.T) {
 	require.Equal(prodEnvironmentID, build.EnvironmentID)
 	require.Equal(prodProductTierID, build.ProductTierID)
 
-	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", build.ServiceID})
+	cmd.RootCmd.SetArgs([]string{"service", "delete", "--id", build.ServiceID})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 }
@@ -331,7 +331,7 @@ func Test_build_create_no_description(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", build.ServiceID})
+	cmd.RootCmd.SetArgs([]string{"service", "delete", "--id", build.ServiceID})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 }
@@ -356,7 +356,7 @@ func Test_build_create_no_service_logo_url(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", build.ServiceID})
+	cmd.RootCmd.SetArgs([]string{"service", "delete", "--id", build.ServiceID})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 }

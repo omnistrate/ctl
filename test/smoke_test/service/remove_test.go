@@ -34,7 +34,7 @@ func Test_remove_basic(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
-	cmd.RootCmd.SetArgs([]string{"remove", "--service-id", build.ServiceID})
+	cmd.RootCmd.SetArgs([]string{"service", "delete", "--id", build.ServiceID})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 }
