@@ -665,13 +665,13 @@ func buildService(ctx context.Context, fileData []byte, token, name, specType st
 		if project.Configs != nil {
 			configs := make(map[string]string)
 			for configName, config := range project.Configs {
-				var fileContent []byte
-				fileContent, err = os.ReadFile(filepath.Clean(config.File))
+				var configFileContent []byte
+				configFileContent, err = os.ReadFile(filepath.Clean(config.File))
 				if err != nil {
 					return "", "", "", make(map[string]string), err
 				}
 
-				configs[configName] = base64.StdEncoding.EncodeToString(fileContent)
+				configs[configName] = base64.StdEncoding.EncodeToString(configFileContent)
 			}
 		}
 
