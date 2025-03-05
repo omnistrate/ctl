@@ -20,6 +20,7 @@ import (
 	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
+	"github.com/omnistrate/ctl/internal/model"
 	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/pkg/browser"
 	"github.com/pkg/errors"
@@ -944,12 +945,12 @@ x-omnistrate-image-registry-attributes:
 		}
 
 		for _, account := range accounts.AccountConfigs {
-			if account.Status == "VERIFYING" && account.AwsAccountID != nil && *account.AwsAccountID == awsAccountID {
+			if account.Status == model.Verifying.String() && account.AwsAccountID != nil && *account.AwsAccountID == awsAccountID {
 				awsAccountUnverified = true
 				unverifiedAwsAccountConfigID = account.Id
 			}
 
-			if account.Status == "VERIFYING" && account.GcpProjectID != nil && *account.GcpProjectID == gcpProjectID && account.GcpProjectNumber != nil && *account.GcpProjectNumber == gcpProjectNumber {
+			if account.Status == model.Verifying.String() && account.GcpProjectID != nil && *account.GcpProjectID == gcpProjectID && account.GcpProjectNumber != nil && *account.GcpProjectNumber == gcpProjectNumber {
 				gcpAccountUnverified = true
 				unverifiedGcpAccountConfigID = account.Id
 			}
