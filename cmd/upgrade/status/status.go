@@ -19,7 +19,7 @@ const (
 omctl upgrade status [upgrade-id]`
 )
 
-var LastDescribedUpgradeStatus model.UpgradeStatus
+var LastUpgradeStatus model.UpgradeStatus
 var Cmd = &cobra.Command{
 	Use:          "status [upgrade-id] [flags]",
 	Short:        "Get Upgrade status",
@@ -100,7 +100,7 @@ func run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		LastDescribedUpgradeStatus = model.UpgradeStatus{
+		LastUpgradeStatus = model.UpgradeStatus{
 			UpgradeID:  upgradePathID,
 			Total:      upgrade.TotalCount,
 			Pending:    upgrade.PendingCount,
@@ -111,7 +111,7 @@ func run(cmd *cobra.Command, args []string) error {
 			Skipped:    upgrade.SkippedCount,
 			Status:     upgrade.Status,
 		}
-		formattedUpgradeStatuses = append(formattedUpgradeStatuses, &LastDescribedUpgradeStatus)
+		formattedUpgradeStatuses = append(formattedUpgradeStatuses, &LastUpgradeStatus)
 	}
 
 	if len(formattedUpgradeStatuses) == 0 {

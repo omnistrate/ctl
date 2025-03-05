@@ -179,24 +179,20 @@ func validateScheduledAndCancel(ctx context.Context, instanceID string, targetVe
 		return fmt.Errorf("expected 1 upgrade path ID, got %d", len(upgrade.UpgradePathIDs))
 	}
 	upgradeID := upgrade.UpgradePathIDs[0]
-
-	cmd.RootCmd.SetArgs([]string{"upgrade", "status", upgradeID})
-	err = cmd.RootCmd.ExecuteContext(ctx)
-	if err != nil {
-		return err
-	}
-
 	for {
-		if status.LastDescribedUpgradeStatus.Status != constants.InProgress.String() {
+		cmd.RootCmd.SetArgs([]string{"upgrade", "status", upgradeID})
+		if err = cmd.RootCmd.ExecuteContext(ctx); err != nil {
+			return err
+		}
+
+		if status.LastUpgradeStatus.Status != constants.InProgress.String() {
 			break
 		}
 		time.Sleep(5 * time.Second)
 	}
-	if status.LastDescribedUpgradeStatus.UpgradeID == "" {
-		return fmt.Errorf("expected non-empty LastDescribedUpgradeStatus")
-	}
-	if status.LastDescribedUpgradeStatus.Status != constants.Scheduled.String() {
-		return fmt.Errorf("expected status %s, got %s", constants.Scheduled.String(), status.LastDescribedUpgradeStatus.Status)
+
+	if status.LastUpgradeStatus.Status != constants.Scheduled.String() {
+		return fmt.Errorf("expected status %s, got %s", constants.Scheduled.String(), status.LastUpgradeStatus.Status)
 	}
 
 	cmd.RootCmd.SetArgs([]string{"upgrade", "cancel", upgradeID})
@@ -212,13 +208,18 @@ func validateScheduledAndCancel(ctx context.Context, instanceID string, targetVe
 	}
 
 	for {
-		if status.LastDescribedUpgradeStatus.Status != constants.Scheduled.String() {
+		cmd.RootCmd.SetArgs([]string{"upgrade", "status", upgradeID})
+		if err = cmd.RootCmd.ExecuteContext(ctx); err != nil {
+			return err
+		}
+
+		if status.LastUpgradeStatus.Status != constants.Scheduled.String() {
 			break
 		}
 		time.Sleep(5 * time.Second)
 	}
-	if status.LastDescribedUpgradeStatus.Status != constants.Cancelled.String() {
-		return fmt.Errorf("expected status %s, got %s", constants.Cancelled.String(), status.LastDescribedUpgradeStatus.Status)
+	if status.LastUpgradeStatus.Status != constants.Cancelled.String() {
+		return fmt.Errorf("expected status %s, got %s", constants.Cancelled.String(), status.LastUpgradeStatus.Status)
 	}
 
 	return nil
