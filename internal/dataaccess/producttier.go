@@ -3,15 +3,12 @@ package dataaccess
 import (
 	"context"
 
-	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
-	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
-	serviceapiapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_apiapi"
-	"github.com/omnistrate/ctl/internal/config"
+	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/utils"
 )
 
 func DeleteProductTier(ctx context.Context, token, serviceID, productTierID string) (err error) {
-	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+	ctxWithToken := context.WithValue(ctx, openapiclientv1.ContextAccessToken, token)
 
 	apiClient := getV1Client()
 	r, err := apiClient.ProductTierApiAPI.ProductTierApiDeleteProductTier(
@@ -29,8 +26,8 @@ func DeleteProductTier(ctx context.Context, token, serviceID, productTierID stri
 	return nil
 }
 
-func DescribeProductTier(ctx context.Context, token, serviceID, productTierID string) (productTier *openapiclient.DescribeProductTierResult, err error) {
-	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+func DescribeProductTier(ctx context.Context, token, serviceID, productTierID string) (productTier *openapiclientv1.DescribeProductTierResult, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientv1.ContextAccessToken, token)
 
 	apiClient := getV1Client()
 	res, r, err := apiClient.ProductTierApiAPI.ProductTierApiDescribeProductTier(
@@ -48,46 +45,42 @@ func DescribeProductTier(ctx context.Context, token, serviceID, productTierID st
 	return res, nil
 }
 
-func ReleaseServicePlan(ctx context.Context, token, serviceID, serviceAPIID, productTierID string, versionSetName *string, isPreferred bool) (err error) {
-	serviceApi, err := httpclientwrapper.NewServiceAPI(config.GetHostScheme(), config.GetHost())
+func ReleaseServicePlan(ctx context.Context, token, serviceID, serviceAPIID, productTierID string, versionSetName *string, isPreferred bool) error {
+	ctxWithToken := context.WithValue(ctx, openapiclientv1.ContextAccessToken, token)
+	apiClient := getV1Client()
+
+	r, err := apiClient.ServiceApiApiAPI.ServiceApiApiReleaseServiceAPI(ctxWithToken, serviceID, serviceAPIID).
+		ReleaseServiceAPIRequest2(openapiclientv1.ReleaseServiceAPIRequest2{
+			ProductTierId:  utils.ToPtr(productTierID),
+			VersionSetName: versionSetName,
+			VersionSetType: utils.ToPtr("Major"),
+			IsPreferred:    utils.ToPtr(isPreferred),
+		}).Execute()
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
 	if err != nil {
-		return
+		return handleV1Error(err)
 	}
-
-	request := &serviceapiapi.ReleaseServiceAPIRequest{
-		Token:          token,
-		ServiceID:      serviceapiapi.ServiceID(serviceID),
-		ID:             serviceapiapi.ServiceAPIID(serviceAPIID),
-		ProductTierID:  utils.ToPtr(serviceapiapi.ProductTierID(productTierID)),
-		VersionSetName: versionSetName,
-		VersionSetType: utils.ToPtr("Major"),
-		IsPreferred:    isPreferred,
-	}
-
-	if err = serviceApi.ReleaseServiceAPI(ctx, request); err != nil {
-		return
-	}
-
-	return
+	return nil
 }
 
-func DescribePendingChanges(ctx context.Context, token, serviceID, serviceAPIID, productTierID string) (pendingChanges *serviceapiapi.DescribePendingChangesResult, err error) {
-	serviceApi, err := httpclientwrapper.NewServiceAPI(config.GetHostScheme(), config.GetHost())
+func DescribePendingChanges(ctx context.Context, token, serviceID, serviceAPIID, productTierID string) (*openapiclientv1.DescribePendingChangesResult, error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientv1.ContextAccessToken, token)
+	apiClient := getV1Client()
+
+	resp, r, err := apiClient.ServiceApiApiAPI.ServiceApiApiDescribePendingChanges(ctxWithToken, serviceID, serviceAPIID).
+		ProductTierId(productTierID).
+		Execute()
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
 	if err != nil {
-		return
+		return nil, handleV1Error(err)
 	}
-
-	request := &serviceapiapi.DescribePendingChangesRequest{
-		Token:         token,
-		ServiceID:     serviceapiapi.ServiceID(serviceID),
-		ID:            serviceapiapi.ServiceAPIID(serviceAPIID),
-		ProductTierID: utils.ToPtr(serviceapiapi.ProductTierID(productTierID)),
-	}
-
-	pendingChanges, err = serviceApi.DescribePendingChanges(ctx, request)
-	if err != nil {
-		return
-	}
-
-	return
+	return resp, nil
 }

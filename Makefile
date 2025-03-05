@@ -152,7 +152,7 @@ update-omnistrate-dependencies:
 .PHONY: check-dependencies
 check-dependencies:
 	@echo "Checking dependencies starting with github.com/omnistrate..."
-	@violating_deps=$$(grep -E '^\s*github.com/omnistrate' go.mod | grep -v -E 'github.com/omnistrate/api-design|github.com/omnistrate/api-design/pkg/httpclientwrapper|github.com/omnistrate-oss/omnistrate-sdk-go'); \
+	@violating_deps=$$(grep -E '^\s*github.com/omnistrate' go.mod | grep -v -E 'github.com/omnistrate-oss/omnistrate-sdk-go'); \
     if [ -n "$$violating_deps" ]; then \
         echo "Error: Found dependencies starting with github.com/omnistrate/commons other than allowed ones:"; \
         echo "$$violating_deps"; \

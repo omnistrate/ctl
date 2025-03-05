@@ -3,10 +3,11 @@ package upgrade
 import (
 	"context"
 	"fmt"
-	"github.com/omnistrate/api-design/v1/api/constants"
-	"github.com/omnistrate/ctl/cmd/upgrade/status"
 	"testing"
 	"time"
+
+	"github.com/omnistrate/ctl/cmd/upgrade/status"
+	"github.com/omnistrate/ctl/internal/model"
 
 	"github.com/google/uuid"
 	"github.com/omnistrate/ctl/cmd/build"
@@ -185,14 +186,14 @@ func validateScheduledAndCancel(ctx context.Context, instanceID string, targetVe
 			return err
 		}
 
-		if status.LastUpgradeStatus.Status != constants.InProgress.String() {
+		if status.LastUpgradeStatus.Status != model.InProgress.String() {
 			break
 		}
 		time.Sleep(5 * time.Second)
 	}
 
-	if status.LastUpgradeStatus.Status != constants.Scheduled.String() {
-		return fmt.Errorf("expected status %s, got %s", constants.Scheduled.String(), status.LastUpgradeStatus.Status)
+	if status.LastUpgradeStatus.Status != model.Scheduled.String() {
+		return fmt.Errorf("expected status %s, got %s", model.Scheduled.String(), status.LastUpgradeStatus.Status)
 	}
 
 	cmd.RootCmd.SetArgs([]string{"upgrade", "cancel", upgradeID})
@@ -213,13 +214,13 @@ func validateScheduledAndCancel(ctx context.Context, instanceID string, targetVe
 			return err
 		}
 
-		if status.LastUpgradeStatus.Status != constants.Scheduled.String() {
+		if status.LastUpgradeStatus.Status != model.Scheduled.String() {
 			break
 		}
 		time.Sleep(5 * time.Second)
 	}
-	if status.LastUpgradeStatus.Status != constants.Cancelled.String() {
-		return fmt.Errorf("expected status %s, got %s", constants.Cancelled.String(), status.LastUpgradeStatus.Status)
+	if status.LastUpgradeStatus.Status != model.Cancelled.String() {
+		return fmt.Errorf("expected status %s, got %s", model.Cancelled.String(), status.LastUpgradeStatus.Status)
 	}
 
 	return nil

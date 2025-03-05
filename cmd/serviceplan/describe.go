@@ -203,16 +203,18 @@ func formatServicePlanDetails(ctx context.Context, token, serviceName, planName,
 
 	formattedPendingChanges := make(map[string]model.ResourceChangeSet)
 	for resourceID, changeSet := range pendingChanges.ResourceChangeSets {
-		formattedChangeSet := model.ResourceChangeSet{
-			ResourceChanges:           changeSet.ResourceChanges,
-			ProductTierFeatureChanges: changeSet.ProductTierFeatureChanges,
-			ImageConfigChanges:        changeSet.ImageConfigChanges,
-			InfraConfigChanges:        changeSet.InfraConfigChanges,
+		if cs, ok := changeSet.(openapiclient.ChangeSet); ok {
+			formattedChangeSet := model.ResourceChangeSet{
+				ResourceChanges:           cs.ResourceChanges,
+				ProductTierFeatureChanges: cs.ProductTierFeatureChanges,
+				ImageConfigChanges:        cs.ImageConfigChanges,
+				InfraConfigChanges:        cs.InfraConfigChanges,
+			}
+			if cs.ResourceName != nil {
+				formattedChangeSet.ResourceName = *cs.ResourceName
+			}
+			formattedPendingChanges[resourceID] = formattedChangeSet
 		}
-		if changeSet.ResourceName != nil {
-			formattedChangeSet.ResourceName = *changeSet.ResourceName
-		}
-		formattedPendingChanges[string(resourceID)] = formattedChangeSet
 	}
 
 	formattedServicePlan := model.ServicePlanDetails{

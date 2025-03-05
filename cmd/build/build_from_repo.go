@@ -13,7 +13,6 @@ import (
 	"github.com/compose-spec/compose-go/loader"
 	"github.com/compose-spec/compose-go/types"
 	"github.com/fatih/color"
-	"github.com/omnistrate/api-design/v1/api/constants"
 	"github.com/omnistrate/ctl/cmd/common"
 
 	"github.com/chelnak/ysmrr"
@@ -21,6 +20,7 @@ import (
 	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
+	"github.com/omnistrate/ctl/internal/model"
 	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/pkg/browser"
 	"github.com/pkg/errors"
@@ -945,12 +945,12 @@ x-omnistrate-image-registry-attributes:
 		}
 
 		for _, account := range accounts.AccountConfigs {
-			if account.Status == string(constants.Verifying) && account.AwsAccountID != nil && *account.AwsAccountID == awsAccountID {
+			if account.Status == model.Verifying.String() && account.AwsAccountID != nil && *account.AwsAccountID == awsAccountID {
 				awsAccountUnverified = true
 				unverifiedAwsAccountConfigID = account.Id
 			}
 
-			if account.Status == string(constants.Verifying) && account.GcpProjectID != nil && *account.GcpProjectID == gcpProjectID && account.GcpProjectNumber != nil && *account.GcpProjectNumber == gcpProjectNumber {
+			if account.Status == model.Verifying.String() && account.GcpProjectID != nil && *account.GcpProjectID == gcpProjectID && account.GcpProjectNumber != nil && *account.GcpProjectNumber == gcpProjectNumber {
 				gcpAccountUnverified = true
 				unverifiedGcpAccountConfigID = account.Id
 			}

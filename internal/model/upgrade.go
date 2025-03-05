@@ -1,5 +1,19 @@
 package model
 
+type Status string
+
+func (v Status) String() string {
+	return string(v)
+}
+
+const (
+	Failed     Status = "FAILED"
+	Cancelled  Status = "CANCELLED"
+	Scheduled  Status = "SCHEDULED"
+	Verifying  Status = "VERIFYING"
+	InProgress Status = "IN_PROGRESS"
+)
+
 type Upgrade struct {
 	UpgradeID     string  `json:"upgrade_id"`
 	SourceVersion string  `json:"source_version"`
