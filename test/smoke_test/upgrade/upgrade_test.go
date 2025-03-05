@@ -3,6 +3,8 @@ package upgrade
 import (
 	"context"
 	"fmt"
+	"github.com/omnistrate/api-design/v1/api/constants"
+	"github.com/omnistrate/ctl/cmd/upgrade/status"
 	"testing"
 	"time"
 
@@ -110,7 +112,9 @@ func Test_upgrade_basic(t *testing.T) {
 	time.Sleep(5 * time.Second)
 	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, instance.InstanceStatusRunning, 900*time.Second)
 	require.NoError(err)
-
+	// PASS: scheduled upgrade
+	err = validateScheduledAndCancel(ctx, instanceID, "1.0")
+	require.NoError(err)
 	// PASS: upgrade instance to version 1.0
 	cmd.RootCmd.SetArgs([]string{"upgrade", instanceID, "--version", "1.0"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
@@ -161,4 +165,62 @@ func Test_upgrade_basic(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.Error(err)
 	require.Contains(err.Error(), "upgrade-invalid not found")
+}
+
+func validateScheduledAndCancel(ctx context.Context, instanceID string, targetVersion string) error {
+	// Upgrade instance with latest version
+	scheduledDate := time.Now().Add(1 * time.Hour).Truncate(time.Hour).Format(time.RFC3339)
+	cmd.RootCmd.SetArgs([]string{"upgrade", instanceID, "--version", targetVersion, "--scheduled-date", scheduledDate})
+	err := cmd.RootCmd.ExecuteContext(ctx)
+	if err != nil {
+		return err
+	}
+	if len(upgrade.UpgradePathIDs) != 1 {
+		return fmt.Errorf("expected 1 upgrade path ID, got %d", len(upgrade.UpgradePathIDs))
+	}
+	upgradeID := upgrade.UpgradePathIDs[0]
+	for {
+		cmd.RootCmd.SetArgs([]string{"upgrade", "status", upgradeID})
+		if err = cmd.RootCmd.ExecuteContext(ctx); err != nil {
+			return err
+		}
+
+		if status.LastUpgradeStatus.Status != constants.InProgress.String() {
+			break
+		}
+		time.Sleep(5 * time.Second)
+	}
+
+	if status.LastUpgradeStatus.Status != constants.Scheduled.String() {
+		return fmt.Errorf("expected status %s, got %s", constants.Scheduled.String(), status.LastUpgradeStatus.Status)
+	}
+
+	cmd.RootCmd.SetArgs([]string{"upgrade", "cancel", upgradeID})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	cmd.RootCmd.SetArgs([]string{"upgrade", "status", upgradeID})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	for {
+		cmd.RootCmd.SetArgs([]string{"upgrade", "status", upgradeID})
+		if err = cmd.RootCmd.ExecuteContext(ctx); err != nil {
+			return err
+		}
+
+		if status.LastUpgradeStatus.Status != constants.Scheduled.String() {
+			break
+		}
+		time.Sleep(5 * time.Second)
+	}
+	if status.LastUpgradeStatus.Status != constants.Cancelled.String() {
+		return fmt.Errorf("expected status %s, got %s", constants.Cancelled.String(), status.LastUpgradeStatus.Status)
+	}
+
+	return nil
 }
