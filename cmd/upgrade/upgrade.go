@@ -2,7 +2,7 @@ package upgrade
 
 import (
 	"fmt"
-	"github.com/omnistrate/ctl/cmd/upgrade/managelifecycle"
+	"github.com/omnistrate/ctl/cmd/upgrade/manageupgradelifecycle"
 	"strings"
 
 	"github.com/omnistrate/ctl/cmd/common"
@@ -45,9 +45,9 @@ var Cmd = &cobra.Command{
 
 func init() {
 	Cmd.AddCommand(status.Cmd)
-	Cmd.AddCommand(managelifecycle.CancelCmd)
-	Cmd.AddCommand(managelifecycle.ResumeCmd)
-	Cmd.AddCommand(managelifecycle.PauseCmd)
+	Cmd.AddCommand(manageupgradelifecycle.CancelCmd)
+	Cmd.AddCommand(manageupgradelifecycle.ResumeCmd)
+	Cmd.AddCommand(manageupgradelifecycle.PauseCmd)
 
 	Cmd.Args = cobra.MinimumNArgs(1)
 
