@@ -2,8 +2,9 @@ package upgrade
 
 import (
 	"fmt"
-	"github.com/omnistrate/ctl/cmd/common"
 	"strings"
+
+	"github.com/omnistrate/ctl/cmd/common"
 
 	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/cmd/upgrade/status"
@@ -276,8 +277,8 @@ func run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		upgrades[upgradeArgs].UpgradePathID = string(upgradePathID)
-		UpgradePathIDs = append(UpgradePathIDs, string(upgradePathID))
+		upgrades[upgradeArgs].UpgradePathID = upgradePathID
+		UpgradePathIDs = append(UpgradePathIDs, upgradePathID)
 	}
 
 	utils.HandleSpinnerSuccess(spinner, sm, "Upgrade scheduled successfully")
