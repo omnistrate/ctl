@@ -16,7 +16,6 @@ import (
 	"github.com/compose-spec/compose-go/types"
 	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
-	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
@@ -365,7 +364,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		sm1.Start()
 	}
 
-	var undefinedResources map[string]serviceapi.ResourceID
+	var undefinedResources map[string]string
 	ServiceID, EnvironmentID, ProductTierID, undefinedResources, err = buildService(
 		cmd.Context(),
 		fileData,
