@@ -7,7 +7,7 @@ Patch deployment for an instance deployment
 This command helps you patch the deployment for an instance deployment.
 
 ```
-omnistrate-ctl instance patch-deployment [instance-id] --resource-name <deployment-name> --deployment-action <deployment-action> --patch-files <patch-files> [flags]
+omnistrate-ctl instance patch-deployment [instance-id] --resource-name <resource-name> --deployment-action <deployment-action> --patch-files <patch-files> [flags]
 ```
 
 ### Examples
