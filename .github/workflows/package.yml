@@ -13,9 +13,6 @@ on:
       - main
 
 env:
-  GOPRIVATE: github.com/omnistrate
-  GOPROXY: ${{ secrets.GOPROXY }}
-  GOSUMDB: ${{ secrets.GOSUMDB }}
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
@@ -46,13 +43,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate token
-        id: generate_token
-        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a
-        with:
-          app_id: ${{ secrets.CI_APP_ID }}
-          private_key: ${{ secrets.CI_APP_PRIVATE_KEY }}
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
@@ -77,11 +67,6 @@ jobs:
           context: .
           file: ./build/Dockerfile
           platforms: ${{ env.PR_PLATFORMS }}
-          build-args: |
-            GIT_USER=api 
-            GIT_TOKEN=${{ steps.generate_token.outputs.token }}
-            GOPROXY=${{ env.GOPROXY }}
-            GOSUMDB=${{ env.GOSUMDB }}
           push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -104,13 +89,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Generate token
-        id: generate_token
-        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a
-        with:
-          app_id: ${{ secrets.CI_APP_ID }}
-          private_key: ${{ secrets.CI_APP_PRIVATE_KEY }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -143,11 +121,6 @@ jobs:
           context: .
           file: ./build/Dockerfile
           platforms: ${{ env.PLATFORMS }}
-          build-args: |
-            GIT_USER=api 
-            GIT_TOKEN=${{ steps.generate_token.outputs.token }}
-            GOPROXY=${{ env.GOPROXY }}
-            GOSUMDB=${{ env.GOSUMDB }}
           push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

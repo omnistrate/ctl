@@ -10,18 +10,10 @@ COPY ./ .
 
 ARG TARGETOS
 ARG TARGETARCH
-ARG GIT_USER
-ARG GIT_TOKEN
 ARG GOPROXY
 ARG GOSUMDB
 ENV CGO_ENABLED=0
-ENV GOPRIVATE=github.com/omnistrate
-ENV GOPROXY=${GOPROXY}
-ENV GOSUMDB=${GOSUMDB}
 ENV GOMAXPROCS=8
-
-RUN echo Configuring access to private repos
-RUN echo "machine github.com login ${GIT_USER} password ${GIT_TOKEN}" > ~/.netrc
 
 RUN echo Fetching project dependencies
 RUN --mount=type=cache,target=/go/pkg/mod \
@@ -38,6 +30,7 @@ RUN echo Short testing to validate the build
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     GOOS=${TARGETOS} GOARCH=${TARGETARCH} go test ./... -short
+    
 ## Deploy
 FROM alpine:latest AS app
 
