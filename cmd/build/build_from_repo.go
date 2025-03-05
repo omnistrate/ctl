@@ -13,7 +13,6 @@ import (
 	"github.com/compose-spec/compose-go/loader"
 	"github.com/compose-spec/compose-go/types"
 	"github.com/fatih/color"
-	"github.com/omnistrate/api-design/v1/api/constants"
 	"github.com/omnistrate/ctl/cmd/common"
 
 	"github.com/chelnak/ysmrr"
@@ -945,12 +944,12 @@ x-omnistrate-image-registry-attributes:
 		}
 
 		for _, account := range accounts.AccountConfigs {
-			if account.Status == string(constants.Verifying) && account.AwsAccountID != nil && *account.AwsAccountID == awsAccountID {
+			if account.Status == "VERIFYING" && account.AwsAccountID != nil && *account.AwsAccountID == awsAccountID {
 				awsAccountUnverified = true
 				unverifiedAwsAccountConfigID = account.Id
 			}
 
-			if account.Status == string(constants.Verifying) && account.GcpProjectID != nil && *account.GcpProjectID == gcpProjectID && account.GcpProjectNumber != nil && *account.GcpProjectNumber == gcpProjectNumber {
+			if account.Status == "VERIFYING" && account.GcpProjectID != nil && *account.GcpProjectID == gcpProjectID && account.GcpProjectNumber != nil && *account.GcpProjectNumber == gcpProjectNumber {
 				gcpAccountUnverified = true
 				unverifiedGcpAccountConfigID = account.Id
 			}
