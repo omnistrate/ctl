@@ -1,10 +1,11 @@
 package domain
 
 import (
-	"github.com/omnistrate/ctl/cmd/common"
 	"strings"
 
-	saasportalapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/saas_portal_api"
+	"github.com/omnistrate/ctl/cmd/common"
+
+	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
@@ -97,12 +98,12 @@ func runList(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func formatDomain(domain *saasportalapi.CustomDomain) (model.Domain, error) {
+func formatDomain(domain openapiclientv1.CustomDomain) (model.Domain, error) {
 	return model.Domain{
-		EnvironmentType: string(domain.EnvironmentType),
+		EnvironmentType: domain.EnvironmentType,
 		Name:            domain.Name,
 		Domain:          domain.CustomDomain,
-		Status:          string(domain.Status),
+		Status:          domain.Status,
 		ClusterEndpoint: domain.ClusterEndpoint,
 	}, nil
 }

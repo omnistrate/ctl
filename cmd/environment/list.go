@@ -1,11 +1,12 @@
 package environment
 
 import (
-	"github.com/omnistrate/ctl/cmd/common"
 	"strings"
 
+	"github.com/omnistrate/ctl/cmd/common"
+
 	"github.com/chelnak/ysmrr"
-	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
+	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
@@ -117,7 +118,7 @@ func runList(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func formatEnvironment(service openapiclient.DescribeServiceResult, environment openapiclient.ServiceEnvironment, truncateNames bool) (model.Environment, error) {
+func formatEnvironment(service openapiclientv1.DescribeServiceResult, environment openapiclientv1.ServiceEnvironment, truncateNames bool) (model.Environment, error) {
 	serviceName := service.Name
 	envName := environment.Name
 

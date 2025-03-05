@@ -4,20 +4,21 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"github.com/compose-spec/compose-go/loader"
-	"github.com/compose-spec/compose-go/types"
-	"github.com/fatih/color"
-	"github.com/omnistrate/api-design/v1/api/constants"
-	"github.com/omnistrate/ctl/cmd/common"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/compose-spec/compose-go/loader"
+	"github.com/compose-spec/compose-go/types"
+	"github.com/fatih/color"
+	"github.com/omnistrate/api-design/v1/api/constants"
+	"github.com/omnistrate/ctl/cmd/common"
+
 	"github.com/chelnak/ysmrr"
 	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
-	serviceenvironmentapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_environment_api"
+	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
@@ -858,7 +859,7 @@ x-omnistrate-image-registry-attributes:
 		return err
 	}
 	for _, env := range service.ServiceEnvironments {
-		if env.Id != string(prodEnvironmentID) {
+		if env.Id != prodEnvironmentID {
 			continue
 		}
 		for _, plan := range env.ServicePlans {
@@ -886,9 +887,9 @@ x-omnistrate-image-registry-attributes:
 	spinner.Complete()
 
 	// Step 19: Initialize the SaaS Portal
-	var prodEnvironment *serviceenvironmentapi.DescribeServiceEnvironmentResult
+	var prodEnvironment *openapiclientv1.DescribeServiceEnvironmentResult
 	if config.IsProd() {
-		prodEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, string(prodEnvironmentID))
+		prodEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, prodEnvironmentID)
 		if err != nil {
 			utils.PrintError(err)
 			return err
@@ -898,7 +899,7 @@ x-omnistrate-image-registry-attributes:
 			spinner = sm.AddSpinner("Initializing the SaaS Portal. This may take a few minutes.")
 
 			for {
-				prodEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, string(prodEnvironmentID))
+				prodEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, prodEnvironmentID)
 				if err != nil {
 					utils.PrintError(err)
 					return err
@@ -927,7 +928,7 @@ x-omnistrate-image-registry-attributes:
 	println()
 	fmt.Println("Congratulations! Your service has been successfully built and deployed.")
 	if config.IsProd() {
-		utils.PrintURL("You can access the SaaS Portal at", getSaaSPortalURL(prodEnvironment, serviceID, string(prodEnvironmentID)))
+		utils.PrintURL("You can access the SaaS Portal at", getSaaSPortalURL(prodEnvironment, serviceID, prodEnvironmentID))
 	}
 
 	println()
@@ -996,7 +997,7 @@ x-omnistrate-image-registry-attributes:
 
 // Helper functions
 
-func checkIfProdEnvExists(ctx context.Context, token string, serviceID string) (serviceenvironmentapi.ServiceEnvironmentID, error) {
+func checkIfProdEnvExists(ctx context.Context, token string, serviceID string) (string, error) {
 	prodEnvironment, err := dataaccess.FindEnvironment(ctx, token, serviceID, "prod")
 	if errors.As(err, &dataaccess.ErrEnvironmentNotFound) {
 		return "", nil
@@ -1005,10 +1006,10 @@ func checkIfProdEnvExists(ctx context.Context, token string, serviceID string) (
 		return "", err
 	}
 
-	return prodEnvironment.ID, nil
+	return prodEnvironment.Id, nil
 }
 
-func createProdEnv(ctx context.Context, token string, serviceID string, devEnvironmentID string) (serviceenvironmentapi.ServiceEnvironmentID, error) {
+func createProdEnv(ctx context.Context, token string, serviceID string, devEnvironmentID string) (string, error) {
 	// Get default deployment config ID
 	defaultDeploymentConfigID, err := dataaccess.GetDefaultDeploymentConfigID(ctx, token)
 	if err != nil {
@@ -1016,18 +1017,17 @@ func createProdEnv(ctx context.Context, token string, serviceID string, devEnvir
 		return "", err
 	}
 
-	prod := serviceenvironmentapi.CreateServiceEnvironmentRequest{
-		Name:                    DefaultProdEnvName,
-		Description:             "Production environment",
-		ServiceID:               serviceenvironmentapi.ServiceID(serviceID),
-		Visibility:              serviceenvironmentapi.ServiceVisibility("PUBLIC"),
-		Type:                    (*serviceenvironmentapi.EnvironmentType)(utils.ToPtr("PROD")),
-		SourceEnvironmentID:     utils.ToPtr(serviceenvironmentapi.ServiceEnvironmentID(devEnvironmentID)),
-		DeploymentConfigID:      serviceenvironmentapi.DeploymentConfigID(defaultDeploymentConfigID),
-		AutoApproveSubscription: utils.ToPtr(true),
-	}
-
-	prodEnvironmentID, err := dataaccess.CreateServiceEnvironment(ctx, token, prod)
+	prodEnvironmentID, err := dataaccess.CreateServiceEnvironment(ctx, token,
+		DefaultProdEnvName,
+		"Production environment",
+		serviceID,
+		"PUBLIC",
+		"PROD",
+		utils.ToPtr(devEnvironmentID),
+		defaultDeploymentConfigID,
+		true,
+		nil,
+	)
 	if err != nil {
 		utils.PrintError(err)
 		return "", err
