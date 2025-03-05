@@ -662,7 +662,7 @@ func buildService(ctx context.Context, fileData []byte, token, name, specType st
 		// Get the configs from the project
 		var configs *map[string]string
 		if project.Configs != nil {
-			configs := make(map[string]string)
+			configsTemp := make(map[string]string)
 			for configName, config := range project.Configs {
 				var configFileContent []byte
 				configFileContent, err = os.ReadFile(filepath.Clean(config.File))
@@ -670,23 +670,24 @@ func buildService(ctx context.Context, fileData []byte, token, name, specType st
 					return "", "", "", make(map[string]string), err
 				}
 
-				configs[configName] = base64.StdEncoding.EncodeToString(configFileContent)
+				configsTemp[configName] = base64.StdEncoding.EncodeToString(configFileContent)
 			}
+			configs = &configsTemp
 		}
 
 		// Get the secrets from the project
 		var secrets *map[string]string
 		if project.Secrets != nil {
-			secrets := make(map[string]string)
+			secretsTemp := make(map[string]string)
 			for secretName, secret := range project.Secrets {
 				var fileContent []byte
 				fileContent, err = os.ReadFile(filepath.Clean(secret.File))
 				if err != nil {
 					return "", "", "", make(map[string]string), err
 				}
-
-				secrets[secretName] = base64.StdEncoding.EncodeToString(fileContent)
+				secretsTemp[secretName] = base64.StdEncoding.EncodeToString(fileContent)
 			}
+			secrets = &secretsTemp
 		}
 
 		request := openapiclientv1.BuildServiceFromComposeSpecRequest2{
