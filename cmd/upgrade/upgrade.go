@@ -2,6 +2,7 @@ package upgrade
 
 import (
 	"fmt"
+	"github.com/omnistrate/ctl/cmd/upgrade/managelifecycle"
 	"strings"
 
 	"github.com/omnistrate/ctl/cmd/common"
@@ -27,7 +28,10 @@ omctl upgrade [instance1] [instance2] --version=latest
 omctl upgrade [instance1] [instance2] --version=preferred
 
 # Upgrade instances to a specific version with version name
-omctl upgrade [instance1] [instance2] --version-name=v0.1.1`
+omctl upgrade [instance1] [instance2] --version-name=v0.1.1
+
+# Upgrade instance to a specific version with a schedule date in the future
+omctl upgrade [instance-id] --version=1.0 --scheduled-date="2023-12-01T00:00:00Z"`
 )
 
 var Cmd = &cobra.Command{
@@ -41,11 +45,15 @@ var Cmd = &cobra.Command{
 
 func init() {
 	Cmd.AddCommand(status.Cmd)
+	Cmd.AddCommand(managelifecycle.CancelCmd)
+	Cmd.AddCommand(managelifecycle.ResumeCmd)
+	Cmd.AddCommand(managelifecycle.PauseCmd)
 
 	Cmd.Args = cobra.MinimumNArgs(1)
 
 	Cmd.Flags().StringP("version", "", "", "Specify the version number to upgrade to. Use 'latest' to upgrade to the latest version. Use 'preferred' to upgrade to the preferred version. Use either this flag or the --version-name flag to upgrade to a specific version.")
 	Cmd.Flags().StringP("version-name", "", "", "Specify the version name to upgrade to. Use either this flag or the --version flag to upgrade to a specific version.")
+	Cmd.Flags().StringP("scheduled-date", "", "", "Specify the scheduled date for the upgrade.")
 }
 
 type Args struct {

@@ -1,4 +1,4 @@
-package status
+package managelifecycle
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 	"github.com/omnistrate/ctl/cmd/common"
 
 	"github.com/chelnak/ysmrr"
-	"github.com/omnistrate/ctl/cmd/upgrade/status/detail"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/model"
@@ -15,27 +14,52 @@ import (
 )
 
 const (
-	statusExample = `# Get upgrade status
-omctl upgrade status [upgrade-id]`
+	pauseExample = ` Pausing ongoing upgrade # 
+omctl upgrade pause [upgrade-id] `
+	resumeExample = ` Resuming paused upgrade # 
+omctl upgrade resume [upgrade-id] `
+	cancelExample = ` Cancelling uncompleted upgrade # 
+omctl upgrade cancel [upgrade-id] `
 )
 
-var LastDescribedUpgradeStatus model.UpgradeStatus
-var Cmd = &cobra.Command{
-	Use:          "status [upgrade-id] [flags]",
-	Short:        "Get Upgrade status",
-	Example:      statusExample,
-	RunE:         run,
+var PauseCmd = &cobra.Command{
+	Use:          "pause [upgrade-id] [flags]",
+	Short:        "Pause an ongoing upgrade",
+	Example:      pauseExample,
+	RunE:         pause,
+	SilenceUsage: true,
+}
+var ResumeCmd = &cobra.Command{
+	Use:          "resume [upgrade-id] [flags]",
+	Short:        "Resume a paused upgrade",
+	Example:      resumeExample,
+	RunE:         resume,
+	SilenceUsage: true,
+}
+var CancelCmd = &cobra.Command{
+	Use:          "cancel [upgrade-id] [flags]",
+	Short:        "Cancel an uncompleted upgrade",
+	Example:      cancelExample,
+	RunE:         cancel,
 	SilenceUsage: true,
 }
 
 func init() {
-	Cmd.AddCommand(detail.Cmd)
-
-	Cmd.Args = cobra.MinimumNArgs(1)
-
+	PauseCmd.Args = cobra.MinimumNArgs(1)
+	ResumeCmd.Args = cobra.MinimumNArgs(1)
+	CancelCmd.Args = cobra.MinimumNArgs(1)
+}
+func cancel(cmd *cobra.Command, args []string) error {
+	return manageLifecycle(cmd, args, model.CancelAction)
+}
+func pause(cmd *cobra.Command, args []string) error {
+	return manageLifecycle(cmd, args, model.PauseAction)
+}
+func resume(cmd *cobra.Command, args []string) error {
+	return manageLifecycle(cmd, args, model.ResumeAction)
 }
 
-func run(cmd *cobra.Command, args []string) error {
+func manageLifecycle(cmd *cobra.Command, args []string, action model.UpgradeMaintenanceAction) error {
 	defer config.CleanupArgsAndFlags(cmd, &args)
 
 	// Retrieve flags
@@ -57,7 +81,7 @@ func run(cmd *cobra.Command, args []string) error {
 	var spinner *ysmrr.Spinner
 	if output != "json" {
 		sm = ysmrr.NewSpinnerManager()
-		msg := "Retrieving upgrade status..."
+		msg := "Requesting pause action on upgrade..."
 		spinner = sm.AddSpinner(msg)
 		sm.Start()
 	}
@@ -93,14 +117,13 @@ func run(cmd *cobra.Command, args []string) error {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
-
-		upgrade, err := dataaccess.DescribeUpgradePath(cmd.Context(), token, serviceID, productTierID, upgradePathID)
+		upgrade, err := dataaccess.ManageLifecycle(cmd.Context(), token, serviceID, productTierID, upgradePathID, action)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
 
-		LastDescribedUpgradeStatus = model.UpgradeStatus{
+		formattedUpgradeStatuses = append(formattedUpgradeStatuses, &model.UpgradeStatus{
 			UpgradeID:  upgradePathID,
 			Total:      upgrade.TotalCount,
 			Pending:    upgrade.PendingCount,
@@ -110,14 +133,13 @@ func run(cmd *cobra.Command, args []string) error {
 			Scheduled:  utils.FromPtr(upgrade.ScheduledCount),
 			Skipped:    upgrade.SkippedCount,
 			Status:     upgrade.Status,
-		}
-		formattedUpgradeStatuses = append(formattedUpgradeStatuses, &LastDescribedUpgradeStatus)
+		})
 	}
 
 	if len(formattedUpgradeStatuses) == 0 {
 		utils.HandleSpinnerSuccess(spinner, sm, "No upgrades found")
 	} else {
-		utils.HandleSpinnerSuccess(spinner, sm, "Upgrade status retrieved")
+		utils.HandleSpinnerSuccess(spinner, sm, "Upgrade pause request submitted")
 	}
 
 	// Print output
@@ -130,7 +152,7 @@ func run(cmd *cobra.Command, args []string) error {
 	if output != "json" {
 		println("\nTo get more details, run the following command(s):")
 		for _, s := range formattedUpgradeStatuses {
-			println(fmt.Sprintf("  omctl upgrade status detail %s", s.UpgradeID))
+			println(fmt.Sprintf("  omctl upgrade pause detail %s", s.UpgradeID))
 		}
 	}
 

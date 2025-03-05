@@ -21,9 +21,20 @@ type UpgradeStatus struct {
 }
 
 type UpgradeStatusDetail struct {
-	UpgradeID        string `json:"upgrade_id"`
-	InstanceID       string `json:"instance_id"`
-	UpgradeStartTime string `json:"upgrade_start_time"`
-	UpgradeEndTime   string `json:"upgrade_end_time"`
-	UpgradeStatus    string `json:"upgrade_status"`
+	UpgradeID            string  `json:"upgrade_id"`
+	InstanceID           string  `json:"instance_id"`
+	UpgradeStartTime     string  `json:"upgrade_start_time"`
+	PlannedExecutionDate *string `json:"planned_execution_date"`
+	UpgradeEndTime       string  `json:"upgrade_end_time"`
+	UpgradeStatus        string  `json:"upgrade_status"`
 }
+
+type UpgradeMaintenanceAction string
+
+func (a UpgradeMaintenanceAction) String() string {
+	return string(a)
+}
+
+const PauseAction UpgradeMaintenanceAction = "pause"
+const ResumeAction UpgradeMaintenanceAction = "resume"
+const CancelAction UpgradeMaintenanceAction = "cancel"
