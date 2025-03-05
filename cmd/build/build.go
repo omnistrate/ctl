@@ -651,19 +651,20 @@ func buildService(ctx context.Context, fileData []byte, token, name, specType st
 		}
 
 		// Convert the project back to YAML, in case it was modified
-		var modifiedFileData []byte
+		var fileContent string
 		if modified {
-			if modifiedFileData, err = project.MarshalYAML(); err != nil {
+			var parsedYamlContent []byte
+			if parsedYamlContent, err = project.MarshalYAML(); err != nil {
 				err = errors.Wrap(err, "failed to marshal project to YAML")
 				return
 			}
-		} else {
-			modifiedFileData = fileData
+			fileContent = base64.StdEncoding.EncodeToString(parsedYamlContent)
 		}
 
 		// Get the configs from the project
-		configs := make(map[string]string)
+		var configs *map[string]string
 		if project.Configs != nil {
+			configs := make(map[string]string)
 			for configName, config := range project.Configs {
 				var fileContent []byte
 				fileContent, err = os.ReadFile(filepath.Clean(config.File))
@@ -676,8 +677,9 @@ func buildService(ctx context.Context, fileData []byte, token, name, specType st
 		}
 
 		// Get the secrets from the project
-		secrets := make(map[string]string)
+		var secrets *map[string]string
 		if project.Secrets != nil {
+			secrets := make(map[string]string)
 			for secretName, secret := range project.Secrets {
 				var fileContent []byte
 				fileContent, err = os.ReadFile(filepath.Clean(secret.File))
@@ -695,12 +697,12 @@ func buildService(ctx context.Context, fileData []byte, token, name, specType st
 			ServiceLogoURL:     serviceLogoURL,
 			Environment:        environment,
 			EnvironmentType:    environmentType,
-			FileContent:        base64.StdEncoding.EncodeToString(modifiedFileData),
+			FileContent:        fileContent,
 			Release:            utils.ToPtr(release),
 			ReleaseAsPreferred: utils.ToPtr(releaseAsPreferred),
 			ReleaseVersionName: releaseName,
-			Configs:            utils.ToPtr(configs),
-			Secrets:            utils.ToPtr(secrets),
+			Configs:            configs,
+			Secrets:            secrets,
 		}
 
 		buildRes, err := dataaccess.BuildServiceFromComposeSpec(ctx, token, request)
