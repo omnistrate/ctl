@@ -62,3 +62,41 @@ func DeleteService(ctx context.Context, token, serviceID string) error {
 
 	return nil
 }
+
+func BuildServiceFromServicePlanSpec(ctx context.Context, token string, request openapiclient.BuildServiceFromServicePlanSpecRequest2) (*openapiclient.BuildServiceFromServicePlanSpecResult, error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+	apiClient := getV1Client()
+
+	resp, r, err := apiClient.ServiceApiAPI.ServiceApiBuildServiceFromServicePlanSpec(ctxWithToken).
+		BuildServiceFromServicePlanSpecRequest2(request).
+		Execute()
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+	if err != nil {
+		return nil, handleV1Error(err)
+	}
+
+	return resp, nil
+}
+
+func BuildServiceFromComposeSpec(ctx context.Context, token string, request openapiclient.BuildServiceFromComposeSpecRequest2) (*openapiclient.BuildServiceFromComposeSpecResult, error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+	apiClient := getV1Client()
+
+	resp, r, err := apiClient.ServiceApiAPI.ServiceApiBuildServiceFromComposeSpec(ctxWithToken).
+		BuildServiceFromComposeSpecRequest2(request).
+		Execute()
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+	if err != nil {
+		return nil, handleV1Error(err)
+	}
+
+	return resp, nil
+}

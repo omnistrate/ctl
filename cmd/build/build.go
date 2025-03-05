@@ -16,14 +16,12 @@ import (
 	"github.com/compose-spec/compose-go/types"
 	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
-	"github.com/omnistrate/api-design/pkg/httpclientwrapper"
 	serviceapi "github.com/omnistrate/api-design/v1/pkg/registration/gen/service_api"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	goa "goa.design/goa/v3/pkg"
 )
 
 var (
@@ -510,12 +508,12 @@ func runBuild(cmd *cobra.Command, args []string) error {
 						return err
 					}
 					prodEnvironmentID, err = dataaccess.CreateServiceEnvironment(
-						cmd.Context(), 
+						cmd.Context(),
 						token,
-						"Production", 
-						"Production environment", 
+						"Production",
+						"Production environment",
 						ServiceID,
-						"PUBLIC", 
+						"PUBLIC",
 						"PROD",
 						utils.ToPtr(EnvironmentID),
 						defaultDeploymentConfigID,
@@ -592,62 +590,39 @@ func runBuild(cmd *cobra.Command, args []string) error {
 }
 
 func buildService(ctx context.Context, fileData []byte, token, name, specType string, description, serviceLogoURL, environment, environmentType *string, release,
-	releaseAsPreferred bool, releaseName *string) (serviceID string, environmentID string, productTierID string, undefinedResources map[string]serviceapi.ResourceID, err error) {
+	releaseAsPreferred bool, releaseName *string) (serviceID string, environmentID string, productTierID string, undefinedResources map[string]string, err error) {
 	if name == "" {
-		return "", "", "", make(map[string]serviceapi.ResourceID), errors.New("name is required")
-	}
-
-	service, err := httpclientwrapper.NewService(config.GetHostScheme(), config.GetHost())
-	if err != nil {
-		return "", "", "", make(map[string]serviceapi.ResourceID), err
+		return "", "", "", make(map[string]string), errors.New("name is required")
 	}
 
 	if specType == "" {
-		return "", "", "", make(map[string]serviceapi.ResourceID), errors.New("specType is required")
+		return "", "", "", make(map[string]string), errors.New("specType is required")
 	}
 
 	switch specType {
 	case ServicePlanSpecType:
-		request := serviceapi.BuildServiceFromServicePlanSpecRequest{
-			Token:              token,
+		request := openapiclientv1.BuildServiceFromServicePlanSpecRequest2{
 			Name:               name,
 			Description:        description,
 			ServiceLogoURL:     serviceLogoURL,
 			Environment:        environment,
-			EnvironmentType:    (*serviceapi.EnvironmentType)(environmentType),
+			EnvironmentType:    environmentType,
 			FileContent:        base64.StdEncoding.EncodeToString(fileData),
 			Release:            utils.ToPtr(release),
 			ReleaseAsPreferred: utils.ToPtr(releaseAsPreferred),
 			ReleaseVersionName: releaseName,
 		}
 
-		var buildRes *serviceapi.BuildServiceFromServicePlanSpecResult
-		buildRes, err = service.BuildServiceFromServicePlanSpec(ctx, &request)
+		buildRes, err := dataaccess.BuildServiceFromServicePlanSpec(ctx, token, request)
 		if err != nil {
-			var serviceError *goa.ServiceError
-			if errors.As(err, &serviceError) {
-				return "", "", "", make(map[string]serviceapi.ResourceID), fmt.Errorf("%s\nDetail: %s", serviceError.Name, serviceError.Message)
-			}
-			return
+			return "", "", "", make(map[string]string), err
 		}
 		if buildRes == nil {
-			return "", "", "", make(map[string]serviceapi.ResourceID), errors.New("empty response from server")
+			return "", "", "", make(map[string]string), errors.New("empty response from server")
 		}
-		return string(buildRes.ServiceID), string(buildRes.ServiceEnvironmentID), string(buildRes.ProductTierID), buildRes.UndefinedResources, nil
-	case DockerComposeSpecType:
-		request := serviceapi.BuildServiceFromComposeSpecRequest{
-			Token:              token,
-			Name:               name,
-			Description:        description,
-			ServiceLogoURL:     serviceLogoURL,
-			Environment:        environment,
-			EnvironmentType:    (*serviceapi.EnvironmentType)(environmentType),
-			FileContent:        base64.StdEncoding.EncodeToString(fileData),
-			Release:            &release,
-			ReleaseAsPreferred: &releaseAsPreferred,
-			ReleaseVersionName: releaseName,
-		}
+		return buildRes.GetServiceID(), buildRes.GetServiceEnvironmentID(), buildRes.GetProductTierID(), buildRes.GetUndefinedResources(), nil
 
+	case DockerComposeSpecType:
 		// Load the YAML content
 		var parsedYaml map[string]interface{}
 		parsedYaml, err = loader.ParseYAML(fileData)
@@ -672,63 +647,73 @@ func buildService(ctx context.Context, fileData []byte, token, name, specType st
 		// Convert config volumes to configs
 		var modified bool
 		if project, modified, err = convertVolumesToConfigs(project); err != nil {
-			return "", "", "", make(map[string]serviceapi.ResourceID), err
+			return "", "", "", make(map[string]string), err
 		}
 
 		// Convert the project back to YAML, in case it was modified
+		var modifiedFileData []byte
 		if modified {
-			var parsedYamlContent []byte
-			if parsedYamlContent, err = project.MarshalYAML(); err != nil {
+			if modifiedFileData, err = project.MarshalYAML(); err != nil {
 				err = errors.Wrap(err, "failed to marshal project to YAML")
 				return
 			}
-			request.FileContent = base64.StdEncoding.EncodeToString(parsedYamlContent)
+		} else {
+			modifiedFileData = fileData
 		}
 
 		// Get the configs from the project
+		configs := make(map[string]string)
 		if project.Configs != nil {
-			request.Configs = make(map[string]string)
 			for configName, config := range project.Configs {
 				var fileContent []byte
 				fileContent, err = os.ReadFile(filepath.Clean(config.File))
 				if err != nil {
-					return "", "", "", make(map[string]serviceapi.ResourceID), err
+					return "", "", "", make(map[string]string), err
 				}
 
-				request.Configs[configName] = base64.StdEncoding.EncodeToString(fileContent)
+				configs[configName] = base64.StdEncoding.EncodeToString(fileContent)
 			}
 		}
 
 		// Get the secrets from the project
+		secrets := make(map[string]string)
 		if project.Secrets != nil {
-			request.Secrets = make(map[string]string)
 			for secretName, secret := range project.Secrets {
 				var fileContent []byte
 				fileContent, err = os.ReadFile(filepath.Clean(secret.File))
 				if err != nil {
-					return "", "", "", make(map[string]serviceapi.ResourceID), err
+					return "", "", "", make(map[string]string), err
 				}
 
-				request.Secrets[secretName] = base64.StdEncoding.EncodeToString(fileContent)
+				secrets[secretName] = base64.StdEncoding.EncodeToString(fileContent)
 			}
 		}
 
-		var buildRes *serviceapi.BuildServiceFromComposeSpecResult
-		buildRes, err = service.BuildServiceFromComposeSpec(ctx, &request)
+		request := openapiclientv1.BuildServiceFromComposeSpecRequest2{
+			Name:               name,
+			Description:        description,
+			ServiceLogoURL:     serviceLogoURL,
+			Environment:        environment,
+			EnvironmentType:    environmentType,
+			FileContent:        base64.StdEncoding.EncodeToString(modifiedFileData),
+			Release:            utils.ToPtr(release),
+			ReleaseAsPreferred: utils.ToPtr(releaseAsPreferred),
+			ReleaseVersionName: releaseName,
+			Configs:            utils.ToPtr(configs),
+			Secrets:            utils.ToPtr(secrets),
+		}
+
+		buildRes, err := dataaccess.BuildServiceFromComposeSpec(ctx, token, request)
 		if err != nil {
-			var serviceError *goa.ServiceError
-			if errors.As(err, &serviceError) {
-				return "", "", "", make(map[string]serviceapi.ResourceID), fmt.Errorf("%s\nDetail: %s", serviceError.Name, serviceError.Message)
-			}
-			return
+			return "", "", "", make(map[string]string), err
 		}
 		if buildRes == nil {
-			return "", "", "", make(map[string]serviceapi.ResourceID), errors.New("empty response from server")
+			return "", "", "", make(map[string]string), errors.New("empty response from server")
 		}
-		return string(buildRes.ServiceID), string(buildRes.ServiceEnvironmentID), string(buildRes.ProductTierID), buildRes.UndefinedResources, nil
+		return buildRes.GetServiceID(), buildRes.GetServiceEnvironmentID(), buildRes.GetProductTierID(), buildRes.GetUndefinedResources(), nil
 
 	default:
-		return "", "", "", make(map[string]serviceapi.ResourceID), errors.New("invalid spec type")
+		return "", "", "", make(map[string]string), errors.New("invalid spec type")
 	}
 }
 
