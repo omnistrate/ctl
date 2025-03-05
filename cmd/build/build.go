@@ -650,14 +650,13 @@ func buildService(ctx context.Context, fileData []byte, token, name, specType st
 		}
 
 		// Convert the project back to YAML, in case it was modified
-		var fileContent string
 		if modified {
 			var parsedYamlContent []byte
 			if parsedYamlContent, err = project.MarshalYAML(); err != nil {
 				err = errors.Wrap(err, "failed to marshal project to YAML")
 				return
 			}
-			fileContent = base64.StdEncoding.EncodeToString(parsedYamlContent)
+			fileData = parsedYamlContent
 		}
 
 		// Get the configs from the project
@@ -696,7 +695,7 @@ func buildService(ctx context.Context, fileData []byte, token, name, specType st
 			ServiceLogoURL:     serviceLogoURL,
 			Environment:        environment,
 			EnvironmentType:    environmentType,
-			FileContent:        fileContent,
+			FileContent:        base64.StdEncoding.EncodeToString(fileData),
 			Release:            utils.ToPtr(release),
 			ReleaseAsPreferred: utils.ToPtr(releaseAsPreferred),
 			ReleaseVersionName: releaseName,
