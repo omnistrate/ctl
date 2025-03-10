@@ -8,14 +8,24 @@ import (
 	"os"
 	"testing"
 
+	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
+// The textMode variable is defined in analyze.go
+
+// getSampleData returns sample data for testing
+func getSampleData(instanceID string) ([]dataaccess.InspectWorkloadItem, []dataaccess.InspectAZItem, []dataaccess.InspectStorageClassItem) {
+	// Create a K8sInspectClient to get the sample data
+	inspectClient := dataaccess.NewK8sInspectClient(dataaccess.K8sClientConfig{})
+	return inspectClient.GetSampleData(instanceID)
+}
+
 // TestGetSampleData verifies that sample data is properly generated
 func TestGetSampleData(t *testing.T) {
 	instanceID := "test-namespace"
-	workloadItems, azItems := getSampleData(instanceID)
+	workloadItems, azItems, _ := getSampleData(instanceID)
 
 	// Test workload items
 	assert.Equal(t, 3, len(workloadItems), "Should have 3 workload items")
@@ -48,7 +58,7 @@ func TestGetSampleData(t *testing.T) {
 // mockRunInspect is a modified version of runInspect that we can test
 func mockRunInspect(instanceID string) error {
 	// Get sample data
-	workloadItems, azItems := getSampleData(instanceID)
+	workloadItems, azItems, _ := getSampleData(instanceID)
 	
 	// Verify the data
 	if len(workloadItems) == 0 || len(azItems) == 0 {
