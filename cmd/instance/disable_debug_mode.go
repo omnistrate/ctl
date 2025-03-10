@@ -3,6 +3,8 @@ package instance
 import (
 	"encoding/json"
 	"errors"
+	"github.com/cqroot/prompt"
+	"github.com/cqroot/prompt/choose"
 	"strings"
 
 	"github.com/chelnak/ysmrr"
@@ -16,11 +18,11 @@ import (
 
 const (
 	disableDebugModeExample = `# Disable debug mode for an instance deployment
-omctl instance disable-debug-mode i-1234 --resource-name terraform`
+omctl instance disable-debug-mode i-1234 --resource-name terraform --force`
 )
 
 var disableDebugModeCmd = &cobra.Command{
-	Use:          "disable-debug-mode [instance-id] --resource-name [resource-name]",
+	Use:          "disable-debug-mode [instance-id] --resource-name [resource-name] --force",
 	Short:        "Disable debug mode for an instance deployment",
 	Long:         `This command helps you disable debug mode for an instance deployment`,
 	Example:      disableDebugModeExample,
@@ -30,6 +32,7 @@ var disableDebugModeCmd = &cobra.Command{
 
 func init() {
 	disableDebugModeCmd.Flags().StringP("resource-name", "r", "", "Resource name")
+	disableDebugModeCmd.Flags().BoolP("force", "f", false, "Force enable debug mode")
 
 	disableDebugModeCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 	disableDebugModeCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported")
@@ -64,6 +67,34 @@ func runDisableDebug(cmd *cobra.Command, args []string) error {
 		err = errors.New("only json output is supported")
 		utils.PrintError(err)
 		return err
+	}
+
+	isForce, err := cmd.Flags().GetBool("force")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	if !isForce {
+		// Prompt user to confirm
+		var choice string
+		choice, err = prompt.New().Ask("Disabling debug mode will allow all instance operations to resume. Before proceeding, please verify that your instance has been upgraded to the correct plan version. Do you want to continue?").
+			Choose([]string{
+				"Yes",
+				"No",
+			}, choose.WithTheme(choose.ThemeArrow))
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+
+		switch choice {
+		case "Yes":
+			break
+		case "No":
+			utils.PrintInfo("Operation cancelled")
+			return nil
+		}
 	}
 
 	// Retrieve flags
