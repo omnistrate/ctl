@@ -139,7 +139,7 @@ func runContinueDeployment(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	utils.PrintWarning("The instance is currently locked for operations. The deployment has been continued, but to fully unlock the instance and resume normal operations, you'll need to perform an instance upgrade and then disable debug mode.")
+	utils.PrintWarning("You will need to upgrade your instance to a plan version with the appropriate fix first and then disable debug mode.")
 
 	// Describe deployment entity
 	deploymentEntity, err := dataaccess.GetInstanceDeploymentEntity(cmd.Context(), token, instanceID, resourceType, deploymentName)

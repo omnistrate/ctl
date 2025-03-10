@@ -78,7 +78,7 @@ func runDisableDebug(cmd *cobra.Command, args []string) error {
 	if !isForce {
 		// Prompt user to confirm
 		var choice string
-		choice, err = prompt.New().Ask("Disabling debug mode will allow all instance operations to resume. Before proceeding, please verify that your instance has been upgraded to the correct plan version. Do you want to continue?").
+		choice, err = prompt.New().Ask("Please verify that your instance has been upgraded to the plan version with the appropriate fix. Continue to proceed?").
 			Choose([]string{
 				"Yes",
 				"No",
