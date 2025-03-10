@@ -1,0 +1,62 @@
+Replace pod icons with Kubernetes logo (⎈) in TUI display.
+
+In the file cmd/inspect/analyze.go:
+
+1. Find two occurrences of this pattern:
+
+```go
+// Color pods based on status
+var podColor tcell.Color
+var podIcon string
+
+switch pod.Status {
+case "Running":
+    podColor = tcell.ColorGreen
+    podIcon = "✅"
+case "Pending":
+    podColor = tcell.ColorYellow
+    podIcon = "⏳"
+case "Failed":
+    podColor = tcell.ColorRed
+    podIcon = "❌"
+default:
+    podColor = tcell.ColorGray
+    podIcon = "❔"
+}
+
+podNode := tview.NewTreeNode(fmt.Sprintf("%s Pod: %s (%s)", podIcon, pod.Name, pod.Status))
+```
+
+2. Replace both occurrences with:
+
+```go
+// Color pods based on status
+var podColor tcell.Color
+
+switch pod.Status {
+case "Running":
+    podColor = tcell.ColorGreen
+case "Pending":
+    podColor = tcell.ColorYellow
+case "Failed":
+    podColor = tcell.ColorRed
+default:
+    podColor = tcell.ColorGray
+}
+
+// Use Kubernetes logo for pods
+podNode := tview.NewTreeNode(fmt.Sprintf("⎈ Pod: %s (%s)", pod.Name, pod.Status))
+```
+
+3. Also update the mockup in mockup.go to use Kubernetes logo
+
+Change:
+```
+"║ │ │  │  ├─ ✅ Pod: postgres-cluster-0 (Running)       │  ║\n"
+```
+To:
+```
+"║ │ │  │  ├─ ⎈ Pod: postgres-cluster-0 (Running)       │  ║\n"
+```
+
+And update all other pod entries similarly.

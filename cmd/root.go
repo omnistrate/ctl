@@ -13,6 +13,7 @@ import (
 	"github.com/omnistrate/ctl/cmd/domain"
 	"github.com/omnistrate/ctl/cmd/environment"
 	"github.com/omnistrate/ctl/cmd/helm"
+	"github.com/omnistrate/ctl/cmd/inspect"
 	"github.com/omnistrate/ctl/cmd/instance"
 	"github.com/omnistrate/ctl/cmd/service"
 	"github.com/omnistrate/ctl/cmd/serviceplan"
@@ -123,6 +124,7 @@ func init() {
 	RootCmd.AddCommand(environment.Cmd)
 	RootCmd.AddCommand(customnetwork.Cmd)
 	RootCmd.AddCommand(servicesorchestration.Cmd)
+	RootCmd.AddCommand(inspect.Cmd)
 
 	// Hide the default completion command
 	RootCmd.Root().CompletionOptions.DisableDefaultCmd = true

@@ -1,0 +1,120 @@
+package inspect
+
+import (
+	"fmt"
+	"strings"
+
+	"github.com/omnistrate/ctl/internal/dataaccess"
+)
+
+// GenerateMockup creates a text-based representation of what the TUI would look like
+func GenerateMockup(instanceID string) string {
+	// We use the sample data to generate a mockup visualization
+	// Create a K8sInspectClient
+	inspectClient := dataaccess.NewK8sInspectClient(dataaccess.K8sClientConfig{})
+	_, _, _ = inspectClient.GetSampleData(instanceID)
+	var sb strings.Builder
+
+	// Title with enhanced styling
+	sb.WriteString("╔══════════════════════════════════════════════════════════╗\n")
+	sb.WriteString(fmt.Sprintf("║        Kubernetes Resource Inspector - Namespace: %-9s  ║\n", instanceID))
+	sb.WriteString("╠══════════════════════════════════════════════════════════╣\n")
+	sb.WriteString("║ [Active view: Workload] - Use TAB to toggle views        ║\n")
+	sb.WriteString("╠══════════════════════════════════════════════════════════╣\n")
+
+	// Workload View Mock with enhanced styling and icons
+	sb.WriteString("║ ┌─ WORKLOADS ────────────────────────────────────────┐  ║\n")
+	sb.WriteString("║ │ 📊 Workload View                                    │  ║\n")
+	sb.WriteString("║ │ ├─ 💾 StatefulSet: postgres-cluster                 │  ║\n")
+	sb.WriteString("║ │ │  ├─ 🌐 AZ: us-west-2a                            │  ║\n")
+	sb.WriteString("║ │ │  │  ├─ ⎈ Pod: postgres-cluster-0 (Running)       │  ║\n")
+	sb.WriteString("║ │ │  │  └─ ⎈ Pod: postgres-cluster-1 (Running)       │  ║\n")
+	sb.WriteString("║ │ │  └─ 🌐 AZ: us-west-2b                            │  ║\n")
+	sb.WriteString("║ │ │     └─ ⎈ Pod: postgres-cluster-2 (Running)       │  ║\n")
+	sb.WriteString("║ │ ├─ 🚀 Deployment: api-server                        │  ║\n")
+	sb.WriteString("║ │ │  ├─ 🌐 AZ: us-west-2a                            │  ║\n")
+	sb.WriteString("║ │ │  │  └─ ⎈ Pod: api-server-abc123 (Running)        │  ║\n")
+	sb.WriteString("║ │ │  └─ 🌐 AZ: us-west-2b                            │  ║\n")
+	sb.WriteString("║ │ │     └─ ⎈ Pod: api-server-def456 (Running)        │  ║\n")
+	sb.WriteString("║ │ └─ 🚀 Deployment: redis-cache                       │  ║\n")
+	sb.WriteString("║ │    ├─ 🌐 AZ: us-west-2a                            │  ║\n")
+	sb.WriteString("║ │    │  └─ ⎈ Pod: redis-cache-abc123 (Running)       │  ║\n")
+	sb.WriteString("║ │    └─ 🌐 AZ: us-west-2c                            │  ║\n")
+	sb.WriteString("║ │       └─ ⎈ Pod: redis-cache-def456 (Running)       │  ║\n")
+	sb.WriteString("║ └────────────────────────────────────────────────────┘  ║\n")
+	sb.WriteString("╠══════════════════════════════════════════════════════════╣\n")
+
+	// Infrastructure View Mock with enhanced styling and icons
+	sb.WriteString("║ [Switch to Infrastructure View using TAB]                ║\n")
+	sb.WriteString("║ ┌─ INFRASTRUCTURE ─────────────────────────────────┐     ║\n")
+	sb.WriteString("║ │ 🏢 Infrastructure View                            │     ║\n")
+	sb.WriteString("║ │ ├─ 🌐 AZ: us-west-2a                             │     ║\n")
+	sb.WriteString("║ │ │  ├─ 💻 VM: node-1a                             │     ║\n")
+	sb.WriteString("║ │ │  │    Type: m5.xlarge, vCPUs: 4, Memory: 16.0GB │     ║\n")
+	sb.WriteString("║ │ │  │  ├─ ⎈ Pod: postgres-cluster-0 (Running)     │     ║\n")
+	sb.WriteString("║ │ │  │  ├─ ⎈ Pod: postgres-cluster-1 (Running)     │     ║\n")
+	sb.WriteString("║ │ │  │  └─ ⎈ Pod: redis-cache-abc123 (Running)     │     ║\n")
+	sb.WriteString("║ │ │  └─ 💻 VM: node-2a                             │     ║\n")
+	sb.WriteString("║ │ │       Type: c5.2xlarge, vCPUs: 8, Memory: 16.0GB│     ║\n")
+	sb.WriteString("║ │ │       └─ ⎈ Pod: api-server-abc123 (Running)    │     ║\n")
+	sb.WriteString("║ │ └─ [+] More AZs (us-west-2b, us-west-2c)          │     ║\n")
+	sb.WriteString("║ └────────────────────────────────────────────────────┘    ║\n")
+	sb.WriteString("╠══════════════════════════════════════════════════════════╣\n")
+
+	// Storage View Mock with enhanced styling and icons
+	sb.WriteString("║ [Switch to Storage View using TAB]                       ║\n")
+	sb.WriteString("║ ┌─ STORAGE ─────────────────────────────────────────┐    ║\n")
+	sb.WriteString("║ │ 💿 Storage View                                    │    ║\n")
+	sb.WriteString("║ │ ├─ 💾 StatefulSets                                │    ║\n")
+	sb.WriteString("║ │ │  └─ 💾 StatefulSet: postgres-cluster            │    ║\n")
+	sb.WriteString("║ │ │     ├─ ⎈ Pod: postgres-cluster-0 (Running)      │    ║\n")
+	sb.WriteString("║ │ │     │  ├─ 💾 PVC: postgres-data-0 (Size: 10Gi, Status: Bound) │ ║\n")
+	sb.WriteString("║ │ │     │  │  ├─ StorageClass: gp2, Access: RWO      │    ║\n")
+	sb.WriteString("║ │ │     │  │  └─ 📁 PV: pvc-abcd1234                │    ║\n")
+	sb.WriteString("║ │ │     │  └─ 💾 PVC: postgres-wal-0 (Size: 5Gi, Status: Bound) │ ║\n")
+	sb.WriteString("║ │ │     │     └─ 📁 PV: pvc-efgh5678                │    ║\n")
+	sb.WriteString("║ │ │     ├─ ⎈ Pod: postgres-cluster-1 (Running)      │    ║\n")
+	sb.WriteString("║ │ │     │  └─ 💾 PVC: postgres-data-1 (Size: 10Gi, Status: Bound) │ ║\n")
+	sb.WriteString("║ │ │     │     └─ 📁 PV: pvc-ijkl9012                │    ║\n")
+	sb.WriteString("║ │ │     └─ ⎈ Pod: postgres-cluster-2 (Running)      │    ║\n")
+	sb.WriteString("║ │ │        └─ 💾 PVC: postgres-data-2 (Size: 10Gi, Status: Bound) │ ║\n")
+	sb.WriteString("║ │ │           └─ 📁 PV: pvc-mnop3456                │    ║\n")
+	sb.WriteString("║ │ │                                                  │    ║\n")
+	sb.WriteString("║ │ └─ 🚀 Deployments                                 │    ║\n")
+	sb.WriteString("║ │    └─ 🚀 Deployment: redis-cache                  │    ║\n")
+	sb.WriteString("║ │       ├─ ⎈ Pod: redis-cache-abc123 (Running)      │    ║\n")
+	sb.WriteString("║ │       │  └─ 💾 PVC: redis-data (Size: 8Gi, Status: Bound) │ ║\n")
+	sb.WriteString("║ │       │     └─ 📁 PV: pvc-redisdata               │    ║\n")
+	sb.WriteString("║ │       └─ ⎈ Pod: redis-cache-def456 (Running)      │    ║\n")
+	sb.WriteString("║ │          ├─ 💾 PVC: redis-data (Size: 8Gi, Status: Bound) │ ║\n")
+	sb.WriteString("║ │          │  └─ 📁 PV: pvc-redisdata               │    ║\n")
+	sb.WriteString("║ │          └─ 💾 PVC: redis-config (Size: 1Gi, Status: Bound) │ ║\n")
+	sb.WriteString("║ │             └─ 📁 PV: pvc-redisconfig             │    ║\n")
+	sb.WriteString("║ └────────────────────────────────────────────────────┘    ║\n")
+	sb.WriteString("║                                                           ║\n")
+	sb.WriteString("║ [PV Details Pop-up (appears when clicking on a PV)]      ║\n")
+	sb.WriteString("║ ┌─────────────────────────────────────────────────────┐  ║\n")
+	sb.WriteString("║ │ PV Name: pvc-abcd1234                               │  ║\n")
+	sb.WriteString("║ │ Size: 10Gi                                          │  ║\n")
+	sb.WriteString("║ │ Status: Bound                                       │  ║\n")
+	sb.WriteString("║ │ Access Modes: RWO                                   │  ║\n")
+	sb.WriteString("║ │ Volume Type: CSI:ebs.csi.aws                        │  ║\n")
+	sb.WriteString("║ │ Bound to PVC: postgres-data-0                       │  ║\n")
+	sb.WriteString("║ │ PVC Namespace: sample-123                           │  ║\n")
+	sb.WriteString("║ │                                                     │  ║\n")
+	sb.WriteString("║ │ Storage Class Details:                              │  ║\n")
+	sb.WriteString("║ │ Name: gp2                                           │  ║\n")
+	sb.WriteString("║ │ Provisioner: ebs.csi.aws.com                        │  ║\n")
+	sb.WriteString("║ │                                                     │  ║\n")
+	sb.WriteString("║ │ Parameters:                                         │  ║\n")
+	sb.WriteString("║ │   type: gp2                                         │  ║\n")
+	sb.WriteString("║ │   fsType: ext4                                      │  ║\n")
+	sb.WriteString("║ │                                                     │  ║\n")
+	sb.WriteString("║ │                   [ Close ]                         │  ║\n")
+	sb.WriteString("║ └─────────────────────────────────────────────────────┘  ║\n")
+	sb.WriteString("╠══════════════════════════════════════════════════════════╣\n")
+	sb.WriteString("║ TAB: Switch Views | ↑/↓: Navigate | ENTER: Expand/Collapse | q: Quit ║\n")
+	sb.WriteString("╚══════════════════════════════════════════════════════════╝\n")
+
+	return sb.String()
+}
