@@ -90,16 +90,18 @@ func DescribeResourceInstance(ctx context.Context, token string, serviceID, envi
 	return
 }
 
-func EnableResourceInstanceOverride(ctx context.Context, token string, serviceID, environmentID, instanceID string) (err error) {
+func UpdateResourceInstanceDebugMode(ctx context.Context, token string, serviceID, environmentID, instanceID string, enable bool) (err error) {
 	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
 	apiClient := getFleetClient()
 
-	req := apiClient.InventoryApiAPI.InventoryApiEnableResourceInstanceManualOverride(
+	req := apiClient.InventoryApiAPI.InventoryApiUpdateResourceInstanceDebugMode(
 		ctxWithToken,
 		serviceID,
 		environmentID,
 		instanceID,
-	)
+	).FleetUpdateResourceInstanceDebugModeRequest2(openapiclientfleet.FleetUpdateResourceInstanceDebugModeRequest2{
+		Enable: enable,
+	})
 
 	var r *http.Response
 	defer func() {

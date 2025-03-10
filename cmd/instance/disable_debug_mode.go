@@ -3,6 +3,10 @@ package instance
 import (
 	"encoding/json"
 	"errors"
+	"github.com/cqroot/prompt"
+	"github.com/cqroot/prompt/choose"
+	"strings"
+
 	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/cmd/common"
 	"github.com/omnistrate/ctl/internal/config"
@@ -10,18 +14,17 @@ import (
 	"github.com/omnistrate/ctl/internal/utils"
 	errors2 "github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 const (
-	disableDebugModeExample = `# Disable instance deployment debug mode
-omctl instance disable-debug-mode instance-abcd1234 --resource-name my-terraform-deployment --deployment-action apply`
+	disableDebugModeExample = `# Disable debug mode for an instance deployment
+omctl instance disable-debug-mode i-1234 --resource-name terraform --force`
 )
 
 var disableDebugModeCmd = &cobra.Command{
-	Use:          "disable-debug-mode [instance-id] --resource-name <resource-name> --deployment-action <deployment-action>",
-	Short:        "Disable instance debug mode",
-	Long:         `This command helps you disable instance debug mode.`,
+	Use:          "disable-debug-mode [instance-id] --resource-name [resource-name] --force",
+	Short:        "Disable debug mode for an instance deployment",
+	Long:         `This command helps you disable debug mode for an instance deployment`,
 	Example:      disableDebugModeExample,
 	RunE:         runDisableDebug,
 	SilenceUsage: true,
@@ -29,16 +32,13 @@ var disableDebugModeCmd = &cobra.Command{
 
 func init() {
 	disableDebugModeCmd.Flags().StringP("resource-name", "r", "", "Resource name")
-	disableDebugModeCmd.Flags().StringP("deployment-action", "e", "", "Deployment action")
+	disableDebugModeCmd.Flags().BoolP("force", "f", false, "Force enable debug mode")
 
 	disableDebugModeCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
 	disableDebugModeCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported")
 
 	var err error
 	if err = disableDebugModeCmd.MarkFlagRequired("resource-name"); err != nil {
-		return
-	}
-	if err = disableDebugModeCmd.MarkFlagRequired("deployment-action"); err != nil {
 		return
 	}
 }
@@ -54,6 +54,49 @@ func runDisableDebug(cmd *cobra.Command, args []string) error {
 
 	// Retrieve args
 	instanceID := args[0]
+
+	// Retrieve flags
+	output, err := cmd.Flags().GetString("output")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	// Validate output flag
+	if output != "json" {
+		err = errors.New("only json output is supported")
+		utils.PrintError(err)
+		return err
+	}
+
+	isForce, err := cmd.Flags().GetBool("force")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	if !isForce {
+		// Prompt user to confirm
+		var choice string
+		choice, err = prompt.New().Ask("Please verify that your instance has been upgraded to the plan version with the appropriate fix. Continue to proceed?").
+			Choose([]string{
+				"Yes",
+				"No",
+			}, choose.WithTheme(choose.ThemeArrow))
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+
+		switch choice {
+		case "Yes":
+			break
+		case "No":
+			utils.PrintInfo("Operation cancelled")
+			return nil
+		}
+	}
+
 	// Retrieve flags
 	resourceName, err := cmd.Flags().GetString("resource-name")
 	if err != nil {
@@ -63,13 +106,6 @@ func runDisableDebug(cmd *cobra.Command, args []string) error {
 
 	if resourceName == "" {
 		err = errors.New("resource name is required")
-		utils.PrintError(err)
-		return err
-	}
-
-	// Retrieve flags
-	output, err := cmd.Flags().GetString("output")
-	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
@@ -86,9 +122,16 @@ func runDisableDebug(cmd *cobra.Command, args []string) error {
 	var spinner *ysmrr.Spinner
 	if output != "json" {
 		sm = ysmrr.NewSpinnerManager()
-		msg := "Resuming deployment..."
+		msg := "Disabling debug mode for instance deployment..."
 		spinner = sm.AddSpinner(msg)
 		sm.Start()
+	}
+
+	// Check if instance exists
+	serviceID, environmentID, _, _, err := getInstance(cmd.Context(), token, instanceID)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
 	}
 
 	resourceID, resourceType, err := getResourceFromInstance(cmd.Context(), token, instanceID, resourceName)
@@ -97,22 +140,8 @@ func runDisableDebug(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	var deploymentAction string
-	if resourceType == string(TerraformDeploymentType) {
-		deploymentAction, err = cmd.Flags().GetString("deployment-action")
-		if err != nil {
-			utils.PrintError(err)
-			return err
-		}
-
-		if deploymentAction == "" {
-			err = errors.New("deployment action is required")
-			utils.PrintError(err)
-			return err
-		}
-	}
-
-	if resourceType != string(TerraformDeploymentType) {
+	// Validate deployment type
+	if strings.ToLower(resourceType) != string(TerraformDeploymentType) {
 		err = errors.New("only terraform deployment type is supported")
 		utils.PrintError(err)
 		return err
@@ -124,21 +153,18 @@ func runDisableDebug(cmd *cobra.Command, args []string) error {
 		deploymentName = getTerraformDeploymentName(resourceID, instanceID)
 	}
 
-	// Get instance deployment
 	_, err = dataaccess.GetInstanceDeploymentEntity(cmd.Context(), token, instanceID, resourceType, deploymentName)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
 
-	// Resume instance deployment
-	err = dataaccess.ResumeInstanceDeploymentEntity(cmd.Context(), token, instanceID, resourceType, deploymentName, deploymentAction)
+	// Enable debug mode
+	err = dataaccess.UpdateResourceInstanceDebugMode(cmd.Context(), token, serviceID, environmentID, instanceID, false)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
 	}
-
-	utils.PrintWarning("The instance is currently locked for operations. Debug mode has been disabled for the deployment, but to fully unlock the instance and resume normal operations, you'll need to perform an instance upgrade.")
 
 	// Describe deployment entity
 	deploymentEntity, err := dataaccess.GetInstanceDeploymentEntity(cmd.Context(), token, instanceID, resourceType, deploymentName)
@@ -174,7 +200,7 @@ func runDisableDebug(cmd *cobra.Command, args []string) error {
 		deploymentEntity = string(displayOutput)
 	}
 
-	utils.HandleSpinnerSuccess(spinner, sm, "Successfully enabled override for instance deployment")
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully disabled debug mode for instance deployment")
 	// Print output
 	err = utils.PrintTextTableJsonOutput(output, deploymentEntity)
 	if err != nil {
@@ -183,5 +209,4 @@ func runDisableDebug(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
-
 }

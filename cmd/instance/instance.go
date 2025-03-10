@@ -23,8 +23,9 @@ func init() {
 	Cmd.AddCommand(updateCmd) // Hidden (deprecated)
 	Cmd.AddCommand(modifyCmd)
 	Cmd.AddCommand(enableDebugModeCmd)
-	Cmd.AddCommand(getDeploymentCmd)
 	Cmd.AddCommand(disableDebugModeCmd)
+	Cmd.AddCommand(getDeploymentCmd)
+	Cmd.AddCommand(continueDeploymentCmd)
 	Cmd.AddCommand(patchDeploymentCmd)
 }
 
