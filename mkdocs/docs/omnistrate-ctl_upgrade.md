@@ -46,8 +46,9 @@ omctl upgrade [instance-id] --version=1.0 --scheduled-date="2023-12-01T00:00:00Z
 
 ### SEE ALSO
 
-- [omnistrate-ctl](omnistrate-ctl.md) - Manage your Omnistrate SaaS from the command line
-- [omnistrate-ctl upgrade cancel](omnistrate-ctl_upgrade_cancel.md) - Cancel an uncompleted upgrade
-- [omnistrate-ctl upgrade pause](omnistrate-ctl_upgrade_pause.md) - Pause an ongoing upgrade
-- [omnistrate-ctl upgrade resume](omnistrate-ctl_upgrade_resume.md) - Resume a paused upgrade
-- [omnistrate-ctl upgrade status](omnistrate-ctl_upgrade_status.md) - Get Upgrade status
+* [omnistrate-ctl](omnistrate-ctl.md)	 - Manage your Omnistrate SaaS from the command line
+* [omnistrate-ctl upgrade cancel](omnistrate-ctl_upgrade_cancel.md)	 - Cancel an uncompleted upgrade
+* [omnistrate-ctl upgrade pause](omnistrate-ctl_upgrade_pause.md)	 - Pause an ongoing upgrade
+* [omnistrate-ctl upgrade resume](omnistrate-ctl_upgrade_resume.md)	 - Resume a paused upgrade
+* [omnistrate-ctl upgrade status](omnistrate-ctl_upgrade_status.md)	 - Get Upgrade status
+
