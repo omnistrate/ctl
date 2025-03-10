@@ -2,6 +2,7 @@ package inspect
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -19,7 +20,6 @@ import (
 
 var (
 	outputFlag      string
-	textMode        bool
 	kubeconfig      string
 	kubeContext     string
 	defaultKubeConf string
@@ -36,8 +36,7 @@ func init() {
 	}
 
 	// Add flags for the command
-	Cmd.Flags().StringVarP(&outputFlag, "output", "o", "table", "Output format (text|table|json)")
-	Cmd.Flags().BoolVar(&textMode, "text", false, "Show in text mode instead of TUI (useful for testing)")
+	Cmd.Flags().StringVarP(&outputFlag, "output", "o", "table", "Output format (table|text|json)")
 	Cmd.Flags().StringVar(&kubeconfig, "kubeconfig", defaultKubeConf, "Path to the kubeconfig file")
 	Cmd.Flags().StringVar(&kubeContext, "context", "", "Kubernetes context to use")
 }
@@ -50,16 +49,61 @@ func runInspect(cmd *cobra.Command, args []string) error {
 
 	instanceID := args[0]
 	
-	// If text mode is enabled, print mockup instead of launching TUI
-	if textMode {
-		fmt.Println(GenerateMockup(instanceID))
-		return nil
-	}
-	
 	// Check if kubeconfig exists
 	if _, err := os.Stat(kubeconfig); os.IsNotExist(err) {
 		fmt.Printf("Warning: Kubeconfig file not found at %s\n", kubeconfig)
 		fmt.Println("Trying to use in-cluster config or default settings...")
+	}
+	
+	// Process based on output format
+	switch outputFlag {
+	case "text", "json":
+		// For both text and JSON formats, we need to fetch the real data first
+		inspectClient := dataaccess.NewK8sInspectClient(dataaccess.K8sClientConfig{
+			Kubeconfig:  kubeconfig,
+			KubeContext: kubeContext,
+		})
+		
+		workloadItems, azItems, storageData, err := inspectClient.GetClusterData(ctx, instanceID)
+		if err != nil {
+			fmt.Printf("Error fetching cluster data: %v\n", err)
+			return err
+		}
+		
+		// For text format, generate a text representation of the data
+		if outputFlag == "text" {
+			fmt.Println(generateTextOutput(instanceID, workloadItems, azItems, storageData))
+			return nil
+		}
+		
+		// Convert data to JSON format
+		type jsonOutput struct {
+			InstanceID    string                            `json:"instanceId"`
+			Workloads     []dataaccess.InspectWorkloadItem  `json:"workloads"`
+			AZs           []dataaccess.InspectAZItem        `json:"availabilityZones"`
+			StorageClass  []dataaccess.InspectStorageClassItem `json:"storageClasses"`
+		}
+		
+		output := jsonOutput{
+			InstanceID:    instanceID,
+			Workloads:     workloadItems,
+			AZs:           azItems,
+			StorageClass:  storageData,
+		}
+		
+		jsonData, err := json.MarshalIndent(output, "", "  ")
+		if err != nil {
+			fmt.Printf("Error converting to JSON: %v\n", err)
+			return err
+		}
+		
+		fmt.Println(string(jsonData))
+		return nil
+	case "table":
+		// Default to interactive TUI mode
+		// Continues to the code below
+	default:
+		return fmt.Errorf("unsupported output format: %s. Supported formats are table, text, and json", outputFlag)
 	}
 	
 	// Create a K8sInspectClient
@@ -83,6 +127,367 @@ func runInspect(cmd *cobra.Command, args []string) error {
 	
 	// Launch TUI with the data
 	return launchTUI(instanceID, workloadItems, azItems, storageData)
+}
+
+// generateTextOutput creates a text representation of the cluster data
+func generateTextOutput(instanceID string, workloadItems []dataaccess.InspectWorkloadItem, azItems []dataaccess.InspectAZItem, storageClasses []dataaccess.InspectStorageClassItem) string {
+	var sb strings.Builder
+	
+	// Calculate summary stats
+	totalVMs := make(map[string]bool)    // Map to track unique VM names
+	totalCPU := 0.0                      // Track total CPUs
+	totalMemory := 0.0                   // Track total memory in GB
+	totalStorage := 0.0                  // Track total storage in GiB
+	storageClassCounts := make(map[string]float64)
+	
+	// First identify pods related to workloads
+	workloadPods := make(map[string]bool)
+	for _, workload := range workloadItems {
+		for _, pods := range workload.AZs {
+			for _, pod := range pods {
+				workloadPods[pod.Name] = true
+			}
+		}
+	}
+	
+	// Check if we have any workload pods
+	hasAnyWorkloadPods := len(workloadPods) > 0
+	
+	// Count VMs and resources
+	for _, az := range azItems {
+		for _, vm := range az.VMs {
+			if len(vm.Pods) == 0 {
+				continue
+			}
+			
+			if hasAnyWorkloadPods {
+				hasWorkloadPod := false
+				for _, pod := range vm.Pods {
+					if workloadPods[pod.Name] {
+						hasWorkloadPod = true
+						break
+					}
+				}
+				
+				if !hasWorkloadPod {
+					continue
+				}
+			}
+			
+			totalVMs[vm.Name] = true
+			totalCPU += float64(vm.VCPUs)
+			totalMemory += vm.MemoryGB
+		}
+	}
+	
+	// Identify PVCs attached to relevant pods
+	relevantPVCs := make(map[string]bool)
+	if hasAnyWorkloadPods {
+		for _, workload := range workloadItems {
+			for _, pods := range workload.AZs {
+				for _, pod := range pods {
+					for _, pvc := range pod.PVCs {
+						relevantPVCs[pvc.Name] = true
+					}
+				}
+			}
+		}
+	} else {
+		for _, az := range azItems {
+			for _, vm := range az.VMs {
+				for _, pod := range vm.Pods {
+					for _, pvc := range pod.PVCs {
+						relevantPVCs[pvc.Name] = true
+					}
+				}
+			}
+		}
+	}
+	
+	// Calculate storage totals
+	for _, sc := range storageClasses {
+		for _, pv := range sc.PVs {
+			if !relevantPVCs[pv.PVCName] {
+				continue
+			}
+			
+			var size float64
+			if strings.HasSuffix(pv.Size, "Gi") {
+				fmt.Sscanf(pv.Size, "%f", &size)
+			} else if strings.HasSuffix(pv.Size, "Mi") {
+				fmt.Sscanf(pv.Size, "%f", &size)
+				size = size / 1024.0
+			}
+			
+			totalStorage += size
+			storageClassCounts[sc.Name] += size
+		}
+	}
+	
+	// Title with enhanced styling
+	sb.WriteString("╔══════════════════════════════════════════════════════════╗\n")
+	sb.WriteString(fmt.Sprintf("║  Kubernetes Resource Inspector - Namespace: %-10s ║\n", instanceID))
+	sb.WriteString("╚══════════════════════════════════════════════════════════╝\n\n")
+	
+	// Workload View summary
+	sb.WriteString("📊 WORKLOAD VIEW SUMMARY\n")
+	sb.WriteString("══════════════════════\n")
+	sb.WriteString(fmt.Sprintf("VMs: %d, vCPUs: %.0f, Memory: %.1f GB RAM\n\n", len(totalVMs), totalCPU, totalMemory))
+	
+	// Workload details
+	sb.WriteString("WORKLOAD DETAILS\n")
+	sb.WriteString("═══════════════\n")
+	if len(workloadItems) == 0 {
+		sb.WriteString("No StatefulSets or Deployments found. Listing standalone pods:\n\n")
+		
+		// Group standalone pods by AZ
+		podsByAZ := make(map[string][]dataaccess.InspectPodItem)
+		for _, azItem := range azItems {
+			for _, vm := range azItem.VMs {
+				for _, pod := range vm.Pods {
+					podsByAZ[azItem.Name] = append(podsByAZ[azItem.Name], pod)
+				}
+			}
+		}
+		
+		// Show pods by AZ
+		for az, pods := range podsByAZ {
+			sb.WriteString(fmt.Sprintf("🌐 AZ: %s\n", az))
+			for _, pod := range pods {
+				sb.WriteString(fmt.Sprintf("  ⎈ Pod: %s (%s)\n", pod.Name, pod.Status))
+				sb.WriteString(fmt.Sprintf("    Node: %s\n", pod.NodeName))
+				
+				// Show attached PVCs
+				if len(pod.PVCs) > 0 {
+					sb.WriteString("    Attached PVCs:\n")
+					for _, pvc := range pod.PVCs {
+						sb.WriteString(fmt.Sprintf("      💾 %s (%s, %s)\n", pvc.Name, pvc.Size, pvc.Status))
+					}
+				}
+				sb.WriteString("\n")
+			}
+			sb.WriteString("\n")
+		}
+	} else {
+		// Show workloads (StatefulSets and Deployments)
+		for _, workload := range workloadItems {
+			icon := "💾"
+			if workload.Type == "Deployment" {
+				icon = "🚀"
+			}
+			sb.WriteString(fmt.Sprintf("%s %s: %s\n", icon, workload.Type, workload.Name))
+			
+			// Show pods by AZ
+			for az, pods := range workload.AZs {
+				sb.WriteString(fmt.Sprintf("  🌐 AZ: %s\n", az))
+				for _, pod := range pods {
+					sb.WriteString(fmt.Sprintf("    ⎈ Pod: %s (%s)\n", pod.Name, pod.Status))
+					sb.WriteString(fmt.Sprintf("      Node: %s\n", pod.NodeName))
+					
+					// Show attached PVCs
+					if len(pod.PVCs) > 0 {
+						sb.WriteString("      Attached PVCs:\n")
+						for _, pvc := range pod.PVCs {
+							sb.WriteString(fmt.Sprintf("        💾 %s (%s, %s)\n", pvc.Name, pvc.Size, pvc.Status))
+						}
+					}
+				}
+			}
+			sb.WriteString("\n")
+		}
+		
+		// Show standalone pods if any
+		standalonePods := make(map[string][]dataaccess.InspectPodItem)
+		for _, azItem := range azItems {
+			for _, vm := range azItem.VMs {
+				for _, pod := range vm.Pods {
+					if workloadPods[pod.Name] {
+						continue
+					}
+					standalonePods[azItem.Name] = append(standalonePods[azItem.Name], pod)
+				}
+			}
+		}
+		
+		if len(standalonePods) > 0 {
+			sb.WriteString("🔷 STANDALONE PODS\n")
+			for az, pods := range standalonePods {
+				sb.WriteString(fmt.Sprintf("  🌐 AZ: %s\n", az))
+				for _, pod := range pods {
+					sb.WriteString(fmt.Sprintf("    ⎈ Pod: %s (%s)\n", pod.Name, pod.Status))
+					sb.WriteString(fmt.Sprintf("      Node: %s\n", pod.NodeName))
+					
+					// Show attached PVCs
+					if len(pod.PVCs) > 0 {
+						sb.WriteString("      Attached PVCs:\n")
+						for _, pvc := range pod.PVCs {
+							sb.WriteString(fmt.Sprintf("        💾 %s (%s, %s)\n", pvc.Name, pvc.Size, pvc.Status))
+						}
+					}
+				}
+			}
+			sb.WriteString("\n")
+		}
+	}
+	
+	// Infrastructure View
+	sb.WriteString("\n🏢 INFRASTRUCTURE VIEW SUMMARY\n")
+	sb.WriteString("═══════════════════════════\n")
+	sb.WriteString(fmt.Sprintf("VMs: %d, vCPUs: %.0f, Memory: %.1f GB RAM\n", len(totalVMs), totalCPU, totalMemory))
+	
+	// Show instance types
+	instanceTypes := make(map[string]int)
+	for _, az := range azItems {
+		for _, vm := range az.VMs {
+			if len(vm.Pods) == 0 {
+				continue
+			}
+			
+			if hasAnyWorkloadPods {
+				hasWorkloadPod := false
+				for _, pod := range vm.Pods {
+					if workloadPods[pod.Name] {
+						hasWorkloadPod = true
+						break
+					}
+				}
+				
+				if !hasWorkloadPod {
+					continue
+				}
+			}
+			
+			instanceTypes[vm.InstanceType]++
+		}
+	}
+	
+	if len(instanceTypes) > 0 {
+		sb.WriteString("Instance Types:\n")
+		for instanceType, count := range instanceTypes {
+			sb.WriteString(fmt.Sprintf("  %s: %d\n", instanceType, count))
+		}
+	}
+	sb.WriteString("\n")
+	
+	// VM details
+	sb.WriteString("INFRASTRUCTURE DETAILS\n")
+	sb.WriteString("═════════════════════\n")
+	for _, az := range azItems {
+		sb.WriteString(fmt.Sprintf("🌐 AZ: %s\n", az.Name))
+		
+		for _, vm := range az.VMs {
+			hasRelevantPods := false
+			if hasAnyWorkloadPods {
+				for _, pod := range vm.Pods {
+					if workloadPods[pod.Name] {
+						hasRelevantPods = true
+						break
+					}
+				}
+			} else if len(vm.Pods) > 0 {
+				hasRelevantPods = true
+			}
+			
+			if !hasRelevantPods {
+				continue
+			}
+			
+			sb.WriteString(fmt.Sprintf("  💻 VM: %s\n", vm.Name))
+			sb.WriteString(fmt.Sprintf("    Type: %s, vCPUs: %d, Memory: %.1f GB\n", vm.InstanceType, vm.VCPUs, vm.MemoryGB))
+			sb.WriteString("    Pods:\n")
+			
+			for _, pod := range vm.Pods {
+				if hasAnyWorkloadPods && !workloadPods[pod.Name] {
+					continue
+				}
+				sb.WriteString(fmt.Sprintf("      ⎈ %s (%s)\n", pod.Name, pod.Status))
+			}
+		}
+		sb.WriteString("\n")
+	}
+	
+	// Storage View
+	sb.WriteString("\n💿 STORAGE VIEW SUMMARY\n")
+	sb.WriteString("═════════════════════\n")
+	sb.WriteString(fmt.Sprintf("Total Storage: %.1f GiB\n", totalStorage))
+	
+	if len(storageClassCounts) > 0 {
+		sb.WriteString("Storage Classes:\n")
+		for sc, size := range storageClassCounts {
+			sb.WriteString(fmt.Sprintf("  %s: %.1f GiB\n", sc, size))
+		}
+	}
+	sb.WriteString("\n")
+	
+	// Storage details
+	sb.WriteString("STORAGE DETAILS\n")
+	sb.WriteString("═══════════════\n")
+	
+	// Find all pods with PVCs
+	podsWithStorage := make(map[string][]dataaccess.InspectPodItem)
+	for _, azItem := range azItems {
+		for _, vm := range azItem.VMs {
+			for _, pod := range vm.Pods {
+				if len(pod.PVCs) > 0 {
+					if hasAnyWorkloadPods && !workloadPods[pod.Name] {
+						continue
+					}
+					
+					// Find workload for this pod (if any)
+					workloadKey := "Standalone"
+					for _, workload := range workloadItems {
+						for _, pods := range workload.AZs {
+							for _, wPod := range pods {
+								if wPod.Name == pod.Name {
+									workloadKey = fmt.Sprintf("%s: %s", workload.Type, workload.Name)
+									break
+								}
+							}
+						}
+					}
+					podsWithStorage[workloadKey] = append(podsWithStorage[workloadKey], pod)
+				}
+			}
+		}
+	}
+	
+	if len(podsWithStorage) == 0 {
+		sb.WriteString("No persistent volumes found.\n")
+	} else {
+		for workload, pods := range podsWithStorage {
+			if workload == "Standalone" {
+				sb.WriteString("🔷 Standalone Pods:\n")
+			} else {
+				if strings.HasPrefix(workload, "StatefulSet") {
+					sb.WriteString(fmt.Sprintf("💾 %s\n", workload))
+				} else {
+					sb.WriteString(fmt.Sprintf("🚀 %s\n", workload))
+				}
+			}
+			
+			for _, pod := range pods {
+				sb.WriteString(fmt.Sprintf("  ⎈ Pod: %s (%s)\n", pod.Name, pod.Status))
+				sb.WriteString("    PVCs:\n")
+				
+				for _, pvc := range pod.PVCs {
+					sb.WriteString(fmt.Sprintf("      💾 %s\n", pvc.Name))
+					sb.WriteString(fmt.Sprintf("        Size: %s, Status: %s\n", pvc.Size, pvc.Status))
+					if pvc.StorageClass != "" {
+						sb.WriteString(fmt.Sprintf("        Storage Class: %s\n", pvc.StorageClass))
+					}
+					if pvc.PVName != "" {
+						sb.WriteString(fmt.Sprintf("        Bound to PV: %s\n", pvc.PVName))
+					}
+					if len(pvc.AccessModes) > 0 {
+						sb.WriteString(fmt.Sprintf("        Access Modes: %s\n", strings.Join(pvc.AccessModes, ", ")))
+					}
+				}
+			}
+			sb.WriteString("\n")
+		}
+	}
+	
+	return sb.String()
 }
 
 // launchTUI creates and runs the terminal UI
