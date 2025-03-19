@@ -2,8 +2,10 @@ package upgrade
 
 import (
 	"fmt"
-	"github.com/omnistrate/ctl/cmd/upgrade/manageupgradelifecycle"
 	"strings"
+
+	"github.com/omnistrate/ctl/cmd/upgrade/manageupgradelifecycle"
+	"github.com/omnistrate/ctl/cmd/upgrade/status/detail"
 
 	"github.com/omnistrate/ctl/cmd/common"
 
@@ -44,16 +46,20 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
-	Cmd.AddCommand(status.Cmd)
-	Cmd.AddCommand(manageupgradelifecycle.CancelCmd)
-	Cmd.AddCommand(manageupgradelifecycle.ResumeCmd)
-	Cmd.AddCommand(manageupgradelifecycle.PauseCmd)
-
 	Cmd.Args = cobra.MinimumNArgs(1)
+	Cmd.Flags().String("version", "", "Target version to upgrade to")
+	Cmd.Flags().String("version-name", "", "Target version name to upgrade to")
+	Cmd.Flags().String("scheduled-date", "", "Future date when the upgrade is planned to be executed (RFC3339 format)")
+	Cmd.Flags().Bool("notify-customer", false, "Enable customer notifications for the upgrade")
 
-	Cmd.Flags().StringP("version", "", "", "Specify the version number to upgrade to. Use 'latest' to upgrade to the latest version. Use 'preferred' to upgrade to the preferred version. Use either this flag or the --version-name flag to upgrade to a specific version.")
-	Cmd.Flags().StringP("version-name", "", "", "Specify the version name to upgrade to. Use either this flag or the --version flag to upgrade to a specific version.")
-	Cmd.Flags().StringP("scheduled-date", "", "", "Specify the scheduled date for the upgrade.")
+	Cmd.AddCommand(status.Cmd)
+	Cmd.AddCommand(manageupgradelifecycle.PauseCmd)
+	Cmd.AddCommand(manageupgradelifecycle.ResumeCmd)
+	Cmd.AddCommand(manageupgradelifecycle.CancelCmd)
+	Cmd.AddCommand(manageupgradelifecycle.NotifyCustomerCmd)
+	Cmd.AddCommand(manageupgradelifecycle.SkipInstancesCmd)
+
+	status.Cmd.AddCommand(detail.Cmd)
 }
 
 type Args struct {
@@ -98,6 +104,8 @@ func run(cmd *cobra.Command, args []string) error {
 	if pError == nil && scheduledDateParam != "" {
 		scheduledDate = &scheduledDateParam
 	}
+
+	notifyCustomer, _ := cmd.Flags().GetBool("notify-customer")
 
 	// Validate input arguments
 	if version == "" && versionName == "" {
@@ -279,6 +287,7 @@ func run(cmd *cobra.Command, args []string) error {
 			upgradeArgs.TargetVersion,
 			upgradeArgs.ScheduledDate,
 			upgradeRes.InstanceIDs,
+			notifyCustomer,
 		)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
