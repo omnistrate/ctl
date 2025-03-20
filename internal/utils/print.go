@@ -6,9 +6,7 @@ import (
 	"os"
 
 	"github.com/fatih/color"
-	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/omnistrate/ctl/internal/config"
-	"github.com/omnistrate/ctl/internal/model"
 )
 
 func PrintError(err error) {
@@ -103,40 +101,4 @@ func PrintTextTableJsonOutput[T any](output string, object T) error {
 		return fmt.Errorf("unsupported output format: %s", output)
 	}
 	return nil
-}
-
-// PrintUpgradeStatuses prints upgrade statuses in a table format
-func PrintUpgradeStatuses(statuses []*model.UpgradeStatus) {
-	t := table.NewWriter()
-	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"UPGRADE ID", "TOTAL", "PENDING", "IN PROGRESS", "COMPLETED", "FAILED", "SCHEDULED", "SKIPPED", "STATUS"})
-
-	for _, s := range statuses {
-		scheduled := ""
-		if s.Scheduled != nil {
-			scheduled = fmt.Sprintf("%d", *s.Scheduled)
-		}
-		t.AppendRow(table.Row{
-			s.UpgradeID,
-			s.Total,
-			s.Pending,
-			s.InProgress,
-			s.Completed,
-			s.Failed,
-			scheduled,
-			s.Skipped,
-			s.Status,
-		})
-	}
-
-	t.Render()
-}
-
-// FromInt64Ptr converts int64 pointer to int pointer
-func FromInt64Ptr(val *int64) *int {
-	if val == nil {
-		return nil
-	}
-	result := int(*val)
-	return &result
 }

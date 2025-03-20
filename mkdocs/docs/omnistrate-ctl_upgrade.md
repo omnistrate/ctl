@@ -34,9 +34,9 @@ omctl upgrade [instance-id] --version=1.0 --scheduled-date="2023-12-01T00:00:00Z
 ```
   -h, --help                    help for upgrade
       --notify-customer         Enable customer notifications for the upgrade
-      --scheduled-date string   Future date when the upgrade is planned to be executed (RFC3339 format)
-      --version string          Target version to upgrade to
-      --version-name string     Target version name to upgrade to
+      --scheduled-date string   Specify the scheduled date for the upgrade.
+      --version string          Specify the version number to upgrade to. Use 'latest' to upgrade to the latest version. Use 'preferred' to upgrade to the preferred version. Use either this flag or the --version-name flag to upgrade to a specific version.
+      --version-name string     Specify the version name to upgrade to. Use either this flag or the --version flag to upgrade to a specific version.
 ```
 
 ### Options inherited from parent commands

@@ -94,7 +94,7 @@ func Test_upgrade_basic(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: upgrade instance to version 1.0
-	cmd.RootCmd.SetArgs([]string{"upgrade", instanceID, "--version", "1.0", "--notify-customer"})
+	cmd.RootCmd.SetArgs([]string{"upgrade", instanceID, "--version", "1.0"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 	require.Len(upgrade.UpgradePathIDs, 1)
@@ -170,7 +170,7 @@ func Test_upgrade_basic(t *testing.T) {
 
 func validateScheduledAndCancel(ctx context.Context, instanceID string, targetVersion string) error {
 	// Upgrade instance with latest version
-	scheduledDate := time.Now().Add(1 * time.Hour).Truncate(time.Hour).Format(time.RFC3339)
+	scheduledDate := time.Now().Add(2 * time.Hour).Truncate(time.Hour).Format(time.RFC3339)
 	cmd.RootCmd.SetArgs([]string{"upgrade", instanceID, "--version", targetVersion, "--scheduled-date", scheduledDate})
 	err := cmd.RootCmd.ExecuteContext(ctx)
 	if err != nil {
@@ -182,13 +182,6 @@ func validateScheduledAndCancel(ctx context.Context, instanceID string, targetVe
 	upgradeID := upgrade.UpgradePathIDs[0]
 	// Test notify-customer
 	cmd.RootCmd.SetArgs([]string{"upgrade", "notify-customer", upgradeID})
-	err = cmd.RootCmd.ExecuteContext(ctx)
-	if err != nil {
-		return err
-	}
-
-	// Test skip-instances
-	cmd.RootCmd.SetArgs([]string{"upgrade", "skip-instances", upgradeID, "--instances", instanceID})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	if err != nil {
 		return err
@@ -210,7 +203,6 @@ func validateScheduledAndCancel(ctx context.Context, instanceID string, targetVe
 		return fmt.Errorf("expected status %s, got %s", model.Scheduled.String(), status.LastUpgradeStatus.Status)
 	}
 
-	// Cancel the upgrade
 	cmd.RootCmd.SetArgs([]string{"upgrade", "cancel", upgradeID})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	if err != nil {

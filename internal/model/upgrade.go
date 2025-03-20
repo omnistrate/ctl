@@ -18,23 +18,25 @@ const (
 )
 
 type UpgradeStatus struct {
-	UpgradeID  string `json:"upgrade_id"`
-	Total      int64  `json:"total"`
-	Pending    int64  `json:"pending"`
-	InProgress int64  `json:"in_progress"`
-	Completed  int64  `json:"completed"`
-	Failed     int64  `json:"failed"`
-	Scheduled  *int   `json:"scheduled,omitempty"`
-	Skipped    int64  `json:"skipped"`
-	Status     string `json:"status"`
+	UpgradeID      string `json:"upgrade_id"`
+	Total          int64  `json:"total"`
+	Pending        int64  `json:"pending"`
+	InProgress     int64  `json:"in_progress"`
+	Completed      int64  `json:"completed"`
+	Failed         int64  `json:"failed"`
+	Scheduled      *int   `json:"scheduled,omitempty"`
+	Skipped        int64  `json:"skipped"`
+	Status         string `json:"status"`
+	NotifyCustomer bool   `json:"notify_customer"`
 }
 
 type Upgrade struct {
-	UpgradeID     string  `json:"upgrade_id"`
-	SourceVersion string  `json:"source_version"`
-	TargetVersion string  `json:"target_version"`
-	InstanceIDs   string  `json:"instance_ids"`
-	ScheduledDate *string `json:"scheduled_date,omitempty"`
+	UpgradeID      string  `json:"upgrade_id"`
+	SourceVersion  string  `json:"source_version"`
+	TargetVersion  string  `json:"target_version"`
+	InstanceIDs    string  `json:"instance_ids"`
+	ScheduledDate  *string `json:"scheduled_date,omitempty"`
+	NotifyCustomer bool    `json:"notify_customer"`
 }
 
 type UpgradeStatusDetail struct {
