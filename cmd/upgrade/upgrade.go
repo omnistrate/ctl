@@ -2,10 +2,10 @@ package upgrade
 
 import (
 	"fmt"
-	"github.com/omnistrate/ctl/cmd/upgrade/manageupgradelifecycle"
 	"strings"
 
 	"github.com/omnistrate/ctl/cmd/common"
+	"github.com/omnistrate/ctl/cmd/upgrade/manageupgradelifecycle"
 
 	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/cmd/upgrade/status"
@@ -48,20 +48,24 @@ func init() {
 	Cmd.AddCommand(manageupgradelifecycle.CancelCmd)
 	Cmd.AddCommand(manageupgradelifecycle.ResumeCmd)
 	Cmd.AddCommand(manageupgradelifecycle.PauseCmd)
+	Cmd.AddCommand(manageupgradelifecycle.NotifyCustomerCmd)
+	Cmd.AddCommand(manageupgradelifecycle.SkipInstancesCmd)
 
 	Cmd.Args = cobra.MinimumNArgs(1)
 
 	Cmd.Flags().StringP("version", "", "", "Specify the version number to upgrade to. Use 'latest' to upgrade to the latest version. Use 'preferred' to upgrade to the preferred version. Use either this flag or the --version-name flag to upgrade to a specific version.")
 	Cmd.Flags().StringP("version-name", "", "", "Specify the version name to upgrade to. Use either this flag or the --version flag to upgrade to a specific version.")
 	Cmd.Flags().StringP("scheduled-date", "", "", "Specify the scheduled date for the upgrade.")
+	Cmd.Flags().Bool("notify-customer", false, "Enable customer notifications for the upgrade")
 }
 
 type Args struct {
-	ServiceID     string
-	ProductTierID string
-	SourceVersion string
-	TargetVersion string
-	ScheduledDate *string
+	ServiceID      string
+	ProductTierID  string
+	SourceVersion  string
+	TargetVersion  string
+	NotifyCustomer bool
+	ScheduledDate  *string
 }
 
 var UpgradePathIDs []string
@@ -98,6 +102,8 @@ func run(cmd *cobra.Command, args []string) error {
 	if pError == nil && scheduledDateParam != "" {
 		scheduledDate = &scheduledDateParam
 	}
+
+	notifyCustomer, _ := cmd.Flags().GetBool("notify-customer")
 
 	// Validate input arguments
 	if version == "" && versionName == "" {
@@ -235,35 +241,39 @@ func run(cmd *cobra.Command, args []string) error {
 		}
 
 		if upgrades[Args{
-			ServiceID:     serviceID,
-			ProductTierID: productTierID,
-			SourceVersion: sourceVersion,
-			TargetVersion: targetVersion,
-			ScheduledDate: scheduledDate,
+			ServiceID:      serviceID,
+			ProductTierID:  productTierID,
+			SourceVersion:  sourceVersion,
+			TargetVersion:  targetVersion,
+			ScheduledDate:  scheduledDate,
+			NotifyCustomer: notifyCustomer,
 		}] == nil {
 			upgrades[Args{
-				ServiceID:     serviceID,
-				ProductTierID: productTierID,
-				SourceVersion: sourceVersion,
-				TargetVersion: targetVersion,
-				ScheduledDate: scheduledDate,
+				ServiceID:      serviceID,
+				ProductTierID:  productTierID,
+				SourceVersion:  sourceVersion,
+				TargetVersion:  targetVersion,
+				ScheduledDate:  scheduledDate,
+				NotifyCustomer: notifyCustomer,
 			}] = &Res{
 				InstanceIDs: make([]string, 0),
 			}
 		}
 
 		upgrades[Args{
-			ServiceID:     serviceID,
-			ProductTierID: productTierID,
-			SourceVersion: sourceVersion,
-			TargetVersion: targetVersion,
-			ScheduledDate: scheduledDate,
+			ServiceID:      serviceID,
+			ProductTierID:  productTierID,
+			SourceVersion:  sourceVersion,
+			TargetVersion:  targetVersion,
+			ScheduledDate:  scheduledDate,
+			NotifyCustomer: notifyCustomer,
 		}].InstanceIDs = append(upgrades[Args{
-			ServiceID:     serviceID,
-			ProductTierID: productTierID,
-			SourceVersion: sourceVersion,
-			TargetVersion: targetVersion,
-			ScheduledDate: scheduledDate,
+			ServiceID:      serviceID,
+			ProductTierID:  productTierID,
+			SourceVersion:  sourceVersion,
+			TargetVersion:  targetVersion,
+			ScheduledDate:  scheduledDate,
+			NotifyCustomer: notifyCustomer,
 		}].InstanceIDs, instanceID)
 	}
 
@@ -279,6 +289,7 @@ func run(cmd *cobra.Command, args []string) error {
 			upgradeArgs.TargetVersion,
 			upgradeArgs.ScheduledDate,
 			upgradeRes.InstanceIDs,
+			upgradeArgs.NotifyCustomer,
 		)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
@@ -295,11 +306,12 @@ func run(cmd *cobra.Command, args []string) error {
 	formattedUpgrades := make([]model.Upgrade, 0)
 	for upgradeArgs, upgradeRes := range upgrades {
 		formattedUpgrade := model.Upgrade{
-			UpgradeID:     upgradeRes.UpgradePathID,
-			SourceVersion: upgradeArgs.SourceVersion,
-			TargetVersion: upgradeArgs.TargetVersion,
-			InstanceIDs:   strings.Join(upgradeRes.InstanceIDs, ","),
-			ScheduledDate: upgradeArgs.ScheduledDate,
+			UpgradeID:      upgradeRes.UpgradePathID,
+			SourceVersion:  upgradeArgs.SourceVersion,
+			TargetVersion:  upgradeArgs.TargetVersion,
+			InstanceIDs:    strings.Join(upgradeRes.InstanceIDs, ","),
+			NotifyCustomer: upgradeArgs.NotifyCustomer,
+			ScheduledDate:  upgradeArgs.ScheduledDate,
 		}
 
 		formattedUpgrades = append(formattedUpgrades, formattedUpgrade)

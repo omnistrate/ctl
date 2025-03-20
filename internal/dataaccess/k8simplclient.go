@@ -339,7 +339,7 @@ func (k *K8sInspectClientImpl) GetClusterData(ctx context.Context, namespace str
 
 	// Create AZ items
 	azItems := []InspectAZItem{}
-	for az, _ := range podMap {
+	for az := range podMap {
 		azItem := InspectAZItem{
 			Name: az,
 			VMs:  []InspectVMItem{},

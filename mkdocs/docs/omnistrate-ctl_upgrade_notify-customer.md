@@ -1,22 +1,22 @@
-## omnistrate-ctl upgrade pause
+## omnistrate-ctl upgrade notify-customer
 
-Pause an ongoing upgrade
+Enable customer notifications for a scheduled upgrade
 
 ```
-omnistrate-ctl upgrade pause [upgrade-id] [flags]
+omnistrate-ctl upgrade notify-customer [upgrade-id] [flags]
 ```
 
 ### Examples
 
 ```
- Pausing ongoing upgrade #
-omctl upgrade pause [upgrade-id]
+ Enable customer notifications for a scheduled upgrade #
+omctl upgrade notify-customer [upgrade-id]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for pause
+  -h, --help   help for notify-customer
 ```
 
 ### Options inherited from parent commands

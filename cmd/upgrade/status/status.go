@@ -107,7 +107,7 @@ func run(cmd *cobra.Command, args []string) error {
 			InProgress: upgrade.InProgressCount,
 			Completed:  upgrade.CompletedCount,
 			Failed:     upgrade.FailedCount,
-			Scheduled:  utils.FromPtr(upgrade.ScheduledCount),
+			Scheduled:  utils.FromInt64Ptr(upgrade.ScheduledCount),
 			Skipped:    upgrade.SkippedCount,
 			Status:     upgrade.Status,
 		}

@@ -7,7 +7,7 @@ import (
 	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 )
 
-func CreateUpgradePath(ctx context.Context, token, serviceID, productTierID, sourceVersion, targetVersion string, scheduledDate *string, instanceIDs []string) (string, error) {
+func CreateUpgradePath(ctx context.Context, token, serviceID, productTierID, sourceVersion, targetVersion string, scheduledDate *string, instanceIDs []string, notifyCustomer bool) (string, error) {
 	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
 	apiClient := getFleetClient()
 
@@ -18,6 +18,9 @@ func CreateUpgradePath(ctx context.Context, token, serviceID, productTierID, sou
 			ScheduledDate: scheduledDate,
 			UpgradeFilters: map[string][]string{
 				"INSTANCE_IDS": instanceIDs,
+			},
+			AdditionalProperties: map[string]interface{}{
+				"notifyCustomer": notifyCustomer,
 			},
 		})
 
@@ -35,6 +38,10 @@ func CreateUpgradePath(ctx context.Context, token, serviceID, productTierID, sou
 }
 
 func ManageLifecycle(ctx context.Context, token, serviceID, productTierID, upgradePathID string, action model.UpgradeMaintenanceAction) (*openapiclientfleet.UpgradePath, error) {
+	return ManageLifecycleWithPayload(ctx, token, serviceID, productTierID, upgradePathID, action, nil)
+}
+
+func ManageLifecycleWithPayload(ctx context.Context, token, serviceID, productTierID, upgradePathID string, action model.UpgradeMaintenanceAction, actionPayload map[string]interface{}) (*openapiclientfleet.UpgradePath, error) {
 	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
 	apiClient := getFleetClient()
 
