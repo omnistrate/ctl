@@ -1,37 +1,40 @@
 package model
 
-type Status string
+// UpgradePathStatus represents the status of an upgrade path
+type UpgradePathStatus string
 
-func (v Status) String() string {
+func (v UpgradePathStatus) String() string {
 	return string(v)
 }
 
 const (
-	Failed     Status = "FAILED"
-	Cancelled  Status = "CANCELLED"
-	Scheduled  Status = "SCHEDULED"
-	Verifying  Status = "VERIFYING"
-	InProgress Status = "IN_PROGRESS"
+	InProgress UpgradePathStatus = "IN_PROGRESS"
+	Scheduled  UpgradePathStatus = "SCHEDULED"
+	Completed  UpgradePathStatus = "COMPLETED"
+	Failed     UpgradePathStatus = "FAILED"
+	Cancelled  UpgradePathStatus = "CANCELLED"
+	Skipped    UpgradePathStatus = "SKIPPED"
+	Verifying  UpgradePathStatus = "VERIFYING"
 )
-
-type Upgrade struct {
-	UpgradeID     string  `json:"upgrade_id"`
-	SourceVersion string  `json:"source_version"`
-	TargetVersion string  `json:"target_version"`
-	ScheduledDate *string `json:"scheduled_date,omitempty"`
-	InstanceIDs   string  `json:"instance_ids"`
-}
 
 type UpgradeStatus struct {
 	UpgradeID  string `json:"upgrade_id"`
 	Total      int64  `json:"total"`
 	Pending    int64  `json:"pending"`
-	Scheduled  int64  `json:"scheduled"`
-	Skipped    int64  `json:"skipped"`
 	InProgress int64  `json:"in_progress"`
 	Completed  int64  `json:"completed"`
 	Failed     int64  `json:"failed"`
+	Scheduled  *int   `json:"scheduled,omitempty"`
+	Skipped    int64  `json:"skipped"`
 	Status     string `json:"status"`
+}
+
+type Upgrade struct {
+	UpgradeID     string  `json:"upgrade_id"`
+	SourceVersion string  `json:"source_version"`
+	TargetVersion string  `json:"target_version"`
+	InstanceIDs   string  `json:"instance_ids"`
+	ScheduledDate *string `json:"scheduled_date,omitempty"`
 }
 
 type UpgradeStatusDetail struct {
@@ -49,6 +52,25 @@ func (a UpgradeMaintenanceAction) String() string {
 	return string(a)
 }
 
-const PauseAction UpgradeMaintenanceAction = "pause"
-const ResumeAction UpgradeMaintenanceAction = "resume"
-const CancelAction UpgradeMaintenanceAction = "cancel"
+// Maintenance actions
+const (
+	PauseAction          UpgradeMaintenanceAction = "pause"
+	ResumeAction         UpgradeMaintenanceAction = "resume"
+	CancelAction         UpgradeMaintenanceAction = "cancel"
+	NotifyCustomerAction UpgradeMaintenanceAction = "notify-customer"
+	SkipInstancesAction  UpgradeMaintenanceAction = "skip-instances"
+)
+
+// Maintenance event types
+const (
+	EventTypeScheduled = "scheduled"
+	EventTypeReminder  = "reminder"
+	EventTypeImmediate = "immediate"
+)
+
+// Completion status types
+const (
+	CompletionStatusSuccess   = "success"
+	CompletionStatusCancelled = "cancelled"
+	CompletionStatusSkipped   = "skipped"
+)

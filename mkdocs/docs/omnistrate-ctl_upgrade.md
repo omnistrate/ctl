@@ -33,9 +33,10 @@ omctl upgrade [instance-id] --version=1.0 --scheduled-date="2023-12-01T00:00:00Z
 
 ```
   -h, --help                    help for upgrade
-      --scheduled-date string   Specify the scheduled date for the upgrade.
-      --version string          Specify the version number to upgrade to. Use 'latest' to upgrade to the latest version. Use 'preferred' to upgrade to the preferred version. Use either this flag or the --version-name flag to upgrade to a specific version.
-      --version-name string     Specify the version name to upgrade to. Use either this flag or the --version flag to upgrade to a specific version.
+      --notify-customer         Enable customer notifications for the upgrade
+      --scheduled-date string   Future date when the upgrade is planned to be executed (RFC3339 format)
+      --version string          Target version to upgrade to
+      --version-name string     Target version name to upgrade to
 ```
 
 ### Options inherited from parent commands
@@ -46,9 +47,10 @@ omctl upgrade [instance-id] --version=1.0 --scheduled-date="2023-12-01T00:00:00Z
 
 ### SEE ALSO
 
-* [omnistrate-ctl](omnistrate-ctl.md)	 - Manage your Omnistrate SaaS from the command line
-* [omnistrate-ctl upgrade cancel](omnistrate-ctl_upgrade_cancel.md)	 - Cancel an uncompleted upgrade
-* [omnistrate-ctl upgrade pause](omnistrate-ctl_upgrade_pause.md)	 - Pause an ongoing upgrade
-* [omnistrate-ctl upgrade resume](omnistrate-ctl_upgrade_resume.md)	 - Resume a paused upgrade
-* [omnistrate-ctl upgrade status](omnistrate-ctl_upgrade_status.md)	 - Get Upgrade status
-
+- [omnistrate-ctl](omnistrate-ctl.md) - Manage your Omnistrate SaaS from the command line
+- [omnistrate-ctl upgrade cancel](omnistrate-ctl_upgrade_cancel.md) - Cancel an uncompleted upgrade
+- [omnistrate-ctl upgrade notify-customer](omnistrate-ctl_upgrade_notify-customer.md) - Enable customer notifications for a scheduled upgrade
+- [omnistrate-ctl upgrade pause](omnistrate-ctl_upgrade_pause.md) - Pause an ongoing upgrade
+- [omnistrate-ctl upgrade resume](omnistrate-ctl_upgrade_resume.md) - Resume a paused upgrade
+- [omnistrate-ctl upgrade skip-instances](omnistrate-ctl_upgrade_skip-instances.md) - Skip specific instances from an upgrade path
+- [omnistrate-ctl upgrade status](omnistrate-ctl_upgrade_status.md) - Get Upgrade status
