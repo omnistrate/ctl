@@ -170,8 +170,7 @@ func Test_upgrade_basic(t *testing.T) {
 
 func validateScheduledAndCancel(ctx context.Context, instanceID string, targetVersion string) error {
 	// Upgrade instance with latest version
-	scheduledDate := time.Now().Add(1 * time.Hour).Truncate(time.Hour).Format(time.RFC3339)
-	cmd.RootCmd.SetArgs([]string{"upgrade", instanceID, "--version", targetVersion, "--scheduled-date", scheduledDate, "--notify-customer"})
+	cmd.RootCmd.SetArgs([]string{"upgrade", instanceID, "--version", targetVersion, "--scheduled-date"})
 	err := cmd.RootCmd.ExecuteContext(ctx)
 	if err != nil {
 		return err
