@@ -170,15 +170,16 @@ func manageLifecycle(cmd *cobra.Command, args []string, action model.UpgradeMain
 		}
 
 		formattedUpgradeStatuses = append(formattedUpgradeStatuses, &model.UpgradeStatus{
-			UpgradeID:  upgradePathID,
-			Total:      upgrade.TotalCount,
-			Pending:    upgrade.PendingCount,
-			InProgress: upgrade.InProgressCount,
-			Completed:  upgrade.CompletedCount,
-			Failed:     upgrade.FailedCount,
-			Scheduled:  utils.FromInt64Ptr(upgrade.ScheduledCount),
-			Skipped:    upgrade.SkippedCount,
-			Status:     upgrade.Status,
+			UpgradeID:      upgradePathID,
+			Total:          upgrade.TotalCount,
+			Pending:        upgrade.PendingCount,
+			InProgress:     upgrade.InProgressCount,
+			Completed:      upgrade.CompletedCount,
+			Failed:         upgrade.FailedCount,
+			Scheduled:      utils.FromInt64Ptr(upgrade.ScheduledCount),
+			Skipped:        upgrade.SkippedCount,
+			Status:         upgrade.Status,
+			NotifyCustomer: utils.FromPtrOrDefault(upgrade.NotifyCustomer, false),
 		})
 	}
 
