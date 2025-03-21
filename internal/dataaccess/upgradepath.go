@@ -52,7 +52,8 @@ func ManageLifecycleWithPayload(ctx context.Context, token, serviceID, productTi
 		upgradePathID,
 	)
 	req = req.ManageUpgradePathLifecycleRequest2(openapiclientfleet.ManageUpgradePathLifecycleRequest2{
-		Action: action.String(),
+		Action:        action.String(),
+		ActionPayload: actionPayload,
 	})
 	resp, r, err := req.Execute()
 	defer func() {

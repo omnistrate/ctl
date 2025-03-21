@@ -114,7 +114,9 @@ func Test_upgrade_basic(t *testing.T) {
 	err = testutils.WaitForInstanceToReachStatus(ctx, instanceID, instance.InstanceStatusRunning, 900*time.Second)
 	require.NoError(err)
 	// PASS: scheduled upgrade
-	err = validateScheduledAndCancel(ctx, instanceID, "1.0")
+	err = validateScheduledAndCancel(ctx, instanceID, "1.0", false)
+	require.NoError(err)
+	err = validateScheduledAndCancel(ctx, instanceID, "1.0", true)
 	require.NoError(err)
 	// PASS: upgrade instance to version 1.0
 	cmd.RootCmd.SetArgs([]string{"upgrade", instanceID, "--version", "1.0"})
@@ -168,7 +170,7 @@ func Test_upgrade_basic(t *testing.T) {
 	require.Contains(err.Error(), "upgrade-invalid not found")
 }
 
-func validateScheduledAndCancel(ctx context.Context, instanceID string, targetVersion string) error {
+func validateScheduledAndCancel(ctx context.Context, instanceID string, targetVersion string, shouldSkipInstance bool) error {
 	// Upgrade instance with latest version
 	scheduledDate := time.Now().Add(2 * time.Hour).Truncate(time.Hour).Format(time.RFC3339)
 	cmd.RootCmd.SetArgs([]string{"upgrade", instanceID, "--version", targetVersion, "--scheduled-date", scheduledDate})
@@ -198,12 +200,17 @@ func validateScheduledAndCancel(ctx context.Context, instanceID string, targetVe
 		}
 		time.Sleep(5 * time.Second)
 	}
-
+	if status.LastUpgradeStatus.NotifyCustomer != true {
+		return fmt.Errorf("expected notify customer to be true, got %v", status.LastUpgradeStatus.NotifyCustomer)
+	}
 	if status.LastUpgradeStatus.Status != model.Scheduled.String() {
 		return fmt.Errorf("expected status %s, got %s", model.Scheduled.String(), status.LastUpgradeStatus.Status)
 	}
-
-	cmd.RootCmd.SetArgs([]string{"upgrade", "cancel", upgradeID})
+	cmdArgs := []string{"upgrade", "cancel", upgradeID}
+	if shouldSkipInstance {
+		cmdArgs = []string{"upgrade", "skip-instances", upgradeID, "--resource-ids", instanceID}
+	}
+	cmd.RootCmd.SetArgs(cmdArgs)
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	if err != nil {
 		return err
@@ -226,9 +233,12 @@ func validateScheduledAndCancel(ctx context.Context, instanceID string, targetVe
 		}
 		time.Sleep(5 * time.Second)
 	}
-	if status.LastUpgradeStatus.Status != model.Cancelled.String() {
-		return fmt.Errorf("expected status %s, got %s", model.Cancelled.String(), status.LastUpgradeStatus.Status)
+	expectedStatus := model.Cancelled.String()
+	if shouldSkipInstance {
+		expectedStatus = model.Completed.String()
 	}
-
+	if status.LastUpgradeStatus.Status != expectedStatus {
+		return fmt.Errorf("expected status %s, got %s", expectedStatus, status.LastUpgradeStatus.Status)
+	}
 	return nil
 }
