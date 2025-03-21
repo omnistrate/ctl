@@ -10,7 +10,7 @@ func (v UpgradePathStatus) String() string {
 const (
 	InProgress UpgradePathStatus = "IN_PROGRESS"
 	Scheduled  UpgradePathStatus = "SCHEDULED"
-	Completed  UpgradePathStatus = "COMPLETED"
+	Complete   UpgradePathStatus = "COMPLETE"
 	Failed     UpgradePathStatus = "FAILED"
 	Cancelled  UpgradePathStatus = "CANCELLED"
 	Skipped    UpgradePathStatus = "SKIPPED"
