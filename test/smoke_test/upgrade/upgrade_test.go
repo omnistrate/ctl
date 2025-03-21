@@ -182,6 +182,14 @@ func validateScheduledAndCancel(ctx context.Context, instanceID string, targetVe
 		return fmt.Errorf("expected 1 upgrade path ID, got %d", len(upgrade.UpgradePathIDs))
 	}
 	upgradeID := upgrade.UpgradePathIDs[0]
+
+	cmd.RootCmd.SetArgs([]string{"upgrade", "status", upgradeID})
+	if err = cmd.RootCmd.ExecuteContext(ctx); err != nil {
+		return err
+	}
+	if status.LastUpgradeStatus.NotifyCustomer == true {
+		return fmt.Errorf("expected notify customer to be false, got %v", status.LastUpgradeStatus.NotifyCustomer)
+	}
 	// Test notify-customer
 	cmd.RootCmd.SetArgs([]string{"upgrade", "notify-customer", upgradeID})
 	err = cmd.RootCmd.ExecuteContext(ctx)
@@ -235,7 +243,7 @@ func validateScheduledAndCancel(ctx context.Context, instanceID string, targetVe
 	}
 	expectedStatus := model.Cancelled.String()
 	if shouldSkipInstance {
-		expectedStatus = model.Completed.String()
+		expectedStatus = model.Complete.String()
 	}
 	if status.LastUpgradeStatus.Status != expectedStatus {
 		return fmt.Errorf("expected status %s, got %s", expectedStatus, status.LastUpgradeStatus.Status)
