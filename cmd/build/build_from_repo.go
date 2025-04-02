@@ -39,6 +39,12 @@ omctl build-from-repo --file omnistrate-compose.yaml
 
 # Build service with a custom service name
 omctl build-from-repo --service-name my-custom-service
+
+# Skip building and pushing Docker image
+omctl build-from-repo --skip-docker-build
+
+# Skip multiple stages
+omctl build-from-repo --skip-docker-build --skip-environment-promotion
 "
 `
 	GitHubPATGenerateURL = "https://github.com/settings/tokens"
@@ -50,7 +56,7 @@ omctl build-from-repo --service-name my-custom-service
 var BuildFromRepoCmd = &cobra.Command{
 	Use:          "build-from-repo",
 	Short:        "Build Service from Git Repository",
-	Long:         "This command helps to build service from git repository. Run this command from the root of the repository. Make sure you have the Dockerfile in the repository and have the Docker daemon running on your machine. By default, the service name will be the repository name, but you can specify a custom service name with the --service-name flag.",
+	Long:         "This command helps to build service from git repository. Run this command from the root of the repository. Make sure you have the Dockerfile in the repository and have the Docker daemon running on your machine. By default, the service name will be the repository name, but you can specify a custom service name with the --service-name flag.\n\nYou can also skip specific stages of the build process using the --skip-* flags. For example, you can skip building the Docker image with --skip-docker-build, skip creating the service with --skip-service-build, skip environment promotion with --skip-environment-promotion, or skip SaaS portal initialization with --skip-saas-portal-init.",
 	Example:      buildFromRepoExample,
 	RunE:         runBuildFromRepo,
 	SilenceUsage: true,
@@ -66,6 +72,12 @@ func init() {
 	BuildFromRepoCmd.Flags().StringP("output", "o", "text", "Output format. Only text is supported")
 	BuildFromRepoCmd.Flags().StringP("file", "f", ComposeFileName, "Specify the compose file to read and write to.")
 	BuildFromRepoCmd.Flags().String("service-name", "", "Specify a custom service name. If not provided, the repository name will be used.")
+	
+	// Skip flags for different stages
+	BuildFromRepoCmd.Flags().Bool("skip-docker-build", false, "Skip building and pushing the Docker image")
+	BuildFromRepoCmd.Flags().Bool("skip-service-build", false, "Skip building the service from the compose spec")
+	BuildFromRepoCmd.Flags().Bool("skip-environment-promotion", false, "Skip creating and promoting to the production environment")
+	BuildFromRepoCmd.Flags().Bool("skip-saas-portal-init", false, "Skip initializing the SaaS Portal")
 
 	err := BuildFromRepoCmd.MarkFlagFilename("file")
 	if err != nil {
@@ -108,6 +120,31 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	}
 
 	file, err := cmd.Flags().GetString("file")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+	
+	// Get skip flags
+	skipDockerBuild, err := cmd.Flags().GetBool("skip-docker-build")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	skipServiceBuild, err := cmd.Flags().GetBool("skip-service-build")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	skipEnvironmentPromotion, err := cmd.Flags().GetBool("skip-environment-promotion")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	skipSaasPortalInit, err := cmd.Flags().GetBool("skip-saas-portal-init")
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -178,15 +215,18 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	sm = ysmrr.NewSpinnerManager()
 	sm.Start()
 
-	spinner = sm.AddSpinner("Checking if gh installed")
-	time.Sleep(1 * time.Second) // Add a delay to show the spinner
-	err = exec.Command("gh", "version").Run()
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
+	// Only check for gh if we're not skipping Docker build
+	if !skipDockerBuild {
+		spinner = sm.AddSpinner("Checking if gh installed")
+		time.Sleep(1 * time.Second) // Add a delay to show the spinner
+		err = exec.Command("gh", "version").Run()
+		if err != nil {
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
+		spinner.UpdateMessage("Checking if gh installed: Yes")
+		spinner.Complete()
 	}
-	spinner.UpdateMessage("Checking if gh installed: Yes")
-	spinner.Complete()
 
 	// Step 1: Check if the user is in the root of the repository
 	spinner = sm.AddSpinner("Checking if user is in the root of the repository")
@@ -240,6 +280,9 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	var parsedYaml map[string]interface{}
 	var project *types.Project
 	dockerfilePaths := make(map[string]string) // service -> dockerfile path
+	versionTaggedImageUrls := make(map[string]string) // service -> image url with digest tag
+	var pat string
+	var ghUsername string
 
 	composeSpecHasBuildContext := false
 	if composeSpecExists {
@@ -300,300 +343,204 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	}
 
 	if !composeSpecExists || composeSpecHasBuildContext {
-		// Step 4: Check if the Dockerfile exists
-		for _, dockerfilePath := range dockerfilePaths {
-			spinner = sm.AddSpinner(fmt.Sprintf("Checking if %s exists in the repository", dockerfilePath))
-			time.Sleep(1 * time.Second) // Add a delay to show the spinner
-
-			if _, err = os.Stat(dockerfilePath); os.IsNotExist(err) {
-				utils.HandleSpinnerError(spinner, sm, errors.New(fmt.Sprintf("%s not found in the repository", dockerfilePath)))
+		// Skip Docker build if flag is set
+		if skipDockerBuild {
+			spinner = sm.AddSpinner("Skipping Docker build (--skip-docker-build flag is set)")
+			spinner.Complete()
+			
+			// We still need to get the GitHub username for the compose spec
+			spinner = sm.AddSpinner("Getting GitHub username for compose spec")
+			pat, err = config.LookupGitHubPersonalAccessToken()
+			if err != nil && !errors.As(err, &config.ErrGitHubPATNotFound) {
+				utils.HandleSpinnerError(spinner, sm, err)
 				return err
 			}
-
-			spinner.UpdateMessage(fmt.Sprintf("Checking if %s exists in the repository: Yes", dockerfilePath))
+			
+			if !errors.As(err, &config.ErrGitHubPATNotFound) {
+				ghUsernameOutput, err := exec.Command("gh", "api", "user", "-q", ".login").Output()
+				if err != nil {
+					utils.HandleSpinnerError(spinner, sm, err)
+					return err
+				}
+				ghUsername = strings.TrimSpace(string(ghUsernameOutput))
+				spinner.UpdateMessage(fmt.Sprintf("Getting GitHub username for compose spec: %s", ghUsername))
+			} else {
+				spinner.UpdateMessage("GitHub PAT not found, will prompt if needed later")
+			}
 			spinner.Complete()
-		}
+			
+			// Set placeholder image URLs if needed
+			for service, _ := range dockerfilePaths {
+				label := strings.ToLower(utils.GetFirstDifferentSegmentInFilePaths(dockerfilePaths[service], dockerfilePathsArr))
+				var imageUrl string
+				if label == "" {
+					imageUrl = fmt.Sprintf("ghcr.io/%s/%s", strings.ToLower(repoOwner), repoName)
+				} else {
+					imageUrl = fmt.Sprintf("ghcr.io/%s/%s-%s", strings.ToLower(repoOwner), repoName, label)
+				}
+				versionTaggedImageUrls[service] = fmt.Sprintf("%s:latest", imageUrl)
+			}
+		} else {
+			// Step 4: Check if the Dockerfile exists
+			for _, dockerfilePath := range dockerfilePaths {
+				spinner = sm.AddSpinner(fmt.Sprintf("Checking if %s exists in the repository", dockerfilePath))
+				time.Sleep(1 * time.Second) // Add a delay to show the spinner
 
-		// Step 5: Check if Docker is installed
-		spinner = sm.AddSpinner("Checking if Docker installed")
-		time.Sleep(1 * time.Second)                   // Add a delay to show the spinner
-		err = exec.Command("docker", "version").Run() // Simple way to check if Docker is available
-		if err != nil {
-			utils.HandleSpinnerError(spinner, sm, err)
-			return err
-		}
-		spinner.UpdateMessage("Checking if Docker installed: Yes")
-		spinner.Complete()
+				if _, err = os.Stat(dockerfilePath); os.IsNotExist(err) {
+					utils.HandleSpinnerError(spinner, sm, errors.New(fmt.Sprintf("%s not found in the repository", dockerfilePath)))
+					return err
+				}
 
-		// Step 6: Check if the Docker daemon is running
-		spinner = sm.AddSpinner("Checking if Docker daemon is running")
-		time.Sleep(1 * time.Second)                // Add a delay to show the spinner
-		err = exec.Command("docker", "info").Run() // Simple way to check if Docker is available
-		if err != nil {
-			utils.HandleSpinnerError(spinner, sm, err)
-			return err
-		}
-		spinner.UpdateMessage("Checking if Docker daemon is running: Yes")
-		spinner.Complete()
+				spinner.UpdateMessage(fmt.Sprintf("Checking if %s exists in the repository: Yes", dockerfilePath))
+				spinner.Complete()
+			}
 
-		// Step 7: Check if there is an existing GitHub pat
-		spinner = sm.AddSpinner("Checking for existing GitHub Personal Access Token")
-		time.Sleep(1 * time.Second) // Add a delay to show the spinner
-		pat, err := config.LookupGitHubPersonalAccessToken()
-		if err != nil && !errors.As(err, &config.ErrGitHubPATNotFound) {
-			utils.HandleSpinnerError(spinner, sm, err)
-			return err
-		}
-		if err == nil && !resetPAT {
-			spinner.UpdateMessage("Checking for existing GitHub Personal Access Token: Yes")
+			// Step 5: Check if Docker is installed
+			spinner = sm.AddSpinner("Checking if Docker installed")
+			time.Sleep(1 * time.Second)                   // Add a delay to show the spinner
+			err = exec.Command("docker", "version").Run() // Simple way to check if Docker is available
+			if err != nil {
+				utils.HandleSpinnerError(spinner, sm, err)
+				return err
+			}
+			spinner.UpdateMessage("Checking if Docker installed: Yes")
 			spinner.Complete()
-		}
-		if err != nil && !errors.As(err, &config.ErrGitHubPATNotFound) {
-			utils.HandleSpinnerError(spinner, sm, err)
-			return err
-		}
-		if errors.As(err, &config.ErrGitHubPATNotFound) || resetPAT {
-			// Prompt user to enter GitHub pat
-			spinner.UpdateMessage("Checking for existing GitHub Personal Access Token: No GitHub Personal Access Token found.")
+
+			// Step 6: Check if the Docker daemon is running
+			spinner = sm.AddSpinner("Checking if Docker daemon is running")
+			time.Sleep(1 * time.Second)                // Add a delay to show the spinner
+			err = exec.Command("docker", "info").Run() // Simple way to check if Docker is available
+			if err != nil {
+				utils.HandleSpinnerError(spinner, sm, err)
+				return err
+			}
+			spinner.UpdateMessage("Checking if Docker daemon is running: Yes")
 			spinner.Complete()
-			sm.Stop()
-			utils.PrintWarning("[Action Required] GitHub Personal Access Token (PAT) is required to push the Docker image to GitHub Container Registry.")
-			utils.PrintWarning("Please follow the instructions below to generate a GitHub Personal Access Token with the following scopes: write:packages, delete:packages.")
-			utils.PrintWarning("The token will be stored securely on your machine and will not be shared with anyone.")
-			fmt.Println()
-			fmt.Println("Instructions to generate a GitHub Personal Access Token:")
-			fmt.Println("1. Click on the 'Generate new token' button. Choose 'Generate new token (classic)'. Authenticate with your GitHub account.")
-			fmt.Println(`2. Enter / Select the following details:
+
+			// Step 7: Check if there is an existing GitHub pat
+			spinner = sm.AddSpinner("Checking for existing GitHub Personal Access Token")
+			time.Sleep(1 * time.Second) // Add a delay to show the spinner
+			pat, err = config.LookupGitHubPersonalAccessToken()
+			if err != nil && !errors.As(err, &config.ErrGitHubPATNotFound) {
+				utils.HandleSpinnerError(spinner, sm, err)
+				return err
+			}
+			if err == nil && !resetPAT {
+				spinner.UpdateMessage("Checking for existing GitHub Personal Access Token: Yes")
+				spinner.Complete()
+			}
+			if err != nil && !errors.As(err, &config.ErrGitHubPATNotFound) {
+				utils.HandleSpinnerError(spinner, sm, err)
+				return err
+			}
+			if errors.As(err, &config.ErrGitHubPATNotFound) || resetPAT {
+				// Prompt user to enter GitHub pat
+				spinner.UpdateMessage("Checking for existing GitHub Personal Access Token: No GitHub Personal Access Token found.")
+				spinner.Complete()
+				sm.Stop()
+				utils.PrintWarning("[Action Required] GitHub Personal Access Token (PAT) is required to push the Docker image to GitHub Container Registry.")
+				utils.PrintWarning("Please follow the instructions below to generate a GitHub Personal Access Token with the following scopes: write:packages, delete:packages.")
+				utils.PrintWarning("The token will be stored securely on your machine and will not be shared with anyone.")
+				fmt.Println()
+				fmt.Println("Instructions to generate a GitHub Personal Access Token:")
+				fmt.Println("1. Click on the 'Generate new token' button. Choose 'Generate new token (classic)'. Authenticate with your GitHub account.")
+				fmt.Println(`2. Enter / Select the following details:
   - Enter Note: "omnistrate-cli" or any other note you prefer
   - Select Expiration: "No expiration"
   - Select the following scopes:	
     - write:packages
     - delete:packages`)
-			fmt.Println("3. Click 'Generate token' and copy the token to your clipboard.")
-			fmt.Println()
+				fmt.Println("3. Click 'Generate token' and copy the token to your clipboard.")
+				fmt.Println()
 
-			fmt.Println("Redirecting you to the GitHub Personal Access Token generation page in your default browser in a few seconds...")
-			fmt.Println()
-			fmt.Print("If the browser does not open automatically, open the following URL:\n\n")
-			fmt.Printf("%s\n\n", GitHubPATGenerateURL)
+				fmt.Println("Redirecting you to the GitHub Personal Access Token generation page in your default browser in a few seconds...")
+				fmt.Println()
+				fmt.Print("If the browser does not open automatically, open the following URL:\n\n")
+				fmt.Printf("%s\n\n", GitHubPATGenerateURL)
 
-			time.Sleep(5 * time.Second)
-			err = browser.OpenURL(GitHubPATGenerateURL)
-			if err != nil {
-				err = errors.New(fmt.Sprintf("Error opening browser: %v\n", err))
-				utils.PrintError(err)
-				return err
+				time.Sleep(5 * time.Second)
+				err = browser.OpenURL(GitHubPATGenerateURL)
+				if err != nil {
+					err = errors.New(fmt.Sprintf("Error opening browser: %v\n", err))
+					utils.PrintError(err)
+					return err
+				}
+
+				utils.PrintSuccess("Please paste the GitHub Personal Access Token: ")
+				var userInput string
+				_, err = fmt.Scanln(&userInput)
+				if err != nil {
+					utils.PrintError(err)
+					return err
+				}
+				pat = strings.TrimSpace(userInput)
+
+				// Save the GitHub PAT
+				err = config.CreateOrUpdateGitHubPersonalAccessToken(pat)
+				if err != nil {
+					utils.PrintError(err)
+					return err
+				}
+
+				sm = ysmrr.NewSpinnerManager()
+				sm.Start()
 			}
 
-			utils.PrintSuccess("Please paste the GitHub Personal Access Token: ")
-			var userInput string
-			_, err = fmt.Scanln(&userInput)
-			if err != nil {
-				utils.PrintError(err)
-				return err
-			}
-			pat = strings.TrimSpace(userInput)
-
-			// Save the GitHub PAT
-			err = config.CreateOrUpdateGitHubPersonalAccessToken(pat)
-			if err != nil {
-				utils.PrintError(err)
-				return err
-			}
-
-			sm = ysmrr.NewSpinnerManager()
-			sm.Start()
-		}
-
-		// Step 8: Retrieve the GitHub username
-		spinner = sm.AddSpinner("Retrieving GitHub username")
-		time.Sleep(1 * time.Second) // Add a delay to show the spinner
-		ghUsernameOutput, err := exec.Command("gh", "api", "user", "-q", ".login").Output()
-		if err != nil {
-			utils.HandleSpinnerError(spinner, sm, err)
-			return err
-		}
-		ghUsername := strings.TrimSpace(string(ghUsernameOutput))
-		spinner.UpdateMessage(fmt.Sprintf("Retrieving GitHub username: %s", ghUsername))
-		spinner.Complete()
-
-		// Step 9: Label the docker image with the repository name
-		spinner = sm.AddSpinner("Labeling Docker image with the repository name")
-		for _, dockerfilePath := range dockerfilePaths {
-			// Read the Dockerfile
-			var dockerfileData []byte
-			dockerfileData, err = os.ReadFile(dockerfilePath)
+			// Step 8: Retrieve the GitHub username
+			spinner = sm.AddSpinner("Retrieving GitHub username")
+			time.Sleep(1 * time.Second) // Add a delay to show the spinner
+			ghUsernameOutput, err := exec.Command("gh", "api", "user", "-q", ".login").Output()
 			if err != nil {
 				utils.HandleSpinnerError(spinner, sm, err)
 				return err
 			}
+			ghUsername = strings.TrimSpace(string(ghUsernameOutput))
+			spinner.UpdateMessage(fmt.Sprintf("Retrieving GitHub username: %s", ghUsername))
+			spinner.Complete()
 
-			// Check if the Dockerfile already has the label
-			if strings.Contains(string(dockerfileData), "LABEL org.opencontainers.image.source") {
-				spinner.UpdateMessage("Labeling Docker image with the repository name: Already labeled")
-			} else {
-				// Append the label to the Dockerfile
-				dockerfileData = append(dockerfileData, []byte(fmt.Sprintf("\nLABEL org.opencontainers.image.source=\"https://github.com/%s/%s\"\n", repoOwner, repoName))...)
-
-				// Write the Dockerfile back
-				err = os.WriteFile(dockerfilePath, dockerfileData, 0600)
+			// Step 9: Label the docker image with the repository name
+			spinner = sm.AddSpinner("Labeling Docker image with the repository name")
+			for _, dockerfilePath := range dockerfilePaths {
+				// Read the Dockerfile
+				var dockerfileData []byte
+				dockerfileData, err = os.ReadFile(dockerfilePath)
 				if err != nil {
 					utils.HandleSpinnerError(spinner, sm, err)
 					return err
 				}
 
-				spinner.UpdateMessage(fmt.Sprintf("Labeling Docker image with the repository name: %s/%s", repoOwner, repoName))
-			}
-		}
+				// Check if the Dockerfile already has the label
+				if strings.Contains(string(dockerfileData), "LABEL org.opencontainers.image.source") {
+					spinner.UpdateMessage("Labeling Docker image with the repository name: Already labeled")
+				} else {
+					// Append the label to the Dockerfile
+					dockerfileData = append(dockerfileData, []byte(fmt.Sprintf("\nLABEL org.opencontainers.image.source=\"https://github.com/%s/%s\"\n", repoOwner, repoName))...)
 
-		spinner.Complete()
-
-		// Step 10: Login to GitHub Container Registry
-		spinner = sm.AddSpinner("Logging in to ghcr.io")
-		spinner.Complete()
-		sm.Stop()
-		loginCmd := exec.Command("docker", "login", "ghcr.io", "--username", ghUsername, "--password", pat)
-
-		// Redirect stdout and stderr to the terminal
-		loginCmd.Stdout = os.Stdout
-		loginCmd.Stderr = os.Stderr
-
-		fmt.Printf("Invoking 'docker login ghcr.io --username %s --password ******'...\n", ghUsername)
-		err = loginCmd.Run()
-		if err != nil {
-			utils.HandleSpinnerError(spinner, sm, err)
-			return err
-		}
-
-		sm = ysmrr.NewSpinnerManager()
-		sm.Start()
-
-		versionTaggedImageUrls := make(map[string]string) // service -> image url with digest tag
-		for service, dockerfilePath := range dockerfilePaths {
-			// Set current working directory to the service context
-			err = os.Chdir(filepath.Dir(dockerfilePath))
-			if err != nil {
-				utils.HandleSpinnerError(spinner, sm, err)
-				return err
-			}
-
-			// Step 11: Build docker image
-			label := strings.ToLower(utils.GetFirstDifferentSegmentInFilePaths(dockerfilePath, dockerfilePathsArr))
-			var imageUrl string
-			if label == "" {
-				imageUrl = fmt.Sprintf("ghcr.io/%s/%s", strings.ToLower(repoOwner), repoName)
-			} else {
-				imageUrl = fmt.Sprintf("ghcr.io/%s/%s-%s", strings.ToLower(repoOwner), repoName, label)
-			}
-
-			spinner = sm.AddSpinner(fmt.Sprintf("Building Docker image: %s", imageUrl))
-			spinner.Complete()
-			sm.Stop()
-			buildCmd := exec.Command("docker", "buildx", "build", "--pull", "--platform", "linux/amd64", ".", "-f", dockerfilePath, "-t", imageUrl, "--no-cache", "--load")
-
-			// Redirect stdout and stderr to the terminal
-			buildCmd.Stdout = os.Stdout
-			buildCmd.Stderr = os.Stderr
-
-			fmt.Printf("Invoking 'docker buildx build --pull --platform linux/amd64 . -f %s -t %s --no-cache --load'...\n", dockerfilePath, imageUrl)
-			err = buildCmd.Run()
-			if err != nil {
-				utils.HandleSpinnerError(spinner, sm, err)
-				return err
-			}
-
-			sm = ysmrr.NewSpinnerManager()
-			sm.Start()
-
-			// Step 12: Push docker image to GitHub Container Registry
-			spinner = sm.AddSpinner("Pushing Docker image to GitHub Container Registry")
-			spinner.Complete()
-			sm.Stop()
-			pushCmd := exec.Command("docker", "push", imageUrl)
-
-			// Redirect stdout and stderr to the terminal
-			pushCmd.Stdout = os.Stdout
-			pushCmd.Stderr = os.Stderr
-
-			fmt.Printf("Invoking 'docker push %s'...\n", imageUrl)
-			err = pushCmd.Run()
-			if err != nil {
-				utils.HandleSpinnerError(spinner, sm, err)
-				return err
-			}
-
-			sm = ysmrr.NewSpinnerManager()
-			sm.Start()
-
-			// Retrieve the digest
-			spinner = sm.AddSpinner("Retrieving the digest for the image")
-			digestCmd := exec.Command("docker", "buildx", "imagetools", "inspect", imageUrl)
-
-			var digestOutput []byte
-			digestOutput, err = digestCmd.Output()
-			if err != nil {
-				utils.HandleSpinnerError(spinner, sm, err)
-				return err
-			}
-
-			// Convert output to string and search for the Digest line
-			var digest string
-			digestOutputStr := string(digestOutput)
-			for _, line := range strings.Split(digestOutputStr, "\n") {
-				if strings.Contains(line, "Digest:") {
-					parts := strings.Split(line, ":")
-					if len(parts) < 3 {
-						utils.HandleSpinnerError(spinner, sm, errors.New("unable to retrieve the digest"))
+					// Write the Dockerfile back
+					err = os.WriteFile(dockerfilePath, dockerfileData, 0600)
+					if err != nil {
+						utils.HandleSpinnerError(spinner, sm, err)
 						return err
 					}
-					digest = fmt.Sprintf("sha-%s", strings.TrimSpace(strings.Split(line, ":")[2]))
-					break
+
+					spinner.UpdateMessage(fmt.Sprintf("Labeling Docker image with the repository name: %s/%s", repoOwner, repoName))
 				}
 			}
 
 			spinner.Complete()
-			sm.Stop()
 
-			fmt.Printf("Retrieved digest: %s\n", digest)
-
-			sm = ysmrr.NewSpinnerManager()
-			sm.Start()
-
-			imageUrlWithDigestTag := fmt.Sprintf("%s:%s", imageUrl, digest)
-			versionTaggedImageUrls[service] = imageUrlWithDigestTag
-
-			// Tag the image with the digest
-			spinner = sm.AddSpinner("Tagging the image with the digest")
+			// Step 10: Login to GitHub Container Registry
+			spinner = sm.AddSpinner("Logging in to ghcr.io")
 			spinner.Complete()
 			sm.Stop()
-
-			tagCmd := exec.Command("docker", "tag", imageUrl, imageUrlWithDigestTag)
-
-			tagCmd.Stdout = os.Stdout
-			tagCmd.Stderr = os.Stderr
-
-			fmt.Printf("Invoking 'docker tag %s %s'...\n", imageUrl, imageUrlWithDigestTag)
-			if err = tagCmd.Run(); err != nil {
-				utils.HandleSpinnerError(spinner, sm, err)
-				return err
-			}
-
-			sm = ysmrr.NewSpinnerManager()
-			sm.Start()
-
-			// Push the image with the digest tag
-			spinner = sm.AddSpinner("Pushing the image with the digest tag")
-			spinner.Complete()
-			sm.Stop()
-
-			pushCmd = exec.Command("docker", "push", imageUrlWithDigestTag)
+			loginCmd := exec.Command("docker", "login", "ghcr.io", "--username", ghUsername, "--password", pat)
 
 			// Redirect stdout and stderr to the terminal
-			pushCmd.Stdout = os.Stdout
-			pushCmd.Stderr = os.Stderr
+			loginCmd.Stdout = os.Stdout
+			loginCmd.Stderr = os.Stderr
 
-			fmt.Printf("Invoking 'docker push %s'...\n", imageUrlWithDigestTag)
-			err = pushCmd.Run()
+			fmt.Printf("Invoking 'docker login ghcr.io --username %s --password ******'...\n", ghUsername)
+			err = loginCmd.Run()
 			if err != nil {
 				utils.HandleSpinnerError(spinner, sm, err)
 				return err
@@ -601,13 +548,147 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 			sm = ysmrr.NewSpinnerManager()
 			sm.Start()
-		}
 
-		// Change back to the root directory
-		err = os.Chdir(rootDir)
-		if err != nil {
-			utils.HandleSpinnerError(spinner, sm, err)
-			return err
+			for service, dockerfilePath := range dockerfilePaths {
+				// Set current working directory to the service context
+				err = os.Chdir(filepath.Dir(dockerfilePath))
+				if err != nil {
+					utils.HandleSpinnerError(spinner, sm, err)
+					return err
+				}
+
+				// Step 11: Build docker image
+				label := strings.ToLower(utils.GetFirstDifferentSegmentInFilePaths(dockerfilePath, dockerfilePathsArr))
+				var imageUrl string
+				if label == "" {
+					imageUrl = fmt.Sprintf("ghcr.io/%s/%s", strings.ToLower(repoOwner), repoName)
+				} else {
+					imageUrl = fmt.Sprintf("ghcr.io/%s/%s-%s", strings.ToLower(repoOwner), repoName, label)
+				}
+
+				spinner = sm.AddSpinner(fmt.Sprintf("Building Docker image: %s", imageUrl))
+				spinner.Complete()
+				sm.Stop()
+				buildCmd := exec.Command("docker", "buildx", "build", "--pull", "--platform", "linux/amd64", ".", "-f", dockerfilePath, "-t", imageUrl, "--no-cache", "--load")
+
+				// Redirect stdout and stderr to the terminal
+				buildCmd.Stdout = os.Stdout
+				buildCmd.Stderr = os.Stderr
+
+				fmt.Printf("Invoking 'docker buildx build --pull --platform linux/amd64 . -f %s -t %s --no-cache --load'...\n", dockerfilePath, imageUrl)
+				err = buildCmd.Run()
+				if err != nil {
+					utils.HandleSpinnerError(spinner, sm, err)
+					return err
+				}
+
+				sm = ysmrr.NewSpinnerManager()
+				sm.Start()
+
+				// Step 12: Push docker image to GitHub Container Registry
+				spinner = sm.AddSpinner("Pushing Docker image to GitHub Container Registry")
+				spinner.Complete()
+				sm.Stop()
+				pushCmd := exec.Command("docker", "push", imageUrl)
+
+				// Redirect stdout and stderr to the terminal
+				pushCmd.Stdout = os.Stdout
+				pushCmd.Stderr = os.Stderr
+
+				fmt.Printf("Invoking 'docker push %s'...\n", imageUrl)
+				err = pushCmd.Run()
+				if err != nil {
+					utils.HandleSpinnerError(spinner, sm, err)
+					return err
+				}
+
+				sm = ysmrr.NewSpinnerManager()
+				sm.Start()
+
+				// Retrieve the digest
+				spinner = sm.AddSpinner("Retrieving the digest for the image")
+				digestCmd := exec.Command("docker", "buildx", "imagetools", "inspect", imageUrl)
+
+				var digestOutput []byte
+				digestOutput, err = digestCmd.Output()
+				if err != nil {
+					utils.HandleSpinnerError(spinner, sm, err)
+					return err
+				}
+
+				// Convert output to string and search for the Digest line
+				var digest string
+				digestOutputStr := string(digestOutput)
+				for _, line := range strings.Split(digestOutputStr, "\n") {
+					if strings.Contains(line, "Digest:") {
+						parts := strings.Split(line, ":")
+						if len(parts) < 3 {
+							utils.HandleSpinnerError(spinner, sm, errors.New("unable to retrieve the digest"))
+							return err
+						}
+						digest = fmt.Sprintf("sha-%s", strings.TrimSpace(strings.Split(line, ":")[2]))
+						break
+					}
+				}
+
+				spinner.Complete()
+				sm.Stop()
+
+				fmt.Printf("Retrieved digest: %s\n", digest)
+
+				sm = ysmrr.NewSpinnerManager()
+				sm.Start()
+
+				imageUrlWithDigestTag := fmt.Sprintf("%s:%s", imageUrl, digest)
+				versionTaggedImageUrls[service] = imageUrlWithDigestTag
+
+				// Tag the image with the digest
+				spinner = sm.AddSpinner("Tagging the image with the digest")
+				spinner.Complete()
+				sm.Stop()
+
+				tagCmd := exec.Command("docker", "tag", imageUrl, imageUrlWithDigestTag)
+
+				tagCmd.Stdout = os.Stdout
+				tagCmd.Stderr = os.Stderr
+
+				fmt.Printf("Invoking 'docker tag %s %s'...\n", imageUrl, imageUrlWithDigestTag)
+				if err = tagCmd.Run(); err != nil {
+					utils.HandleSpinnerError(spinner, sm, err)
+					return err
+				}
+
+				sm = ysmrr.NewSpinnerManager()
+				sm.Start()
+
+				// Push the image with the digest tag
+				spinner = sm.AddSpinner("Pushing the image with the digest tag")
+				spinner.Complete()
+				sm.Stop()
+
+				pushCmd = exec.Command("docker", "push", imageUrlWithDigestTag)
+
+				// Redirect stdout and stderr to the terminal
+				pushCmd.Stdout = os.Stdout
+				pushCmd.Stderr = os.Stderr
+
+				fmt.Printf("Invoking 'docker push %s'...\n", imageUrlWithDigestTag)
+				err = pushCmd.Run()
+				if err != nil {
+					utils.HandleSpinnerError(spinner, sm, err)
+					return err
+				}
+
+				sm = ysmrr.NewSpinnerManager()
+				sm.Start()
+			}
+
+			// Change back to the root directory
+			err = os.Chdir(rootDir)
+			if err != nil {
+				utils.HandleSpinnerError(spinner, sm, err)
+				return err
+			}
 		}
 
 		// Step 13: Generate compose spec from the Docker image
@@ -769,6 +850,15 @@ x-omnistrate-image-registry-attributes:
 
 	// Step 14: Building service from the compose spec
 	spinner = sm.AddSpinner("Building service from the compose spec")
+	
+	// Skip service build if flag is set
+	if skipServiceBuild {
+		spinner.UpdateMessage("Skipping service build (--skip-service-build flag is set)")
+		spinner.Complete()
+		sm.Stop()
+		fmt.Println("Service build was skipped. No service was created.")
+		return nil
+	}
 
 	// Get the service name from flag
 	serviceName, err := cmd.Flags().GetString("service-name")
@@ -820,92 +910,108 @@ x-omnistrate-image-registry-attributes:
 		sm.Start()
 	}
 
-	// Step 15: Check if the production environment is set up
-	spinner = sm.AddSpinner("Checking if the production environment is set up")
-	time.Sleep(1 * time.Second) // Add a delay to show the spinner
-	prodEnvironmentID, err := checkIfProdEnvExists(cmd.Context(), token, serviceID)
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
-	yesOrNo = "No"
-	if prodEnvironmentID != "" {
-		yesOrNo = "Yes"
-	}
-	spinner.UpdateMessage(fmt.Sprintf("Checking if the production environment is set up: %s", yesOrNo))
-	spinner.Complete()
-
-	// Step 16: Create a production environment if it does not exist
-	if prodEnvironmentID == "" {
-		spinner = sm.AddSpinner("Creating a production environment")
-		prodEnvironmentID, err = createProdEnv(cmd.Context(), token, serviceID, devEnvironmentID)
+	// Skip environment promotion if flag is set
+	var prodEnvironmentID string
+	if skipEnvironmentPromotion {
+		spinner = sm.AddSpinner("Skipping environment promotion (--skip-environment-promotion flag is set)")
+		spinner.Complete()
+	} else {
+		// Step 15: Check if the production environment is set up
+		spinner = sm.AddSpinner("Checking if the production environment is set up")
+		time.Sleep(1 * time.Second) // Add a delay to show the spinner
+		prodEnvironmentID, err = checkIfProdEnvExists(cmd.Context(), token, serviceID)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
-		spinner.UpdateMessage(fmt.Sprintf("Creating a production environment: created environment %s (environment ID: %s)", DefaultProdEnvName, prodEnvironmentID))
+		yesOrNo = "No"
+		if prodEnvironmentID != "" {
+			yesOrNo = "Yes"
+		}
+		spinner.UpdateMessage(fmt.Sprintf("Checking if the production environment is set up: %s", yesOrNo))
+		spinner.Complete()
+		// Step 16: Create a production environment if it does not exist
+		if prodEnvironmentID == "" {
+			spinner = sm.AddSpinner("Creating a production environment")
+			prodEnvironmentID, err = createProdEnv(cmd.Context(), token, serviceID, devEnvironmentID)
+			if err != nil {
+				utils.HandleSpinnerError(spinner, sm, err)
+				return err
+			}
+			spinner.UpdateMessage(fmt.Sprintf("Creating a production environment: created environment %s (environment ID: %s)", DefaultProdEnvName, prodEnvironmentID))
+			spinner.Complete()
+		}
+
+		// Step 17: Promote the service to the production environment
+		spinner = sm.AddSpinner(fmt.Sprintf("Promoting the service to the %s environment", DefaultProdEnvName))
+		err = dataaccess.PromoteServiceEnvironment(cmd.Context(), token, serviceID, devEnvironmentID)
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+		spinner.UpdateMessage("Promoting the service to the production environment: Success")
+		spinner.Complete()
+
+		// Step 18: Set this service plan as the default service plan in production
+		spinner = sm.AddSpinner("Setting the service plan as the default service plan in production")
+
+		// Describe the dev product tier
+		var devProductTier *openapiclient.DescribeProductTierResult
+		devProductTier, err = dataaccess.DescribeProductTier(cmd.Context(), token, serviceID, devPlanID)
+		if err != nil {
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
+
+		// Find the production plan with the same name as the dev plan
+		var prodPlanID string
+		service, err := dataaccess.DescribeService(cmd.Context(), token, serviceID)
+		if err != nil {
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
+		for _, env := range service.ServiceEnvironments {
+			if env.Id != prodEnvironmentID {
+				continue
+			}
+			for _, plan := range env.ServicePlans {
+				if plan.Name == devProductTier.Name {
+					prodPlanID = plan.ProductTierID
+					break
+				}
+			}
+		}
+
+		// Find the latest version of the production plan
+		targetVersion, err := dataaccess.FindLatestVersion(cmd.Context(), token, serviceID, prodPlanID)
+		if err != nil {
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
+
+		// Set the default service plan
+		_, err = dataaccess.SetDefaultServicePlan(cmd.Context(), token, serviceID, prodPlanID, targetVersion)
+		if err != nil {
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
+		spinner.UpdateMessage("Setting current version as the default service plan version in production: Success")
 		spinner.Complete()
 	}
 
-	// Step 17: Promote the service to the production environment
-	spinner = sm.AddSpinner(fmt.Sprintf("Promoting the service to the %s environment", DefaultProdEnvName))
-	err = dataaccess.PromoteServiceEnvironment(cmd.Context(), token, serviceID, devEnvironmentID)
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-	spinner.UpdateMessage("Promoting the service to the production environment: Success")
-	spinner.Complete()
-
-	// Step 18: Set this service plan as the default service plan in production
-	spinner = sm.AddSpinner("Setting the service plan as the default service plan in production")
-
-	// Describe the dev product tier
-	var devProductTier *openapiclient.DescribeProductTierResult
-	devProductTier, err = dataaccess.DescribeProductTier(cmd.Context(), token, serviceID, devPlanID)
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
-
-	// Find the production plan with the same name as the dev plan
-	var prodPlanID string
-	service, err := dataaccess.DescribeService(cmd.Context(), token, serviceID)
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
-	for _, env := range service.ServiceEnvironments {
-		if env.Id != prodEnvironmentID {
-			continue
-		}
-		for _, plan := range env.ServicePlans {
-			if plan.Name == devProductTier.Name {
-				prodPlanID = plan.ProductTierID
-				break
-			}
-		}
-	}
-
-	// Find the latest version of the production plan
-	targetVersion, err := dataaccess.FindLatestVersion(cmd.Context(), token, serviceID, prodPlanID)
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
-
-	// Set the default service plan
-	_, err = dataaccess.SetDefaultServicePlan(cmd.Context(), token, serviceID, prodPlanID, targetVersion)
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
-	spinner.UpdateMessage("Setting current version as the default service plan version in production: Success")
-	spinner.Complete()
-
 	// Step 19: Initialize the SaaS Portal
 	var prodEnvironment *openapiclientv1.DescribeServiceEnvironmentResult
-	if config.IsProd() {
+	
+	if skipSaasPortalInit || skipEnvironmentPromotion {
+		// Skip SaaS Portal initialization if either flag is set
+		spinner = sm.AddSpinner("Skipping SaaS Portal initialization")
+		if skipSaasPortalInit {
+			spinner.UpdateMessage("Skipping SaaS Portal initialization (--skip-saas-portal-init flag is set)")
+		} else {
+			spinner.UpdateMessage("Skipping SaaS Portal initialization (--skip-environment-promotion flag is set)")
+		}
+		spinner.Complete()
+	} else if config.IsProd() && !skipEnvironmentPromotion && prodEnvironmentID != "" {
 		prodEnvironment, err = dataaccess.DescribeServiceEnvironment(cmd.Context(), token, serviceID, prodEnvironmentID)
 		if err != nil {
 			utils.PrintError(err)
@@ -944,7 +1050,7 @@ x-omnistrate-image-registry-attributes:
 	println()
 	println()
 	fmt.Println("Congratulations! Your service has been successfully built and deployed.")
-	if config.IsProd() {
+	if config.IsProd() && !skipSaasPortalInit && !skipEnvironmentPromotion && prodEnvironment != nil {
 		utils.PrintURL("You can access the SaaS Portal at", getSaaSPortalURL(prodEnvironment, serviceID, prodEnvironmentID))
 	}
 
