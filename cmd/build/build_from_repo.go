@@ -36,6 +36,9 @@ omctl build-from-repo --env-var POSTGRES_PASSWORD=default --deployment-type byoa
 
 # Build service from an existing compose spec in the repository
 omctl build-from-repo --file omnistrate-compose.yaml
+
+# Build service with a custom service name
+omctl build-from-repo --service-name my-custom-service
 "
 `
 	GitHubPATGenerateURL = "https://github.com/settings/tokens"
@@ -47,7 +50,7 @@ omctl build-from-repo --file omnistrate-compose.yaml
 var BuildFromRepoCmd = &cobra.Command{
 	Use:          "build-from-repo",
 	Short:        "Build Service from Git Repository",
-	Long:         "This command helps to build service from git repository. Run this command from the root of the repository. Make sure you have the Dockerfile in the repository and have the Docker daemon running on your machine.",
+	Long:         "This command helps to build service from git repository. Run this command from the root of the repository. Make sure you have the Dockerfile in the repository and have the Docker daemon running on your machine. By default, the service name will be the repository name, but you can specify a custom service name with the --service-name flag.",
 	Example:      buildFromRepoExample,
 	RunE:         runBuildFromRepo,
 	SilenceUsage: true,
@@ -62,6 +65,7 @@ func init() {
 	BuildFromRepoCmd.Flags().Bool("reset-pat", false, "Reset the GitHub Personal Access Token (PAT) for the current user.")
 	BuildFromRepoCmd.Flags().StringP("output", "o", "text", "Output format. Only text is supported")
 	BuildFromRepoCmd.Flags().StringP("file", "f", ComposeFileName, "Specify the compose file to read and write to.")
+	BuildFromRepoCmd.Flags().String("service-name", "", "Specify a custom service name. If not provided, the repository name will be used.")
 
 	err := BuildFromRepoCmd.MarkFlagFilename("file")
 	if err != nil {
@@ -766,12 +770,25 @@ x-omnistrate-image-registry-attributes:
 	// Step 14: Building service from the compose spec
 	spinner = sm.AddSpinner("Building service from the compose spec")
 
+	// Get the service name from flag
+	serviceName, err := cmd.Flags().GetString("service-name")
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+
+	// Use custom service name if provided, otherwise use repo name
+	serviceNameToUse := repoName
+	if serviceName != "" {
+		serviceNameToUse = serviceName
+	}
+
 	// Build the service
 	serviceID, devEnvironmentID, devPlanID, undefinedResources, err := buildService(
 		cmd.Context(),
 		fileData,
 		token,
-		repoName,
+		serviceNameToUse,
 		DockerComposeSpecType,
 		nil,
 		nil,
@@ -786,7 +803,7 @@ x-omnistrate-image-registry-attributes:
 		return err
 	}
 
-	spinner.UpdateMessage(fmt.Sprintf("Building service from the compose spec: built service %s (service ID: %s)", repoName, serviceID))
+	spinner.UpdateMessage(fmt.Sprintf("Building service from the compose spec: built service %s (service ID: %s)", serviceNameToUse, serviceID))
 	spinner.Complete()
 
 	// Print warning if there are any undefined resources
