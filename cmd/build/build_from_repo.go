@@ -45,6 +45,9 @@ omctl build-from-repo --skip-docker-build
 
 # Skip multiple stages
 omctl build-from-repo --skip-docker-build --skip-environment-promotion
+
+# Run in dry-run mode (build image locally but don't push or create service)
+omctl build-from-repo --dry-run
 "
 `
 	GitHubPATGenerateURL = "https://github.com/settings/tokens"
@@ -56,7 +59,7 @@ omctl build-from-repo --skip-docker-build --skip-environment-promotion
 var BuildFromRepoCmd = &cobra.Command{
 	Use:          "build-from-repo",
 	Short:        "Build Service from Git Repository",
-	Long:         "This command helps to build service from git repository. Run this command from the root of the repository. Make sure you have the Dockerfile in the repository and have the Docker daemon running on your machine. By default, the service name will be the repository name, but you can specify a custom service name with the --service-name flag.\n\nYou can also skip specific stages of the build process using the --skip-* flags. For example, you can skip building the Docker image with --skip-docker-build, skip creating the service with --skip-service-build, skip environment promotion with --skip-environment-promotion, or skip SaaS portal initialization with --skip-saas-portal-init.",
+	Long:         "This command helps to build service from git repository. Run this command from the root of the repository. Make sure you have the Dockerfile in the repository and have the Docker daemon running on your machine. By default, the service name will be the repository name, but you can specify a custom service name with the --service-name flag.\n\nYou can also skip specific stages of the build process using the --skip-* flags. For example, you can skip building the Docker image with --skip-docker-build, skip creating the service with --skip-service-build, skip environment promotion with --skip-environment-promotion, or skip SaaS portal initialization with --skip-saas-portal-init.\n\nFor testing purposes, use the --dry-run flag to only build the Docker image locally without pushing, skip service creation, and generate a local spec file with a '-dry-run' suffix. Note that --dry-run cannot be used together with any of the --skip-* flags as they are mutually exclusive.",
 	Example:      buildFromRepoExample,
 	RunE:         runBuildFromRepo,
 	SilenceUsage: true,
@@ -78,6 +81,9 @@ func init() {
 	BuildFromRepoCmd.Flags().Bool("skip-service-build", false, "Skip building the service from the compose spec")
 	BuildFromRepoCmd.Flags().Bool("skip-environment-promotion", false, "Skip creating and promoting to the production environment")
 	BuildFromRepoCmd.Flags().Bool("skip-saas-portal-init", false, "Skip initializing the SaaS Portal")
+	
+	// Dry run flag
+	BuildFromRepoCmd.Flags().Bool("dry-run", false, "Run in dry-run mode: only build the Docker image locally without pushing, skip service creation, and write the generated spec to a local file with '-dry-run' suffix. Cannot be used with any --skip-* flags.")
 
 	err := BuildFromRepoCmd.MarkFlagFilename("file")
 	if err != nil {
@@ -148,6 +154,28 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		utils.PrintError(err)
 		return err
+	}
+
+	// Get dry-run flag
+	dryRun, err := cmd.Flags().GetBool("dry-run")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+	
+	// Check for incompatible flag combinations
+	if dryRun {
+		// If dry-run is set, other skip flags should not be set
+		if skipDockerBuild || skipServiceBuild || skipEnvironmentPromotion || skipSaasPortalInit {
+			err = errors.New("--dry-run flag is not compatible with --skip-* flags (they are mutually exclusive)")
+			utils.PrintError(err)
+			return err
+		}
+		
+		// In dry-run mode, we implicitly skip these steps
+		skipServiceBuild = true
+		skipEnvironmentPromotion = true
+		skipSaasPortalInit = true
 	}
 
 	// Convert the file path to an absolute path
@@ -585,6 +613,14 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 				sm = ysmrr.NewSpinnerManager()
 				sm.Start()
 
+				// In dry-run mode, skip pushing to registry and use local image tag
+				if dryRun {
+					spinner = sm.AddSpinner("Dry run: Using local image tag (skipping push)")
+					spinner.Complete()
+					versionTaggedImageUrls[service] = fmt.Sprintf("%s:latest", imageUrl)
+					continue
+				}
+
 				// Step 12: Push docker image to GitHub Container Registry
 				spinner = sm.AddSpinner("Pushing Docker image to GitHub Container Registry")
 				spinner.Complete()
@@ -850,6 +886,27 @@ x-omnistrate-image-registry-attributes:
 
 	// Step 14: Building service from the compose spec
 	spinner = sm.AddSpinner("Building service from the compose spec")
+	
+	// If we're in dry-run mode, save the compose spec to a file with '-dry-run' suffix
+	if dryRun {
+		// Get the file extension
+		fileExt := filepath.Ext(file)
+		baseName := file[:len(file)-len(fileExt)]
+		dryRunFile := fmt.Sprintf("%s-dry-run%s", baseName, fileExt)
+		
+		// Write the compose spec to the dry-run file
+		err = os.WriteFile(dryRunFile, fileData, 0600)
+		if err != nil {
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
+		
+		spinner.UpdateMessage(fmt.Sprintf("Dry run: Wrote compose spec to %s", dryRunFile))
+		spinner.Complete()
+		sm.Stop()
+		fmt.Printf("Dry run completed. Final compose spec written to %s\n", dryRunFile)
+		return nil
+	}
 	
 	// Skip service build if flag is set
 	if skipServiceBuild {
