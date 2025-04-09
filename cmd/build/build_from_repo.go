@@ -75,13 +75,13 @@ func init() {
 	BuildFromRepoCmd.Flags().StringP("output", "o", "text", "Output format. Only text is supported")
 	BuildFromRepoCmd.Flags().StringP("file", "f", ComposeFileName, "Specify the compose file to read and write to.")
 	BuildFromRepoCmd.Flags().String("service-name", "", "Specify a custom service name. If not provided, the repository name will be used.")
-	
+
 	// Skip flags for different stages
 	BuildFromRepoCmd.Flags().Bool("skip-docker-build", false, "Skip building and pushing the Docker image")
 	BuildFromRepoCmd.Flags().Bool("skip-service-build", false, "Skip building the service from the compose spec")
 	BuildFromRepoCmd.Flags().Bool("skip-environment-promotion", false, "Skip creating and promoting to the production environment")
 	BuildFromRepoCmd.Flags().Bool("skip-saas-portal-init", false, "Skip initializing the SaaS Portal")
-	
+
 	// Dry run flag
 	BuildFromRepoCmd.Flags().Bool("dry-run", false, "Run in dry-run mode: only build the Docker image locally without pushing, skip service creation, and write the generated spec to a local file with '-dry-run' suffix. Cannot be used with any --skip-* flags.")
 
@@ -130,7 +130,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		utils.PrintError(err)
 		return err
 	}
-	
+
 	// Get skip flags
 	skipDockerBuild, err := cmd.Flags().GetBool("skip-docker-build")
 	if err != nil {
@@ -162,7 +162,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		utils.PrintError(err)
 		return err
 	}
-	
+
 	// Check for incompatible flag combinations
 	if dryRun {
 		// If dry-run is set, other skip flags should not be set
@@ -171,7 +171,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 			utils.PrintError(err)
 			return err
 		}
-		
+
 		// In dry-run mode, we implicitly skip these steps
 		skipServiceBuild = true
 		skipEnvironmentPromotion = true
@@ -307,7 +307,8 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	var fileData []byte
 	var parsedYaml map[string]interface{}
 	var project *types.Project
-	dockerfilePaths := make(map[string]string) // service -> dockerfile path
+	dockerfilePaths := make(map[string]string)        // service -> dockerfile path
+	dockerBuildContexts := make(map[string]string)    // service -> docker build context
 	versionTaggedImageUrls := make(map[string]string) // service -> image url with digest tag
 	var pat string
 	var ghUsername string
@@ -355,10 +356,12 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 				}
 
 				dockerfilePaths[service.Name] = filepath.Join(absContextPath, service.Build.Dockerfile)
+				dockerBuildContexts[service.Name] = absContextPath
 			}
 		}
 	} else {
 		dockerfilePaths[defaultServiceName], err = filepath.Abs("Dockerfile")
+		dockerBuildContexts[defaultServiceName], err = filepath.Abs("Dockerfile")
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
@@ -375,7 +378,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 		if skipDockerBuild {
 			spinner = sm.AddSpinner("Skipping Docker build (--skip-docker-build flag is set)")
 			spinner.Complete()
-			
+
 			// We still need to get the GitHub username for the compose spec
 			spinner = sm.AddSpinner("Getting GitHub username for compose spec")
 			pat, err = config.LookupGitHubPersonalAccessToken()
@@ -383,7 +386,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 				utils.HandleSpinnerError(spinner, sm, err)
 				return err
 			}
-			
+
 			if !errors.As(err, &config.ErrGitHubPATNotFound) {
 				ghUsernameOutput, err := exec.Command("gh", "api", "user", "-q", ".login").Output()
 				if err != nil {
@@ -396,7 +399,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 				spinner.UpdateMessage("GitHub PAT not found, will prompt if needed later")
 			}
 			spinner.Complete()
-			
+
 			// Set placeholder image URLs if needed
 			for service, _ := range dockerfilePaths {
 				label := strings.ToLower(utils.GetFirstDifferentSegmentInFilePaths(dockerfilePaths[service], dockerfilePathsArr))
@@ -579,7 +582,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 			for service, dockerfilePath := range dockerfilePaths {
 				// Set current working directory to the service context
-				err = os.Chdir(filepath.Dir(dockerfilePath))
+				err = os.Chdir(filepath.Dir(dockerBuildContexts[service]))
 				if err != nil {
 					utils.HandleSpinnerError(spinner, sm, err)
 					return err
@@ -886,28 +889,28 @@ x-omnistrate-image-registry-attributes:
 
 	// Step 14: Building service from the compose spec
 	spinner = sm.AddSpinner("Building service from the compose spec")
-	
+
 	// If we're in dry-run mode, save the compose spec to a file with '-dry-run' suffix
 	if dryRun {
 		// Get the file extension
 		fileExt := filepath.Ext(file)
 		baseName := file[:len(file)-len(fileExt)]
 		dryRunFile := fmt.Sprintf("%s-dry-run%s", baseName, fileExt)
-		
+
 		// Write the compose spec to the dry-run file
 		err = os.WriteFile(dryRunFile, fileData, 0600)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
 			return err
 		}
-		
+
 		spinner.UpdateMessage(fmt.Sprintf("Dry run: Wrote compose spec to %s", dryRunFile))
 		spinner.Complete()
 		sm.Stop()
 		fmt.Printf("Dry run completed. Final compose spec written to %s\n", dryRunFile)
 		return nil
 	}
-	
+
 	// Skip service build if flag is set
 	if skipServiceBuild {
 		spinner.UpdateMessage("Skipping service build (--skip-service-build flag is set)")
@@ -1058,7 +1061,7 @@ x-omnistrate-image-registry-attributes:
 
 	// Step 19: Initialize the SaaS Portal
 	var prodEnvironment *openapiclientv1.DescribeServiceEnvironmentResult
-	
+
 	if skipSaasPortalInit || skipEnvironmentPromotion {
 		// Skip SaaS Portal initialization if either flag is set
 		spinner = sm.AddSpinner("Skipping SaaS Portal initialization")
