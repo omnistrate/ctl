@@ -2,8 +2,9 @@ package account
 
 import (
 	"fmt"
-	"github.com/omnistrate/ctl/cmd/common"
 	"strings"
+
+	"github.com/omnistrate/ctl/cmd/common"
 
 	"github.com/chelnak/ysmrr"
 	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
@@ -117,13 +118,28 @@ func runList(cmd *cobra.Command, args []string) error {
 // Helper functions
 
 func formatAccount(account *openapiclient.DescribeAccountConfigResult) (model.Account, error) {
+	if account == nil {
+		return model.Account{}, fmt.Errorf("account is nil")
+	}
+
 	var targetAccountID, cloudProvider string
+
+	// Handle AWS account
 	if account.AwsAccountID != nil {
 		targetAccountID = *account.AwsAccountID
 		cloudProvider = "AWS"
-	} else {
+	} else if account.GcpProjectID != nil && account.GcpProjectNumber != nil {
+		// Handle GCP account
 		targetAccountID = fmt.Sprintf("%s(ProjectID: %s)", *account.GcpProjectID, *account.GcpProjectNumber)
 		cloudProvider = "GCP"
+	} else if account.AzureSubscriptionID != nil {
+		// Handle Azure account
+		targetAccountID = *account.AzureSubscriptionID
+		cloudProvider = "Azure"
+	} else {
+		// Handle unknown account type
+		targetAccountID = "unknown"
+		cloudProvider = "unknown"
 	}
 
 	return model.Account{

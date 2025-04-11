@@ -3,8 +3,9 @@ package dataaccess
 import (
 	"context"
 	"fmt"
-	"github.com/omnistrate/ctl/internal/config"
 	"strings"
+
+	"github.com/omnistrate/ctl/internal/config"
 
 	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/utils"
@@ -85,7 +86,8 @@ const (
 	AccountNotVerifiedWarningMsgTemplate = `
 WARNING! Account %s(%s) is not verified. To complete the account configuration setup, follow the instructions below:
 - For AWS CloudFormation users: Please create your CloudFormation Stack using the provided template at %s. Watch the CloudFormation guide at %s for help.
-- For AWS/GCP Terraform users: Execute the Terraform scripts available at %s, by using the Account Config Identity ID below. For guidance our Terraform instructional video is at %s.`
+- For AWS/GCP Terraform users: Execute the Terraform scripts available at %s, by using the Account Config Identity ID below. For guidance our Terraform instructional video is at %s.
+- For Azure users: Execute the Azure bootstrap script using the command provided in your account configuration details. This will set up the necessary Azure AD applications and role assignments.`
 
 	NextStepVerifyAccountMsgTemplate = `
 Next step:
@@ -118,11 +120,20 @@ func PrintAccountNotVerifiedWarning(account *openapiclient.DescribeAccountConfig
 	var targetAccountID string
 	if account.AwsAccountID != nil {
 		targetAccountID = *account.AwsAccountID
-	} else {
+	} else if account.GcpProjectID != nil {
 		targetAccountID = *account.GcpProjectID
+	} else if account.AzureSubscriptionID != nil {
+		targetAccountID = *account.AzureSubscriptionID
+	} else {
+		targetAccountID = "unknown"
 	}
 
-	utils.PrintWarning(fmt.Sprintf(AccountNotVerifiedWarningMsgTemplate, account.Name, targetAccountID, awsCloudFormationTemplateURL,
+	name := account.Name
+	if name == "" {
+		name = "Unnamed Account"
+	}
+
+	utils.PrintWarning(fmt.Sprintf(AccountNotVerifiedWarningMsgTemplate, name, targetAccountID, awsCloudFormationTemplateURL,
 		AwsCloudFormationGuideURL, AwsGcpTerraformScriptsURL, AwsGcpTerraformGuideURL))
 }
 
