@@ -85,6 +85,9 @@ services:
           gcp:
             instanceStorageType: GCP::PD_BALANCED
             instanceStorageSizeGiAPIParam: instanceStorageSize
+          azure:
+            instanceStorageType: AZURE::STANDARD_SSD
+            instanceStorageSizeGi: instanceStorageSize
       - type: cluster
         x-omnistrate-storage:
           aws:

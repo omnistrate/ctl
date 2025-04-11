@@ -85,6 +85,9 @@ services:
           gcp:
             instanceStorageType: GCP::PD_BALANCED
             instanceStorageSizeGi: 100
+          azure:
+            instanceStorageType: AZURE::STANDARD_SSD
+            instanceStorageSizeGi: 100
     x-omnistrate-capabilities:
       autoscaling:
         maxReplicas: 1

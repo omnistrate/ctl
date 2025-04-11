@@ -47,6 +47,9 @@ services:
           gcp:
             instanceStorageType: GCP::PD_BALANCED
             instanceStorageSizeGi: 100
+          azure:
+            instanceStorageType: AZURE::STANDARD_SSD
+            instanceStorageSizeGi: 10
     x-omnistrate-compute:
       instanceTypes:
         - cloudProvider: aws
