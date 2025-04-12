@@ -80,6 +80,10 @@ build:
 	fi; \
 	CGO_ENABLED=0 go build -mod=mod ${BUILD_FLAGS} -o dist/$$binary_name github.com/omnistrate/ctl
 
+.PHONY: release-dry-run
+release-dry-run:
+	goreleaser release --snapshot --clean
+	
 .PHONY: ctl-linux-amd64
 ctl-linux-amd64: main.go
 	GOOS=linux GOARCH=amd64 make build
