@@ -1599,13 +1599,14 @@ func launchTUI(instanceID string, workloadItems []dataaccess.InspectWorkloadItem
 			// Switch between views cyclically
 			if tabs.HasPage("workload") {
 				currentPage, _ := tabs.GetFrontPage()
-				if currentPage == "workload" {
+				switch currentPage {
+				case "workload":
 					tabs.SwitchToPage("infra")
 					helpText.SetText("[blue]Active view: Infrastructure[white] - Use TAB to toggle views")
-				} else if currentPage == "infra" {
+				case "infra":
 					tabs.SwitchToPage("storage")
 					helpText.SetText("[purple]Active view: Storage[white] - Use TAB to toggle views")
-				} else {
+				default:
 					tabs.SwitchToPage("workload")
 					helpText.SetText("[green]Active view: Workload[white] - Use TAB to toggle views")
 				}

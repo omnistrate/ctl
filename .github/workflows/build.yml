@@ -42,7 +42,7 @@ jobs:
 
       - name: golangci-lint
         timeout-minutes: 20
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v7
         with:
           args: ./...
           skip-cache: true
@@ -136,7 +136,7 @@ jobs:
   smoke-tests:
     environment: Dev-us-west-2
     if: github.event_name != 'push'
-    needs: [build, lint]
+    needs: [build, lint, integration-tests]
     runs-on: ubuntu-latest
     permissions:
       contents: read
