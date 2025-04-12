@@ -248,7 +248,7 @@ jobs:
           app_id: ${{ secrets.CLI_APP_ID }}
           private_key: ${{ secrets.CLI_APP_PRIVATE_KEY }}
 
-      - name: Upload binaries on a new release
+      - name: Upload binaries on a new release on cli repo
         timeout-minutes: 5
         uses: softprops/action-gh-release@v2
         with:

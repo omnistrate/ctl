@@ -11,6 +11,7 @@ on:
 env:
   # test coverage threshold
   TESTCOVERAGE_THRESHOLD: 6
+  GOLANG_CI_VERSION: v2.0.1
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -41,10 +42,8 @@ jobs:
 
       - name: golangci-lint
         timeout-minutes: 20
-        uses: golangci/golangci-lint-action@v5
+        uses: golangci/golangci-lint-action@v7
         with:
-          # Optional: version of golangci-lint to use in form of v1.2 or v1.2.3 or `latest` to use the latest version
-          version: v1.60.2
           args: ./...
           skip-cache: true
 
@@ -131,7 +130,7 @@ jobs:
   smoke-tests:
     environment: Dev-us-west-2
     if: github.event_name != 'push'
-    needs: [build, lint]
+    needs: [build, lint, integration-tests]
     runs-on: ubuntu-latest
     permissions:
       contents: read
