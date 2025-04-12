@@ -15,7 +15,6 @@ import (
 	"github.com/compose-spec/compose-go/loader"
 	"github.com/compose-spec/compose-go/types"
 	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
-	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/omnistrate/ctl/internal/config"
 	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/omnistrate/ctl/internal/utils"
@@ -600,7 +599,7 @@ func buildService(ctx context.Context, fileData []byte, token, name, specType st
 
 	switch specType {
 	case ServicePlanSpecType:
-		request := openapiclientv1.BuildServiceFromServicePlanSpecRequest2{
+		request := openapiclient.BuildServiceFromServicePlanSpecRequest2{
 			Name:               name,
 			Description:        description,
 			ServiceLogoURL:     serviceLogoURL,
@@ -690,7 +689,7 @@ func buildService(ctx context.Context, fileData []byte, token, name, specType st
 			secrets = &secretsTemp
 		}
 
-		request := openapiclientv1.BuildServiceFromComposeSpecRequest2{
+		request := openapiclient.BuildServiceFromComposeSpecRequest2{
 			Name:               name,
 			Description:        description,
 			ServiceLogoURL:     serviceLogoURL,
@@ -718,7 +717,7 @@ func buildService(ctx context.Context, fileData []byte, token, name, specType st
 	}
 }
 
-func checkIfSaaSPortalReady(serviceEnvironment *openapiclientv1.DescribeServiceEnvironmentResult) bool {
+func checkIfSaaSPortalReady(serviceEnvironment *openapiclient.DescribeServiceEnvironmentResult) bool {
 	if serviceEnvironment.SaasPortalUrl != nil && serviceEnvironment.SaasPortalStatus != nil && *serviceEnvironment.SaasPortalStatus == "RUNNING" {
 		return true
 	}
@@ -726,7 +725,7 @@ func checkIfSaaSPortalReady(serviceEnvironment *openapiclientv1.DescribeServiceE
 	return false
 }
 
-func getSaaSPortalURL(serviceEnvironment *openapiclientv1.DescribeServiceEnvironmentResult, serviceID, environmentID string) string {
+func getSaaSPortalURL(serviceEnvironment *openapiclient.DescribeServiceEnvironmentResult, serviceID, environmentID string) string {
 	if serviceEnvironment.SaasPortalUrl != nil {
 		return fmt.Sprintf("https://"+*serviceEnvironment.SaasPortalUrl+"/service-plans?serviceId=%s&environmentId=%s", serviceID, environmentID)
 	}
