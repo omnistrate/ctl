@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 ## Build
-FROM golang:1.23-alpine AS builder
+FROM golang:1.24-alpine AS builder
 
 RUN apk update && apk add git make
 
@@ -13,7 +13,6 @@ ARG TARGETARCH
 ARG GOPROXY
 ARG GOSUMDB
 ENV CGO_ENABLED=0
-ENV GOMAXPROCS=8
 
 RUN echo Fetching project dependencies
 RUN --mount=type=cache,target=/go/pkg/mod \
