@@ -119,7 +119,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		request.CloudProviderId = cloudProviderID
 		request.GcpProjectID = &gcpProjectID
 		request.GcpProjectNumber = &gcpProjectNumber
-		request.GcpServiceAccountEmail = utils.ToPtr(fmt.Sprintf("bootstrap-%s@%s.iam.gserviceaccount.com", user.OrgId, gcpProjectID))
+		request.GcpServiceAccountEmail = utils.ToPtr(fmt.Sprintf("bootstrap-%s@%s.iam.gserviceaccount.com", *user.OrgId, gcpProjectID))
 		request.Description = "GCP Account" + gcpProjectID
 	} else {
 		// Get azure cloud provider id
