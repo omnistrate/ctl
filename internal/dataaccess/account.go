@@ -165,15 +165,21 @@ func PrintNextStepVerifyAccountMsg(account *openapiclient.DescribeAccountConfigR
 	// Determine cloud provider and set appropriate message
 	if account.AwsAccountID != nil {
 		targetAccountID := *account.AwsAccountID
-		nextStepMessage = fmt.Sprintf(NextStepVerifyAccountMsgTemplateAWS,
-			awsCloudFormationTemplateURL, AwsCloudFormationGuideURL,
-			AwsGcpTerraformScriptsURL, targetAccountID, AwsGcpTerraformGuideURL)
+		nextStepMessage = fmt.Sprintf("Account: %s\n%s",
+			name,
+			fmt.Sprintf(NextStepVerifyAccountMsgTemplateAWS,
+				awsCloudFormationTemplateURL, AwsCloudFormationGuideURL,
+				AwsGcpTerraformScriptsURL, targetAccountID, AwsGcpTerraformGuideURL))
 	} else if account.GcpProjectID != nil && account.GcpBootstrapShellCommand != nil {
-		nextStepMessage = fmt.Sprintf(NextStepVerifyAccountMsgTemplateGCP,
-			*account.GcpBootstrapShellCommand)
+		nextStepMessage = fmt.Sprintf("Account: %s\n%s",
+			name,
+			fmt.Sprintf(NextStepVerifyAccountMsgTemplateGCP,
+				*account.GcpBootstrapShellCommand))
 	} else if account.AzureSubscriptionID != nil && account.AzureBootstrapShellCommand != nil {
-		nextStepMessage = fmt.Sprintf(NextStepVerifyAccountMsgTemplateAzure,
-			*account.AzureBootstrapShellCommand)
+		nextStepMessage = fmt.Sprintf("Account: %s\n%s",
+			name,
+			fmt.Sprintf(NextStepVerifyAccountMsgTemplateAzure,
+				*account.AzureBootstrapShellCommand))
 	}
 
 	if nextStepMessage != "" {
