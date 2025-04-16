@@ -44,7 +44,7 @@ func init() {
 	createCmd.Flags().String("azure-tenant-id", "", "Azure tenant ID")
 
 	// Add validation to the flags
-	createCmd.MarkFlagsMutuallyExclusive("aws-account-id", "gcp-project-id", "azure-subscription-id")
+	//createCmd.MarkFlagsMutuallyExclusive("aws-account-id", "gcp-project-id", "azure-subscription-id")
 	createCmd.MarkFlagsOneRequired("aws-account-id", "gcp-project-id", "azure-subscription-id")
 	createCmd.MarkFlagsRequiredTogether("gcp-project-id", "gcp-project-number")
 	createCmd.MarkFlagsRequiredTogether("azure-subscription-id", "azure-tenant-id")
@@ -66,7 +66,11 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	azureSubscriptionID, _ := cmd.Flags().GetString("azure-subscription-id")
 	azureTenantID, _ := cmd.Flags().GetString("azure-tenant-id")
 	output, _ := cmd.Flags().GetString("output")
-
+	if (awsAccountID != "" && gcpProjectID != "") ||
+		(awsAccountID != "" && azureSubscriptionID != "") ||
+		(gcpProjectID != "" && azureSubscriptionID != "") {
+		return fmt.Errorf("only one of --aws-account-id, --gcp-project-id, or --azure-subscription-id can be used at a time")
+	}
 	// Validate user login
 	token, err := common.GetTokenWithLogin()
 	if err != nil {
