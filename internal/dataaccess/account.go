@@ -83,18 +83,67 @@ func CreateAccount(ctx context.Context, token string, accountConfig openapiclien
 }
 
 const (
-	AccountNotVerifiedWarningMsgTemplate = `
-WARNING! Account %s(%s) is not verified. To complete the account configuration setup, follow the instructions below:
-- For AWS CloudFormation users: Please create your CloudFormation Stack using the provided template at %s. Watch the CloudFormation guide at %s for help.
-- For AWS/GCP Terraform users: Execute the Terraform scripts available at %s, by using the Account Config Identity ID below. For guidance our Terraform instructional video is at %s.
-- For Azure users: Execute the Azure bootstrap script using the command provided in your account configuration details. This will set up the necessary Azure AD applications and role assignments.`
+	AccountNotVerifiedWarningMsgTemplateAWS = `
+WARNING! Account %s (ID: %s) is not verified. To complete the account configuration setup, follow the instructions below:
 
-	NextStepVerifyAccountMsgTemplate = `
+For AWS CloudFormation users:
+- Create your CloudFormation Stack using the template at: %s
+- Watch our setup guide at: %s
+
+For AWS Terraform users:
+- Execute the Terraform scripts from: %s
+- Use your Account Config ID: %s
+- Watch our Terraform guide at: %s`
+
+	AccountNotVerifiedWarningMsgTemplateGCP = `
+WARNING! Account %s (Project ID: %s,Project Number: %s) is not verified. To complete the account configuration setup, follow the instructions below:
+
+1. Open Google Cloud Shell at: https://shell.cloud.google.com/?cloudshell_ephemeral=true&show=terminal
+2. Execute the following command:
+   %s
+
+For guidance, watch our GCP setup guide at: https://youtu.be/7A9WbZjuXgQ`
+
+	AccountNotVerifiedWarningMsgTemplateAzure = `
+WARNING! Account %s (Subscription ID: %s, Tenant ID: %s) is not verified. To complete the account configuration setup, follow the instructions below:
+
+1. Open Azure Cloud Shell at: https://portal.azure.com/#cloudshell/
+2. Execute the following command:
+   %s
+
+For guidance, watch our Azure setup guide at: https://youtu.be/isTGi8tQA2w`
+
+	NextStepVerifyAccountMsgTemplateAWS = `
+Next step:
+Verify your account.
+For AWS CloudFormation users:
+- Please create your CloudFormation Stack using the provided template at %s
+- Watch the CloudFormation guide at %s for help
+
+For AWS Terraform users:
+- Execute the Terraform scripts from: %s
+- Use your Account Config ID: %s
+- Watch our Terraform guide at %s`
+
+	NextStepVerifyAccountMsgTemplateGCP = `
 Next step:
 Verify your account.
 
-- For AWS CloudFormation users: Please create your CloudFormation Stack using the provided template at %s. Watch the CloudFormation guide at %s for help.
-- For AWS/GCP Terraform users: Execute the Terraform scripts available at %s, by using the Account Config Identity ID below. For guidance our Terraform instructional video is at %s.`
+1. Open Google Cloud Shell at: https://shell.cloud.google.com/?cloudshell_ephemeral=true&show=terminal
+2. Execute the following command:
+   %s
+
+For guidance, watch our GCP setup guide at: https://youtu.be/7A9WbZjuXgQ`
+
+	NextStepVerifyAccountMsgTemplateAzure = `
+Next step:
+Verify your account.
+
+1. Open Azure Cloud Shell at: https://portal.azure.com/#cloudshell/
+2. Execute the following command:
+   %s
+
+For guidance, watch our Azure setup guide at: https://youtu.be/isTGi8tQA2w`
 
 	AwsCloudFormationGuideURL = "https://youtu.be/Mu-4jppldwk"
 	AwsGcpTerraformScriptsURL = "https://github.com/omnistrate-oss/account-setup"
@@ -107,8 +156,29 @@ func PrintNextStepVerifyAccountMsg(account *openapiclient.DescribeAccountConfigR
 		awsCloudFormationTemplateURL = *account.AwsCloudFormationTemplateURL
 	}
 
-	fmt.Println(fmt.Sprintf(NextStepVerifyAccountMsgTemplate, awsCloudFormationTemplateURL,
-		AwsCloudFormationGuideURL, AwsGcpTerraformScriptsURL, AwsGcpTerraformGuideURL))
+	var nextStepMessage string
+	name := account.Name
+	if name == "" {
+		name = "Unnamed Account"
+	}
+
+	// Determine cloud provider and set appropriate message
+	if account.AwsAccountID != nil {
+		targetAccountID := *account.AwsAccountID
+		nextStepMessage = fmt.Sprintf(NextStepVerifyAccountMsgTemplateAWS,
+			awsCloudFormationTemplateURL, AwsCloudFormationGuideURL,
+			AwsGcpTerraformScriptsURL, targetAccountID, AwsGcpTerraformGuideURL)
+	} else if account.GcpProjectID != nil && account.GcpBootstrapShellCommand != nil {
+		nextStepMessage = fmt.Sprintf(NextStepVerifyAccountMsgTemplateGCP,
+			*account.GcpBootstrapShellCommand)
+	} else if account.AzureSubscriptionID != nil && account.AzureBootstrapShellCommand != nil {
+		nextStepMessage = fmt.Sprintf(NextStepVerifyAccountMsgTemplateAzure,
+			*account.AzureBootstrapShellCommand)
+	}
+
+	if nextStepMessage != "" {
+		fmt.Println(nextStepMessage)
+	}
 }
 
 func PrintAccountNotVerifiedWarning(account *openapiclient.DescribeAccountConfigResult) {
@@ -118,23 +188,28 @@ func PrintAccountNotVerifiedWarning(account *openapiclient.DescribeAccountConfig
 	}
 
 	var targetAccountID string
-	if account.AwsAccountID != nil {
-		targetAccountID = *account.AwsAccountID
-	} else if account.GcpProjectID != nil {
-		targetAccountID = *account.GcpProjectID
-	} else if account.AzureSubscriptionID != nil {
-		targetAccountID = *account.AzureSubscriptionID
-	} else {
-		targetAccountID = "unknown"
-	}
-
+	var warningMessage string
 	name := account.Name
 	if name == "" {
 		name = "Unnamed Account"
 	}
 
-	utils.PrintWarning(fmt.Sprintf(AccountNotVerifiedWarningMsgTemplate, name, targetAccountID, awsCloudFormationTemplateURL,
-		AwsCloudFormationGuideURL, AwsGcpTerraformScriptsURL, AwsGcpTerraformGuideURL))
+	// Determine cloud provider and set appropriate message
+	if account.AwsAccountID != nil {
+		warningMessage = fmt.Sprintf(AccountNotVerifiedWarningMsgTemplateAWS, name, *account.AwsAccountID,
+			awsCloudFormationTemplateURL, AwsCloudFormationGuideURL,
+			AwsGcpTerraformScriptsURL, targetAccountID, AwsGcpTerraformGuideURL)
+	} else if account.GcpProjectID != nil && account.GcpProjectNumber != nil && account.GcpBootstrapShellCommand != nil {
+		warningMessage = fmt.Sprintf(AccountNotVerifiedWarningMsgTemplateGCP, name, *account.GcpProjectID,
+			*account.GcpProjectNumber, *account.GcpBootstrapShellCommand)
+	} else if account.AzureSubscriptionID != nil && account.AzureTenantID != nil && account.AzureBootstrapShellCommand != nil {
+		warningMessage = fmt.Sprintf(AccountNotVerifiedWarningMsgTemplateAzure, name, *account.AzureSubscriptionID,
+			*account.AzureTenantID, *account.AzureBootstrapShellCommand)
+	}
+
+	if warningMessage != "" {
+		utils.PrintWarning(warningMessage)
+	}
 }
 
 func AskVerifyAccountIfAny(ctx context.Context) {
