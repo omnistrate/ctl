@@ -638,7 +638,10 @@ func buildService(ctx context.Context, fileData []byte, token, name, specType st
 					Config: parsedYaml,
 				},
 			},
-		}); err != nil {
+		}, func(options *loader.Options) {
+			loader.WithDiscardEnvFiles(options)
+		},
+		); err != nil {
 			err = errors.Wrap(err, "invalid compose")
 			return
 		}
