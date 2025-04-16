@@ -44,7 +44,6 @@ func init() {
 	createCmd.Flags().String("azure-tenant-id", "", "Azure tenant ID")
 
 	// Add validation to the flags
-	//createCmd.MarkFlagsMutuallyExclusive("aws-account-id", "gcp-project-id", "azure-subscription-id")
 	createCmd.MarkFlagsOneRequired("aws-account-id", "gcp-project-id", "azure-subscription-id")
 	createCmd.MarkFlagsRequiredTogether("gcp-project-id", "gcp-project-number")
 	createCmd.MarkFlagsRequiredTogether("azure-subscription-id", "azure-tenant-id")
