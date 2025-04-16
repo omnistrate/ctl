@@ -2,6 +2,7 @@ package account
 
 import (
 	"fmt"
+
 	"github.com/omnistrate/ctl/cmd/common"
 
 	"github.com/chelnak/ysmrr"
@@ -18,11 +19,14 @@ const (
 omctl account create [account-name] --aws-account-id=[account-id]
 
 # Create gcp account
-omctl account create [account-name] --gcp-project-id=[project-id] --gcp-project-number=[project-number]`
+omctl account create [account-name] --gcp-project-id=[project-id] --gcp-project-number=[project-number]
+
+# Create azure account
+omctl account create [account-name] --azure-subscription-id=[subscription-id] --azure-tenant-id=[tenant-id]`
 )
 
 var createCmd = &cobra.Command{
-	Use:          "create [account-name] [--aws-account-id=account-id] [--gcp-project-id=project-id] [--gcp-project-number=project-number]",
+	Use:          "create [account-name] [--aws-account-id=account-id] [--gcp-project-id=project-id] [--gcp-project-number=project-number] [--azure-subscription-id=subscription-id] [--azure-tenant-id=tenant-id]",
 	Short:        "Create a Cloud Provider Account",
 	Long:         `This command helps you create a Cloud Provider Account in your account list.`,
 	Example:      createExample,
@@ -36,11 +40,14 @@ func init() {
 	createCmd.Flags().String("aws-account-id", "", "AWS account ID")
 	createCmd.Flags().String("gcp-project-id", "", "GCP project ID")
 	createCmd.Flags().String("gcp-project-number", "", "GCP project number")
+	createCmd.Flags().String("azure-subscription-id", "", "Azure subscription ID")
+	createCmd.Flags().String("azure-tenant-id", "", "Azure tenant ID")
 
-	// TODO: Uncomment the following lines to add validation to the flags
-	// createCmd.MarkFlagsMutuallyExclusive("aws-account-id", "gcp-project-id")
-	// createCmd.MarkFlagsOneRequired("aws-account-id", "gcp-project-id")
-	// createCmd.MarkFlagsRequiredTogether("gcp-project-id", "gcp-project-number")
+	// Add validation to the flags
+	createCmd.MarkFlagsMutuallyExclusive("aws-account-id", "gcp-project-id", "azure-subscription-id")
+	createCmd.MarkFlagsOneRequired("aws-account-id", "gcp-project-id", "azure-subscription-id")
+	createCmd.MarkFlagsRequiredTogether("gcp-project-id", "gcp-project-number")
+	createCmd.MarkFlagsRequiredTogether("azure-subscription-id", "azure-tenant-id")
 }
 
 func runCreate(cmd *cobra.Command, args []string) error {
@@ -56,6 +63,8 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	awsAccountID, _ := cmd.Flags().GetString("aws-account-id")
 	gcpProjectID, _ := cmd.Flags().GetString("gcp-project-id")
 	gcpProjectNumber, _ := cmd.Flags().GetString("gcp-project-number")
+	azureSubscriptionID, _ := cmd.Flags().GetString("azure-subscription-id")
+	azureTenantID, _ := cmd.Flags().GetString("azure-tenant-id")
 	output, _ := cmd.Flags().GetString("output")
 
 	// Validate user login
@@ -92,7 +101,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		request.AwsAccountID = &awsAccountID
 		request.AwsBootstrapRoleARN = utils.ToPtr("arn:aws:iam::" + awsAccountID + ":role/omnistrate-bootstrap-role")
 		request.Description = "AWS Account" + awsAccountID
-	} else {
+	} else if gcpProjectID != "" {
 		// Get organization id
 		user, err := dataaccess.DescribeUser(cmd.Context(), token)
 		if err != nil {
@@ -112,6 +121,18 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		request.GcpProjectNumber = &gcpProjectNumber
 		request.GcpServiceAccountEmail = utils.ToPtr(fmt.Sprintf("bootstrap-%s@%s.iam.gserviceaccount.com", user.OrgId, gcpProjectID))
 		request.Description = "GCP Account" + gcpProjectID
+	} else {
+		// Get azure cloud provider id
+		cloudProviderID, err := dataaccess.GetCloudProviderByName(cmd.Context(), token, "azure")
+		if err != nil {
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
+
+		request.CloudProviderId = cloudProviderID
+		request.AzureSubscriptionID = &azureSubscriptionID
+		request.AzureTenantID = &azureTenantID
+		request.Description = "Azure Account" + azureSubscriptionID
 	}
 
 	// Create account
