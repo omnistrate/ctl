@@ -377,6 +377,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		release,
 		releaseAsPreferred,
 		releaseNamePtr,
+		false,
 	)
 	if err != nil {
 		utils.HandleSpinnerError(spinner1, sm1, err)
@@ -588,7 +589,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 }
 
 func buildService(ctx context.Context, fileData []byte, token, name, specType string, description, serviceLogoURL, environment, environmentType *string, release,
-	releaseAsPreferred bool, releaseName *string) (serviceID string, environmentID string, productTierID string, undefinedResources map[string]string, err error) {
+	releaseAsPreferred bool, releaseName *string, parseEnvFile bool) (serviceID string, environmentID string, productTierID string, undefinedResources map[string]string, err error) {
 	if name == "" {
 		return "", "", "", make(map[string]string), errors.New("name is required")
 	}
@@ -649,7 +650,7 @@ func buildService(ctx context.Context, fileData []byte, token, name, specType st
 		}
 
 		// Convert the project back to YAML, in case it was modified
-		if modified {
+		if modified || parseEnvFile {
 			var parsedYamlContent []byte
 			if parsedYamlContent, err = project.MarshalYAML(); err != nil {
 				err = errors.Wrap(err, "failed to marshal project to YAML")
