@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/omnistrate/ctl/cmd"
@@ -45,11 +44,7 @@ func Test_build_basic(t *testing.T) {
 		if f.IsDir() {
 			continue
 		}
-
-		if !strings.Contains(f.Name(), "experio") {
-			continue
-		}
-
+		
 		cmd.RootCmd.SetArgs([]string{"build",
 			"-f", "../../composefiles/" + f.Name(),
 			"--name", f.Name() + uuid.NewString(),
