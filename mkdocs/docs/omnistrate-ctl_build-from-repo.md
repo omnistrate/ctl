@@ -48,7 +48,7 @@ omctl build-from-repo --dry-run
       --deployment-type string       Set the deployment type. Options: 'hosted' or 'byoa' (Bring Your Own Account). Only effective when no compose spec exists in the repo.
       --dry-run                      Run in dry-run mode: only build the Docker image locally without pushing, skip service creation, and write the generated spec to a local file with '-dry-run' suffix. Cannot be used with any --skip-* flags.
       --env-var stringArray          Specify environment variables required for running the image. Effective only when the compose.yaml is absent. Use the format: --env-var key1=var1 --env-var key2=var2. Only effective when no compose spec exists in the repo.
-  -f, --file $var.password           Specify the compose file to read and write to. In this compose file, remember to use a $$ (double-dollar sign) when your configuration needs a literal dollar sign, e.g. instead of $var.password, use `$$var.password`. Refer to https://docs.docker.com/reference/compose-file/interpolation/ for more details on interpolation. (default "compose.yaml")
+  -f, --file string                  Specify the compose file to read and write to (default "compose.yaml")
       --gcp-project-id string        GCP project ID. Must be used with --gcp-project-number and --deployment-type
       --gcp-project-number string    GCP project number. Must be used with --gcp-project-id and --deployment-type
   -h, --help                         help for build-from-repo
