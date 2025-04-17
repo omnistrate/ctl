@@ -916,9 +916,6 @@ x-omnistrate-image-registry-attributes:
 		true,
 		true,
 		nil,
-		true,
-		spinner,
-		sm,
 	)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
