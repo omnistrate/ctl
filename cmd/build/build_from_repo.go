@@ -709,8 +709,8 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 				return err
 			}
 
-			// Replace the actual PAT with {{ secrets.GitHubPAT }}
-			fileData = []byte(strings.ReplaceAll(string(fileData), pat, "{{ secrets.GitHubPAT }}"))
+			// Replace the actual PAT with $${{ secrets.GitHubPAT }}
+			fileData = []byte(strings.ReplaceAll(string(fileData), pat, "$${{ secrets.GitHubPAT }}"))
 
 			// Replace the image tag with build tag
 			fileData = []byte(strings.ReplaceAll(string(fileData), fmt.Sprintf("image: %s", versionTaggedImageUrls[defaultServiceName]), "build:\n      context: .\n      dockerfile: Dockerfile"))
@@ -813,7 +813,7 @@ x-omnistrate-image-registry-attributes:
 	}
 
 	// Step 13: Get or create a GitHub PAT if needed
-	if strings.Contains(string(fileData), "{{ secrets.GitHubPAT }}") && pat == "" {
+	if strings.Contains(string(fileData), "$${{ secrets.GitHubPAT }}") && pat == "" {
 		sm, pat, err = getOrCreatePAT(sm, resetPAT)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
@@ -821,7 +821,7 @@ x-omnistrate-image-registry-attributes:
 		}
 	}
 
-	// Step 14: Render the compose file: variable interpolation, {{ secrets.GitHubPAT }} replacement, build context replacement
+	// Step 14: Render the compose file: variable interpolation, $${{ secrets.GitHubPAT }} replacement, build context replacement
 	spinner = sm.AddSpinner("Validating and rendering compose spec")
 
 	// Render the compose file using docker compose config
@@ -842,10 +842,10 @@ x-omnistrate-image-registry-attributes:
 	}
 	fileData = cmdOut.Bytes()
 
-	// Render the {{ secrets.GitHubPAT }} in the compose file if needed
-	if strings.Contains(string(fileData), "{{ secrets.GitHubPAT }}") {
+	// Render the $${{ secrets.GitHubPAT }} in the compose file if needed
+	if strings.Contains(string(fileData), "${{ secrets.GitHubPAT }}") {
+		fileData = []byte(strings.ReplaceAll(string(fileData), "$${{ secrets.GitHubPAT }}", pat))
 		fileData = []byte(strings.ReplaceAll(string(fileData), "${{ secrets.GitHubPAT }}", pat)) // for backward compatibility
-		fileData = []byte(strings.ReplaceAll(string(fileData), "{{ secrets.GitHubPAT }}", pat))
 	}
 
 	// Render build context sections into image fields in the compose file if needed
