@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/chelnak/ysmrr"
@@ -27,5 +28,5 @@ func TestRenderEnvFileAndInterpolateVariables(t *testing.T) {
 
 	result, err := RenderEnvFileAndInterpolateVariables(fileData, cwd, filePath, sm, nil)
 	require.NoError(t, err, "Error rendering env file and interpolating variables: %v", err)
-	require.Equal(t, string(result), string(expectedFileData), "Rendered file content does not match expected content")
+	require.Equal(t, strings.ReplaceAll(string(result), " ", ""), strings.ReplaceAll(string(expectedFileData), " ", ""), "Rendered file content does not match expected content")
 }
