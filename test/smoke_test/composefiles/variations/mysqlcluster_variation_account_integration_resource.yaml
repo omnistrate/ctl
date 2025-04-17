@@ -22,9 +22,6 @@ x-omnistrate-integrations:
                   protocol: https
               all: # another serie
                 aggregationFunction: sum
-x-internal-integrations:
-  billing:
-    S3BucketARN: arn:aws:s3:::my_billing_bucket_name
 services:
   MySQL:
     image: mysql:latest

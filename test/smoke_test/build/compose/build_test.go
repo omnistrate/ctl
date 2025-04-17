@@ -45,6 +45,10 @@ func Test_build_basic(t *testing.T) {
 			continue
 		}
 
+		if f.Name() == ".env" {
+			continue
+		}
+
 		cmd.RootCmd.SetArgs([]string{"build",
 			"-f", "../../composefiles/" + f.Name(),
 			"--name", f.Name() + uuid.NewString(),

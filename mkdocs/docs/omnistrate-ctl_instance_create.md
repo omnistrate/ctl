@@ -14,7 +14,7 @@ omnistrate-ctl instance create --service=[service] --environment=[environment] -
 
 ```
 # Create an instance deployment
-omctl instance create --service=mysql --environment=dev --plan=mysql --version=latest --resource=mySQL --cloud-provider=aws --region=ca-central-1 --param '{"databaseName":"default","password":"a_secure_password","rootPassword":"a_secure_root_password","username":"user"}
+omctl instance create --service=mysql --environment=dev --plan=mysql --version=latest --resource=mySQL --cloud-provider=aws --region=ca-central-1 --param '{"databaseName":"default","password":"a_secure_password","rootPassword":"a_secure_root_password","username":"user"}'
 
 # Create an instance deployment with parameters from a file
 omctl instance create --service=mysql --environment=dev --plan=mysql --version=latest --resource=mySQL --cloud-provider=aws --region=ca-central-1 --param-file /path/to/params.json
@@ -44,4 +44,5 @@ omctl instance create --service=mysql --environment=dev --plan=mysql --version=l
 
 ### SEE ALSO
 
-- [omnistrate-ctl instance](omnistrate-ctl_instance.md) - Manage Instance Deployments for your service
+* [omnistrate-ctl instance](omnistrate-ctl_instance.md)	 - Manage Instance Deployments for your service
+
