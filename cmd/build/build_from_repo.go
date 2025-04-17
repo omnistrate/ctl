@@ -821,51 +821,53 @@ x-omnistrate-image-registry-attributes:
 		}
 	}
 
-	// Step 14: Render the compose file: variable interpolation, ${{ secrets.GitHubPAT }} replacement, build context replacement
+	// Step 14: Render the compose file: variable interpolation (if env_file appears), ${{ secrets.GitHubPAT }} replacement, build context replacement
 	spinner = sm.AddSpinner("Rendering compose spec")
 
-	// Replace `$` with `$$` to avoid interpolation. Do not replace for `${...}` since it's used to specify variable interpolations
-	fileData = []byte(strings.ReplaceAll(string(fileData), "$", "$$"))   // Escape $ to $$
-	fileData = []byte(strings.ReplaceAll(string(fileData), "$${", "${")) // Unescape $${ to ${ for variable interpolation
-	fileData = []byte(strings.ReplaceAll(string(fileData), "${{ secrets.GitHubPAT }}", "$${{ secrets.GitHubPAT }}"))
+	if strings.Contains(string(fileData), "env_file:") {
+		// Replace `$` with `$$` to avoid interpolation. Do not replace for `${...}` since it's used to specify variable interpolations
+		fileData = []byte(strings.ReplaceAll(string(fileData), "$", "$$"))   // Escape $ to $$
+		fileData = []byte(strings.ReplaceAll(string(fileData), "$${", "${")) // Unescape $${ to ${ for variable interpolation
+		fileData = []byte(strings.ReplaceAll(string(fileData), "${{ secrets.GitHubPAT }}", "$${{ secrets.GitHubPAT }}"))
 
-	// Write the compose spec to a temporary file
-	tempFile := filepath.Join(rootDir, filepath.Base(file)+".tmp")
-	err = os.WriteFile(tempFile, fileData, 0600)
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
+		// Write the compose spec to a temporary file
+		tempFile := filepath.Join(rootDir, filepath.Base(file)+".tmp")
+		err = os.WriteFile(tempFile, fileData, 0600)
+		if err != nil {
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
+
+		// Render the compose file using docker compose config
+		renderCmd := exec.Command("docker", "compose", "-f", tempFile, "config")
+		cmdOut := &bytes.Buffer{}
+		cmdErr := &bytes.Buffer{}
+		renderCmd.Stdout = cmdOut
+		renderCmd.Stderr = cmdErr
+
+		err = renderCmd.Run()
+		if err != nil {
+			spinner.Error()
+			sm.Stop()
+			fmt.Fprintf(os.Stderr, "%s", cmdErr.String())
+			utils.HandleSpinnerError(spinner, sm, err)
+
+			return err
+		}
+		fileData = cmdOut.Bytes()
+
+		// Remove the temporary file
+		err = os.Remove(tempFile)
+		if err != nil {
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
+
+		// Docker compose config command escapes the $ character by adding a $ in front of it, so we need to unescape it
+		fileData = []byte(strings.ReplaceAll(string(fileData), "$$", "$"))
 	}
 
-	// Render the compose file using docker compose config
-	renderCmd := exec.Command("docker", "compose", "-f", tempFile, "config")
-	cmdOut := &bytes.Buffer{}
-	cmdErr := &bytes.Buffer{}
-	renderCmd.Stdout = cmdOut
-	renderCmd.Stderr = cmdErr
-
-	err = renderCmd.Run()
-	if err != nil {
-		spinner.Error()
-		sm.Stop()
-		fmt.Fprintf(os.Stderr, "%s", cmdErr.String())
-		utils.HandleSpinnerError(spinner, sm, err)
-
-		return err
-	}
-	fileData = cmdOut.Bytes()
-
-	// Remove the temporary file
-	err = os.Remove(tempFile)
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
-
-	// Docker compose config command escapes the $ character by adding a $ in front of it, so we need to unescape it
-	fileData = []byte(strings.ReplaceAll(string(fileData), "$$", "$"))
-
-	// Render the $${{ secrets.GitHubPAT }} in the compose file if needed
+	// Render the ${{ secrets.GitHubPAT }} in the compose file if needed
 	if strings.Contains(string(fileData), "${{ secrets.GitHubPAT }}") {
 		fileData = []byte(strings.ReplaceAll(string(fileData), "${{ secrets.GitHubPAT }}", pat))
 	}
