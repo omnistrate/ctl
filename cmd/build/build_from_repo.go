@@ -822,10 +822,10 @@ x-omnistrate-image-registry-attributes:
 	}
 
 	// Step 14: Render the compose file: variable interpolation, $${{ secrets.GitHubPAT }} replacement, build context replacement
-	spinner = sm.AddSpinner("Rendering compose spec")
+	spinner = sm.AddSpinner("Validating and rendering compose spec")
 
 	// Render the compose file using docker compose config
-	renderCmd := exec.Command("docker", "compose", "config")
+	renderCmd := exec.Command("docker", "compose", "-f", file, "config")
 	cmdOut := &bytes.Buffer{}
 	cmdErr := &bytes.Buffer{}
 	renderCmd.Stdout = cmdOut
@@ -833,7 +833,11 @@ x-omnistrate-image-registry-attributes:
 
 	err = renderCmd.Run()
 	if err != nil {
+		spinner.Error()
+		sm.Stop()
+		fmt.Fprintf(os.Stderr, "%s", cmdErr.String())
 		utils.HandleSpinnerError(spinner, sm, err)
+
 		return err
 	}
 	fileData = cmdOut.Bytes()
@@ -853,7 +857,7 @@ x-omnistrate-image-registry-attributes:
 		fileData = []byte(utils.ReplaceBuildContext(string(fileData), dockerPathsToImageUrls))
 	}
 
-	spinner.UpdateMessage("Rendering compose spec: completed")
+	spinner.UpdateMessage("Validating and rendering compose spec: complete")
 	spinner.Complete()
 
 	// Step 15: Building service from the compose spec
