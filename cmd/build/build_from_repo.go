@@ -73,7 +73,7 @@ func init() {
 	BuildFromRepoCmd.Flags().String("gcp-project-number", "", "GCP project number. Must be used with --gcp-project-id and --deployment-type")
 	BuildFromRepoCmd.Flags().Bool("reset-pat", false, "Reset the GitHub Personal Access Token (PAT) for the current user.")
 	BuildFromRepoCmd.Flags().StringP("output", "o", "text", "Output format. Only text is supported")
-	BuildFromRepoCmd.Flags().StringP("file", "f", ComposeFileName, "Specify the compose file to read and write to.")
+	BuildFromRepoCmd.Flags().StringP("file", "f", ComposeFileName, "Specify the compose file to read and write to. In this compose file, remember to use a $$ (double-dollar sign) when your configuration needs a literal dollar sign, e.g. instead of `$var.password`, use `$$var.password`. Refer to https://docs.docker.com/reference/compose-file/interpolation/ for more details on interpolation.")
 	BuildFromRepoCmd.Flags().String("service-name", "", "Specify a custom service name. If not provided, the repository name will be used.")
 
 	// Skip flags for different stages
@@ -842,10 +842,12 @@ x-omnistrate-image-registry-attributes:
 	}
 	fileData = cmdOut.Bytes()
 
+	// Docker compose config command escapes the $ character by adding a $ in front of it, so we need to unescape it
+	fileData = []byte(strings.ReplaceAll(string(fileData), "$$", "$"))
+
 	// Render the $${{ secrets.GitHubPAT }} in the compose file if needed
 	if strings.Contains(string(fileData), "${{ secrets.GitHubPAT }}") {
-		fileData = []byte(strings.ReplaceAll(string(fileData), "$${{ secrets.GitHubPAT }}", pat))
-		fileData = []byte(strings.ReplaceAll(string(fileData), "${{ secrets.GitHubPAT }}", pat)) // for backward compatibility
+		fileData = []byte(strings.ReplaceAll(string(fileData), "${{ secrets.GitHubPAT }}", pat))
 	}
 
 	// Render build context sections into image fields in the compose file if needed
