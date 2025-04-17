@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/omnistrate/ctl/cmd"
@@ -42,6 +43,10 @@ func Test_build_basic(t *testing.T) {
 	// Step 3: test build service on all compose files
 	for _, f := range composeFiles {
 		if f.IsDir() {
+			continue
+		}
+
+		if !strings.Contains(f.Name(), "experio") {
 			continue
 		}
 

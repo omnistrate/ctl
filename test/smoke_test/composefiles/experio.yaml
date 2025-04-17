@@ -12,7 +12,7 @@ services:
     ports:
       - 5432:5432
     env_file:
-      - ".env"
+      - "../../composefiles/.env"
     environment:
       - POSTGRES_DB=${DB_NAME}
       - POSTGRES_USER=${DB_USER}
@@ -40,7 +40,7 @@ services:
     depends_on:
       - postgres
     env_file:
-      - ".env"
+      - "../../composefiles/.env"
     environment:
       - DB_HOST=postgres
     ports:
@@ -74,9 +74,3 @@ services:
         modifiable: true
         required: false
         export: true
-
-x-omnistrate-image-registry-attributes:
-  ghcr.io:
-    auth:
-      password: ${{ secrets.GitHubPAT }}
-      username: abc
