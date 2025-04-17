@@ -378,6 +378,8 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		releaseAsPreferred,
 		releaseNamePtr,
 		false,
+		spinner1,
+		sm1,
 	)
 	if err != nil {
 		utils.HandleSpinnerError(spinner1, sm1, err)
@@ -589,7 +591,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 }
 
 func buildService(ctx context.Context, fileData []byte, token, name, specType string, description, serviceLogoURL, environment, environmentType *string, release,
-	releaseAsPreferred bool, releaseName *string, parseEnvFile bool) (serviceID string, environmentID string, productTierID string, undefinedResources map[string]string, err error) {
+	releaseAsPreferred bool, releaseName *string, parseEnvFile bool, spinner *ysmrr.Spinner, sm ysmrr.SpinnerManager) (serviceID string, environmentID string, productTierID string, undefinedResources map[string]string, err error) {
 	if name == "" {
 		return "", "", "", make(map[string]string), errors.New("name is required")
 	}
@@ -638,10 +640,7 @@ func buildService(ctx context.Context, fileData []byte, token, name, specType st
 					Config: parsedYaml,
 				},
 			},
-		}, func(options *loader.Options) {
-			loader.WithDiscardEnvFiles(options)
-		},
-		); err != nil {
+		}); err != nil {
 			err = errors.Wrap(err, "invalid compose")
 			return
 		}
