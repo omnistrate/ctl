@@ -73,7 +73,7 @@ func init() {
 	BuildFromRepoCmd.Flags().String("gcp-project-number", "", "GCP project number. Must be used with --gcp-project-id and --deployment-type")
 	BuildFromRepoCmd.Flags().Bool("reset-pat", false, "Reset the GitHub Personal Access Token (PAT) for the current user.")
 	BuildFromRepoCmd.Flags().StringP("output", "o", "text", "Output format. Only text is supported")
-	BuildFromRepoCmd.Flags().StringP("file", "f", ComposeFileName, "Specify the compose file to read and write to. In this compose file, remember to use a $$ (double-dollar sign) when your configuration needs a literal dollar sign, e.g. instead of `$var.password`, use `$$var.password`. Refer to https://docs.docker.com/reference/compose-file/interpolation/ for more details on interpolation.")
+	BuildFromRepoCmd.Flags().StringP("file", "f", ComposeFileName, "Specify the compose file to read and write to")
 	BuildFromRepoCmd.Flags().String("service-name", "", "Specify a custom service name. If not provided, the repository name will be used.")
 
 	// Skip flags for different stages
@@ -709,8 +709,8 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 				return err
 			}
 
-			// Replace the actual PAT with $${{ secrets.GitHubPAT }}
-			fileData = []byte(strings.ReplaceAll(string(fileData), pat, "$${{ secrets.GitHubPAT }}"))
+			// Replace the actual PAT with ${{ secrets.GitHubPAT }}
+			fileData = []byte(strings.ReplaceAll(string(fileData), pat, "${{ secrets.GitHubPAT }}"))
 
 			// Replace the image tag with build tag
 			fileData = []byte(strings.ReplaceAll(string(fileData), fmt.Sprintf("image: %s", versionTaggedImageUrls[defaultServiceName]), "build:\n      context: .\n      dockerfile: Dockerfile"))
@@ -813,7 +813,7 @@ x-omnistrate-image-registry-attributes:
 	}
 
 	// Step 13: Get or create a GitHub PAT if needed
-	if strings.Contains(string(fileData), "$${{ secrets.GitHubPAT }}") && pat == "" {
+	if strings.Contains(string(fileData), "${{ secrets.GitHubPAT }}") && pat == "" {
 		sm, pat, err = getOrCreatePAT(sm, resetPAT)
 		if err != nil {
 			utils.HandleSpinnerError(spinner, sm, err)
@@ -821,11 +821,24 @@ x-omnistrate-image-registry-attributes:
 		}
 	}
 
-	// Step 14: Render the compose file: variable interpolation, $${{ secrets.GitHubPAT }} replacement, build context replacement
+	// Step 14: Render the compose file: variable interpolation, ${{ secrets.GitHubPAT }} replacement, build context replacement
 	spinner = sm.AddSpinner("Rendering compose spec")
 
+	// Replace `$` with `$$` to avoid interpolation. Do not replace for `${...}` since it's used to specify variable interpolations
+	fileData = []byte(strings.ReplaceAll(string(fileData), "$", "$$"))   // Escape $ to $$
+	fileData = []byte(strings.ReplaceAll(string(fileData), "$${", "${")) // Unescape $${ to ${ for variable interpolation
+	fileData = []byte(strings.ReplaceAll(string(fileData), "${{ secrets.GitHubPAT }}", "$${{ secrets.GitHubPAT }}"))
+
+	// Write the compose spec to a temporary file
+	tempFile := filepath.Join(rootDir, filepath.Base(file)+".tmp")
+	err = os.WriteFile(tempFile, fileData, 0600)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+
 	// Render the compose file using docker compose config
-	renderCmd := exec.Command("docker", "compose", "-f", file, "config")
+	renderCmd := exec.Command("docker", "compose", "-f", tempFile, "config")
 	cmdOut := &bytes.Buffer{}
 	cmdErr := &bytes.Buffer{}
 	renderCmd.Stdout = cmdOut
@@ -841,6 +854,13 @@ x-omnistrate-image-registry-attributes:
 		return err
 	}
 	fileData = cmdOut.Bytes()
+
+	// Remove the temporary file
+	err = os.Remove(tempFile)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
 
 	// Docker compose config command escapes the $ character by adding a $ in front of it, so we need to unescape it
 	fileData = []byte(strings.ReplaceAll(string(fileData), "$$", "$"))
