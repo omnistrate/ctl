@@ -37,7 +37,7 @@ omnistrate-ctl inspect [instance-id] [flags]
 ```
       --context string      Kubernetes context to use
   -h, --help                help for inspect
-      --kubeconfig string   Path to the kubeconfig file (default "/Users/pberton/.kube/config")
+      --kubeconfig string   Path to the kubeconfig file (default "/Users/xinyi/.kube/config")
   -o, --output string       Output format (table|text|json) (default "table")
       --text                Output text representation (shorthand for --output=text)
 ```
