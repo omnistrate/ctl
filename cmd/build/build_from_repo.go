@@ -48,8 +48,10 @@ omctl build-from-repo --skip-docker-build --skip-environment-promotion
 
 # Run in dry-run mode (build image locally but don't push or create service)
 omctl build-from-repo --dry-run
-"
-`
+
+# Build for multiple platforms
+omctl build-from-repo --platforms linux/amd64 --platforms linux/arm64
+"`
 	GitHubPATGenerateURL = "https://github.com/settings/tokens"
 	ComposeFileName      = "compose.yaml"
 	DefaultProdEnvName   = "Production"
@@ -84,6 +86,9 @@ func init() {
 
 	// Dry run flag
 	BuildFromRepoCmd.Flags().Bool("dry-run", false, "Run in dry-run mode: only build the Docker image locally without pushing, skip service creation, and write the generated spec to a local file with '-dry-run' suffix. Cannot be used with any --skip-* flags.")
+	
+	// Platform flag
+	BuildFromRepoCmd.Flags().StringArray("platforms", []string{"linux/amd64"}, "Specify the platforms to build for. Use the format: --platforms linux/amd64 --platforms linux/arm64. Default is linux/amd64.")
 
 	err := BuildFromRepoCmd.MarkFlagFilename("file")
 	if err != nil {
@@ -535,13 +540,24 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 				spinner = sm.AddSpinner(fmt.Sprintf("Building Docker image: %s", imageUrl))
 				spinner.Complete()
 				sm.Stop()
-				buildCmd := exec.Command("docker", "buildx", "build", "--pull", "--platform", "linux/amd64", ".", "-f", dockerfilePath, "-t", imageUrl, "--no-cache", "--load")
+				
+				// Get the platforms defined in flag
+				platformsFlag, err := cmd.Flags().GetStringArray("platforms")
+				if err != nil {
+					utils.HandleSpinnerError(spinner, sm, err)
+					return err
+				}
+				
+				// Join the platforms list with comma as separator
+				platformsStr := strings.Join(platformsFlag, ",")
+				
+				buildCmd := exec.Command("docker", "buildx", "build", "--pull", "--platform", platformsStr, ".", "-f", dockerfilePath, "-t", imageUrl, "--no-cache", "--load")
 
 				// Redirect stdout and stderr to the terminal
 				buildCmd.Stdout = os.Stdout
 				buildCmd.Stderr = os.Stderr
 
-				fmt.Printf("Invoking 'docker buildx build --pull --platform linux/amd64 . -f %s -t %s --no-cache --load'...\n", dockerfilePath, imageUrl)
+				fmt.Printf("Invoking 'docker buildx build --pull --platform %s . -f %s -t %s --no-cache --load'...\n", platformsStr, dockerfilePath, imageUrl)
 				err = buildCmd.Run()
 				if err != nil {
 					utils.HandleSpinnerError(spinner, sm, err)
@@ -881,6 +897,8 @@ x-omnistrate-image-registry-attributes:
 		fmt.Println("Service build was skipped. No service was created.")
 		return nil
 	}
+
+
 
 	// Get the service name from flag
 	serviceName, err := cmd.Flags().GetString("service-name")
