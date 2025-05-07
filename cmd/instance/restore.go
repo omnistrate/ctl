@@ -1,6 +1,8 @@
 package instance
 
 import (
+	"errors"
+
 	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/cmd/common"
 	"github.com/omnistrate/ctl/internal/config"
@@ -11,34 +13,30 @@ import (
 
 const (
 	restoreExample = `# Restore to a new instance from a snapshot
-omctl instance restore --service-id service-abc123 --environment-id env-xyz789 --snapshot-id snapshot-123def --param '{"key": "value"}'`
+omctl instance restore instance-abcd1234 --snapshot-id snapshot-xyz789 --param '{"key": "value"}'
+
+# Restore using parameters from a file
+omctl instance restore instance-abcd1234 --snapshot-id snapshot-xyz789 --param-file /path/to/params.json`
 )
 
 var restoreCmd = &cobra.Command{
-	Use:          "restore --service-id <service-id> --environment-id <environment-id> --snapshot-id <snapshot-id> [--param=param] [--param-file=file-path]",
+	Use:          "restore [instance-id] --snapshot-id <snapshot-id> [--param=param] [--param-file=file-path]",
 	Short:        "Create a new instance by restoring from a snapshot",
-	Long:         `This command helps you create a new instance by restoring from a snapshot.`,
+	Long:         `This command helps you create a new instance by restoring from a snapshot using an existing instance for context.`,
 	Example:      restoreExample,
 	RunE:         runRestore,
 	SilenceUsage: true,
 }
 
 func init() {
-	restoreCmd.Args = cobra.NoArgs
-	restoreCmd.Flags().String("service-id", "", "The ID of the service")
-	restoreCmd.Flags().String("environment-id", "", "The ID of the environment")
+	restoreCmd.Args = cobra.ExactArgs(1)
 	restoreCmd.Flags().String("snapshot-id", "", "The ID of the snapshot to restore from")
 	restoreCmd.Flags().String("param", "", "Parameters override for the instance deployment")
 	restoreCmd.Flags().String("param-file", "", "Json file containing parameters override for the instance deployment")
-	if err := restoreCmd.MarkFlagRequired("service-id"); err != nil {
-		return
-	}
-	if err := restoreCmd.MarkFlagRequired("environment-id"); err != nil {
-		return
-	}
 	if err := restoreCmd.MarkFlagRequired("snapshot-id"); err != nil {
 		return
 	}
+
 	if err := restoreCmd.MarkFlagFilename("param-file"); err != nil {
 		return
 	}
@@ -47,18 +45,15 @@ func init() {
 func runRestore(cmd *cobra.Command, args []string) error {
 	defer config.CleanupArgsAndFlags(cmd, &args)
 
-	// Retrieve flags
+	if len(args) == 0 {
+		err := errors.New("instance id is required")
+		utils.PrintError(err)
+		return err
+	}
+
+	// Retrieve args and flags
+	instanceID := args[0]
 	output, err := cmd.Flags().GetString("output")
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-	serviceID, err := cmd.Flags().GetString("service-id")
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-	environmentID, err := cmd.Flags().GetString("environment-id")
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -94,6 +89,13 @@ func runRestore(cmd *cobra.Command, args []string) error {
 		msg := "Creating new instance from snapshot..."
 		spinner = sm.AddSpinner(msg)
 		sm.Start()
+	}
+
+	// Get service and environment IDs from the instance
+	serviceID, environmentID, _, _, err := getInstance(cmd.Context(), token, instanceID)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
 	}
 
 	// Format parameters
