@@ -13,7 +13,7 @@ func CreateServicesOrchestration(
 	token string,
 	orchestrationCreateDSL string,
 ) (
-	res *openapiclientfleet.CreateResourceInstanceResponseBody,
+	res *openapiclientfleet.FleetCreateServicesOrchestrationResult,
 	err error,
 ) {
 	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
