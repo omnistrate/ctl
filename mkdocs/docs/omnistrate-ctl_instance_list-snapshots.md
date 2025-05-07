@@ -1,26 +1,26 @@
-## omnistrate-ctl instance restart
+## omnistrate-ctl instance list-snapshots
 
-Restart an instance deployment for your service
+List all snapshots for an instance
 
 ### Synopsis
 
-This command helps you restart the instance for your service.
+This command helps you list all snapshots available for your instance.
 
 ```
-omnistrate-ctl instance restart [instance-id] [flags]
+omnistrate-ctl instance list-snapshots [instance-id] [flags]
 ```
 
 ### Examples
 
 ```
-# Restart an instance deployment
-omctl instance restart instance-abcd1234
+# List snapshots for an instance
+omctl instance list-snapshots instance-abcd1234"
 ```
 
 ### Options
 
 ```
-  -h, --help   help for restart
+  -h, --help   help for list-snapshots
 ```
 
 ### Options inherited from parent commands

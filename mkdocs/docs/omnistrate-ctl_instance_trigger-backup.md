@@ -1,26 +1,26 @@
-## omnistrate-ctl instance restart
+## omnistrate-ctl instance trigger-backup
 
-Restart an instance deployment for your service
+Trigger an automatic backup for your instance
 
 ### Synopsis
 
-This command helps you restart the instance for your service.
+This command helps you trigger an automatic backup for your instance.
 
 ```
-omnistrate-ctl instance restart [instance-id] [flags]
+omnistrate-ctl instance trigger-backup [instance-id] [flags]
 ```
 
 ### Examples
 
 ```
-# Restart an instance deployment
-omctl instance restart instance-abcd1234
+# Trigger an automatic backup for an instance
+omctl instance trigger-backup instance-abcd1234
 ```
 
 ### Options
 
 ```
-  -h, --help   help for restart
+  -h, --help   help for trigger-backup
 ```
 
 ### Options inherited from parent commands

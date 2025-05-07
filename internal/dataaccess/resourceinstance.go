@@ -2,6 +2,7 @@ package dataaccess
 
 import (
 	"context"
+	"github.com/omnistrate/ctl/internal/utils"
 	"net/http"
 
 	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
@@ -9,7 +10,7 @@ import (
 
 func CreateResourceInstance(ctx context.Context, token string,
 	serviceProviderId string, serviceKey string, serviceAPIVersion string, serviceEnvironmentKey string, serviceModelKey string, productTierKey string, resourceKey string,
-	request openapiclientfleet.FleetCreateResourceInstanceRequest2) (res *openapiclientfleet.CreateResourceInstanceResponseBody, err error) {
+	request openapiclientfleet.FleetCreateResourceInstanceRequest2) (res *openapiclientfleet.FleetCreateResourceInstanceResult, err error) {
 	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
 	apiClient := getFleetClient()
 
@@ -23,6 +24,111 @@ func CreateResourceInstance(ctx context.Context, token string,
 		productTierKey,
 		resourceKey,
 	).FleetCreateResourceInstanceRequest2(request)
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	res, r, err = req.Execute()
+	if err != nil {
+		return nil, handleFleetError(err)
+	}
+	return
+}
+
+func RestoreResourceInstanceSnapshot(ctx context.Context, token string, serviceID, environmentID, snapshotID string, formattedParams map[string]any) (res *openapiclientfleet.FleetRestoreResourceInstanceResult, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
+
+	req := apiClient.InventoryApiAPI.InventoryApiRestoreResourceInstanceFromSnapshot(
+		ctxWithToken,
+		serviceID,
+		environmentID,
+		snapshotID,
+	).FleetRestoreResourceInstanceFromSnapshotRequest2(
+		openapiclientfleet.FleetRestoreResourceInstanceFromSnapshotRequest2{
+			InputParametersOverride: formattedParams,
+			NetworkType:             utils.ToPtr("PUBLIC"), // We always set this to PUBLIC for now
+		})
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	res, r, err = req.Execute()
+	if err != nil {
+		return nil, handleFleetError(err)
+	}
+	return
+}
+
+func DescribeResourceInstanceSnapshot(ctx context.Context, token string, serviceID, environmentID, instanceID, snapshotID string) (res *openapiclientfleet.FleetDescribeInstanceSnapshotResult, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
+
+	req := apiClient.InventoryApiAPI.InventoryApiDescribeResourceInstanceSnapshot(
+		ctxWithToken,
+		serviceID,
+		environmentID,
+		instanceID,
+		snapshotID,
+	)
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	res, r, err = req.Execute()
+	if err != nil {
+		return nil, handleFleetError(err)
+	}
+	return
+}
+
+func ListResourceInstanceSnapshots(ctx context.Context, token string, serviceID, environmentID, instanceID string) (res *openapiclientfleet.FleetListInstanceSnapshotResult, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
+
+	req := apiClient.InventoryApiAPI.InventoryApiListResourceInstanceSnapshots(
+		ctxWithToken,
+		serviceID,
+		environmentID,
+		instanceID,
+	)
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	res, r, err = req.Execute()
+	if err != nil {
+		return nil, handleFleetError(err)
+	}
+	return
+}
+
+func TriggerResourceInstanceAutoBackup(ctx context.Context, token string, serviceID, environmentID, instanceID string) (res *openapiclientfleet.FleetAutomaticInstanceSnapshotCreationResult, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
+
+	req := apiClient.InventoryApiAPI.InventoryApiTriggerAutomaticResourceInstanceSnapshotCreation(
+		ctxWithToken,
+		serviceID,
+		environmentID,
+		instanceID,
+	)
 
 	var r *http.Response
 	defer func() {
