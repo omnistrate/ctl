@@ -45,7 +45,7 @@ func DescribeProductTier(ctx context.Context, token, serviceID, productTierID st
 	return res, nil
 }
 
-func ReleaseServicePlan(ctx context.Context, token, serviceID, serviceAPIID, productTierID string, versionSetName *string, isPreferred bool) error {
+func ReleaseServicePlan(ctx context.Context, token, serviceID, serviceAPIID, productTierID string, versionSetName *string, isPreferred, dryrun bool) error {
 	ctxWithToken := context.WithValue(ctx, openapiclientv1.ContextAccessToken, token)
 	apiClient := getV1Client()
 
@@ -55,6 +55,7 @@ func ReleaseServicePlan(ctx context.Context, token, serviceID, serviceAPIID, pro
 			VersionSetName: versionSetName,
 			VersionSetType: utils.ToPtr("Major"),
 			IsPreferred:    utils.ToPtr(isPreferred),
+			DryRun:         utils.ToPtr(dryrun),
 		}).Execute()
 	defer func() {
 		if r != nil {
