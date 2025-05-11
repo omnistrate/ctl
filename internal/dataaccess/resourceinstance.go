@@ -304,9 +304,14 @@ func StopResourceInstance(ctx context.Context, token string, serviceID, environm
 	return
 }
 
-func UpdateResourceInstance(ctx context.Context, token string,
+func UpdateResourceInstance(
+	ctx context.Context,
+	token string,
 	serviceID, environmentID, instanceID string,
-	resourceId string, requestParameters map[string]any) (err error) {
+	resourceId string,
+	networkType *string,
+	requestParameters map[string]any,
+) (err error) {
 	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
 	apiClient := getFleetClient()
 
@@ -316,6 +321,7 @@ func UpdateResourceInstance(ctx context.Context, token string,
 		environmentID,
 		instanceID,
 	).FleetUpdateResourceInstanceRequest2(openapiclientfleet.FleetUpdateResourceInstanceRequest2{
+		NetworkType:   networkType,
 		ResourceId:    resourceId,
 		RequestParams: requestParameters,
 	})
