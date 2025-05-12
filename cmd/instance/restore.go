@@ -23,7 +23,7 @@ omctl instance restore instance-abcd1234 --snapshot-id snapshot-xyz789 --param-f
 )
 
 var restoreCmd = &cobra.Command{
-	Use:          "restore [instance-id] --snapshot-id <snapshot-id> [--param=param] [--param-file=file-path] --tierversion-override <tier-version> --network-type <network-type>",
+	Use:          "restore [instance-id] --snapshot-id <snapshot-id> [--param=param] [--param-file=file-path] --tierversion-override <tier-version> --network-type PUBLIC / INTERNAL",
 	Short:        "Create a new instance by restoring from a snapshot",
 	Long:         `This command helps you create a new instance by restoring from a snapshot using an existing instance for context.`,
 	Example:      restoreExample,
@@ -37,7 +37,7 @@ func init() {
 	restoreCmd.Flags().String("param", "", "Parameters override for the instance deployment")
 	restoreCmd.Flags().String("param-file", "", "Json file containing parameters override for the instance deployment")
 	restoreCmd.Flags().String("tierversion-override", "", "Override the tier version for the restored instance")
-	restoreCmd.Flags().String("network-type", "", "Network type override for the instance deployment")
+	restoreCmd.Flags().String("network-type", "", "Optional network type change for the instance deployment (PUBLIC / INTERNAL)")
 
 	if err := restoreCmd.MarkFlagRequired("snapshot-id"); err != nil {
 		return

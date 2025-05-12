@@ -7,7 +7,7 @@ Create a new instance by restoring from a snapshot
 This command helps you create a new instance by restoring from a snapshot using an existing instance for context.
 
 ```
-omnistrate-ctl instance restore [instance-id] --snapshot-id <snapshot-id> [--param=param] [--param-file=file-path] --tierversion-override <tier-version> --network-type <network-type> [flags]
+omnistrate-ctl instance restore [instance-id] --snapshot-id <snapshot-id> [--param=param] [--param-file=file-path] --tierversion-override <tier-version> --network-type PUBLIC / INTERNAL [flags]
 ```
 
 ### Examples
@@ -24,7 +24,7 @@ omctl instance restore instance-abcd1234 --snapshot-id snapshot-xyz789 --param-f
 
 ```
   -h, --help                          help for restore
-      --network-type string           Network type override for the instance deployment
+      --network-type string           Optional network type change for the instance deployment (PUBLIC / INTERNAL)
       --param string                  Parameters override for the instance deployment
       --param-file string             Json file containing parameters override for the instance deployment
       --snapshot-id string            The ID of the snapshot to restore from
