@@ -9,9 +9,15 @@ import (
 	"github.com/omnistrate/ctl/internal/config"
 )
 
+var (
+	LastPrintedString string
+)
+
 func PrintError(err error) {
 	errorMsg := color.New(color.FgRed, color.Bold).SprintFunc()
-	fmt.Println(errorMsg("Error: "), err.Error())
+	msg := fmt.Sprintf("%s %s", errorMsg("Error: "), err.Error())
+	fmt.Println(msg)
+	LastPrintedString = msg
 	if !config.IsDryRun() {
 		os.Exit(1)
 	}
@@ -19,22 +25,30 @@ func PrintError(err error) {
 
 func PrintSuccess(msg string) {
 	successMsg := color.New(color.FgGreen, color.Bold).SprintFunc()
-	fmt.Println(successMsg(msg))
+	formatted := successMsg(msg)
+	fmt.Println(formatted)
+	LastPrintedString = formatted
 }
 
 func PrintInfo(msg string) {
 	infoMsg := color.New(color.FgCyan).SprintFunc()
-	fmt.Println(infoMsg(msg))
+	formatted := infoMsg(msg)
+	fmt.Println(formatted)
+	LastPrintedString = formatted
 }
 
 func PrintWarning(msg string) {
 	warningMsg := color.New(color.FgYellow).SprintFunc()
-	fmt.Println(warningMsg(msg))
+	formatted := warningMsg(msg)
+	fmt.Println(formatted)
+	LastPrintedString = formatted
 }
 
 func PrintURL(label, url string) {
 	urlMsg := color.New(color.FgCyan).SprintFunc()
-	fmt.Printf("%s: %s\n", label, urlMsg(url))
+	formatted := fmt.Sprintf("%s: %s", label, urlMsg(url))
+	fmt.Println(formatted)
+	LastPrintedString = formatted
 }
 
 func PrintJSON(res interface{}) {
@@ -43,7 +57,9 @@ func PrintJSON(res interface{}) {
 		PrintError(err)
 		return
 	}
-	fmt.Println(string(data))
+	formatted := string(data)
+	fmt.Println(formatted)
+	LastPrintedString = formatted
 }
 
 func PrintTextTableJsonArrayOutput[T any](output string, objects []T) error {
@@ -57,7 +73,11 @@ func PrintTextTableJsonArrayOutput[T any](output string, objects []T) error {
 			}
 			dataArray = append(dataArray, string(data))
 		}
-		return PrintText(dataArray)
+		err := PrintText(dataArray)
+		if err == nil {
+			LastPrintedString = fmt.Sprintf("%v", dataArray)
+		}
+		return err
 	case "table":
 		dataArray := make([]string, 0)
 		for _, obj := range objects {
@@ -67,16 +87,24 @@ func PrintTextTableJsonArrayOutput[T any](output string, objects []T) error {
 			}
 			dataArray = append(dataArray, string(data))
 		}
-		return PrintTable(dataArray)
+		err := PrintTable(dataArray)
+		if err == nil {
+			LastPrintedString = fmt.Sprintf("%v", dataArray)
+		}
+		return err
 	case "json":
 		data, err := json.MarshalIndent(objects, "", "    ")
 		if err != nil {
 			return err
 		}
 		if len(objects) == 0 {
-			fmt.Println("[]")
+			formatted := "[]"
+			fmt.Println(formatted)
+			LastPrintedString = formatted
 		} else {
-			fmt.Printf("%s\n", data)
+			formatted := string(data)
+			fmt.Printf("%s\n", formatted)
+			LastPrintedString = formatted
 		}
 	default:
 		return fmt.Errorf("unsupported output format: %s", output)
@@ -92,11 +120,21 @@ func PrintTextTableJsonOutput[T any](output string, object T) error {
 
 	switch output {
 	case "text":
-		return PrintText([]string{string(data)})
+		err := PrintText([]string{string(data)})
+		if err == nil {
+			LastPrintedString = string(data)
+		}
+		return err
 	case "table":
-		return PrintTable([]string{string(data)})
+		err := PrintTable([]string{string(data)})
+		if err == nil {
+			LastPrintedString = string(data)
+		}
+		return err
 	case "json":
-		fmt.Printf("%s\n", data)
+		formatted := string(data)
+		fmt.Printf("%s\n", formatted)
+		LastPrintedString = formatted
 	default:
 		return fmt.Errorf("unsupported output format: %s", output)
 	}

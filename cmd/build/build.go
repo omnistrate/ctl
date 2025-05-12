@@ -630,7 +630,7 @@ func buildService(ctx context.Context, fileData []byte, token, name, specType st
 			Release:            utils.ToPtr(release),
 			ReleaseAsPreferred: utils.ToPtr(releaseAsPreferred),
 			ReleaseVersionName: releaseName,
-			// todo: uncomment when prod api-design is deployed DryRun:             utils.ToPtr(dryRun),
+			Dryrun:             utils.ToPtr(dryRun),
 		}
 
 		buildRes, err := dataaccess.BuildServiceFromServicePlanSpec(ctx, token, request)
@@ -723,7 +723,7 @@ func buildService(ctx context.Context, fileData []byte, token, name, specType st
 			ReleaseVersionName: releaseName,
 			Configs:            configs,
 			Secrets:            secrets,
-			// todo: uncomment when prod api-design is deployed DryRun:             utils.ToPtr(dryRun),
+			Dryrun:             utils.ToPtr(dryRun),
 		}
 
 		buildRes, err := dataaccess.BuildServiceFromComposeSpec(ctx, token, request)
