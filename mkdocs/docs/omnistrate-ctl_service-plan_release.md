@@ -23,6 +23,7 @@ omctl service-plan release --service-id=[service-id] --plan-id=[plan-id]
 ### Options
 
 ```
+      --dryrun                       Perform a dry run without making any changes
       --environment string           Environment name. Use this flag with service name and plan name to release the service plan in a specific environment
   -h, --help                         help for release
       --plan-id string               Plan ID. Required if plan name is not provided
@@ -40,5 +41,4 @@ omctl service-plan release --service-id=[service-id] --plan-id=[plan-id]
 
 ### SEE ALSO
 
-* [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md)	 - Manage Service Plans for your service
-
+- [omnistrate-ctl service-plan](omnistrate-ctl_service-plan.md) - Manage Service Plans for your service
