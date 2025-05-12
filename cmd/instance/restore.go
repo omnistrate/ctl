@@ -2,6 +2,9 @@ package instance
 
 import (
 	"errors"
+	"fmt"
+	"github.com/cqroot/prompt"
+	"github.com/cqroot/prompt/choose"
 
 	"github.com/chelnak/ysmrr"
 	"github.com/omnistrate/ctl/cmd/common"
@@ -20,7 +23,7 @@ omctl instance restore instance-abcd1234 --snapshot-id snapshot-xyz789 --param-f
 )
 
 var restoreCmd = &cobra.Command{
-	Use:          "restore [instance-id] --snapshot-id <snapshot-id> [--param=param] [--param-file=file-path]",
+	Use:          "restore [instance-id] --snapshot-id <snapshot-id> [--param=param] [--param-file=file-path] --tierversion-override <tier-version> --network-type <network-type>",
 	Short:        "Create a new instance by restoring from a snapshot",
 	Long:         `This command helps you create a new instance by restoring from a snapshot using an existing instance for context.`,
 	Example:      restoreExample,
@@ -33,10 +36,12 @@ func init() {
 	restoreCmd.Flags().String("snapshot-id", "", "The ID of the snapshot to restore from")
 	restoreCmd.Flags().String("param", "", "Parameters override for the instance deployment")
 	restoreCmd.Flags().String("param-file", "", "Json file containing parameters override for the instance deployment")
+	restoreCmd.Flags().String("tierversion-override", "", "Override the tier version for the restored instance")
+	restoreCmd.Flags().String("network-type", "", "Network type override for the instance deployment")
+
 	if err := restoreCmd.MarkFlagRequired("snapshot-id"); err != nil {
 		return
 	}
-
 	if err := restoreCmd.MarkFlagFilename("param-file"); err != nil {
 		return
 	}
@@ -84,12 +89,6 @@ func runRestore(cmd *cobra.Command, args []string) error {
 	// Initialize spinner if output is not JSON
 	var sm ysmrr.SpinnerManager
 	var spinner *ysmrr.Spinner
-	if output != "json" {
-		sm = ysmrr.NewSpinnerManager()
-		msg := "Creating new instance from snapshot..."
-		spinner = sm.AddSpinner(msg)
-		sm.Start()
-	}
 
 	// Get service and environment IDs from the instance
 	serviceID, environmentID, _, _, err := getInstance(cmd.Context(), token, instanceID)
@@ -105,8 +104,52 @@ func runRestore(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// Get tier version override
+	tierVersionOverride, err := cmd.Flags().GetString("tierversion-override")
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+
+	// If tier version override is set, show warning and require confirmation using prompt/choose
+	if tierVersionOverride != "" {
+		// Prompt user to confirm
+		var choice string
+		choice, err = prompt.New().Ask(fmt.Sprintf("NOTICE: System is initiating restoration of instance with service ID %s, using service plan version %s override. Please verify plan compatibility with the target snapshot before proceeding. Continue to proceed?", serviceID, tierVersionOverride)).
+			Choose([]string{
+				"Yes",
+				"No",
+			}, choose.WithTheme(choose.ThemeArrow))
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+
+		switch choice {
+		case "Yes":
+			break
+		case "No":
+			utils.PrintInfo("Operation cancelled")
+			return nil
+		}
+	}
+
+	// Get network type override
+	networkType, err := cmd.Flags().GetString("network-type")
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+
+	if output != "json" {
+		sm = ysmrr.NewSpinnerManager()
+		msg := "Creating new instance from snapshot..."
+		spinner = sm.AddSpinner(msg)
+		sm.Start()
+	}
+
 	// Restore from snapshot
-	result, err := dataaccess.RestoreResourceInstanceSnapshot(cmd.Context(), token, serviceID, environmentID, snapshotID, formattedParams)
+	result, err := dataaccess.RestoreResourceInstanceSnapshot(cmd.Context(), token, serviceID, environmentID, snapshotID, formattedParams, tierVersionOverride, networkType)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
