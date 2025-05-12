@@ -2,8 +2,9 @@ package dataaccess
 
 import (
 	"context"
-	"github.com/omnistrate/ctl/internal/utils"
 	"net/http"
+
+	"github.com/omnistrate/ctl/internal/utils"
 
 	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 )
@@ -39,20 +40,29 @@ func CreateResourceInstance(ctx context.Context, token string,
 	return
 }
 
-func RestoreResourceInstanceSnapshot(ctx context.Context, token string, serviceID, environmentID, snapshotID string, formattedParams map[string]any) (res *openapiclientfleet.FleetRestoreResourceInstanceResult, err error) {
+func RestoreResourceInstanceSnapshot(ctx context.Context, token string, serviceID, environmentID, snapshotID string, formattedParams map[string]any, tierVersionOverride string, networkType string) (res *openapiclientfleet.FleetRestoreResourceInstanceResult, err error) {
 	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
 	apiClient := getFleetClient()
+
+	if networkType == "" {
+		networkType = "PUBLIC"
+	}
+
+	reqBody := openapiclientfleet.FleetRestoreResourceInstanceFromSnapshotRequest2{
+		InputParametersOverride: formattedParams,
+		NetworkType:             utils.ToPtr(networkType),
+	}
+
+	if tierVersionOverride != "" {
+		reqBody.ProductTierVersionOverride = &tierVersionOverride
+	}
 
 	req := apiClient.InventoryApiAPI.InventoryApiRestoreResourceInstanceFromSnapshot(
 		ctxWithToken,
 		serviceID,
 		environmentID,
 		snapshotID,
-	).FleetRestoreResourceInstanceFromSnapshotRequest2(
-		openapiclientfleet.FleetRestoreResourceInstanceFromSnapshotRequest2{
-			InputParametersOverride: formattedParams,
-			NetworkType:             utils.ToPtr("PUBLIC"), // We always set this to PUBLIC for now
-		})
+	).FleetRestoreResourceInstanceFromSnapshotRequest2(reqBody)
 
 	var r *http.Response
 	defer func() {
