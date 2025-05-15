@@ -418,7 +418,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		Environment: environment,
 	}
 
-	if release || releaseAsPreferred {
+	if !dryRun && (release || releaseAsPreferred) {
 		versionDetails, err := dataaccess.DescribeLatestVersion(cmd.Context(), token, ServiceID, ProductTierID)
 		if err != nil {
 			err = errors.Wrap(err, "failed to get the latest version")
