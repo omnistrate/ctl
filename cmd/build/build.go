@@ -403,8 +403,11 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		utils.HandleSpinnerError(spinner1, sm1, err)
 		return err
 	}
-
-	utils.HandleSpinnerSuccess(spinner1, sm1, "Successfully built service")
+	header := "Successfully built service"
+	if dryRun {
+		header = "Simulated service build completed successfully (dry run)"
+	}
+	utils.HandleSpinnerSuccess(spinner1, sm1, header)
 
 	// Print the service plan details
 	servicePlanDetails := model.ServicePlanVersion{
