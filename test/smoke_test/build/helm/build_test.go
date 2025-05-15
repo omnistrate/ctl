@@ -71,7 +71,7 @@ func Test_build_basic(t *testing.T) {
 }
 
 func Test_build_dry_run(t *testing.T) {
-	testutils.SetupLocalSmokeTestEnvironment(t)
+	testutils.SmokeTest(t)
 
 	ctx := context.TODO()
 
@@ -81,7 +81,7 @@ func Test_build_dry_run(t *testing.T) {
 	var err error
 
 	// Step 1: login
-	testEmail, testPassword, err := testutils.GetTestAccount2()
+	testEmail, testPassword, err := testutils.GetTestAccount()
 	require.NoError(err)
 	cmd.RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
 	err = cmd.RootCmd.ExecuteContext(ctx)
