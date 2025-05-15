@@ -17,7 +17,6 @@ func PrintError(err error) {
 	errorMsg := color.New(color.FgRed, color.Bold).SprintFunc()
 	msg := fmt.Sprintf("%s %s", errorMsg("Error: "), err.Error())
 	fmt.Println(msg)
-	LastPrintedString = msg
 	if !config.IsDryRun() {
 		os.Exit(1)
 	}
@@ -27,28 +26,24 @@ func PrintSuccess(msg string) {
 	successMsg := color.New(color.FgGreen, color.Bold).SprintFunc()
 	formatted := successMsg(msg)
 	fmt.Println(formatted)
-	LastPrintedString = formatted
 }
 
 func PrintInfo(msg string) {
 	infoMsg := color.New(color.FgCyan).SprintFunc()
 	formatted := infoMsg(msg)
 	fmt.Println(formatted)
-	LastPrintedString = formatted
 }
 
 func PrintWarning(msg string) {
 	warningMsg := color.New(color.FgYellow).SprintFunc()
 	formatted := warningMsg(msg)
 	fmt.Println(formatted)
-	LastPrintedString = formatted
 }
 
 func PrintURL(label, url string) {
 	urlMsg := color.New(color.FgCyan).SprintFunc()
 	formatted := fmt.Sprintf("%s: %s", label, urlMsg(url))
 	fmt.Println(formatted)
-	LastPrintedString = formatted
 }
 
 func PrintJSON(res interface{}) {
@@ -59,7 +54,6 @@ func PrintJSON(res interface{}) {
 	}
 	formatted := string(data)
 	fmt.Println(formatted)
-	LastPrintedString = formatted
 }
 
 func PrintTextTableJsonArrayOutput[T any](output string, objects []T) error {

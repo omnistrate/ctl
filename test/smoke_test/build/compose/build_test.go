@@ -393,7 +393,6 @@ func Test_build_dry_run(t *testing.T) {
 		"--description", "Test pgres service for dry run",
 		"--environment", "dev",
 		"--environment-type", "dev",
-		"--release",
 	})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
@@ -418,6 +417,7 @@ func Test_build_dry_run(t *testing.T) {
 		"--environment", "dev",
 		"--environment-type", "dev",
 		"--dry-run",
+		"--release",
 	})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
