@@ -551,13 +551,13 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 				// Join the platforms list with comma as separator
 				platformsStr := strings.Join(platformsFlag, ",")
 
-				buildCmd := exec.Command("docker", "buildx", "build", "--pull", "--platform", platformsStr, ".", "-f", dockerfilePath, "-t", imageUrl, "--no-cache", "--load")
+				buildCmd := exec.Command("docker", "buildx", "build", "--pull", "--platform", platformsStr, ".", "-f", dockerfilePath, "-t", imageUrl, "--load")
 
 				// Redirect stdout and stderr to the terminal
 				buildCmd.Stdout = os.Stdout
 				buildCmd.Stderr = os.Stderr
 
-				fmt.Printf("Invoking 'docker buildx build --pull --platform %s . -f %s -t %s --no-cache --load'...\n", platformsStr, dockerfilePath, imageUrl)
+				fmt.Printf("Invoking 'docker buildx build --pull --platform %s . -f %s -t %s --load'...\n", platformsStr, dockerfilePath, imageUrl)
 				err = buildCmd.Run()
 				if err != nil {
 					utils.HandleSpinnerError(spinner, sm, err)
