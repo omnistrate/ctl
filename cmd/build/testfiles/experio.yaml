@@ -26,7 +26,7 @@ services:
       - local_postgres_data_backups:/backups
 
   redis:
-    x-omnistrate-mode-internal: true
+    x-omnistrate-mode-internal: false
     image: redis/redis-stack-server:latest
     container_name: redis
     restart: always
@@ -36,7 +36,7 @@ services:
       - 6379:6379
 
   server:
-    x-omnistrate-mode-internal: true
+    x-omnistrate-mode-internal: false
     image: "ghcr.io/experio-ai/experio-dockerfile.server:sha-47065d21819504bca486ae305ed9ca67632be085640f7cef4369fb628e646c72"
     restart: always
     command: /start
@@ -51,7 +51,7 @@ services:
     user: ${DOCKER_UID}
 
   client:
-    x-omnistrate-mode-internal: true
+    x-omnistrate-mode-internal: false
     container_name: client
     image: "ghcr.io/experio-ai/experio-dockerfile.client:sha-0d1b8e629f5c97a824590b13f500f478cd440aafecb15c4f9303337b45f8fed1"
     ports:
