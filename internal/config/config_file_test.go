@@ -110,8 +110,6 @@ func TestGitHubPersonalAccessToken(t *testing.T) {
 	assert.Contains(t, err.Error(), ErrGitHubPATNotFound.Error())
 }
 
-
-
 func TestGitHubPersonalAccessTokenFromEnvVar(t *testing.T) {
 	t.Setenv("GITHUB_TOKEN", "env_token")
 	token, err := LookupGitHubPersonalAccessToken()
