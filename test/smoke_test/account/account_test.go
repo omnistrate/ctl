@@ -33,6 +33,7 @@ func Test_account_basic(t *testing.T) {
 	awsAccountName := "aws" + uuid.NewString()
 	gcpAccountName := "gcp" + uuid.NewString()
 	azureAccountName := "azure" + uuid.NewString()
+	// nolint:gosec
 	rand10DigitsNum := rand.New(rand.NewSource(time.Now().UnixNano())).Int63n(9000000000) + 1000000000
 
 	// PASS: create aws account
