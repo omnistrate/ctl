@@ -394,12 +394,16 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 			}
 
 			if !errors.As(err, &config.ErrGitHubPATNotFound) {
-				ghUsernameOutput, err := exec.Command("gh", "api", "user", "-q", ".login").Output()
-				if err != nil {
-					utils.HandleSpinnerError(spinner, sm, err)
-					return err
+				if config.IsGithubTokenEnvVarConfigured() {
+					ghUsername = config.GithubTokenUserName
+				} else {
+					ghUsernameOutput, err := exec.Command("gh", "api", "user", "-q", ".login").Output()
+					if err != nil {
+						utils.HandleSpinnerError(spinner, sm, err)
+						return err
+					}
+					ghUsername = strings.TrimSpace(string(ghUsernameOutput))
 				}
-				ghUsername = strings.TrimSpace(string(ghUsernameOutput))
 				spinner.UpdateMessage(fmt.Sprintf("Getting GitHub username for compose spec: %s", ghUsername))
 			} else {
 				spinner.UpdateMessage("GitHub PAT not found, will prompt if needed later")
@@ -464,12 +468,16 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 			// Step 8: Retrieve the GitHub username
 			spinner = sm.AddSpinner("Retrieving GitHub username")
 			time.Sleep(1 * time.Second) // Add a delay to show the spinner
-			ghUsernameOutput, err := exec.Command("gh", "api", "user", "-q", ".login").Output()
-			if err != nil {
-				utils.HandleSpinnerError(spinner, sm, err)
-				return err
+			if config.IsGithubTokenEnvVarConfigured() {
+				ghUsername = config.GithubTokenUserName
+			} else {
+				ghUsernameOutput, err := exec.Command("gh", "api", "user", "-q", ".login").Output()
+				if err != nil {
+					utils.HandleSpinnerError(spinner, sm, err)
+					return err
+				}
+				ghUsername = strings.TrimSpace(string(ghUsernameOutput))
 			}
-			ghUsername = strings.TrimSpace(string(ghUsernameOutput))
 			spinner.UpdateMessage(fmt.Sprintf("Retrieving GitHub username: %s", ghUsername))
 			spinner.Complete()
 
