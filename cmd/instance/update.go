@@ -101,6 +101,7 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 		environmentID,
 		instanceID,
 		resourceID,
+		nil,
 		formattedParams)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)

@@ -34,6 +34,7 @@ var releaseCmd = &cobra.Command{
 func init() {
 	releaseCmd.Flags().String("release-description", "", "Set custom release description for this release version")
 	releaseCmd.Flags().Bool("release-as-preferred", false, "Release the service plan as preferred")
+	releaseCmd.Flags().Bool("dryrun", false, "Perform a dry run without making any changes")
 	releaseCmd.Flags().StringP("environment", "", "", "Environment name. Use this flag with service name and plan name to release the service plan in a specific environment")
 
 	releaseCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
@@ -46,6 +47,7 @@ func runRelease(cmd *cobra.Command, args []string) error {
 	// Retrieve flags
 	releaseDescription, _ := cmd.Flags().GetString("release-description")
 	releaseAsPreferred, _ := cmd.Flags().GetBool("release-as-preferred")
+	dryRun, _ := cmd.Flags().GetBool("dryrun")
 	output, _ := cmd.Flags().GetString("output")
 	serviceID, _ := cmd.Flags().GetString("service-id")
 	planID, _ := cmd.Flags().GetString("plan-id")
@@ -103,7 +105,7 @@ func runRelease(cmd *cobra.Command, args []string) error {
 	serviceAPIID := serviceModel.ServiceApiId
 
 	// Release service plan
-	err = dataaccess.ReleaseServicePlan(cmd.Context(), token, serviceID, serviceAPIID, planID, getReleaseDescription(releaseDescription), releaseAsPreferred)
+	err = dataaccess.ReleaseServicePlan(cmd.Context(), token, serviceID, serviceAPIID, planID, getReleaseDescription(releaseDescription), releaseAsPreferred, dryRun)
 	if err != nil {
 		spinner.Error()
 		sm.Stop()
@@ -111,8 +113,11 @@ func runRelease(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	utils.HandleSpinnerSuccess(spinner, sm, "Successfully released service plan")
-
+	if !dryRun {
+		utils.HandleSpinnerSuccess(spinner, sm, "Successfully released service plan")
+	} else {
+		utils.HandleSpinnerSuccess(spinner, sm, "Successfully performed dry run for service plan release")
+	}
 	// Get the service plan details
 	searchRes, err := dataaccess.SearchInventory(cmd.Context(), token, fmt.Sprintf("serviceplan:%s", planID))
 	if err != nil {

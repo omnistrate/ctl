@@ -4,17 +4,19 @@ Build Services from image, compose spec or service plan spec
 
 ### Synopsis
 
-Build command can be used to build a service from image, docker compose, and service plan spec. 
+Build command can be used to build a service from image, docker compose, and service plan spec.
 It has two main modes of operation:
-  - Create a new service plan
-  - Update an existing service plan
+
+- Create a new service plan
+- Update an existing service plan
 
 Below info served as service plan identifiers:
-  - service name (--name, required)
-  - environment name (--environment, optional, default: Dev)
-  - environment type (--environment-type, optional, default: dev)
-  - service plan name (the name field of x-omnistrate-service-plan tag in compose spec file, required)
-If the identifiers match an existing service plan, it will update that plan. Otherwise, it'll create a new service plan. 
+
+- service name (--name, required)
+- environment name (--environment, optional, default: Dev)
+- environment type (--environment-type, optional, default: dev)
+- service plan name (the name field of x-omnistrate-service-plan tag in compose spec file, required)
+  If the identifiers match an existing service plan, it will update that plan. Otherwise, it'll create a new service plan.
 
 This command has an interactive mode. In this mode, you can choose to promote the service plan to production by interacting with the prompts.
 
@@ -64,6 +66,7 @@ omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Servi
 
 ```
       --description string                    A short description for the whole service. A service can have multiple service plans.
+  -d, --dry-run                               Simulate building the service without actually creating resources
       --env-var stringArray                   Used together with --image flag. Provide environment variables in the format --env-var key1=var1 --env-var key2=var2
       --environment string                    Name of the environment to build the service in (default "Dev")
       --environment-type string               Type of environment. Valid options include: 'dev', 'prod', 'qa', 'canary', 'staging', 'private') (default "dev")
@@ -90,5 +93,4 @@ omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Servi
 
 ### SEE ALSO
 
-* [omnistrate-ctl](omnistrate-ctl.md)	 - Manage your Omnistrate SaaS from the command line
-
+- [omnistrate-ctl](omnistrate-ctl.md) - Manage your Omnistrate SaaS from the command line

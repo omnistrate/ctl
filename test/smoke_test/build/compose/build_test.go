@@ -6,6 +6,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/omnistrate/ctl/internal/utils"
+
 	"github.com/omnistrate/ctl/cmd"
 	"github.com/omnistrate/ctl/cmd/build"
 	"github.com/omnistrate/ctl/test/testutils"
@@ -360,6 +362,101 @@ func Test_build_create_no_service_logo_url(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
+	cmd.RootCmd.SetArgs([]string{"service", "delete", "--id", build.ServiceID})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+}
+
+func Test_build_dry_run(t *testing.T) {
+	testutils.SmokeTest(t)
+
+	ctx := context.TODO()
+
+	require := require.New(t)
+	defer testutils.Cleanup()
+
+	var err error
+
+	// Step 1: login
+	testEmail, testPassword, err := testutils.GetTestAccount()
+	require.NoError(err)
+	cmd.RootCmd.SetArgs([]string{"login", fmt.Sprintf("--email=%s", testEmail), fmt.Sprintf("--password=%s", testPassword)})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+
+	// Step 2: Create initial service with PostgreSQL configuration
+	serviceName := "build-dry-run-test" + uuid.NewString()
+	cmd.RootCmd.SetArgs([]string{
+		"build",
+		"-f", "../../composefiles/postgresql.yaml",
+		"--name", serviceName,
+		"--description", "Test pgres service for dry run",
+		"--environment", "dev",
+		"--environment-type", "dev",
+	})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+	require.NotEmpty(build.ServiceID)
+
+	// Store initial state for comparison
+	initialServiceID := build.ServiceID
+	cmd.RootCmd.SetArgs([]string{
+		"service-plan",
+		"describe",
+		serviceName, "postgresql",
+		"--service-id", initialServiceID,
+		"--output", "json",
+	})
+	initialJsonOutput := utils.LastPrintedString
+
+	// Step 3a: Test dry-run mode - Should not modify service
+	cmd.RootCmd.SetArgs([]string{
+		"build",
+		"-f", "../../composefiles/postgresql_dryrun.yaml",
+		"--name", serviceName,
+		"--environment", "dev",
+		"--environment-type", "dev",
+		"--dry-run",
+		"--release",
+	})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+
+	// Verify dry-run didn't change the service configuration
+	cmd.RootCmd.SetArgs([]string{
+		"service-plan",
+		"describe",
+		serviceName, "postgresql",
+		"--service-id", initialServiceID,
+		"--output", "json",
+	})
+	require.Equal(initialJsonOutput, utils.LastPrintedString, "Service configuration should not change after dry-run")
+
+	// Step 3b: Apply the actual changes - Should modify service
+	cmd.RootCmd.SetArgs([]string{
+		"build",
+		"-f", "../../composefiles/postgresql_dryrun.yaml",
+		"--name", serviceName,
+		"--environment", "dev",
+		"--environment-type", "dev",
+		"--release",
+	})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+
+	// Verify the service configuration was actually modified
+	cmd.RootCmd.SetArgs([]string{
+		"service-plan",
+		"describe",
+		serviceName, "postgresql",
+		"--service-id", initialServiceID,
+		"--output", "json",
+	})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+	require.NotEqual(initialJsonOutput, utils.LastPrintedString, "Service configuration should change after actual release")
+
+	// Step 4: Cleanup - Delete the test service and associated resources
 	cmd.RootCmd.SetArgs([]string{"service", "delete", "--id", build.ServiceID})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)

@@ -106,6 +106,7 @@ func init() {
 	BuildCmd.Flags().StringP("release-description", "", "", "Used together with --release or --release-as-preferred flag. Provide a description for the release version")
 	BuildCmd.Flags().BoolP("interactive", "i", false, "Interactive mode")
 	BuildCmd.Flags().StringP("spec-type", "s", DockerComposeSpecType, "Spec type")
+	BuildCmd.Flags().BoolP("dry-run", "d", false, "Simulate building the service without actually creating resources")
 
 	BuildCmd.Flags().StringP("image", "", "", "Provide the complete image repository URL with the image name and tag (e.g., docker.io/namespace/my-image:v1.2)")
 	BuildCmd.Flags().StringArrayP("env-var", "", nil, "Used together with --image flag. Provide environment variables in the format --env-var key1=var1 --env-var key2=var2")
@@ -197,6 +198,10 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	output, err := cmd.Flags().GetString("output")
+	if err != nil {
+		return err
+	}
+	dryRun, err := cmd.Flags().GetBool("dry-run")
 	if err != nil {
 		return err
 	}
@@ -392,13 +397,17 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		release,
 		releaseAsPreferred,
 		releaseNamePtr,
+		dryRun,
 	)
 	if err != nil {
 		utils.HandleSpinnerError(spinner1, sm1, err)
 		return err
 	}
-
-	utils.HandleSpinnerSuccess(spinner1, sm1, "Successfully built service")
+	header := "Successfully built service"
+	if dryRun {
+		header = "Simulated service build completed successfully (dry run)"
+	}
+	utils.HandleSpinnerSuccess(spinner1, sm1, header)
 
 	// Print the service plan details
 	servicePlanDetails := model.ServicePlanVersion{
@@ -409,7 +418,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		Environment: environment,
 	}
 
-	if release || releaseAsPreferred {
+	if !dryRun && (release || releaseAsPreferred) {
 		versionDetails, err := dataaccess.DescribeLatestVersion(cmd.Context(), token, ServiceID, ProductTierID)
 		if err != nil {
 			err = errors.Wrap(err, "failed to get the latest version")
@@ -603,7 +612,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 }
 
 func buildService(ctx context.Context, fileData []byte, token, name, specType string, description, serviceLogoURL, environment, environmentType *string, release,
-	releaseAsPreferred bool, releaseName *string) (serviceID string, environmentID string, productTierID string, undefinedResources map[string]string, err error) {
+	releaseAsPreferred bool, releaseName *string, dryRun bool) (serviceID string, environmentID string, productTierID string, undefinedResources map[string]string, err error) {
 	if name == "" {
 		return "", "", "", make(map[string]string), errors.New("name is required")
 	}
@@ -624,6 +633,7 @@ func buildService(ctx context.Context, fileData []byte, token, name, specType st
 			Release:            utils.ToPtr(release),
 			ReleaseAsPreferred: utils.ToPtr(releaseAsPreferred),
 			ReleaseVersionName: releaseName,
+			Dryrun:             utils.ToPtr(dryRun),
 		}
 
 		buildRes, err := dataaccess.BuildServiceFromServicePlanSpec(ctx, token, request)
@@ -716,6 +726,7 @@ func buildService(ctx context.Context, fileData []byte, token, name, specType st
 			ReleaseVersionName: releaseName,
 			Configs:            configs,
 			Secrets:            secrets,
+			Dryrun:             utils.ToPtr(dryRun),
 		}
 
 		buildRes, err := dataaccess.BuildServiceFromComposeSpec(ctx, token, request)
