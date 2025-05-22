@@ -3,7 +3,9 @@ package account
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/omnistrate/ctl/cmd"
@@ -32,18 +34,21 @@ func Test_account_basic(t *testing.T) {
 	gcpAccountName := "gcp" + uuid.NewString()
 	azureAccountName := "azure" + uuid.NewString()
 
+	rand.Seed(time.Now().UnixNano())
+	num := rand.Int63n(9000000000) + 1000000000 // 10 digit number
+
 	// PASS: create aws account
-	cmd.RootCmd.SetArgs([]string{"account", "create", awsAccountName, "--aws-account-id", "4353256597"})
+	cmd.RootCmd.SetArgs([]string{"account", "create", awsAccountName, "--aws-account-id", fmt.Sprintf("%d", num)})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// PASS: create gcp account
-	cmd.RootCmd.SetArgs([]string{"account", "create", gcpAccountName, "--gcp-project-id", "project-id", "--gcp-project-number", "project-number"})
+	cmd.RootCmd.SetArgs([]string{"account", "create", gcpAccountName, "--gcp-project-id", fmt.Sprintf("project-id-%d", num), "--gcp-project-number", "project-number"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// PASS: create azure account
-	cmd.RootCmd.SetArgs([]string{"account", "create", azureAccountName, "--azure-subscription-id", "12345678-1234-1234-1234-123456789012", "--azure-tenant-id", "87654321-4321-4321-4321-210987654321"})
+	cmd.RootCmd.SetArgs([]string{"account", "create", azureAccountName, "--azure-subscription-id", fmt.Sprintf("12345678-1234-1234-1234-%d", num), "--azure-tenant-id", "87654321-4321-4321-4321-210987654321"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
