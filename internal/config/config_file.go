@@ -16,6 +16,7 @@ const (
 	DefaultDir         string      = "~/.omnistrate"
 	DefaultFile        string      = "config.yml"
 	DefaultPermissions os.FileMode = 0700
+	GithubTokenEnvVar  string      = "GITHUB_TOKEN" //nolint:gosec
 )
 
 // ConfigFile represents the Omnistrate CTL config file.
@@ -236,6 +237,10 @@ func CreateOrUpdateGitHubPersonalAccessToken(gitHubPersonalAccessToken string) e
 
 // LookupGitHubPersonalAccessToken returns the authentication configuration.
 func LookupGitHubPersonalAccessToken() (string, error) {
+	if os.Getenv(GithubTokenEnvVar) != "" {
+		return os.Getenv(GithubTokenEnvVar), nil
+	}
+
 	if !fileExists() {
 		return "", ErrConfigFileNotFound
 	}
