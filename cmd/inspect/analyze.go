@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -35,6 +36,8 @@ func init() {
 		if home := homedir.HomeDir(); home != "" {
 			defaultKubeConf = filepath.Join(home, ".kube", "config")
 		}
+	} else {
+		defaultKubeConf = "~/.kube/config"
 	}
 
 	// Add flags for the command
