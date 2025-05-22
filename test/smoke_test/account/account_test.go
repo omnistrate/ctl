@@ -33,22 +33,20 @@ func Test_account_basic(t *testing.T) {
 	awsAccountName := "aws" + uuid.NewString()
 	gcpAccountName := "gcp" + uuid.NewString()
 	azureAccountName := "azure" + uuid.NewString()
-
-	rand.New(rand.NewSource(time.Now().UnixNano()))
-	num := rand.Int63n(9000000000) + 1000000000 // 10 digit number
+	rand10DigitNum := rand.New(rand.NewSource(time.Now().UnixNano())).Int63n(9000000000) + 1000000000
 
 	// PASS: create aws account
-	cmd.RootCmd.SetArgs([]string{"account", "create", awsAccountName, "--aws-account-id", fmt.Sprintf("%d", num)})
+	cmd.RootCmd.SetArgs([]string{"account", "create", awsAccountName, "--aws-account-id", fmt.Sprintf("%d", rand10DigitNum)})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// PASS: create gcp account
-	cmd.RootCmd.SetArgs([]string{"account", "create", gcpAccountName, "--gcp-project-id", fmt.Sprintf("project-id-%d", num), "--gcp-project-number", "project-number"})
+	cmd.RootCmd.SetArgs([]string{"account", "create", gcpAccountName, "--gcp-project-id", fmt.Sprintf("project-id-%d", rand10DigitNum), "--gcp-project-number", "project-number"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// PASS: create azure account
-	cmd.RootCmd.SetArgs([]string{"account", "create", azureAccountName, "--azure-subscription-id", fmt.Sprintf("12345678-1234-1234-1234-%d", num), "--azure-tenant-id", "87654321-4321-4321-4321-210987654321"})
+	cmd.RootCmd.SetArgs([]string{"account", "create", azureAccountName, "--azure-subscription-id", fmt.Sprintf("12345678-1234-1234-1234-%d", rand10DigitNum), "--azure-tenant-id", "87654321-4321-4321-4321-210987654321"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
