@@ -110,6 +110,15 @@ func TestGitHubPersonalAccessToken(t *testing.T) {
 	assert.Contains(t, err.Error(), ErrGitHubPATNotFound.Error())
 }
 
+
+
+func TestGitHubPersonalAccessTokenFromEnvVar(t *testing.T) {
+	t.Setenv("GITHUB_TOKEN", "env_token")
+	token, err := LookupGitHubPersonalAccessToken()
+	assert.NoError(t, err)
+	assert.Equal(t, "env_token", token)
+}
+
 func TestLoadNonExistentFile(t *testing.T) {
 	dir := ConfigDir()
 	cfg, err := New(filepath.Join(dir, "non_existent.yml"))
