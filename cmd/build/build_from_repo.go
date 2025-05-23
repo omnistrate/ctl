@@ -1243,7 +1243,8 @@ func getOrCreatePAT(sm ysmrr.SpinnerManager, resetPAT bool) (newSm ysmrr.Spinner
   - Select Expiration: "No expiration"
   - Select the following scopes:	
     - write:packages
-    - delete:packages`)
+    - delete:packages
+	- read:org`)
 		fmt.Println("3. Click 'Generate token' and copy the token to your clipboard.")
 		fmt.Println()
 
