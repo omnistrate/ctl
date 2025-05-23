@@ -41,8 +41,8 @@ omctl build-from-repo --dry-run
 # Build for multiple platforms
 omctl build-from-repo --platforms linux/amd64 --platforms linux/arm64
 
-# Build using github token from environment variable (GITHUB_TOKEN)
-set GITHUB_TOKEN=ghp_token
+# Build using github token from environment variable (GH_PAT)
+set GH_PAT=ghp_xxxxxxxx
 omctl build-from-repo
 "
 ```
