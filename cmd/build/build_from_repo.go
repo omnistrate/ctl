@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -1327,6 +1328,11 @@ func RenderEnvFileAndInterpolateVariables(fileData []byte, rootDir string, file 
 
 	// Docker compose config command escapes the $ character by adding a $ in front of it, so we need to unescape it
 	newFileData = []byte(strings.ReplaceAll(string(newFileData), "$$", "$"))
+
+	// Quote numeric cpus values in deploy.resources
+	// Match: cpus: <number> where the number is NOT quoted
+	re := regexp.MustCompile(`(?m)(^\s*cpus:\s*)([0-9.]+)\s*$`)
+	newFileData = []byte(re.ReplaceAllString(string(newFileData), `$1"$2"`))
 
 	return
 }
