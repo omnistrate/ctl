@@ -53,6 +53,9 @@ omctl build-from-repo --dry-run
 # Build for multiple platforms
 omctl build-from-repo --platforms linux/amd64 --platforms linux/arm64
 
+# Build with release description
+omctl build-from-repo --release-description "v1.0.0-alpha"
+
 # Build using github token from environment variable (GH_PAT)
 set GH_PAT=ghp_xxxxxxxx
 omctl build-from-repo
@@ -94,6 +97,9 @@ func init() {
 
 	// Platform flag
 	BuildFromRepoCmd.Flags().StringArray("platforms", []string{"linux/amd64"}, "Specify the platforms to build for. Use the format: --platforms linux/amd64 --platforms linux/arm64. Default is linux/amd64.")
+
+	// Release description flag
+	BuildFromRepoCmd.Flags().String("release-description", "", "Provide a description for the release version")
 
 	err := BuildFromRepoCmd.MarkFlagFilename("file")
 	if err != nil {
@@ -168,6 +174,13 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	// Get dry-run flag
 	dryRun, err := cmd.Flags().GetBool("dry-run")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	// Get release-description flag
+	releaseDescription, err := cmd.Flags().GetString("release-description")
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -924,6 +937,12 @@ x-omnistrate-image-registry-attributes:
 		serviceNameToUse = serviceName
 	}
 
+	// Prepare release description pointer
+	var releaseDescriptionPtr *string
+	if releaseDescription != "" {
+		releaseDescriptionPtr = &releaseDescription
+	}
+
 	// Build the service
 	serviceID, devEnvironmentID, devPlanID, undefinedResources, err := buildService(
 		cmd.Context(),
@@ -937,7 +956,7 @@ x-omnistrate-image-registry-attributes:
 		nil,
 		true,
 		true,
-		nil,
+		releaseDescriptionPtr,
 		false,
 	)
 	if err != nil {
