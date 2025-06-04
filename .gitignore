@@ -16,6 +16,7 @@ vendor/
 
 *.omnistrate
 omnistrate-ctl
+ctl
 
 __debug_bin*
 **/.claude/settings.local.json
