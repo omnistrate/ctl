@@ -105,7 +105,13 @@ func runRelease(cmd *cobra.Command, args []string) error {
 	serviceAPIID := serviceModel.ServiceApiId
 
 	// Release service plan
-	err = dataaccess.ReleaseServicePlan(cmd.Context(), token, serviceID, serviceAPIID, planID, getReleaseDescription(releaseDescription), releaseAsPreferred, dryRun)
+	if releaseDescription != "" {
+		// Use the new API that supports setting release description
+		err = dataaccess.ReleaseServicePlanWithDescription(cmd.Context(), token, serviceID, planID, getReleaseDescription(releaseDescription), releaseAsPreferred, dryRun)
+	} else {
+		// Use the original API for backward compatibility
+		err = dataaccess.ReleaseServicePlan(cmd.Context(), token, serviceID, serviceAPIID, planID, getReleaseDescription(releaseDescription), releaseAsPreferred, dryRun)
+	}
 	if err != nil {
 		spinner.Error()
 		sm.Stop()

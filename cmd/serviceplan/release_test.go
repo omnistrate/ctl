@@ -1,8 +1,11 @@
 package serviceplan
 
 import (
+	"context"
 	"testing"
 
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
+	"github.com/omnistrate/ctl/internal/dataaccess"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/require"
 )
@@ -88,4 +91,88 @@ func TestReleaseCmdFlagParsing(t *testing.T) {
 	result := getReleaseDescription(value)
 	require.NotNil(result)
 	require.Equal("v1.0.0-alpha", *result)
+}
+
+// Test that verifies the formatServicePlanVersion function correctly extracts release description
+func TestFormatServicePlanVersionWithReleaseDescription(t *testing.T) {
+	require := require.New(t)
+
+	// Create a mock ServicePlanSearchRecord with a release description
+	versionName := "v1.0.0-alpha"
+	servicePlan := openapiclientfleet.ServicePlanSearchRecord{
+		Id:                  "plan-123",
+		Name:                "test-plan",
+		ServiceId:           "service-456",
+		ServiceName:         "test-service",
+		Version:             "1.0.0",
+		VersionName:         &versionName,
+		VersionSetStatus:    "RELEASED",
+		DeploymentType:      "saas",
+		TenancyType:         "single",
+		Description:         "Test plan",
+		ServiceEnvironmentId: "env-789",
+		ServiceEnvironmentName: "dev",
+	}
+
+	// Format the service plan
+	formattedPlan, err := formatServicePlanVersion(servicePlan, false)
+	require.NoError(err)
+
+	// Verify that the release description is correctly extracted
+	require.Equal("v1.0.0-alpha", formattedPlan.ReleaseDescription)
+	require.Equal("plan-123", formattedPlan.PlanID)
+	require.Equal("test-plan", formattedPlan.PlanName)
+	require.Equal("service-456", formattedPlan.ServiceID)
+	require.Equal("test-service", formattedPlan.ServiceName)
+}
+
+// Test that verifies formatServicePlanVersion handles nil VersionName correctly
+func TestFormatServicePlanVersionWithoutReleaseDescription(t *testing.T) {
+	require := require.New(t)
+
+	// Create a mock ServicePlanSearchRecord without a release description
+	servicePlan := openapiclientfleet.ServicePlanSearchRecord{
+		Id:                  "plan-123",
+		Name:                "test-plan",
+		ServiceId:           "service-456",
+		ServiceName:         "test-service",
+		Version:             "1.0.0",
+		VersionName:         nil, // No release description
+		VersionSetStatus:    "RELEASED",
+		DeploymentType:      "saas",
+		TenancyType:         "single",
+		Description:         "Test plan",
+		ServiceEnvironmentId: "env-789",
+		ServiceEnvironmentName: "dev",
+	}
+
+	// Format the service plan
+	formattedPlan, err := formatServicePlanVersion(servicePlan, false)
+	require.NoError(err)
+
+	// Verify that the release description is empty when VersionName is nil
+	require.Equal("", formattedPlan.ReleaseDescription)
+	require.Equal("plan-123", formattedPlan.PlanID)
+}
+
+// Test that the new ReleaseServicePlanWithDescription function properly handles input
+func TestReleaseServicePlanWithDescriptionInputValidation(t *testing.T) {
+	require := require.New(t)
+
+	// This test just validates the function parameters and early return logic
+	// since we can't actually test the API call without a real service
+
+	ctx := context.Background()
+	token := "test-token"
+	serviceID := "service-123" 
+	productTierID := "plan-456"
+	releaseDescription := "v1.0.0-test"
+	
+	// Test dry run - should return without error
+	err := dataaccess.ReleaseServicePlanWithDescription(ctx, token, serviceID, productTierID, &releaseDescription, false, true)
+	require.NoError(err)
+	
+	// Test with nil release description
+	err = dataaccess.ReleaseServicePlanWithDescription(ctx, token, serviceID, productTierID, nil, false, true)
+	require.NoError(err)
 }

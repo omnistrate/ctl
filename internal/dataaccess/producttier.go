@@ -68,6 +68,37 @@ func ReleaseServicePlan(ctx context.Context, token, serviceID, serviceAPIID, pro
 	return nil
 }
 
+func ReleaseServicePlanWithDescription(ctx context.Context, token, serviceID, productTierID string, releaseDescription *string, isPreferred, dryrun bool) error {
+	// Handle dry run - just return without making API call
+	if dryrun {
+		return nil
+	}
+
+	ctxWithToken := context.WithValue(ctx, openapiclientv1.ContextAccessToken, token)
+	apiClient := getV1Client()
+
+	// Get the latest version to release
+	latestVersion, err := FindLatestVersion(ctx, token, serviceID, productTierID)
+	if err != nil {
+		return err
+	}
+
+	_, r, err := apiClient.TierVersionSetApiAPI.TierVersionSetApiReleaseTierVersionSet(ctxWithToken, serviceID, productTierID, latestVersion).
+		ReleaseTierVersionSetRequest2(openapiclientv1.ReleaseTierVersionSetRequest2{
+			Name:        releaseDescription,
+			IsPreferred: utils.ToPtr(isPreferred),
+		}).Execute()
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+	if err != nil {
+		return handleV1Error(err)
+	}
+	return nil
+}
+
 func DescribePendingChanges(ctx context.Context, token, serviceID, serviceAPIID, productTierID string) (*openapiclientv1.DescribePendingChangesResult, error) {
 	ctxWithToken := context.WithValue(ctx, openapiclientv1.ContextAccessToken, token)
 	apiClient := getV1Client()
