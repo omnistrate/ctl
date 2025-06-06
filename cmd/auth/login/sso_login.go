@@ -43,8 +43,8 @@ const (
 	gitHubDeviceCodeURL    = "https://github.com/login/device/code"
 	googleVerificationURI  = "https://www.google.com/device"
 	gitHubVerificationURI  = "https://github.com/login/device"
-	gitHubScope            = "user:email"
-	googleScope            = "email"
+	gitHubScope            = "read:user user:email"
+	googleScope            = "email profile"
 )
 
 func ssoLogin(ctx context.Context, identityProviderName string) error {
