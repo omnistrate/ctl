@@ -74,7 +74,17 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	// Print output in requested format
-	err = utils.PrintTextTableJsonArrayOutput(output, deploymentCells)
+	if output == "table" {
+		// Use table view for better readability
+		var tableViews []model.DeploymentCellTableView
+		for _, cell := range deploymentCells {
+			tableViews = append(tableViews, cell.ToTableView())
+		}
+		err = utils.PrintTextTableJsonArrayOutput(output, tableViews)
+	} else {
+		// Use full model for JSON and text output
+		err = utils.PrintTextTableJsonArrayOutput(output, deploymentCells)
+	}
 	if err != nil {
 		utils.PrintError(err)
 		return err
