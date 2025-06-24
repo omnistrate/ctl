@@ -18,6 +18,7 @@ func init() {
 	Cmd.AddCommand(describeCmd)
 	Cmd.AddCommand(deleteCmd)
 	Cmd.AddCommand(promoteCmd)
+	Cmd.AddCommand(secretCmd)
 
 }
 
