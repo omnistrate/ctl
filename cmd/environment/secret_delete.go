@@ -10,6 +10,7 @@ import (
 )
 
 const (
+	// #nosec G101 -- This is just an example string for CLI help, not actual credentials
 	secretDeleteExample = `# Delete a secret from dev environment
 omctl environment secret delete dev my-secret
 
