@@ -10,6 +10,7 @@ import (
 	"github.com/omnistrate/ctl/cmd/auth/logout"
 	"github.com/omnistrate/ctl/cmd/build"
 	"github.com/omnistrate/ctl/cmd/customnetwork"
+	"github.com/omnistrate/ctl/cmd/deploymentcell"
 	"github.com/omnistrate/ctl/cmd/domain"
 	"github.com/omnistrate/ctl/cmd/environment"
 	"github.com/omnistrate/ctl/cmd/helm"
@@ -123,6 +124,7 @@ func init() {
 	RootCmd.AddCommand(subscription.Cmd)
 	RootCmd.AddCommand(environment.Cmd)
 	RootCmd.AddCommand(customnetwork.Cmd)
+	RootCmd.AddCommand(deploymentcell.Cmd)
 	RootCmd.AddCommand(servicesorchestration.Cmd)
 	RootCmd.AddCommand(inspect.Cmd)
 
