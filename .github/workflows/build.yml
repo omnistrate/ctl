@@ -42,7 +42,7 @@ jobs:
 
       - name: golangci-lint
         timeout-minutes: 20
-        uses: golangci/golangci-lint-action@v7
+        uses: golangci/golangci-lint-action@v8
         with:
           args: ./...
           skip-cache: true
