@@ -25,7 +25,6 @@ func init() {
 	Cmd.AddCommand(enableDebugModeCmd)
 	Cmd.AddCommand(disableDebugModeCmd)
 	Cmd.AddCommand(listDebugEventsCmd)
-	Cmd.AddCommand(getDebugEventCmd)
 	Cmd.AddCommand(getDeploymentCmd)
 	Cmd.AddCommand(continueDeploymentCmd)
 	Cmd.AddCommand(patchDeploymentCmd)
