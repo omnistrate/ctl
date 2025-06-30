@@ -83,6 +83,10 @@ build:
 	@echo "Build integration test"
 	go test -c -o /dev/null ./test/integration_test/...
 
+.PHONY: release-dry-run
+release-dry-run:
+	goreleaser release --snapshot --clean
+	
 .PHONY: ctl-linux-amd64
 ctl-linux-amd64: main.go
 	GOOS=linux GOARCH=amd64 make build
