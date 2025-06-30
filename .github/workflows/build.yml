@@ -11,7 +11,7 @@ on:
 env:
   # test coverage threshold
   TESTCOVERAGE_THRESHOLD: 6
-  GOLANG_CI_VERSION: v2.0.1
+  GOLANG_CI_VERSION: v2.1.1
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -44,6 +44,7 @@ jobs:
         timeout-minutes: 20
         uses: golangci/golangci-lint-action@v8
         with:
+          version: ${{ env.GOLANG_CI_VERSION }}
           args: ./...
           skip-cache: true
 
