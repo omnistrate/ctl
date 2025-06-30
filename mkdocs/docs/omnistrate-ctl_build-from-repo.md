@@ -37,8 +37,14 @@ omctl build-from-repo --skip-docker-build --skip-environment-promotion
 
 # Run in dry-run mode (build image locally but don't push or create service)
 omctl build-from-repo --dry-run
-"
 
+# Build for multiple platforms
+omctl build-from-repo --platforms linux/amd64 --platforms linux/arm64
+
+# Build using github token from environment variable (GH_PAT)
+set GH_PAT=ghp_xxxxxxxx
+omctl build-from-repo
+"
 ```
 
 ### Options
@@ -48,11 +54,12 @@ omctl build-from-repo --dry-run
       --deployment-type string       Set the deployment type. Options: 'hosted' or 'byoa' (Bring Your Own Account). Only effective when no compose spec exists in the repo.
       --dry-run                      Run in dry-run mode: only build the Docker image locally without pushing, skip service creation, and write the generated spec to a local file with '-dry-run' suffix. Cannot be used with any --skip-* flags.
       --env-var stringArray          Specify environment variables required for running the image. Effective only when the compose.yaml is absent. Use the format: --env-var key1=var1 --env-var key2=var2. Only effective when no compose spec exists in the repo.
-  -f, --file string                  Specify the compose file to read and write to. (default "compose.yaml")
+  -f, --file string                  Specify the compose file to read and write to (default "compose.yaml")
       --gcp-project-id string        GCP project ID. Must be used with --gcp-project-number and --deployment-type
       --gcp-project-number string    GCP project number. Must be used with --gcp-project-id and --deployment-type
   -h, --help                         help for build-from-repo
   -o, --output string                Output format. Only text is supported (default "text")
+      --platforms stringArray        Specify the platforms to build for. Use the format: --platforms linux/amd64 --platforms linux/arm64. Default is linux/amd64. (default [linux/amd64])
       --reset-pat                    Reset the GitHub Personal Access Token (PAT) for the current user.
       --service-name string          Specify a custom service name. If not provided, the repository name will be used.
       --skip-docker-build            Skip building and pushing the Docker image

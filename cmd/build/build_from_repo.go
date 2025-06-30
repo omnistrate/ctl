@@ -1,12 +1,14 @@
 package build
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -47,8 +49,17 @@ omctl build-from-repo --skip-docker-build --skip-environment-promotion
 
 # Run in dry-run mode (build image locally but don't push or create service)
 omctl build-from-repo --dry-run
-"
-`
+
+# Build for multiple platforms
+omctl build-from-repo --platforms linux/amd64 --platforms linux/arm64
+
+# Build with release description
+omctl build-from-repo --release-description "v1.0.0-alpha"
+
+# Build using github token from environment variable (GH_PAT)
+set GH_PAT=ghp_xxxxxxxx
+omctl build-from-repo
+"`
 	GitHubPATGenerateURL = "https://github.com/settings/tokens"
 	ComposeFileName      = "compose.yaml"
 	DefaultProdEnvName   = "Production"
@@ -72,7 +83,7 @@ func init() {
 	BuildFromRepoCmd.Flags().String("gcp-project-number", "", "GCP project number. Must be used with --gcp-project-id and --deployment-type")
 	BuildFromRepoCmd.Flags().Bool("reset-pat", false, "Reset the GitHub Personal Access Token (PAT) for the current user.")
 	BuildFromRepoCmd.Flags().StringP("output", "o", "text", "Output format. Only text is supported")
-	BuildFromRepoCmd.Flags().StringP("file", "f", ComposeFileName, "Specify the compose file to read and write to.")
+	BuildFromRepoCmd.Flags().StringP("file", "f", ComposeFileName, "Specify the compose file to read and write to")
 	BuildFromRepoCmd.Flags().String("service-name", "", "Specify a custom service name. If not provided, the repository name will be used.")
 
 	// Skip flags for different stages
@@ -83,6 +94,12 @@ func init() {
 
 	// Dry run flag
 	BuildFromRepoCmd.Flags().Bool("dry-run", false, "Run in dry-run mode: only build the Docker image locally without pushing, skip service creation, and write the generated spec to a local file with '-dry-run' suffix. Cannot be used with any --skip-* flags.")
+
+	// Platform flag
+	BuildFromRepoCmd.Flags().StringArray("platforms", []string{"linux/amd64"}, "Specify the platforms to build for. Use the format: --platforms linux/amd64 --platforms linux/arm64. Default is linux/amd64.")
+
+	// Release description flag
+	BuildFromRepoCmd.Flags().String("release-description", "", "Provide a description for the release version")
 
 	err := BuildFromRepoCmd.MarkFlagFilename("file")
 	if err != nil {
@@ -157,6 +174,13 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 
 	// Get dry-run flag
 	dryRun, err := cmd.Flags().GetBool("dry-run")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	// Get release-description flag
+	releaseDescription, err := cmd.Flags().GetString("release-description")
 	if err != nil {
 		utils.PrintError(err)
 		return err
@@ -384,12 +408,16 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 			}
 
 			if !errors.As(err, &config.ErrGitHubPATNotFound) {
-				ghUsernameOutput, err := exec.Command("gh", "api", "user", "-q", ".login").Output()
-				if err != nil {
-					utils.HandleSpinnerError(spinner, sm, err)
-					return err
+				if config.IsGithubTokenEnvVarConfigured() {
+					ghUsername = config.GithubTokenUserName
+				} else {
+					ghUsernameOutput, err := exec.Command("gh", "api", "user", "-q", ".login").Output()
+					if err != nil {
+						utils.HandleSpinnerError(spinner, sm, err)
+						return err
+					}
+					ghUsername = strings.TrimSpace(string(ghUsernameOutput))
 				}
-				ghUsername = strings.TrimSpace(string(ghUsernameOutput))
 				spinner.UpdateMessage(fmt.Sprintf("Getting GitHub username for compose spec: %s", ghUsername))
 			} else {
 				spinner.UpdateMessage("GitHub PAT not found, will prompt if needed later")
@@ -445,83 +473,25 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 			spinner.Complete()
 
 			// Step 7: Check if there is an existing GitHub pat
-			spinner = sm.AddSpinner("Checking for existing GitHub Personal Access Token")
-			time.Sleep(1 * time.Second) // Add a delay to show the spinner
-			pat, err = config.LookupGitHubPersonalAccessToken()
-			if err != nil && !errors.As(err, &config.ErrGitHubPATNotFound) {
+			sm, pat, err = getOrCreatePAT(sm, resetPAT)
+			if err != nil {
 				utils.HandleSpinnerError(spinner, sm, err)
 				return err
-			}
-			if err == nil && !resetPAT {
-				spinner.UpdateMessage("Checking for existing GitHub Personal Access Token: Yes")
-				spinner.Complete()
-			}
-			if err != nil && !errors.As(err, &config.ErrGitHubPATNotFound) {
-				utils.HandleSpinnerError(spinner, sm, err)
-				return err
-			}
-			if errors.As(err, &config.ErrGitHubPATNotFound) || resetPAT {
-				// Prompt user to enter GitHub pat
-				spinner.UpdateMessage("Checking for existing GitHub Personal Access Token: No GitHub Personal Access Token found.")
-				spinner.Complete()
-				sm.Stop()
-				utils.PrintWarning("[Action Required] GitHub Personal Access Token (PAT) is required to push the Docker image to GitHub Container Registry.")
-				utils.PrintWarning("Please follow the instructions below to generate a GitHub Personal Access Token with the following scopes: write:packages, delete:packages.")
-				utils.PrintWarning("The token will be stored securely on your machine and will not be shared with anyone.")
-				fmt.Println()
-				fmt.Println("Instructions to generate a GitHub Personal Access Token:")
-				fmt.Println("1. Click on the 'Generate new token' button. Choose 'Generate new token (classic)'. Authenticate with your GitHub account.")
-				fmt.Println(`2. Enter / Select the following details:
-  - Enter Note: "omnistrate-cli" or any other note you prefer
-  - Select Expiration: "No expiration"
-  - Select the following scopes:	
-    - write:packages
-    - delete:packages`)
-				fmt.Println("3. Click 'Generate token' and copy the token to your clipboard.")
-				fmt.Println()
-
-				fmt.Println("Redirecting you to the GitHub Personal Access Token generation page in your default browser in a few seconds...")
-				fmt.Println()
-				fmt.Print("If the browser does not open automatically, open the following URL:\n\n")
-				fmt.Printf("%s\n\n", GitHubPATGenerateURL)
-
-				time.Sleep(5 * time.Second)
-				err = browser.OpenURL(GitHubPATGenerateURL)
-				if err != nil {
-					err = errors.New(fmt.Sprintf("Error opening browser: %v\n", err))
-					utils.PrintError(err)
-					return err
-				}
-
-				utils.PrintSuccess("Please paste the GitHub Personal Access Token: ")
-				var userInput string
-				_, err = fmt.Scanln(&userInput)
-				if err != nil {
-					utils.PrintError(err)
-					return err
-				}
-				pat = strings.TrimSpace(userInput)
-
-				// Save the GitHub PAT
-				err = config.CreateOrUpdateGitHubPersonalAccessToken(pat)
-				if err != nil {
-					utils.PrintError(err)
-					return err
-				}
-
-				sm = ysmrr.NewSpinnerManager()
-				sm.Start()
 			}
 
 			// Step 8: Retrieve the GitHub username
 			spinner = sm.AddSpinner("Retrieving GitHub username")
 			time.Sleep(1 * time.Second) // Add a delay to show the spinner
-			ghUsernameOutput, err := exec.Command("gh", "api", "user", "-q", ".login").Output()
-			if err != nil {
-				utils.HandleSpinnerError(spinner, sm, err)
-				return err
+			if config.IsGithubTokenEnvVarConfigured() {
+				ghUsername = config.GithubTokenUserName
+			} else {
+				ghUsernameOutput, err := exec.Command("gh", "api", "user", "-q", ".login").Output()
+				if err != nil {
+					utils.HandleSpinnerError(spinner, sm, err)
+					return err
+				}
+				ghUsername = strings.TrimSpace(string(ghUsernameOutput))
 			}
-			ghUsername = strings.TrimSpace(string(ghUsernameOutput))
 			spinner.UpdateMessage(fmt.Sprintf("Retrieving GitHub username: %s", ghUsername))
 			spinner.Complete()
 
@@ -596,13 +566,24 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 				spinner = sm.AddSpinner(fmt.Sprintf("Building Docker image: %s", imageUrl))
 				spinner.Complete()
 				sm.Stop()
-				buildCmd := exec.Command("docker", "buildx", "build", "--pull", "--platform", "linux/amd64", ".", "-f", dockerfilePath, "-t", imageUrl, "--no-cache", "--load")
+
+				// Get the platforms defined in flag
+				platformsFlag, err := cmd.Flags().GetStringArray("platforms")
+				if err != nil {
+					utils.HandleSpinnerError(spinner, sm, err)
+					return err
+				}
+
+				// Join the platforms list with comma as separator
+				platformsStr := strings.Join(platformsFlag, ",")
+
+				buildCmd := exec.Command("docker", "buildx", "build", "--pull", "--platform", platformsStr, ".", "-f", dockerfilePath, "-t", imageUrl, "--load")
 
 				// Redirect stdout and stderr to the terminal
 				buildCmd.Stdout = os.Stdout
 				buildCmd.Stderr = os.Stderr
 
-				fmt.Printf("Invoking 'docker buildx build --pull --platform linux/amd64 . -f %s -t %s --no-cache --load'...\n", dockerfilePath, imageUrl)
+				fmt.Printf("Invoking 'docker buildx build --pull --platform %s . -f %s -t %s --load'...\n", platformsStr, dockerfilePath, imageUrl)
 				err = buildCmd.Run()
 				if err != nil {
 					utils.HandleSpinnerError(spinner, sm, err)
@@ -803,7 +784,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 						return err
 					}
 
-					gcpServiceAccountEmail := fmt.Sprintf("bootstrap-%s@%s.iam.gserviceaccount.com", user.OrgId, gcpProjectID)
+					gcpServiceAccountEmail := fmt.Sprintf("bootstrap-%s@%s.iam.gserviceaccount.com", *user.OrgId, gcpProjectID)
 					fileData = append(fileData, []byte(fmt.Sprintf("      GcpServiceAccountEmail: '%s'\n", gcpServiceAccountEmail))...)
 				}
 			}
@@ -845,7 +826,7 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 							return err
 						}
 
-						gcpServiceAccountEmail := fmt.Sprintf("bootstrap-%s@%s.iam.gserviceaccount.com", user.OrgId, gcpProjectID)
+						gcpServiceAccountEmail := fmt.Sprintf("bootstrap-%s@%s.iam.gserviceaccount.com", *user.OrgId, gcpProjectID)
 						fileData = append(fileData, []byte(fmt.Sprintf("      GcpServiceAccountEmail: '%s'\n", gcpServiceAccountEmail))...)
 					}
 				}
@@ -871,11 +852,35 @@ x-omnistrate-image-registry-attributes:
 			spinner.UpdateMessage(fmt.Sprintf("Generating compose spec from the Docker image: saved to %s", file))
 			spinner.Complete()
 		}
+	}
 
-		// Render the ${{ secrets.GitHubPAT }} in the compose file
+	// Step 13: Get or create a GitHub PAT if needed
+	if strings.Contains(string(fileData), "${{ secrets.GitHubPAT }}") && pat == "" {
+		sm, pat, err = getOrCreatePAT(sm, resetPAT)
+		if err != nil {
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
+	}
+
+	// Step 14: Render the compose file: variable interpolation (if env_file appears), ${{ secrets.GitHubPAT }} replacement, build context replacement
+	spinner = sm.AddSpinner("Rendering compose spec")
+
+	if strings.Contains(string(fileData), "env_file:") {
+		fileData, err = RenderEnvFileAndInterpolateVariables(fileData, rootDir, file, sm, spinner)
+		if err != nil {
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
+	}
+
+	// Render the ${{ secrets.GitHubPAT }} in the compose file if needed
+	if strings.Contains(string(fileData), "${{ secrets.GitHubPAT }}") {
 		fileData = []byte(strings.ReplaceAll(string(fileData), "${{ secrets.GitHubPAT }}", pat))
+	}
 
-		// Render build context sections into image fields in the compose file
+	// Render build context sections into image fields in the compose file if needed
+	if composeSpecHasBuildContext {
 		dockerPathsToImageUrls := make(map[string]string)
 		for service, imageUrl := range versionTaggedImageUrls {
 			dockerPathsToImageUrls[dockerfilePaths[service]] = imageUrl
@@ -883,7 +888,10 @@ x-omnistrate-image-registry-attributes:
 		fileData = []byte(utils.ReplaceBuildContext(string(fileData), dockerPathsToImageUrls))
 	}
 
-	// Step 14: Building service from the compose spec
+	spinner.UpdateMessage("Rendering compose spec: complete")
+	spinner.Complete()
+
+	// Step 15: Building service from the compose spec
 	spinner = sm.AddSpinner("Building service from the compose spec")
 
 	// If we're in dry-run mode, save the compose spec to a file with '-dry-run' suffix
@@ -929,6 +937,12 @@ x-omnistrate-image-registry-attributes:
 		serviceNameToUse = serviceName
 	}
 
+	// Prepare release description pointer
+	var releaseDescriptionPtr *string
+	if releaseDescription != "" {
+		releaseDescriptionPtr = &releaseDescription
+	}
+
 	// Build the service
 	serviceID, devEnvironmentID, devPlanID, undefinedResources, err := buildService(
 		cmd.Context(),
@@ -942,7 +956,8 @@ x-omnistrate-image-registry-attributes:
 		nil,
 		true,
 		true,
-		nil,
+		releaseDescriptionPtr,
+		false,
 	)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
@@ -972,7 +987,7 @@ x-omnistrate-image-registry-attributes:
 		spinner = sm.AddSpinner("Skipping environment promotion (--skip-environment-promotion flag is set)")
 		spinner.Complete()
 	} else {
-		// Step 15: Check if the production environment is set up
+		// Step 16: Check if the production environment is set up
 		spinner = sm.AddSpinner("Checking if the production environment is set up")
 		time.Sleep(1 * time.Second) // Add a delay to show the spinner
 		prodEnvironmentID, err = checkIfProdEnvExists(cmd.Context(), token, serviceID)
@@ -986,7 +1001,7 @@ x-omnistrate-image-registry-attributes:
 		}
 		spinner.UpdateMessage(fmt.Sprintf("Checking if the production environment is set up: %s", yesOrNo))
 		spinner.Complete()
-		// Step 16: Create a production environment if it does not exist
+		// Step 17: Create a production environment if it does not exist
 		if prodEnvironmentID == "" {
 			spinner = sm.AddSpinner("Creating a production environment")
 			prodEnvironmentID, err = createProdEnv(cmd.Context(), token, serviceID, devEnvironmentID)
@@ -998,7 +1013,7 @@ x-omnistrate-image-registry-attributes:
 			spinner.Complete()
 		}
 
-		// Step 17: Promote the service to the production environment
+		// Step 18: Promote the service to the production environment
 		spinner = sm.AddSpinner(fmt.Sprintf("Promoting the service to the %s environment", DefaultProdEnvName))
 		err = dataaccess.PromoteServiceEnvironment(cmd.Context(), token, serviceID, devEnvironmentID)
 		if err != nil {
@@ -1008,7 +1023,7 @@ x-omnistrate-image-registry-attributes:
 		spinner.UpdateMessage("Promoting the service to the production environment: Success")
 		spinner.Complete()
 
-		// Step 18: Set this service plan as the default service plan in production
+		// Step 19: Set this service plan as the default service plan in production
 		spinner = sm.AddSpinner("Setting the service plan as the default service plan in production")
 
 		// Describe the dev product tier
@@ -1055,7 +1070,7 @@ x-omnistrate-image-registry-attributes:
 		spinner.Complete()
 	}
 
-	// Step 19: Initialize the SaaS Portal
+	// Step 20: Initialize the SaaS Portal
 	var prodEnvironment *openapiclient.DescribeServiceEnvironmentResult
 
 	if skipSaasPortalInit || skipEnvironmentPromotion {
@@ -1094,7 +1109,7 @@ x-omnistrate-image-registry-attributes:
 			spinner.Complete()
 		}
 
-		// Step 20: Retrieve the SaaS Portal URL
+		// Step 21: Retrieve the SaaS Portal URL
 		spinner = sm.AddSpinner("Retrieving the SaaS Portal URL")
 		time.Sleep(1 * time.Second) // Add a delay to show the spinner
 		spinner.Complete()
@@ -1213,4 +1228,130 @@ func createProdEnv(ctx context.Context, token string, serviceID string, devEnvir
 	}
 
 	return prodEnvironmentID, nil
+}
+
+func getOrCreatePAT(sm ysmrr.SpinnerManager, resetPAT bool) (newSm ysmrr.SpinnerManager, pat string, err error) {
+	newSm = sm
+	spinner := sm.AddSpinner("Checking for existing GitHub Personal Access Token")
+	time.Sleep(1 * time.Second) // Add a delay to show the spinner
+	pat, err = config.LookupGitHubPersonalAccessToken()
+	if err != nil && !errors.As(err, &config.ErrGitHubPATNotFound) {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return
+	}
+	if err == nil && !resetPAT {
+		spinner.UpdateMessage("Checking for existing GitHub Personal Access Token: Yes")
+		spinner.Complete()
+	}
+	if err != nil && !errors.As(err, &config.ErrGitHubPATNotFound) {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return
+	}
+	if errors.As(err, &config.ErrGitHubPATNotFound) || resetPAT {
+		// Prompt user to enter GitHub pat
+		spinner.UpdateMessage("Checking for existing GitHub Personal Access Token: No GitHub Personal Access Token found.")
+		spinner.Complete()
+		sm.Stop()
+		utils.PrintWarning("[Action Required] GitHub Personal Access Token (PAT) is required to push the Docker image to GitHub Container Registry.")
+		utils.PrintWarning("Please follow the instructions below to generate a GitHub Personal Access Token with the following scopes: write:packages, delete:packages.")
+		utils.PrintWarning("The token will be stored securely on your machine and will not be shared with anyone.")
+		fmt.Println()
+		fmt.Println("Instructions to generate a GitHub Personal Access Token:")
+		fmt.Println("1. Click on the 'Generate new token' button. Choose 'Generate new token (classic)'. Authenticate with your GitHub account.")
+		fmt.Println(`2. Enter / Select the following details:
+  - Enter Note: "omnistrate-cli" or any other note you prefer
+  - Select Expiration: "No expiration"
+  - Select the following scopes:	
+    - write:packages
+    - delete:packages
+	- read:org`)
+		fmt.Println("3. Click 'Generate token' and copy the token to your clipboard.")
+		fmt.Println()
+
+		fmt.Println("Redirecting you to the GitHub Personal Access Token generation page in your default browser in a few seconds...")
+		fmt.Println()
+		fmt.Print("If the browser does not open automatically, open the following URL:\n\n")
+		fmt.Printf("%s\n\n", GitHubPATGenerateURL)
+
+		time.Sleep(5 * time.Second)
+		err = browser.OpenURL(GitHubPATGenerateURL)
+		if err != nil {
+			err = errors.New(fmt.Sprintf("Error opening browser: %v\n", err))
+			utils.PrintError(err)
+			return
+		}
+
+		utils.PrintSuccess("Please paste the GitHub Personal Access Token: ")
+		var userInput string
+		_, err = fmt.Scanln(&userInput)
+		if err != nil {
+			utils.PrintError(err)
+			return
+		}
+		pat = strings.TrimSpace(userInput)
+
+		// Save the GitHub PAT
+		err = config.CreateOrUpdateGitHubPersonalAccessToken(pat)
+		if err != nil {
+			utils.PrintError(err)
+			return
+		}
+
+		newSm = ysmrr.NewSpinnerManager()
+		newSm.Start()
+	}
+
+	return
+}
+
+func RenderEnvFileAndInterpolateVariables(fileData []byte, rootDir string, file string, sm ysmrr.SpinnerManager, spinner *ysmrr.Spinner) (newFileData []byte, err error) {
+	// Replace `$` with `$$` to avoid interpolation. Do not replace for `${...}` since it's used to specify variable interpolations
+	fileData = []byte(strings.ReplaceAll(string(fileData), "$", "$$"))   // Escape $ to $$
+	fileData = []byte(strings.ReplaceAll(string(fileData), "$${", "${")) // Unescape $${ to ${ for variable interpolation
+	fileData = []byte(strings.ReplaceAll(string(fileData), "${{ secrets.GitHubPAT }}", "$${{ secrets.GitHubPAT }}"))
+
+	// Write the compose spec to a temporary file
+	tempFile := filepath.Join(rootDir, filepath.Base(file)+".tmp")
+	err = os.WriteFile(tempFile, fileData, 0600)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return
+	}
+
+	// Render the compose file using docker compose config
+	renderCmd := exec.Command("docker", "compose", "-f", tempFile, "config")
+	cmdOut := &bytes.Buffer{}
+	cmdErr := &bytes.Buffer{}
+	renderCmd.Stdout = cmdOut
+	renderCmd.Stderr = cmdErr
+
+	err = renderCmd.Run()
+	if err != nil {
+		if spinner != nil {
+			spinner.Error()
+			sm.Stop()
+		}
+		fmt.Fprintf(os.Stderr, "%s", cmdErr.String())
+		utils.HandleSpinnerError(spinner, sm, err)
+
+		return
+	}
+	newFileData = cmdOut.Bytes()
+
+	// Remove the temporary file
+	err = os.Remove(tempFile)
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return
+	}
+
+	// Docker compose config command escapes the $ character by adding a $ in front of it, so we need to unescape it
+	newFileData = []byte(strings.ReplaceAll(string(newFileData), "$$", "$"))
+
+	// Quote numeric cpus values in deploy.resources
+	// Match: cpus: <number> where the number is NOT quoted
+	re := regexp.MustCompile(`(?m)(^\s*cpus:\s*)([0-9.]+)\s*$`)
+	newFileData = []byte(re.ReplaceAllString(string(newFileData), `$1"$2"`))
+
+	return
 }

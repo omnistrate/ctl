@@ -1,10 +1,11 @@
 package config
 
 import (
-	"github.com/mitchellh/go-homedir"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/mitchellh/go-homedir"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -108,6 +109,37 @@ func TestGitHubPersonalAccessToken(t *testing.T) {
 	_, err = LookupGitHubPersonalAccessToken()
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), ErrGitHubPATNotFound.Error())
+}
+
+func TestGitHubTokenFromEnvVar(t *testing.T) {
+	t.Setenv("GH_TOKEN", "env_token")
+	token, err := LookupGitHubPersonalAccessToken()
+	assert.NoError(t, err)
+	assert.Equal(t, "env_token", token)
+}
+
+func TestGitHubPersonalAccessTokenFromEnvVar(t *testing.T) {
+	t.Setenv("GH_PAT", "PAT_env_token")
+	token, err := LookupGitHubPersonalAccessToken()
+	assert.NoError(t, err)
+	assert.Equal(t, "PAT_env_token", token)
+}
+
+func TestIsGithubTokenConfigured(t *testing.T) {
+	isConfigured := IsGithubTokenEnvVarConfigured()
+	assert.False(t, isConfigured)
+
+	t.Setenv("GH_PAT", "PAT_env_token")
+	isConfigured = IsGithubTokenEnvVarConfigured()
+	assert.False(t, isConfigured)
+
+	t.Setenv("GH_TOKEN", "env_token")
+	isConfigured = IsGithubTokenEnvVarConfigured()
+	assert.True(t, isConfigured)
+
+	t.Setenv("GH_TOKEN", "")
+	isConfigured = IsGithubTokenEnvVarConfigured()
+	assert.False(t, isConfigured)
 }
 
 func TestLoadNonExistentFile(t *testing.T) {

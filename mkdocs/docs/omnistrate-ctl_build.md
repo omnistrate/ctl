@@ -66,6 +66,7 @@ omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Servi
 
 ```
       --description string                    A short description for the whole service. A service can have multiple service plans.
+  -d, --dry-run                               Simulate building the service without actually creating resources
       --env-var stringArray                   Used together with --image flag. Provide environment variables in the format --env-var key1=var1 --env-var key2=var2
       --environment string                    Name of the environment to build the service in (default "Dev")
       --environment-type string               Type of environment. Valid options include: 'dev', 'prod', 'qa', 'canary', 'staging', 'private') (default "dev")

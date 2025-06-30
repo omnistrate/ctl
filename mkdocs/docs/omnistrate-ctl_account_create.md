@@ -7,7 +7,7 @@ Create a Cloud Provider Account
 This command helps you create a Cloud Provider Account in your account list.
 
 ```
-omnistrate-ctl account create [account-name] [--aws-account-id=account-id] [--gcp-project-id=project-id] [--gcp-project-number=project-number] [flags]
+omnistrate-ctl account create [account-name] [--aws-account-id=account-id] [--gcp-project-id=project-id] [--gcp-project-number=project-number] [--azure-subscription-id=subscription-id] [--azure-tenant-id=tenant-id] [flags]
 ```
 
 ### Examples
@@ -18,15 +18,20 @@ omctl account create [account-name] --aws-account-id=[account-id]
 
 # Create gcp account
 omctl account create [account-name] --gcp-project-id=[project-id] --gcp-project-number=[project-number]
+
+# Create azure account
+omctl account create [account-name] --azure-subscription-id=[subscription-id] --azure-tenant-id=[tenant-id]
 ```
 
 ### Options
 
 ```
-      --aws-account-id string       AWS account ID
-      --gcp-project-id string       GCP project ID
-      --gcp-project-number string   GCP project number
-  -h, --help                        help for create
+      --aws-account-id string          AWS account ID
+      --azure-subscription-id string   Azure subscription ID
+      --azure-tenant-id string         Azure tenant ID
+      --gcp-project-id string          GCP project ID
+      --gcp-project-number string      GCP project number
+  -h, --help                           help for create
 ```
 
 ### Options inherited from parent commands

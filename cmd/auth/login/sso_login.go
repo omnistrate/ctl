@@ -43,8 +43,8 @@ const (
 	gitHubDeviceCodeURL    = "https://github.com/login/device/code"
 	googleVerificationURI  = "https://www.google.com/device"
 	gitHubVerificationURI  = "https://github.com/login/device"
-	gitHubScope            = "user:email"
-	googleScope            = "email"
+	gitHubScope            = "read:user user:email"
+	googleScope            = "email profile"
 )
 
 func ssoLogin(ctx context.Context, identityProviderName string) error {
@@ -58,11 +58,11 @@ func ssoLogin(ctx context.Context, identityProviderName string) error {
 
 	// Step 2: Prompt the user to enter the user code in a browser
 	// Copy the user code to the clipboard
+	clipboardSuccess := true
 	err = clipboard.WriteAll(deviceCodeResponse.UserCode)
 	if err != nil {
-		err = errors.New(fmt.Sprintf("Error copying user code to clipboard: %v\n", err))
-		utils.PrintError(err)
-		return err
+		clipboardSuccess = false
+		utils.PrintWarning(fmt.Sprintf("Warning: Could not copy user code to clipboard: %v", err))
 	}
 
 	// Automatically open the verification URI in the default browser
@@ -75,7 +75,11 @@ func ssoLogin(ctx context.Context, identityProviderName string) error {
 	}
 	fmt.Print("If the browser does not open or you wish to use a different device to authorize this request, open the following URL:\n\n")
 	fmt.Printf("%s\n\n", getVerificationURI(identityProviderName))
-	fmt.Print("The code has been copied to your clipboard. Paste it in the browser when prompted.\n")
+	if clipboardSuccess {
+		fmt.Print("The code has been copied to your clipboard. Paste it in the browser when prompted.\n")
+	} else {
+		fmt.Print("Please copy the code below and paste it in the browser when prompted.\n")
+	}
 	fmt.Print("You can also manually type in the code:\n\n")
 	fmt.Printf("%s\n\n", deviceCodeResponse.UserCode)
 

@@ -24,7 +24,6 @@ services:
             reference: refs/tags/v3.7.1
             repositoryUrl: https://github.com/omnistrate/resource-spec-samples.git
             accessToken: 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
-          terraformExecutionIdentity: "omnistrate-tf-org-euvvex3bvm@omnistrate-dataplane-host-dev.iam.gserviceaccount.com"
   - name: terraformChild2
     internal: true
     terraformConfigurations:
@@ -42,7 +41,6 @@ services:
             reference: refs/tags/v3.7.1
             repositoryUrl: https://github.com/omnistrate/resource-spec-samples.git
             accessToken: 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
-          terraformExecutionIdentity: "omnistrate-tf-org-euvvex3bvm@omnistrate-dataplane-host-dev.iam.gserviceaccount.com"
   - name: kustomizeRoot
     type: kustomize
     dependsOn:

@@ -3,7 +3,9 @@ package account
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/omnistrate/ctl/cmd"
@@ -30,14 +32,22 @@ func Test_account_basic(t *testing.T) {
 
 	awsAccountName := "aws" + uuid.NewString()
 	gcpAccountName := "gcp" + uuid.NewString()
+	azureAccountName := "azure" + uuid.NewString()
+	// nolint:gosec
+	rand10DigitsNum := rand.New(rand.NewSource(time.Now().UnixNano())).Int63n(9000000000) + 1000000000
 
 	// PASS: create aws account
-	cmd.RootCmd.SetArgs([]string{"account", "create", awsAccountName, "--aws-account-id", "4353256597"})
+	cmd.RootCmd.SetArgs([]string{"account", "create", awsAccountName, "--aws-account-id", fmt.Sprintf("%d", rand10DigitsNum)})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	// PASS: create gcp account
-	cmd.RootCmd.SetArgs([]string{"account", "create", gcpAccountName, "--gcp-project-id", "project-id", "--gcp-project-number", "project-number"})
+	cmd.RootCmd.SetArgs([]string{"account", "create", gcpAccountName, "--gcp-project-id", fmt.Sprintf("project-id-%d", rand10DigitsNum), "--gcp-project-number", "project-number"})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+
+	// PASS: create azure account
+	cmd.RootCmd.SetArgs([]string{"account", "create", azureAccountName, "--azure-subscription-id", fmt.Sprintf("12345678-1234-1234-1234-%d", rand10DigitsNum), "--azure-tenant-id", "87654321-4321-4321-4321-210987654321"})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
@@ -47,7 +57,7 @@ func Test_account_basic(t *testing.T) {
 	require.NoError(err)
 
 	// PASS: list accounts by name
-	cmd.RootCmd.SetArgs([]string{"account", "list", "--filter", fmt.Sprintf("name:%s", awsAccountName), "--filter", fmt.Sprintf("name:%s", gcpAccountName)})
+	cmd.RootCmd.SetArgs([]string{"account", "list", "--filter", fmt.Sprintf("name:%s", awsAccountName), "--filter", fmt.Sprintf("name:%s", gcpAccountName), "--filter", fmt.Sprintf("name:%s", azureAccountName)})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
@@ -60,12 +70,20 @@ func Test_account_basic(t *testing.T) {
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
+	cmd.RootCmd.SetArgs([]string{"account", "describe", azureAccountName})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+
 	// PASS: delete account
 	cmd.RootCmd.SetArgs([]string{"account", "delete", awsAccountName})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 
 	cmd.RootCmd.SetArgs([]string{"account", "delete", gcpAccountName})
+	err = cmd.RootCmd.ExecuteContext(ctx)
+	require.NoError(err)
+
+	cmd.RootCmd.SetArgs([]string{"account", "delete", azureAccountName})
 	err = cmd.RootCmd.ExecuteContext(ctx)
 	require.NoError(err)
 }
