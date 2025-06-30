@@ -94,7 +94,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
-          version: 'v2.8.2'
+          version: 'v2.10.2'
           workdir: goreleaser
           args: release --clean
         env:
