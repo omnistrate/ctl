@@ -74,7 +74,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   package-multi-arch:
-    runs-on: ubicloud-standard-8
+    runs-on: ubicloud-latest
     if: ${{ github.event_name != 'pull_request' }}
     permissions:
       contents: read
