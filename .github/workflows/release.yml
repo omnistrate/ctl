@@ -37,21 +37,6 @@ jobs:
         timeout-minutes: 5
         uses: actions/checkout@v4
 
-      - name: Generate token
-        timeout-minutes: 5
-        id: generate_token
-        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a
-        with:
-          app_id: ${{ secrets.CI_APP_ID }}
-          private_key: ${{ secrets.CI_APP_PRIVATE_KEY }}
-
-      - name: Configure git for private repo access
-        timeout-minutes: 5
-        env:
-          GH_ACCESS_TOKEN: ${{ steps.generate_token.outputs.token }}
-        run: |
-          echo "machine github.com login api password ${GH_ACCESS_TOKEN}" > ~/.netrc
-
       - name: Set up go
         timeout-minutes: 10
         uses: actions/setup-go@v5
@@ -269,7 +254,7 @@ jobs:
 
   release-package-multi-arch:
     environment: Prod
-    runs-on: ubicloud-standard-8
+    runs-on: ubicloud-latest
     needs: update-brew-formula
     permissions:
       contents: read

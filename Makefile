@@ -79,6 +79,9 @@ build:
 		binary_name="$$binary_name.exe"; \
 	fi; \
 	CGO_ENABLED=0 go build -mod=mod ${BUILD_FLAGS} -o dist/$$binary_name github.com/omnistrate/ctl
+	@echo "Build complete: dist/$$binary_name"
+	@echo "Build integration test"
+	go test -c -o /dev/null ./test/integration_test/...
 
 .PHONY: ctl-linux-amd64
 ctl-linux-amd64: main.go
