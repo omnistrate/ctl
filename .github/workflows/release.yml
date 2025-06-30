@@ -65,6 +65,16 @@ jobs:
           fi
           echo "binary_name=$binary_name" >> "$GITHUB_OUTPUT"
 
+      - name: Create compressed archive
+        timeout-minutes: 2
+        run: |
+          cd dist
+          if [ "${{ matrix.goos }}" == "windows" ]; then
+            zip -9 "${{ steps.calc_binary_name.outputs.binary_name }}.zip" "${{ steps.calc_binary_name.outputs.binary_name }}"
+          else
+            tar -czf "${{ steps.calc_binary_name.outputs.binary_name }}.tar.gz" "${{ steps.calc_binary_name.outputs.binary_name }}"
+          fi
+
       - name: Upload build artifacts
         timeout-minutes: 5
         uses: actions/upload-artifact@v4
@@ -72,42 +82,14 @@ jobs:
           name: ${{ steps.calc_binary_name.outputs.binary_name }}
           path: dist/${{ steps.calc_binary_name.outputs.binary_name }}
 
-  build-go-releaser:
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    steps: 
-      
-      - name: Checkout repository
+      - name: Upload compressed artifacts
         timeout-minutes: 5
-        uses: actions/checkout@v4
-    
-      - name: Set up go
-        timeout-minutes: 10
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: "go.mod"
-          token: ${{ steps.generate_token.outputs.token }}
-          cache-dependency-path: "**/go.sum"
-
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
-        with:
-          distribution: goreleaser
-          version: 'v2.10.2'
-          workdir: goreleaser
-          args: release --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Upload assets
         uses: actions/upload-artifact@v4
         with:
-          name: omnistrate-ctl
+          name: ${{ steps.calc_binary_name.outputs.binary_name }}-compressed
           path: |
-            dist/omnistrate-ctl_*.tar.gz
-            dist/omnistrate-ctl.zip
-            dist/checksums.txt
+            dist/${{ steps.calc_binary_name.outputs.binary_name }}.tar.gz
+            dist/${{ steps.calc_binary_name.outputs.binary_name }}.zip
 
   sanity-check:
     needs: build
@@ -259,6 +241,12 @@ jobs:
             omnistrate-ctl-linux-arm64/omnistrate-ctl-linux-arm64
             omnistrate-ctl-windows-amd64.exe/omnistrate-ctl-windows-amd64.exe
             omnistrate-ctl-windows-arm64.exe/omnistrate-ctl-windows-arm64.exe
+            omnistrate-ctl-darwin-amd64-compressed/omnistrate-ctl-darwin-amd64.tar.gz
+            omnistrate-ctl-darwin-arm64-compressed/omnistrate-ctl-darwin-arm64.tar.gz
+            omnistrate-ctl-linux-amd64-compressed/omnistrate-ctl-linux-amd64.tar.gz
+            omnistrate-ctl-linux-arm64-compressed/omnistrate-ctl-linux-arm64.tar.gz
+            omnistrate-ctl-windows-amd64.exe-compressed/omnistrate-ctl-windows-amd64.exe.zip
+            omnistrate-ctl-windows-arm64.exe-compressed/omnistrate-ctl-windows-arm64.exe.zip
           repository: omnistrate/cli
           token: ${{ steps.generate_token_cli.outputs.token }}
           fail_on_unmatched_files: true
