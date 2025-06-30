@@ -1,0 +1,55 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    main: .
+    ldflags:
+      - -s -w -X github.com/omnistrate/ctl/cmd.Version={{.Version}} -X github.com/omnistrate/ctl/cmd.CommitID={{.Commit}} -X github.com/omnistrate/ctl/cmd.Timestamp={{.Date}}
+    binary: omnistrate-ctl
+
+archives:
+  - id: default
+    formats: [ tar.gz ]
+    name_template: >-
+      omnistrate-ctl_
+      {{- .Os }}_
+      {{- .Arch }}
+    format_overrides:
+      - goos: windows
+        formats: [ zip ]
+    files:
+      - README*
+      - LICENSE*
+
+release:
+  draft: true
+  replace_existing_draft: true
+  use_existing_draft: true
+  mode: append
+
+checksum:
+  name_template: 'checksums.txt'
+  algorithm: sha256
+
+snapshot:
+  version_template: "{{ incpatch .Version }}"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^ci:'
