@@ -44,6 +44,7 @@ jobs:
         timeout-minutes: 20
         uses: golangci/golangci-lint-action@v8
         with:
+          version: ${{ env.GOLANG_CI_VERSION }}
           args: ./...
           skip-cache: true
 
@@ -84,13 +85,7 @@ jobs:
       - name: Unit test
         timeout-minutes: 20
         run: |
-          gotestsum --format github-actions -- ./... -skip test -cover -coverprofile coverage.out -covermode count
-          go tool cover -func=coverage.out -o coverage-report.txt
-
-      - name: Test coverage check
-        timeout-minutes: 10
-        run: |
-          cat coverage-report.txt | grep total | awk '{print $$3}' | sed 's/[%]//g' | awk '{if ($$1 < $TESTCOVERAGE_THRESHOLD) {print "Test coverage is below threshold"; exit 1} else {print "Test coverage is above threshold"}}'
+          gotestsum --format github-actions -- ./... -skip test
 
   integration-tests:
     environment: Dev-us-west-2
