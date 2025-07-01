@@ -103,7 +103,7 @@ jobs:
     strategy:
       matrix:
         os:
-          [ubuntu-latest, macos-latest, windows-latest, ubicloud-standard-2-arm]
+          [ubuntu-latest, macos-latest, windows-latest, ubuntu-24.04-arm]
 
     runs-on: ${{ matrix.os }}
 
@@ -468,12 +468,69 @@ jobs:
         env:
           TAGS: ${{ steps.meta.outputs.tags }}
 
+  test-install-script:
+    runs-on: ${{ matrix.os }}
+    needs: release-binaries
+    permissions:
+      contents: read
+    
+    strategy:
+      matrix:
+        os:
+          [ubuntu-latest, macos-latest, windows-latest, ubuntu-24.04-arm]
+
+    steps:
+      - name: Test curl installation
+        timeout-minutes: 10
+        if: matrix.os != 'windows-latest'
+        run: |
+          # Test the exact curl command from the documentation
+          # This simulates what users will actually run
+          curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/master/install-ctl.sh 
+          
+          # Verify installation
+          if [ -f "./curl-test-install/bin/omnistrate-ctl" ]; then
+            version_output=$(./curl-test-install/bin/omnistrate-ctl --version)
+            echo "Curl installation successful. Version: $version_output"
+            
+            # Verify symlink exists
+            if [ -L "./curl-test-install/bin/omctl" ]; then
+              symlink_version=$(./curl-test-install/bin/omctl --version)
+              echo "Curl symlink working. Version: $symlink_version"
+            else
+              echo "ERROR: omctl symlink not found in curl installation"
+              exit 1
+            fi
+          else
+            echo "ERROR: omnistrate-ctl binary not found in curl installation"
+            exit 1
+          fi
+
+      - name: Test curl installation (Windows)
+        timeout-minutes: 10
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: |
+          # Test the exact curl command from the documentation on Windows
+          # This simulates what users will actually run on Windows
+          curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/master/install-ctl.sh
+          
+          # Verify installation
+          if [ -f "./curl-test-install/bin/omnistrate-ctl.exe" ]; then
+            version_output=$(./curl-test-install/bin/omnistrate-ctl.exe --version)
+            echo "Curl installation successful on Windows. Version: $version_output"
+          else
+            echo "ERROR: omnistrate-ctl.exe binary not found in curl installation"
+            exit 1
+          fi
+
   update-docs:
     name: Upldate CTL documents
     needs:
       - release-package-multi-arch
       - update-brew-formula
       - release-binaries
+      - test-install-script
     uses: ./.github/workflows/docs-deploy.yml
     secrets: inherit
     with:
