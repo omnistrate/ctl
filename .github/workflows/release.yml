@@ -475,19 +475,3 @@ jobs:
     secrets: inherit
     with:
       environment: Prod
-
-  notification:
-    name: Notify Mattermost
-    runs-on: ubuntu-latest
-    needs:
-      - release-package-multi-arch
-      - update-brew-formula
-      - release-binaries
-      - update-docs
-    steps:
-      - name: Mattermost Notification
-        uses: tferreira/matterfy@v1.9
-        with:
-          type: ${{ job.status }}
-          job_name: "*Deploy to Prod*"
-          url: ${{ secrets.MATTERMOST_DEPLOYMENT_NOTIFICATION_WEBHOOK }}
