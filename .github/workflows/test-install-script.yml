@@ -22,8 +22,9 @@ jobs:
           # This simulates what users will actually run
           curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/master/install-ctl.sh
 
-          ./omnistrate-ctl --version
-          echo "Curl installation successful. Version: $version_output"
+          ctl_version=$(./$binary_name --version)
+          echo "Omnistrate CTL version: $ctl_version"
+          echo "ctl_version=$ctl_version" >> "$GITHUB_OUTPUT"
 
       - name: Test curl installation (Windows)
         timeout-minutes: 10
@@ -34,6 +35,7 @@ jobs:
           # This simulates what users will actually run
           curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/master/install-ctl.sh
 
-          omnistrate-ctl.exe --version
-          echo "Curl installation successful. Version: $version_output"
+          $ctl_version=.\omnistrate-ctl-windows-amd64.exe --version
+          echo "Omnistrate CTL version: $ctl_version"
+          echo "ctl_version=$ctl_version" >> $env:GITHUB_OUTPUT
           
