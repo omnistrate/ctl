@@ -1,0 +1,52 @@
+name: Test Install Script
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version to test (defaults to latest)'
+        required: false
+        type: string
+        default: ''
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to test (defaults to latest)'
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  test-install-script:
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    
+    strategy:
+      matrix:
+        os:
+          [ubuntu-latest, macos-latest, windows-latest, ubuntu-24.04-arm]
+
+    steps:
+      - name: Test curl installation
+        timeout-minutes: 10
+        if: matrix.os != 'windows-latest'
+        run: |
+          # Test the exact curl command from the documentation
+          # This simulates what users will actually run
+          curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/master/install-ctl.sh
+          
+          ./omnistrate-ctl --version
+          echo "Curl installation successful. Version: $version_output"
+
+      - name: Test curl installation (Windows)
+        timeout-minutes: 10
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: |
+          # Test the exact curl command from the documentation
+          # This simulates what users will actually run
+          curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/master/install-ctl.sh
+          
+          omnistrate-ctl.exe --version
+          echo "Curl installation successful. Version: $version_output"
