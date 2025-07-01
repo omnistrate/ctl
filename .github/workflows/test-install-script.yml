@@ -22,7 +22,7 @@ jobs:
           # This simulates what users will actually run
           curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/master/install-ctl.sh
 
-          ctl_version=$(./$binary_name --version)
+          ctl_version=$(./omnistrate-ctl --version)
           echo "Omnistrate CTL version: $ctl_version"
           echo "ctl_version=$ctl_version" >> "$GITHUB_OUTPUT"
 
@@ -35,7 +35,7 @@ jobs:
           # This simulates what users will actually run
           curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/master/install-ctl.sh
 
-          $ctl_version=.\omnistrate-ctl-windows-amd64.exe --version
+          $ctl_version=.\omnistrate-ctl.exe --version
           echo "Omnistrate CTL version: $ctl_version"
           echo "ctl_version=$ctl_version" >> $env:GITHUB_OUTPUT
           
