@@ -149,67 +149,71 @@ jobs:
           $ctl_version=.\omnistrate-ctl-windows-amd64.exe --version
           echo "Omnistrate CTL version: $ctl_version"
           echo "ctl_version=$ctl_version" >> $env:GITHUB_OUTPUT
-
-  sanity-check-go-releaser:
-    needs: build
+  
+  smoke-tests:
+    environment: Dev-us-west-2
+    if: github.event_name != 'push'
+    needs: [build, sanity-check]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
+    concurrency:
+      group: ${{ github.workflow }}-smoke-tests-${{ matrix.test-group }}
+      cancel-in-progress: true
 
     strategy:
+      fail-fast: false
       matrix:
-        os:
-          [ubuntu-latest, macos-latest, windows-latest, ubicloud-standard-2-arm]
-
-    runs-on: ${{ matrix.os }}
+        test-group:
+          [
+            "account/...",
+            "auth/...",
+            "build/compose/...",
+            "build/image/...",
+            "build/helm/...",
+            "build/kustomize/...",
+            "build/operator/...",
+            "domain/...",
+            "environment/...",
+            "helm/...",
+            "instance/...",
+            "service/...",
+            "serviceplan/...",
+            "upgrade/...",
+            "customnetwork/...",
+            "servicesorchestration/...",
+          ]
 
     steps:
-      - name: Download build artifacts
-        timeout-minutes: 5
-        uses: actions/download-artifact@v4
-        with: 
-          name: omnistrate-ctl
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Display structure of downloaded files
-        timeout-minutes: 1
-        run: ls -R
+      - name: Set up go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+          cache-dependency-path: "**/go.sum"
 
-      - name: Run the binary (linux and macos only)
-        id: run_binary_linux_macos
-        timeout-minutes: 1
-        if: matrix.os != 'windows-latest'
+      - name: Get dependencies
+        timeout-minutes: 10
         run: |
-          if [ "${{ matrix.os }}" == "macos-latest" ]; then
-            export GOOS=darwin
-            export GOARCH=arm64
-          elif [ "${{ matrix.os }}" == "ubicloud-standard-2-arm" ]; then
-            export GOOS=linux
-            export GOARCH=arm64
-          else
-            export GOOS=linux
-            export GOARCH=amd64
-          fi
+          make tidy
 
-          tar_file="omnistrate-ctl-${GOOS}-${GOARCH}"
-          tar xzf "$tar_file"
+      - name: Gotestsum installer
+        uses: autero1/action-gotestsum@v2.0.0
+        with:
+          gotestsum_version: 1.11.0
 
-          # The binary will be extracted to a directory named omnistrate-ctl
-          chmod +x omnistrate-ctl
-          ctl_version=$(./omnistrate-ctl --version)
-          echo "Omnistrate CTL version: $ctl_version"
-          echo "ctl_version=$ctl_version" >> "$GITHUB_OUTPUT"
-
-      - name: Run the binary (windows only)
-        id: run_binary_windows
-        timeout-minutes: 1
-        if: matrix.os == 'windows-latest'
-        run: |
-          $zipFile = "omnistrate-ctl_windows_amd64.zip"
-          Expand-Archive -Path $zipFile -DestinationPath . -Force
-
-          # Run version check on the extracted binary
-          $ctl_version = .\omnistrate-ctl.exe --version
-          echo "Omnistrate CTL version: $ctl_version"
-          echo "ctl_version=$ctl_version" >> $env:GITHUB_OUTPUT
+      - name: Smoke test ${{ matrix.test-group }}
+        timeout-minutes: 30
+        env:
+          ENABLE_SMOKE_TEST: true
+          TEST_EMAIL: ${{ secrets.SMOKE_TEST_EMAIL }}
+          TEST_PASSWORD: ${{ secrets.SMOKE_TEST_PASSWORD}}
+          OMNISTRATE_ROOT_DOMAIN: ${{ vars.OMNISTRATE_ROOT_DOMAIN}}
+          OMNISTRATE_LOG_LEVEL: debug
+          OMNISTRATE_DRY_RUN: true
+        run: gotestsum --format github-actions -- ./test/smoke_test/${{ matrix.test-group }} -timeout 1800s -p 1 -p 1 -v
 
   release-binaries:
     environment: Prod
