@@ -20,7 +20,7 @@ jobs:
         run: |
           # Test the exact curl command from the documentation
           # This simulates what users will actually run
-          curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/master/install-ctl.sh
+          curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/main/install-ctl.sh
 
           ctl_version=$(./omnistrate-ctl --version)
           echo "Omnistrate CTL version: $ctl_version"
@@ -33,7 +33,7 @@ jobs:
         run: |
           # Test the exact curl command from the documentation
           # This simulates what users will actually run
-          curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/master/install-ctl.sh
+          curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/main/install-ctl.sh
 
           $ctl_version=.\omnistrate-ctl.exe --version
           echo "Omnistrate CTL version: $ctl_version"

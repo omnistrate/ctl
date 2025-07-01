@@ -14,13 +14,13 @@ services:
         aws:
           terraformPath: /test/resources/aws/terraform
           gitConfiguration:
-            reference: refs/heads/master
+            reference: refs/heads/main
             repositoryUrl: https://github.com/omnistrate/ctl.git
           terraformExecutionIdentity: "arn:aws:iam::339713121445:role/omnistrate-custom-terraform-execution-role"
         gcp:
           terraformPath:  /test/resources/gcp/terraform
           gitConfiguration:
-            reference: refs/heads/master
+            reference: refs/heads/main
             repositoryUrl: https://github.com/omnistrate/ctl.git
   - name: terraformChild2
     internal: true
@@ -29,13 +29,13 @@ services:
         aws:
           terraformPath: /test/resources/aws/terraform2
           gitConfiguration:
-            reference: refs/heads/master
+            reference: refs/heads/main
             repositoryUrl: https://github.com/omnistrate/ctl.git
           terraformExecutionIdentity: "arn:aws:iam::339713121445:role/omnistrate-custom-terraform-execution-role"
         gcp:
           terraformPath: /test/resources/gcp/terraform2
           gitConfiguration:
-            reference: refs/heads/master
+            reference: refs/heads/main
             repositoryUrl: https://github.com/omnistrate/ctl.git
   - name: kustomizeRoot
     type: kustomize
@@ -54,7 +54,7 @@ services:
     kustomizeConfiguration:
       kustomizePath: /test/resources/gcp/kustomize
       gitConfiguration:
-        reference: refs/heads/master
+        reference: refs/heads/main
         repositoryUrl: https://github.com/omnistrate/ctl.git
     apiParameters:
       - key: username
