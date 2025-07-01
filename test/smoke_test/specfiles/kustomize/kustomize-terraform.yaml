@@ -52,7 +52,7 @@ services:
       ports:
         - 3306
     kustomizeConfiguration:
-      kustomizePath: /test/resources/gcp/kustomize
+      kustomizePath: /test/resources/kustomize
       gitConfiguration:
         reference: refs/heads/main
         repositoryUrl: https://github.com/omnistrate/ctl.git
