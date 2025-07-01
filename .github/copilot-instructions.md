@@ -2,6 +2,10 @@
 
 This file provides context for GitHub Copilot about the available make commands in this Go project.
 
+## Project Context
+
+This CTL tool uses the `omnistrate-sdk-go` dependency to call Omnistrate APIs. When creating new commands that interact with APIs, you should update dependencies using the `make update-omnistrate-dependencies` target to ensure you have the latest SDK features.
+
 ## How to Use Make Commands
 
 Make is a build automation tool that reads a Makefile to execute commands. The general syntax is:
@@ -95,7 +99,12 @@ make update-dependencies     # Update all dependencies to latest
 ```
 
 ### `make update-omnistrate-dependencies`
-Updates only Omnistrate-specific dependencies.
+Updates only Omnistrate-specific dependencies (omnistrate-sdk-go and related packages). Use this when creating new commands that need the latest API features.
+
+Example:
+```bash
+make update-omnistrate-dependencies  # Update SDK when adding new API commands
+```
 
 ### `make check-dependencies`
 Validates that no conflicting Omnistrate dependencies are present.
@@ -126,9 +135,17 @@ make build         # Build for current platform
 make unit-test     # Run tests
 make lint          # Check code quality
 ```
+
 ### Quick development cycle:
 ```bash
 make tidy build unit-test lint   # Chain multiple targets
+```
+
+### Adding new API commands:
+```bash
+make update-omnistrate-dependencies  # Get latest SDK features
+make build                          # Build with new dependencies
+make unit-test                      # Test new functionality
 ```
 
 ## Environment Variables
