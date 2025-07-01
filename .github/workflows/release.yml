@@ -341,7 +341,7 @@ jobs:
       - name: Display structure of downloaded files
         timeout-minutes: 1
         run: ls -R
-        
+
       - name: Extract compressed artifacts
         timeout-minutes: 2
         run: |
@@ -360,6 +360,7 @@ jobs:
             done
             cd ..
           done
+          
       - name: Calculate SHA256 checksums
         id: calculate_sha256
         run: |
