@@ -154,10 +154,6 @@ jobs:
           echo "Omnistrate CTL version: $ctl_version"
           echo "ctl_version=$ctl_version" >> "$GITHUB_OUTPUT"
 
-      - name: Display structure of uncompressed files
-        timeout-minutes: 1
-        run: ls -R
-
       - name: Extract compressed artifacts (windows only)
         timeout-minutes: 2
         if: matrix.os == 'windows-latest'
@@ -170,12 +166,17 @@ jobs:
             Set-Location ..
           }
 
+      - name: Display structure of uncompressed files
+        timeout-minutes: 1
+        run: ls -R
+
       - name: Run the binary (windows only)
         id: run_binary_windows
         timeout-minutes: 1
         if: matrix.os == 'windows-latest'
         run: |
           cd omnistrate-ctl-windows-amd64.exe-compressed
+          cd omnistrate-ctl-windows-arm64.exe
           $ctl_version = .\omnistrate-ctl-windows-amd64.exe --version
           echo "Omnistrate CTL version: $ctl_version"
           echo "ctl_version=$ctl_version" >> $env:GITHUB_OUTPUT
