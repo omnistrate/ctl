@@ -118,6 +118,7 @@ jobs:
 
       - name: Extract compressed artifacts
         timeout-minutes: 2
+        if: matrix.os != 'windows-latest'
         run: |
           # Extract all compressed archives to get individual binaries
           for dir in omnistrate-ctl-*-compressed/; do
@@ -134,6 +135,18 @@ jobs:
             done
             cd ..
           done
+
+      - name: Extract compressed artifacts (Windows)
+        timeout-minutes: 2
+        if: matrix.os == 'windows-latest'
+        run: |
+          Get-ChildItem -Directory -Name "omnistrate-ctl-windows-compressed" | ForEach-Object {
+            Set-Location $_
+            Get-ChildItem -Name "*.zip" | ForEach-Object {
+              Expand-Archive -Path $_ -DestinationPath . -Force
+            }
+            Set-Location ..
+          }
 
       - name: Run the binary (linux and macos only)
         id: run_binary_linux_macos
