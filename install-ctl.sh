@@ -151,20 +151,24 @@ else
     fi
 fi
 
-chmod +x "${OMNISTRATE_CTL}"
+if [ "$OS" != "windows" ]; then
+    chmod +x "${OMNISTRATE_CTL}"
+fi
 say_green "Omnistrate CTL downloaded to ${OMNISTRATE_CTL}"
 
-# Create symlink for omctl
-if [ ! -f "${OMCTL_SYMLINK}" ]; then
-    ln -s "${OMNISTRATE_CTL}" "${OMCTL_SYMLINK}"
-    say_green "Symlink created: omctl -> ${OMNISTRATE_CTL}"
-else
-    say_yellow "Symlink omctl already exists."
+# Create symlink for omctl (not on Windows)
+if [ "$OS" != "windows" ]; then
+    if [ ! -f "${OMCTL_SYMLINK}" ]; then
+        ln -s "${OMNISTRATE_CTL}" "${OMCTL_SYMLINK}"
+        say_green "Symlink created: omctl -> ${OMNISTRATE_CTL}"
+    else
+        say_yellow "Symlink omctl already exists."
+    fi
 fi
 
 # Now that we have installed Omnistrate, if it is not already on the path, let's add a line to the
 # user's profile to add the folder to the PATH for future sessions.
-if [ "${NO_EDIT_PATH}" != "true" ]; then
+if [ "${NO_EDIT_PATH}" != "true" ] && [ "$OS" != "windows" ]; then
     # If we can, we'll add a line to the user's .profile adding ${OMNISTRATE_INSTALL_ROOT}/bin to the PATH
     SHELL_NAME=$(basename "${SHELL}")
     PROFILE_FILE=""
