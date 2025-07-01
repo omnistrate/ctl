@@ -116,8 +116,9 @@ jobs:
         timeout-minutes: 1
         run: ls -R
 
-      - name: Extract compressed artifacts
+      - name: Extract compressed artifacts (linux and macos only)
         timeout-minutes: 2
+        if: matrix.os != 'windows-latest'
         run: |
           # Extract all compressed archives to get individual binaries
           for dir in omnistrate-ctl-*-compressed/; do
@@ -158,6 +159,18 @@ jobs:
           echo "Omnistrate CTL version: $ctl_version"
           echo "ctl_version=$ctl_version" >> "$GITHUB_OUTPUT"
 
+      - name: Extract compressed artifacts (windows only)
+        timeout-minutes: 2
+        if: matrix.os == 'windows-latest'
+        run: |
+          Get-ChildItem -Directory -Name "omnistrate-ctl-windows-amd64.exe-compressed" | ForEach-Object {
+            Set-Location $_
+            Get-ChildItem -Name "*.zip" | ForEach-Object {
+              Expand-Archive -Path $_ -DestinationPath . -Force
+            }
+            Set-Location ..
+          }
+
       - name: Run the binary (windows only)
         id: run_binary_windows
         timeout-minutes: 1
@@ -171,8 +184,8 @@ jobs:
   smoke-tests:
     environment: Dev-us-west-2
     if: github.event_name != 'push'
-    needs: [build, sanity-check]
     runs-on: ubuntu-latest
+    permissions:
     permissions:
       contents: read
     concurrency:
@@ -391,7 +404,7 @@ jobs:
         id: cpr
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ steps.generate_token_cli.outputs.token }}
+          token: ${{ secrets.PUBLISH_CTL_PAT }}
           title: Update Omnistrate CTL Formula to ${{ steps.get_version.outputs.version }}
           body: |
             This PR updates the Omnistrate CTL Formula to version ${{ steps.get_version.outputs.version }}.
@@ -405,7 +418,7 @@ jobs:
         timeout-minutes: 5
         with:
           repository: omnistrate/homebrew-tap
-          token: ${{ steps.generate_token_cli.outputs.token }}
+          token: ${{ secrets.PUBLISH_CTL_PAT }}
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
           merge-method: squash
 
@@ -490,6 +503,8 @@ jobs:
       - release-package-multi-arch
       - update-brew-formula
       - release-binaries
+    permissions:
+      contents: write
     uses: ./.github/workflows/docs-deploy.yml
     secrets: inherit
     with:

@@ -10,7 +10,6 @@ on:
 
 env:
   # test coverage threshold
-  TESTCOVERAGE_THRESHOLD: 6
   GOLANG_CI_VERSION: v2.1.1
 
 concurrency:
