@@ -103,8 +103,7 @@ jobs:
 
     strategy:
       matrix:
-        os:
-          [ubuntu-latest, macos-latest, windows-latest, ubuntu-24.04-arm]
+        os: [ubuntu-latest, macos-latest, windows-latest, ubuntu-24.04-arm]
 
     runs-on: ${{ matrix.os }}
 
@@ -149,7 +148,7 @@ jobs:
           $ctl_version=.\omnistrate-ctl-windows-amd64.exe --version
           echo "Omnistrate CTL version: $ctl_version"
           echo "ctl_version=$ctl_version" >> $env:GITHUB_OUTPUT
-  
+
   smoke-tests:
     environment: Dev-us-west-2
     if: github.event_name != 'push'
