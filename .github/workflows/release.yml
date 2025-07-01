@@ -490,6 +490,8 @@ jobs:
       - release-package-multi-arch
       - update-brew-formula
       - release-binaries
+    permissions:
+      contents: write
     uses: ./.github/workflows/docs-deploy.yml
     secrets: inherit
     with:
