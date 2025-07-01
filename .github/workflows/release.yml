@@ -186,7 +186,6 @@ jobs:
     if: github.event_name != 'push'
     runs-on: ubuntu-latest
     permissions:
-    permissions:
       contents: read
     concurrency:
       group: ${{ github.workflow }}-smoke-tests-${{ matrix.test-group }}
