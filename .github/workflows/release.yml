@@ -21,21 +21,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  set-draft:
+  set-prerelease:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: Set release to draft
+      - name: Set release to pre release
         timeout-minutes: 2
         uses: softprops/action-gh-release@v2
         with:
-          draft: true
+          prerelease: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     runs-on: ubuntu-latest
-    needs: [set-draft]
+    needs: [set-prerelease]
     permissions:
       contents: read
 
@@ -128,11 +128,6 @@ jobs:
                 tar -xzf "$file"
               fi
             done
-            for file in *.zip; do
-              if [ -f "$file" ]; then
-                unzip "$file"
-              fi
-            done
             cd ..
           done
 
@@ -159,6 +154,10 @@ jobs:
           echo "Omnistrate CTL version: $ctl_version"
           echo "ctl_version=$ctl_version" >> "$GITHUB_OUTPUT"
 
+      - name: Display structure of uncompressed files
+        timeout-minutes: 1
+        run: ls -R
+
       - name: Extract compressed artifacts (windows only)
         timeout-minutes: 2
         if: matrix.os == 'windows-latest'
@@ -177,9 +176,9 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           cd omnistrate-ctl-windows-amd64.exe-compressed
-          $ctl_version=.\omnistrate-ctl-windows-amd64.exe --version
+          $ctl_version = .\omnistrate-ctl-windows-amd64.exe --version
           echo "Omnistrate CTL version: $ctl_version"
-          echo "ctl_version=$ctl_version" >> $env:GITHUB_OUTPU
+          echo "ctl_version=$ctl_version" >> $env:GITHUB_OUTPUT
 
   release-binaries:
     environment: Prod
@@ -189,11 +188,11 @@ jobs:
       contents: write
 
     steps:
-      - name: Set release to draft
+      - name: Set release to pre release
         timeout-minutes: 2
         uses: softprops/action-gh-release@v2
         with:
-          draft: true
+          prerelease: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download build artifacts
@@ -238,6 +237,7 @@ jobs:
           token: ${{ secrets.PUBLISH_CTL_PAT }}
           fail_on_unmatched_files: true
           draft: false
+          prerelease: false
 
       - name: Upload compressed files to triggering release
         timeout-minutes: 5
@@ -258,6 +258,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           draft: false
+          prerelease: false
           token: ${{ secrets.GITHUB_TOKEN }}
 
   update-brew-formula:
