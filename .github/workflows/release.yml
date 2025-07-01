@@ -163,7 +163,7 @@ jobs:
         timeout-minutes: 2
         if: matrix.os == 'windows-latest'
         run: |
-          Get-ChildItem -Directory -Name "omnistrate-ctl-windows-compressed" | ForEach-Object {
+          Get-ChildItem -Directory -Name "omnistrate-ctl-windows-amd64.exe-compressed" | ForEach-Object {
             Set-Location $_
             Get-ChildItem -Name "*.zip" | ForEach-Object {
               Expand-Archive -Path $_ -DestinationPath . -Force
@@ -185,6 +185,7 @@ jobs:
     environment: Dev-us-west-2
     if: github.event_name != 'push'
     runs-on: ubuntu-latest
+    permissions:
     permissions:
       contents: read
     concurrency:
