@@ -119,11 +119,36 @@ fi
 mkdir -p "${OMNISTRATE_INSTALL_ROOT}/bin"
 
 say_blue "=== Downloading Omnistrate CTL for ${OS}-${ARCH} ==="
-curl -L -o "${OMNISTRATE_CTL}" ${BASE_URL}
 
+# Try compressed version first
 if [ "$OS" = "windows" ]; then
-    mv "${OMNISTRATE_CTL}" "${OMNISTRATE_INSTALL_ROOT}/bin/omnistrate-ctl.exe"
-    OMNISTRATE_CTL="${OMNISTRATE_INSTALL_ROOT}/bin/omnistrate-ctl.exe"
+    COMPRESSED_URL="${BASE_URL}.zip"
+    TEMP_FILE="${OMNISTRATE_CTL}.exe"
+    
+    if curl -L --fail -o "${TEMP_FILE}.zip" "${COMPRESSED_URL}" 2>/dev/null; then
+        say_blue "Downloaded compressed version, extracting..."
+        unzip -q "${TEMP_FILE}.zip" -d "${OMNISTRATE_INSTALL_ROOT}/bin/"
+        rm "${TEMP_FILE}.zip"
+        mv "${OMNISTRATE_INSTALL_ROOT}/bin/omnistrate-ctl-${OS}-${ARCH}.exe" "${OMNISTRATE_INSTALL_ROOT}/bin/omnistrate-ctl.exe"
+        OMNISTRATE_CTL="${OMNISTRATE_INSTALL_ROOT}/bin/omnistrate-ctl.exe"
+    else
+        say_yellow "Compressed version not available, downloading uncompressed version..."
+        curl -L -o "${TEMP_FILE}" ${BASE_URL}
+        mv "${TEMP_FILE}" "${OMNISTRATE_INSTALL_ROOT}/bin/omnistrate-ctl.exe"
+        OMNISTRATE_CTL="${OMNISTRATE_INSTALL_ROOT}/bin/omnistrate-ctl.exe"
+    fi
+else
+    COMPRESSED_URL="${BASE_URL}.tar.gz"
+    
+    if curl -L --fail -o "${OMNISTRATE_CTL}.tar.gz" "${COMPRESSED_URL}" 2>/dev/null; then
+        say_blue "Downloaded compressed version, extracting..."
+        tar -xzf "${OMNISTRATE_CTL}.tar.gz" -C "${OMNISTRATE_INSTALL_ROOT}/bin/" --strip-components=0
+        rm "${OMNISTRATE_CTL}.tar.gz"
+        mv "${OMNISTRATE_INSTALL_ROOT}/bin/omnistrate-ctl-${OS}-${ARCH}" "${OMNISTRATE_CTL}"
+    else
+        say_yellow "Compressed version not available, downloading uncompressed version..."
+        curl -L -o "${OMNISTRATE_CTL}" ${BASE_URL}
+    fi
 fi
 
 chmod +x "${OMNISTRATE_CTL}"
