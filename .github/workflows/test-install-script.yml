@@ -2,25 +2,12 @@ name: Test Install Script
 
 on:
   workflow_call:
-    inputs:
-      version:
-        description: "Version to test (defaults to latest)"
-        required: false
-        type: string
-        default: ""
   workflow_dispatch:
-    inputs:
-      version:
-        description: "Version to test (defaults to latest)"
-        required: false
-        type: string
-        default: ""
 
 jobs:
   test-install-script:
     runs-on: ${{ matrix.os }}
-    permissions:
-      contents: read
+    permissions: {}
 
     strategy:
       matrix:
@@ -49,3 +36,4 @@ jobs:
 
           omnistrate-ctl.exe --version
           echo "Curl installation successful. Version: $version_output"
+          
