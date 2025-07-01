@@ -151,6 +151,7 @@ else
     fi
 fi
 
+# If the file is not executable, we need to make it executable
 if [ "$OS" != "windows" ]; then
     chmod +x "${OMNISTRATE_CTL}"
 fi
