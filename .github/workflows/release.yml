@@ -191,6 +191,7 @@ jobs:
           }
 
   smoke-tests: 
+    needs: [set-prerelease]
     uses: ./.github/workflows/smoke-tests.yml
     with: 
       environment: Dev-us-west-2
