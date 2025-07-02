@@ -127,6 +127,185 @@ jobs:
           OMNISTRATE_DRY_RUN: true
         run: gotestsum --format github-actions -- ./test/integration_test/... -timeout 1800s -p 1 -p 1 -v
 
+  compile:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    strategy:
+      matrix:
+        goos: [linux, darwin, windows]
+        goarch: [amd64, arm64]
+
+    steps:
+      - name: Checkout repository
+        timeout-minutes: 5
+        uses: actions/checkout@v4
+
+      - name: Set up go
+        timeout-minutes: 10
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          cache-dependency-path: "**/go.sum"
+
+      - name: Get dependencies
+        timeout-minutes: 10
+        run: |
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} make tidy
+
+      - name: Build
+        timeout-minutes: 20
+        run: |
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} make build
+
+      - name: Calculate binary name
+        timeout-minutes: 1
+        id: calc_binary_name
+        run: |
+          binary_name="omnistrate-ctl-${{ matrix.goos }}-${{ matrix.goarch }}"
+          if [ "${{ matrix.goos }}" == "windows" ]; then
+            binary_name="${binary_name}.exe"
+          fi
+          echo "binary_name=$binary_name" >> "$GITHUB_OUTPUT"
+
+      - name: Create compressed archive
+        timeout-minutes: 2
+        run: |
+          cd dist
+          if [ "${{ matrix.goos }}" == "windows" ]; then
+            zip -9 "${{ steps.calc_binary_name.outputs.binary_name }}.zip" "${{ steps.calc_binary_name.outputs.binary_name }}"
+          else
+            tar -czf "${{ steps.calc_binary_name.outputs.binary_name }}.tar.gz" "${{ steps.calc_binary_name.outputs.binary_name }}"
+          fi
+
+      - name: Upload compressed artifacts
+        timeout-minutes: 5
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.calc_binary_name.outputs.binary_name }}-compressed
+          path: |
+            dist/${{ steps.calc_binary_name.outputs.binary_name }}.tar.gz
+            dist/${{ steps.calc_binary_name.outputs.binary_name }}.zip
+
+  sanity-check:
+    needs: compile
+    permissions:
+      contents: read
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest, ubuntu-24.04-arm]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Download build artifacts
+        timeout-minutes: 5
+        uses: actions/download-artifact@v4
+
+      - name: Display structure of downloaded files
+        timeout-minutes: 1
+        run: ls -R
+
+      - name: Extract compressed artifacts (linux and macos only)
+        timeout-minutes: 2
+        if: matrix.os != 'windows-latest'
+        run: |
+          # Extract all compressed archives to get individual binaries
+          for dir in omnistrate-ctl-*-compressed/; do
+            cd "$dir"
+            for file in *.tar.gz; do
+              if [ -f "$file" ]; then
+                tar -xzf "$file"
+              fi
+            done
+            cd ..
+          done
+
+      - name: Run the binary (linux and macos only)
+        id: run_binary_linux_macos
+        timeout-minutes: 1
+        if: matrix.os != 'windows-latest'
+        run: |
+          if [ "${{ matrix.os }}" == "macos-latest" ]; then
+            export GOOS=darwin
+            export GOARCH=arm64
+          elif [ "${{ matrix.os }}" == "ubuntu-24.04-arm" ]; then
+            export GOOS=linux
+            export GOARCH=arm64
+          else
+            export GOOS=linux
+            export GOARCH=amd64
+          fi
+
+          binary_name="omnistrate-ctl-${GOOS}-${GOARCH}"
+          cd "${binary_name}-compressed"
+          chmod +x $binary_name
+          ctl_version=$(./$binary_name --version)
+          echo "Omnistrate CTL version: $ctl_version"
+          echo "ctl_version=$ctl_version" >> "$GITHUB_OUTPUT"
+
+      - name: Extract compressed artifacts (windows only)
+        timeout-minutes: 2
+        if: matrix.os == 'windows-latest'
+        run: |
+          Write-Host "Starting Windows ZIP extraction..."
+          
+          # List all directories first
+          Write-Host "Available directories:"
+          Get-ChildItem -Directory | ForEach-Object { Write-Host "  - $($_.Name)" }
+          
+          # Extract Windows ZIP files for both AMD64 and ARM64
+          Get-ChildItem -Directory -Name "omnistrate-ctl-windows-amd64.exe-compressed" | ForEach-Object {
+            Write-Host "Processing directory: $_"
+            Set-Location $_
+            
+            # List contents of current directory
+            Write-Host "Contents of ${_}:"
+            Get-ChildItem | ForEach-Object { Write-Host "  - $($_.Name) ($($_.Length) bytes)" }
+            
+            Get-ChildItem -Name "*.zip" | ForEach-Object {
+              Write-Host "Extracting $_ to current directory..."
+              try {
+                Expand-Archive -Path $_ -DestinationPath . -Force
+                Write-Host "Successfully extracted $_"
+                
+                # List extracted files
+                Write-Host "Files after extraction:"
+                Get-ChildItem | Where-Object { !$_.Name.EndsWith('.zip') } | ForEach-Object { 
+                  Write-Host "  - $($_.Name) ($($_.Length) bytes)" 
+                }
+              } catch {
+                Write-Error "Failed to extract $_: $($_.Exception.Message)"
+              }
+            }
+            Set-Location ..
+          }
+          
+          Write-Host "Windows ZIP extraction completed."
+
+      - name: Display structure of uncompressed files
+        timeout-minutes: 1
+        run: ls -R
+
+      - name: Run the binary (windows only)
+        id: run_binary_windows
+        timeout-minutes: 1
+        if: matrix.os == 'windows-latest'
+        run: |
+          # First extract the AMD64 binary if it's not already extracted
+          if (Test-Path "omnistrate-ctl-windows-amd64.exe-compressed") {
+            cd omnistrate-ctl-windows-amd64.exe-compressed
+            $ctl_version = .\omnistrate-ctl-windows-amd64.exe --version
+            echo "Omnistrate CTL version: $ctl_version"
+            echo "ctl_version=$ctl_version" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Error "AMD64 binary directory not found"
+            exit 1
+          }
+
   publish:
     if: github.event_name == 'push'
     needs: [build, lint]
