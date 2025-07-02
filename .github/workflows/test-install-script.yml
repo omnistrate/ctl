@@ -3,7 +3,9 @@ name: Test Install Script
 on:
   workflow_call:
   workflow_dispatch:
-
+  pull_request:
+    branches: ["main"]
+  
 jobs:
   test-install-script:
     runs-on: ${{ matrix.os }}
@@ -20,7 +22,7 @@ jobs:
         run: |
           # Test the exact curl command from the documentation
           # This simulates what users will actually run
-          curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/main/install-ctl.sh
+          curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/main/install-ctl.sh | sh
 
           ctl_version=$(./omnistrate-ctl --version)
           echo "Omnistrate CTL version: $ctl_version"
@@ -33,7 +35,7 @@ jobs:
         run: |
           # Test the exact curl command from the documentation
           # This simulates what users will actually run
-          curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/main/install-ctl.sh
+          curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/main/install-ctl.sh | sh
 
           $ctl_version=.\omnistrate-ctl.exe --version
           echo "Omnistrate CTL version: $ctl_version"
