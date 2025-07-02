@@ -158,13 +158,17 @@ jobs:
         timeout-minutes: 2
         if: matrix.os == 'windows-latest'
         run: |
-          Get-ChildItem -Directory -Name "omnistrate-ctl-windows-amd64.exe-compressed" | ForEach-Object {
-            Set-Location $_
-            Get-ChildItem -Name "*.zip" | ForEach-Object {
-              Expand-Archive -Path $_ -DestinationPath . -Force
-            }
-            Set-Location ..
-          }
+          Write-Host "Starting Windows ZIP extraction..."
+          
+          cd omnistrate-ctl-windows-amd64.exe-compressed
+          
+          $zipFile = "omnistrate-ctl-windows-amd64.exe.zip"
+          Write-Host "Extracting $zipFile to current directory..."
+          Expand-Archive -Path $zipFile -DestinationPath . -Force
+      
+          Set-Location ..
+          
+          Write-Host "Windows ZIP extraction completed."
 
       - name: Display structure of uncompressed files
         timeout-minutes: 1
@@ -175,11 +179,16 @@ jobs:
         timeout-minutes: 1
         if: matrix.os == 'windows-latest'
         run: |
-          cd omnistrate-ctl-windows-amd64.exe-compressed
-          cd omnistrate-ctl-windows-arm64.exe
-          $ctl_version = .\omnistrate-ctl-windows-amd64.exe --version
-          echo "Omnistrate CTL version: $ctl_version"
-          echo "ctl_version=$ctl_version" >> $env:GITHUB_OUTPUT
+          # First extract the AMD64 binary if it's not already extracted
+          if (Test-Path "omnistrate-ctl-windows-amd64.exe-compressed") {
+            cd omnistrate-ctl-windows-amd64.exe-compressed
+            $ctl_version = .\omnistrate-ctl-windows-amd64.exe --version
+            echo "Omnistrate CTL version: $ctl_version"
+            echo "ctl_version=$ctl_version" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Error "AMD64 binary directory not found"
+            exit 1
+          }
 
   release-binaries:
     environment: Prod
