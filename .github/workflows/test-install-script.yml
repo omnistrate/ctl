@@ -19,6 +19,7 @@ jobs:
       - name: Test curl installation
         timeout-minutes: 10
         if: matrix.os != 'windows-latest'
+        shell: bash
         run: |
           # Test the exact curl command from the documentation
           # This simulates what users will actually run
