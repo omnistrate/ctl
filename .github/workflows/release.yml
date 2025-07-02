@@ -190,10 +190,18 @@ jobs:
             exit 1
           }
 
+  smoke-tests: 
+    uses: ./.github/workflows/smoke-tests.yml
+    with: 
+      environment: Dev-us-west-2
+    secrets: inherit
+    permissions: 
+      contents: read
+
   release-binaries:
     environment: Prod
     runs-on: ubuntu-latest
-    needs: [build, sanity-check]
+    needs: [build, sanity-check, smoke-tests]
     permissions:
       contents: write
 
@@ -271,12 +279,21 @@ jobs:
           prerelease: false
           token: ${{ secrets.GITHUB_TOKEN }}
 
+  test-install-script: 
+    uses: ./.github/workflows/test-install-script.yml
+    needs:
+      - build
+      - release-binaries
+    permissions: 
+      contents: read
+
   update-brew-formula:
     environment: Prod
     runs-on: ubuntu-latest
     needs:
       - build
       - release-binaries
+      - test-install-script
     permissions:
       contents: read
 
@@ -423,7 +440,7 @@ jobs:
 
       # https://github.com/docker/build-push-action
       - name: Build and push multi-arch
-        timeout-minutes: 20
+        timeout-minutes: 60
         id: build-and-push
         uses: docker/build-push-action@v6
         with:
