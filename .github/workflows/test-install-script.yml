@@ -5,6 +5,9 @@ on:
   workflow_dispatch:
   pull_request:
     branches: ["main"]
+    paths:
+      - "install-ctl.sh"
+      - ".github/workflows/test-install-script.yml"
   
 jobs:
   test-install-script:
