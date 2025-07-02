@@ -190,10 +190,16 @@ jobs:
             exit 1
           }
 
+  smoke-tests: 
+    uses: ./.github/workflows/smoke-tests.yml
+    with: 
+      environment: Dev-us-west-2
+    secrets: inherit
+
   release-binaries:
     environment: Prod
     runs-on: ubuntu-latest
-    needs: [build, sanity-check]
+    needs: [build, sanity-check, smoke-tests]
     permissions:
       contents: write
 

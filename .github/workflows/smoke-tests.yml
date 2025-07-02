@@ -2,11 +2,23 @@ name: Smoke Tests
 
 on:
   workflow_call:
+    inputs:
+      environment:
+        description: "Environment to run the smoke tests in"
+        required: true
+        type: string
   workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to run the smoke tests in"
+        required: true
+        type: string
+        default: "Dev-us-west-2"
+
 
 jobs:
   smoke-tests:
-    environment: Dev-us-west-2
+    environment: ${{ inputs.environment }}
     if: github.event_name != 'push'
     runs-on: ubuntu-latest
     permissions:
