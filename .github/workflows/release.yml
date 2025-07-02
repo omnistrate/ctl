@@ -389,7 +389,7 @@ jobs:
   release-package-multi-arch:
     environment: Prod
     runs-on: ubuntu-latest
-    needs: sanity-check
+    needs: [sanity-check, smoke-tests]
     permissions:
       contents: read
       packages: write
