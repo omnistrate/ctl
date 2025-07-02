@@ -195,6 +195,8 @@ jobs:
     with: 
       environment: Dev-us-west-2
     secrets: inherit
+    permissions: 
+      contents: read
 
   release-binaries:
     environment: Prod
@@ -282,6 +284,8 @@ jobs:
     needs:
       - build
       - release-binaries
+    permissions: 
+      contents: read
 
   update-brew-formula:
     environment: Prod
