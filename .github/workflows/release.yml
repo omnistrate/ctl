@@ -191,6 +191,7 @@ jobs:
           }
 
   smoke-tests: 
+    needs: [set-prerelease]
     uses: ./.github/workflows/smoke-tests.yml
     with: 
       environment: Dev-us-west-2
@@ -388,7 +389,7 @@ jobs:
   release-package-multi-arch:
     environment: Prod
     runs-on: ubuntu-latest
-    needs: sanity-check
+    needs: [sanity-check, smoke-tests]
     permissions:
       contents: read
       packages: write
