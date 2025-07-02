@@ -24,6 +24,8 @@ jobs:
           # This simulates what users will actually run
           curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/main/install-ctl.sh | sh
 
+          # Add omnistrate-ctl to PATH and get version
+          export PATH="$HOME/.omnistrate/bin:$PATH"
           ctl_version=$(omnistrate-ctl --version)
           echo "Omnistrate CTL version: $ctl_version"
           echo "ctl_version=$ctl_version" >> "$GITHUB_OUTPUT"
