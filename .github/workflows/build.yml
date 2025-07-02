@@ -258,19 +258,21 @@ jobs:
           Get-ChildItem -Directory | ForEach-Object { Write-Host "  - $($_.Name)" }
           
           # Extract Windows ZIP files for both AMD64 and ARM64
-          Get-ChildItem -Directory -Name "omnistrate-ctl-windows-amd64.exe-compressed" | ForEach-Object {
-            Write-Host "Processing directory: $_"
-            Set-Location $_
+          Get-ChildItem -Directory -Name "*windows*.exe-compressed" | ForEach-Object {
+            $dirName = $_.Name
+            Write-Host "Processing directory: $dirName"
+            Set-Location $dirName
             
             # List contents of current directory
-            Write-Host "Contents of ${_}:"
+            Write-Host "Contents of directory:"
             Get-ChildItem | ForEach-Object { Write-Host "  - $($_.Name) ($($_.Length) bytes)" }
             
             Get-ChildItem -Name "*.zip" | ForEach-Object {
-              Write-Host "Extracting $_ to current directory..."
+              $zipFile = $_.Name
+              Write-Host "Extracting $zipFile to current directory..."
               try {
-                Expand-Archive -Path $_ -DestinationPath . -Force
-                Write-Host "Successfully extracted $_"
+                Expand-Archive -Path $zipFile -DestinationPath . -Force
+                Write-Host "Successfully extracted $zipFile"
                 
                 # List extracted files
                 Write-Host "Files after extraction:"
@@ -278,7 +280,8 @@ jobs:
                   Write-Host "  - $($_.Name) ($($_.Length) bytes)" 
                 }
               } catch {
-                Write-Error "Failed to extract $_: $($PSItem.Exception.Message)"
+                Write-Error "Failed to extract ZIP file"
+                throw
               }
             }
             Set-Location ..
