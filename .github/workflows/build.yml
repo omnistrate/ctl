@@ -278,7 +278,7 @@ jobs:
                   Write-Host "  - $($_.Name) ($($_.Length) bytes)" 
                 }
               } catch {
-                Write-Error "Failed to extract $_: $($_.Exception.Message)"
+                Write-Error "Failed to extract $_: $($PSItem.Exception.Message)"
               }
             }
             Set-Location ..
