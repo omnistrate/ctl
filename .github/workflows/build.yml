@@ -253,39 +253,13 @@ jobs:
         run: |
           Write-Host "Starting Windows ZIP extraction..."
           
-          # List all directories first
-          Write-Host "Available directories:"
-          Get-ChildItem -Directory | ForEach-Object { Write-Host "  - $($_.Name)" }
+          cd omnistrate-ctl-windows-amd64.exe-compressed
           
-          # Extract Windows ZIP files for both AMD64 and ARM64
-          Get-ChildItem -Directory -Name "*windows*.exe-compressed" | ForEach-Object {
-            $dirName = $_.Name
-            Write-Host "Processing directory: $dirName"
-            Set-Location $dirName
-            
-            # List contents of current directory
-            Write-Host "Contents of directory:"
-            Get-ChildItem | ForEach-Object { Write-Host "  - $($_.Name) ($($_.Length) bytes)" }
-            
-            Get-ChildItem -Name "*.zip" | ForEach-Object {
-              $zipFile = $_.Name
-              Write-Host "Extracting $zipFile to current directory..."
-              try {
-                Expand-Archive -Path $zipFile -DestinationPath . -Force
-                Write-Host "Successfully extracted $zipFile"
-                
-                # List extracted files
-                Write-Host "Files after extraction:"
-                Get-ChildItem | Where-Object { !$_.Name.EndsWith('.zip') } | ForEach-Object { 
-                  Write-Host "  - $($_.Name) ($($_.Length) bytes)" 
-                }
-              } catch {
-                Write-Error "Failed to extract ZIP file"
-                throw
-              }
-            }
-            Set-Location ..
-          }
+          $zipFile = "omnistrate-ctl-windows-amd64.exe.zip"
+          Write-Host "Extracting $zipFile to current directory..."
+          Expand-Archive -Path $zipFile -DestinationPath . -Force
+      
+          Set-Location ..
           
           Write-Host "Windows ZIP extraction completed."
 
