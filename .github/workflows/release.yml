@@ -159,15 +159,15 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           Write-Host "Starting Windows ZIP extraction..."
-          
+
           cd omnistrate-ctl-windows-amd64.exe-compressed
-          
+
           $zipFile = "omnistrate-ctl-windows-amd64.exe.zip"
           Write-Host "Extracting $zipFile to current directory..."
           Expand-Archive -Path $zipFile -DestinationPath . -Force
-      
+
           Set-Location ..
-          
+
           Write-Host "Windows ZIP extraction completed."
 
       - name: Display structure of uncompressed files
@@ -190,13 +190,13 @@ jobs:
             exit 1
           }
 
-  smoke-tests: 
+  smoke-tests:
     needs: [set-prerelease]
     uses: ./.github/workflows/smoke-tests.yml
-    with: 
+    with:
       environment: Dev-us-west-2
     secrets: inherit
-    permissions: 
+    permissions:
       contents: read
 
   release-binaries:
@@ -280,12 +280,12 @@ jobs:
           prerelease: false
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  test-install-script: 
+  test-install-script:
     uses: ./.github/workflows/test-install-script.yml
     needs:
       - build
       - release-binaries
-    permissions: 
+    permissions:
       contents: read
 
   update-brew-formula:

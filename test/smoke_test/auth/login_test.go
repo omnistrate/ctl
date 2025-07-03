@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/omnistrate/ctl/cmd"
-	"github.com/omnistrate/ctl/test/testutils"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd"
+	"github.com/omnistrate-oss/omnistrate-ctl/test/testutils"
 
 	"github.com/stretchr/testify/require"
 )

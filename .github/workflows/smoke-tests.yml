@@ -15,7 +15,6 @@ on:
         type: string
         default: "Dev-us-west-2"
 
-
 jobs:
   smoke-tests:
     environment: ${{ inputs.environment }}
