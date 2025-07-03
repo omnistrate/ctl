@@ -6,7 +6,7 @@ import (
 	"net/http/httputil"
 
 	"github.com/hashicorp/go-retryablehttp"
-	"github.com/omnistrate-oss/ctl/internal/config"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/config"
 	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/pkg/errors"

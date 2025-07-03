@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/omnistrate-oss/ctl/internal/dataaccess"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/dataaccess"
 )
 
 // GenerateMockup creates a text-based representation of what the TUI would look like

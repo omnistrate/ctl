@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/omnistrate-oss/ctl/internal/config"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/config"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )

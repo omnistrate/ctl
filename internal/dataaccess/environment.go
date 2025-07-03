@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/omnistrate-oss/ctl/internal/utils"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/utils"
 	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/pkg/errors"
 )

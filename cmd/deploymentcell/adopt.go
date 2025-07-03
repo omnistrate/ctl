@@ -9,10 +9,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/omnistrate-oss/ctl/cmd/common"
-	"github.com/omnistrate-oss/ctl/internal/config"
-	"github.com/omnistrate-oss/ctl/internal/dataaccess"
-	"github.com/omnistrate-oss/ctl/internal/utils"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/common"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/config"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/dataaccess"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/utils"
 	"github.com/spf13/cobra"
 )
 

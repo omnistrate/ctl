@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/omnistrate-oss/ctl/internal/dataaccess"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/dataaccess"
 
 	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 )

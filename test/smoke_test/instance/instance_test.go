@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/omnistrate-oss/ctl/cmd"
-	"github.com/omnistrate-oss/ctl/cmd/instance"
-	"github.com/omnistrate-oss/ctl/test/testutils"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/instance"
+	"github.com/omnistrate-oss/omnistrate-ctl/test/testutils"
 	"github.com/stretchr/testify/require"
 )
 

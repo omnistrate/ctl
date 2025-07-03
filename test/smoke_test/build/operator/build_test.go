@@ -6,9 +6,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/omnistrate-oss/ctl/cmd"
-	"github.com/omnistrate-oss/ctl/cmd/build"
-	"github.com/omnistrate-oss/ctl/test/testutils"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/build"
+	"github.com/omnistrate-oss/omnistrate-ctl/test/testutils"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"

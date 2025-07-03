@@ -90,9 +90,9 @@ arm64 | aarch64) ARCH="arm64" ;;
 esac
 
 if [ -z "${VERSION}" ]; then
-    BASE_URL="https://github.com/omnistrate-oss/ctl/releases/latest/download/omnistrate-ctl-${OS}-${ARCH}"
+    BASE_URL="https://github.com/omnistrate-oss/omnistrate-ctl/releases/latest/download/omnistrate-ctl-${OS}-${ARCH}"
 else
-    BASE_URL="https://github.com/omnistrate-oss/ctl/releases/download/${VERSION}/omnistrate-ctl-${OS}-${ARCH}"
+    BASE_URL="https://github.com/omnistrate-oss/omnistrate-ctl/releases/download/${VERSION}/omnistrate-ctl-${OS}-${ARCH}"
 fi
 
 if [ "$OS" = "windows" ]; then

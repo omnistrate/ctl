@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/omnistrate-oss/ctl/internal/dataaccess"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/dataaccess"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )

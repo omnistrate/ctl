@@ -3,7 +3,7 @@ package dataaccess
 import (
 	"context"
 
-	"github.com/omnistrate-oss/ctl/internal/model"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/model"
 
 	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 )

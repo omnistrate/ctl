@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/fatih/color"
-	"github.com/omnistrate-oss/ctl/internal/config"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/config"
 )
 
 var (

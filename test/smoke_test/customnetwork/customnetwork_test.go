@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/omnistrate-oss/ctl/cmd"
-	"github.com/omnistrate-oss/ctl/cmd/customnetwork"
-	"github.com/omnistrate-oss/ctl/internal/config"
-	"github.com/omnistrate-oss/ctl/internal/dataaccess"
-	"github.com/omnistrate-oss/ctl/internal/utils"
-	"github.com/omnistrate-oss/ctl/test/testutils"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/customnetwork"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/config"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/dataaccess"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/utils"
+	"github.com/omnistrate-oss/omnistrate-ctl/test/testutils"
 	"github.com/stretchr/testify/require"
 )
 

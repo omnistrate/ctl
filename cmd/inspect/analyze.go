@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/util/homedir"
 
-	"github.com/omnistrate-oss/ctl/internal/dataaccess"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/dataaccess"
 )
 
 var (

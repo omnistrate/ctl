@@ -8,7 +8,7 @@ Thank you for considering contributing to this project! We welcome all contribut
 2. Clone your fork:
 
 ```
-git clone https://github.com/omnistrate-oss/ctl.git
+git clone https://github.com/omnistrate-oss/omnistrate-ctl.git
 cd repository-name
 ```
 
@@ -56,4 +56,4 @@ git merge origin/main
 
 ## Issues
 
-Feel free to report bugs or suggest features by opening a new [issue](https://github.com/omnistrate-oss/ctl/issues). Before submitting, check if the issue already exists. If so, feel free to comment on it.
+Feel free to report bugs or suggest features by opening a new [issue](https://github.com/omnistrate-oss/omnistrate-ctl/issues). Before submitting, check if the issue already exists. If so, feel free to comment on it.

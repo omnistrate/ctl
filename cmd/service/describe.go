@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/omnistrate-oss/ctl/cmd/common"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/common"
 
 	"github.com/chelnak/ysmrr"
-	"github.com/omnistrate-oss/ctl/internal/config"
-	"github.com/omnistrate-oss/ctl/internal/dataaccess"
-	"github.com/omnistrate-oss/ctl/internal/utils"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/config"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/dataaccess"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/utils"
 	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 	"github.com/pkg/errors"
