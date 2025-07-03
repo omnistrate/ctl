@@ -3,15 +3,16 @@ package instance
 import (
 	"encoding/json"
 	"errors"
+	"strings"
+
 	"github.com/chelnak/ysmrr"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/common"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/config"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/dataaccess"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/utils"
 	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
-	"github.com/omnistrate/ctl/cmd/common"
-	"github.com/omnistrate/ctl/internal/config"
-	"github.com/omnistrate/ctl/internal/dataaccess"
-	"github.com/omnistrate/ctl/internal/utils"
 	errors2 "github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 const (

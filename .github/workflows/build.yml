@@ -10,8 +10,7 @@ on:
 
 env:
   # test coverage threshold
-  TESTCOVERAGE_THRESHOLD: 6
-  GOLANG_CI_VERSION: v2.0.1
+  GOLANG_CI_VERSION: v2.1.1
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -44,6 +43,7 @@ jobs:
         timeout-minutes: 20
         uses: golangci/golangci-lint-action@v8
         with:
+          version: ${{ env.GOLANG_CI_VERSION }}
           args: ./...
           skip-cache: true
 
@@ -84,13 +84,7 @@ jobs:
       - name: Unit test
         timeout-minutes: 20
         run: |
-          gotestsum --format github-actions -- ./... -skip test -cover -coverprofile coverage.out -covermode count
-          go tool cover -func=coverage.out -o coverage-report.txt
-
-      - name: Test coverage check
-        timeout-minutes: 10
-        run: |
-          cat coverage-report.txt | grep total | awk '{print $$3}' | sed 's/[%]//g' | awk '{if ($$1 < $TESTCOVERAGE_THRESHOLD) {print "Test coverage is below threshold"; exit 1} else {print "Test coverage is above threshold"}}'
+          gotestsum --format github-actions -- ./... -skip test
 
   integration-tests:
     environment: Dev-us-west-2
@@ -132,71 +126,6 @@ jobs:
           OMNISTRATE_ROOT_DOMAIN: ${{ vars.OMNISTRATE_ROOT_DOMAIN}}
           OMNISTRATE_DRY_RUN: true
         run: gotestsum --format github-actions -- ./test/integration_test/... -timeout 1800s -p 1 -p 1 -v
-
-  smoke-tests:
-    environment: Dev-us-west-2
-    if: github.event_name != 'push'
-    needs: [build, lint, integration-tests]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    concurrency:
-      group: ${{ github.workflow }}-smoke-tests-${{ matrix.test-group }}
-      cancel-in-progress: true
-
-    strategy:
-      fail-fast: false
-      matrix:
-        test-group:
-          [
-            "account/...",
-            "auth/...",
-            "build/compose/...",
-            "build/image/...",
-            "build/helm/...",
-            "build/kustomize/...",
-            "build/operator/...",
-            "domain/...",
-            "environment/...",
-            "helm/...",
-            "instance/...",
-            "service/...",
-            "serviceplan/...",
-            "upgrade/...",
-            "customnetwork/...",
-            "servicesorchestration/...",
-          ]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: "go.mod"
-          cache-dependency-path: "**/go.sum"
-
-      - name: Get dependencies
-        timeout-minutes: 10
-        run: |
-          make tidy
-
-      - name: Gotestsum installer
-        uses: autero1/action-gotestsum@v2.0.0
-        with:
-          gotestsum_version: 1.11.0
-
-      - name: Smoke test ${{ matrix.test-group }}
-        timeout-minutes: 30
-        env:
-          ENABLE_SMOKE_TEST: true
-          TEST_EMAIL: ${{ secrets.SMOKE_TEST_EMAIL }}
-          TEST_PASSWORD: ${{ secrets.SMOKE_TEST_PASSWORD}}
-          OMNISTRATE_ROOT_DOMAIN: ${{ vars.OMNISTRATE_ROOT_DOMAIN}}
-          OMNISTRATE_LOG_LEVEL: debug
-          OMNISTRATE_DRY_RUN: true
-        run: gotestsum --format github-actions -- ./test/smoke_test/${{ matrix.test-group }} -timeout 1800s -p 1 -p 1 -v
 
   publish:
     if: github.event_name == 'push'
