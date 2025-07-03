@@ -190,7 +190,7 @@ func DescribeResourceInstance(ctx context.Context, token string, serviceID, envi
 		serviceID,
 		environmentID,
 		instanceID,
-	)
+	).Detail(true)
 
 	var r *http.Response
 	defer func() {
@@ -346,6 +346,40 @@ func UpdateResourceInstance(
 	r, err = req.Execute()
 	if err != nil {
 		return handleFleetError(err)
+	}
+	return
+}
+
+func AdoptResourceInstance(ctx context.Context, token string, serviceID, servicePlanID, hostClusterID, primaryResourceKey string, request openapiclientfleet.AdoptResourceInstanceRequest2, servicePlanVersion, subscriptionID *string) (res *openapiclientfleet.FleetCreateResourceInstanceResult, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
+
+	req := apiClient.InventoryApiAPI.InventoryApiAdoptResourceInstance(
+		ctxWithToken,
+		serviceID,
+		servicePlanID,
+		hostClusterID,
+		primaryResourceKey,
+	).AdoptResourceInstanceRequest2(request)
+
+	// Add optional parameters if provided
+	if servicePlanVersion != nil && *servicePlanVersion != "" {
+		req = req.ServicePlanVersion(*servicePlanVersion)
+	}
+	if subscriptionID != nil && *subscriptionID != "" {
+		req = req.SubscriptionID(*subscriptionID)
+	}
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	res, r, err = req.Execute()
+	if err != nil {
+		return nil, handleFleetError(err)
 	}
 	return
 }

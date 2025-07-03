@@ -30,6 +30,7 @@ func init() {
 	Cmd.AddCommand(triggerBackupCmd)
 	Cmd.AddCommand(listSnapshotsCmd)
 	Cmd.AddCommand(restoreCmd)
+	Cmd.AddCommand(adoptCmd)
 }
 
 func run(cmd *cobra.Command, args []string) {
