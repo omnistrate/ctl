@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/config"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/utils"
 	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
-	"github.com/omnistrate/ctl/internal/config"
-	"github.com/omnistrate/ctl/internal/utils"
 )
 
 func ListDomains(ctx context.Context, token string) (*openapiclientv1.ListSaaSPortalCustomDomainsResult, error) {

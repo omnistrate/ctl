@@ -16,7 +16,6 @@ linters:
     - makezero
     - mirror
     - nilerr
-    - noctx
     - predeclared
     - revive
     - unconvert

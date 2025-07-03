@@ -13,7 +13,6 @@ ARG TARGETARCH
 ARG GOPROXY
 ARG GOSUMDB
 ENV CGO_ENABLED=0
-ENV GOMAXPROCS=8
 
 RUN echo Fetching project dependencies
 RUN --mount=type=cache,target=/go/pkg/mod \

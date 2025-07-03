@@ -12,35 +12,31 @@ services:
     terraformConfigurations:
       configurationPerCloudProvider:
         aws:
-          terraformPath: /e2etestv2/original/terraform
+          terraformPath: /test/resources/aws/terraform
           gitConfiguration:
-            reference: refs/tags/v3.7.1
-            repositoryUrl: https://github.com/omnistrate/resource-spec-samples.git
-            accessToken: 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
+            reference: refs/heads/main
+            repositoryUrl: https://github.com/omnistrate-oss/omnistrate-ctl.git
           terraformExecutionIdentity: "arn:aws:iam::339713121445:role/omnistrate-custom-terraform-execution-role"
         gcp:
-          terraformPath: /e2etestv2/original/terraform
+          terraformPath: /test/resources/gcp/terraform
           gitConfiguration:
-            reference: refs/tags/v3.7.1
-            repositoryUrl: https://github.com/omnistrate/resource-spec-samples.git
-            accessToken: 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
+            reference: refs/heads/main
+            repositoryUrl: https://github.com/omnistrate-oss/omnistrate-ctl.git
   - name: terraformChild2
     internal: true
     terraformConfigurations:
       configurationPerCloudProvider:
         aws:
-          terraformPath: /e2etestv2/original/terraform2
+          terraformPath: /test/resources/aws/terraform2
           gitConfiguration:
-            reference: refs/tags/v3.7.1
-            repositoryUrl: https://github.com/omnistrate/resource-spec-samples.git
-            accessToken: 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
+            reference: refs/heads/main
+            repositoryUrl: https://github.com/omnistrate-oss/omnistrate-ctl.git
           terraformExecutionIdentity: "arn:aws:iam::339713121445:role/omnistrate-custom-terraform-execution-role"
         gcp:
-          terraformPath: /e2etestv2/original/terraform2
+          terraformPath: /test/resources/gcp/terraform2
           gitConfiguration:
-            reference: refs/tags/v3.7.1
-            repositoryUrl: https://github.com/omnistrate/resource-spec-samples.git
-            accessToken: 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
+            reference: refs/heads/main
+            repositoryUrl: https://github.com/omnistrate-oss/omnistrate-ctl.git
   - name: kustomizeRoot
     type: kustomize
     dependsOn:
@@ -56,11 +52,10 @@ services:
       ports:
         - 3306
     kustomizeConfiguration:
-      kustomizePath: /e2etestv2/original/kustomize
+      kustomizePath: /test/resources/kustomize
       gitConfiguration:
-        reference: refs/tags/v3.7.1
-        repositoryUrl: https://github.com/omnistrate/resource-spec-samples.git
-        accessToken: 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
+        reference: refs/heads/main
+        repositoryUrl: https://github.com/omnistrate-oss/omnistrate-ctl.git
     apiParameters:
       - key: username
         description: Username

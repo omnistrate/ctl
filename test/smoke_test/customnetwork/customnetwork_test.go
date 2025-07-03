@@ -3,14 +3,15 @@ package customnetwork
 import (
 	"context"
 	"fmt"
-	"github.com/omnistrate/ctl/cmd"
-	"github.com/omnistrate/ctl/cmd/customnetwork"
-	"github.com/omnistrate/ctl/internal/config"
-	"github.com/omnistrate/ctl/internal/dataaccess"
-	"github.com/omnistrate/ctl/internal/utils"
-	"github.com/omnistrate/ctl/test/testutils"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/customnetwork"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/config"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/dataaccess"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/utils"
+	"github.com/omnistrate-oss/omnistrate-ctl/test/testutils"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_custom_network_lifecycle(t *testing.T) {

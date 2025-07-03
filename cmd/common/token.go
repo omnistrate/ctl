@@ -1,8 +1,8 @@
 package common
 
 import (
-	"github.com/omnistrate/ctl/cmd/auth/login"
-	"github.com/omnistrate/ctl/internal/config"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/auth/login"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/config"
 	"github.com/pkg/errors"
 )
 

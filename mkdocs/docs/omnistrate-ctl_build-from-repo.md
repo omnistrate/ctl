@@ -41,6 +41,9 @@ omctl build-from-repo --dry-run
 # Build for multiple platforms
 omctl build-from-repo --platforms linux/amd64 --platforms linux/arm64
 
+# Build with release description
+omctl build-from-repo --release-description "v1.0.0-alpha"
+
 # Build using github token from environment variable (GH_PAT)
 set GH_PAT=ghp_xxxxxxxx
 omctl build-from-repo
@@ -60,6 +63,7 @@ omctl build-from-repo
   -h, --help                         help for build-from-repo
   -o, --output string                Output format. Only text is supported (default "text")
       --platforms stringArray        Specify the platforms to build for. Use the format: --platforms linux/amd64 --platforms linux/arm64. Default is linux/amd64. (default [linux/amd64])
+      --release-description string   Provide a description for the release version
       --reset-pat                    Reset the GitHub Personal Access Token (PAT) for the current user.
       --service-name string          Specify a custom service name. If not provided, the repository name will be used.
       --skip-docker-build            Skip building and pushing the Docker image

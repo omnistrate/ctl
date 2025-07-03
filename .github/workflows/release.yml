@@ -3,7 +3,6 @@ name: Release
 on:
   release:
     types: ["published"]
-  workflow_dispatch:
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -22,8 +21,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  set-prerelease:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Set release to pre release
+        timeout-minutes: 2
+        uses: softprops/action-gh-release@v2
+        with:
+          prerelease: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
   build:
     runs-on: ubuntu-latest
+    needs: [set-prerelease]
     permissions:
       contents: read
 
@@ -37,27 +49,12 @@ jobs:
         timeout-minutes: 5
         uses: actions/checkout@v4
 
-      - name: Generate token
-        timeout-minutes: 5
-        id: generate_token
-        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a
-        with:
-          app_id: ${{ secrets.CI_APP_ID }}
-          private_key: ${{ secrets.CI_APP_PRIVATE_KEY }}
-
-      - name: Configure git for private repo access
-        timeout-minutes: 5
-        env:
-          GH_ACCESS_TOKEN: ${{ steps.generate_token.outputs.token }}
-        run: |
-          echo "machine github.com login api password ${GH_ACCESS_TOKEN}" > ~/.netrc
-
       - name: Set up go
         timeout-minutes: 10
         uses: actions/setup-go@v5
         with:
           go-version-file: "go.mod"
-          token: ${{ steps.generate_token.outputs.token }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           cache-dependency-path: "**/go.sum"
 
       - name: Get dependencies
@@ -80,12 +77,24 @@ jobs:
           fi
           echo "binary_name=$binary_name" >> "$GITHUB_OUTPUT"
 
-      - name: Upload build artifacts
+      - name: Create compressed archive
+        timeout-minutes: 2
+        run: |
+          cd dist
+          if [ "${{ matrix.goos }}" == "windows" ]; then
+            zip -9 "${{ steps.calc_binary_name.outputs.binary_name }}.zip" "${{ steps.calc_binary_name.outputs.binary_name }}"
+          else
+            tar -czf "${{ steps.calc_binary_name.outputs.binary_name }}.tar.gz" "${{ steps.calc_binary_name.outputs.binary_name }}"
+          fi
+
+      - name: Upload compressed artifacts
         timeout-minutes: 5
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.calc_binary_name.outputs.binary_name }}
-          path: dist/${{ steps.calc_binary_name.outputs.binary_name }}
+          name: ${{ steps.calc_binary_name.outputs.binary_name }}-compressed
+          path: |
+            dist/${{ steps.calc_binary_name.outputs.binary_name }}.tar.gz
+            dist/${{ steps.calc_binary_name.outputs.binary_name }}.zip
 
   sanity-check:
     needs: build
@@ -94,8 +103,7 @@ jobs:
 
     strategy:
       matrix:
-        os:
-          [ubuntu-latest, macos-latest, windows-latest, ubicloud-standard-2-arm]
+        os: [ubuntu-latest, macos-latest, windows-latest, ubuntu-24.04-arm]
 
     runs-on: ${{ matrix.os }}
 
@@ -108,6 +116,21 @@ jobs:
         timeout-minutes: 1
         run: ls -R
 
+      - name: Extract compressed artifacts (linux and macos only)
+        timeout-minutes: 2
+        if: matrix.os != 'windows-latest'
+        run: |
+          # Extract all compressed archives to get individual binaries
+          for dir in omnistrate-ctl-*-compressed/; do
+            cd "$dir"
+            for file in *.tar.gz; do
+              if [ -f "$file" ]; then
+                tar -xzf "$file"
+              fi
+            done
+            cd ..
+          done
+
       - name: Run the binary (linux and macos only)
         id: run_binary_linux_macos
         timeout-minutes: 1
@@ -116,7 +139,7 @@ jobs:
           if [ "${{ matrix.os }}" == "macos-latest" ]; then
             export GOOS=darwin
             export GOARCH=arm64
-          elif [ "${{ matrix.os }}" == "ubicloud-standard-2-arm" ]; then
+          elif [ "${{ matrix.os }}" == "ubuntu-24.04-arm" ]; then
             export GOOS=linux
             export GOARCH=arm64
           else
@@ -125,30 +148,72 @@ jobs:
           fi
 
           binary_name="omnistrate-ctl-${GOOS}-${GOARCH}"
-          cd $binary_name
+          cd "${binary_name}-compressed"
           chmod +x $binary_name
           ctl_version=$(./$binary_name --version)
           echo "Omnistrate CTL version: $ctl_version"
           echo "ctl_version=$ctl_version" >> "$GITHUB_OUTPUT"
+
+      - name: Extract compressed artifacts (windows only)
+        timeout-minutes: 2
+        if: matrix.os == 'windows-latest'
+        run: |
+          Write-Host "Starting Windows ZIP extraction..."
+
+          cd omnistrate-ctl-windows-amd64.exe-compressed
+
+          $zipFile = "omnistrate-ctl-windows-amd64.exe.zip"
+          Write-Host "Extracting $zipFile to current directory..."
+          Expand-Archive -Path $zipFile -DestinationPath . -Force
+
+          Set-Location ..
+
+          Write-Host "Windows ZIP extraction completed."
+
+      - name: Display structure of uncompressed files
+        timeout-minutes: 1
+        run: ls -R
 
       - name: Run the binary (windows only)
         id: run_binary_windows
         timeout-minutes: 1
         if: matrix.os == 'windows-latest'
         run: |
-          cd omnistrate-ctl-windows-amd64.exe
-          $ctl_version=.\omnistrate-ctl-windows-amd64.exe --version
-          echo "Omnistrate CTL version: $ctl_version"
-          echo "ctl_version=$ctl_version" >> $env:GITHUB_OUTPUT
+          # First extract the AMD64 binary if it's not already extracted
+          if (Test-Path "omnistrate-ctl-windows-amd64.exe-compressed") {
+            cd omnistrate-ctl-windows-amd64.exe-compressed
+            $ctl_version = .\omnistrate-ctl-windows-amd64.exe --version
+            echo "Omnistrate CTL version: $ctl_version"
+            echo "ctl_version=$ctl_version" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Error "AMD64 binary directory not found"
+            exit 1
+          }
+
+  smoke-tests:
+    needs: [set-prerelease]
+    uses: ./.github/workflows/smoke-tests.yml
+    with:
+      environment: Dev-us-west-2
+    secrets: inherit
+    permissions:
+      contents: read
 
   release-binaries:
     environment: Prod
     runs-on: ubuntu-latest
-    needs: sanity-check
+    needs: [build, sanity-check, smoke-tests]
     permissions:
-      contents: read
+      contents: write
 
     steps:
+      - name: Set release to pre release
+        timeout-minutes: 2
+        uses: softprops/action-gh-release@v2
+        with:
+          prerelease: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Download build artifacts
         timeout-minutes: 5
         uses: actions/download-artifact@v4
@@ -157,29 +222,71 @@ jobs:
         timeout-minutes: 1
         run: ls -R
 
-      - name: Generate token to create the release
+      - name: Extract binaries from compressed archives (legacy - kept for compatibility)
         timeout-minutes: 5
-        id: generate_token_cli
-        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a
-        with:
-          app_id: ${{ secrets.CLI_APP_ID }}
-          private_key: ${{ secrets.CLI_APP_PRIVATE_KEY }}
+        run: |
+          # Extract all compressed archives to get individual binaries
+          for dir in omnistrate-ctl-*-compressed/; do
+            cd "$dir"
+            for file in *.tar.gz; do
+              if [ -f "$file" ]; then
+                tar -xzf "$file"
+              fi
+            done
+            for file in *.zip; do
+              if [ -f "$file" ]; then
+                unzip "$file"
+              fi
+            done
+            cd ..
+          done
 
-      - name: Upload binaries on a new release on cli repo
+      - name: Upload binaries on a new release on cli repo (legacy - kept for compatibility)
         timeout-minutes: 5
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            omnistrate-ctl-darwin-amd64/omnistrate-ctl-darwin-amd64
-            omnistrate-ctl-darwin-arm64/omnistrate-ctl-darwin-arm64
-            omnistrate-ctl-linux-amd64/omnistrate-ctl-linux-amd64
-            omnistrate-ctl-linux-arm64/omnistrate-ctl-linux-arm64
-            omnistrate-ctl-windows-amd64.exe/omnistrate-ctl-windows-amd64.exe
-            omnistrate-ctl-windows-arm64.exe/omnistrate-ctl-windows-arm64.exe
+            omnistrate-ctl-darwin-amd64-compressed/omnistrate-ctl-darwin-amd64
+            omnistrate-ctl-darwin-arm64-compressed/omnistrate-ctl-darwin-arm64
+            omnistrate-ctl-linux-amd64-compressed/omnistrate-ctl-linux-amd64
+            omnistrate-ctl-linux-arm64-compressed/omnistrate-ctl-linux-arm64
+            omnistrate-ctl-windows-amd64.exe-compressed/omnistrate-ctl-windows-amd64.exe
+            omnistrate-ctl-windows-arm64.exe-compressed/omnistrate-ctl-windows-arm64.exe
           repository: omnistrate/cli
-          token: ${{ steps.generate_token_cli.outputs.token }}
+          token: ${{ secrets.PUBLISH_CTL_PAT }}
           fail_on_unmatched_files: true
           draft: false
+          prerelease: false
+
+      - name: Upload compressed files to triggering release
+        timeout-minutes: 5
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            omnistrate-ctl-darwin-amd64-compressed/omnistrate-ctl-darwin-amd64.tar.gz
+            omnistrate-ctl-darwin-arm64-compressed/omnistrate-ctl-darwin-arm64.tar.gz
+            omnistrate-ctl-linux-amd64-compressed/omnistrate-ctl-linux-amd64.tar.gz
+            omnistrate-ctl-linux-arm64-compressed/omnistrate-ctl-linux-arm64.tar.gz
+            omnistrate-ctl-windows-amd64.exe-compressed/omnistrate-ctl-windows-amd64.exe.zip
+            omnistrate-ctl-windows-arm64.exe-compressed/omnistrate-ctl-windows-arm64.exe.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fail_on_unmatched_files: true
+
+      - name: Publish release
+        timeout-minutes: 2
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          prerelease: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  test-install-script:
+    uses: ./.github/workflows/test-install-script.yml
+    needs:
+      - build
+      - release-binaries
+    permissions:
+      contents: read
 
   update-brew-formula:
     environment: Prod
@@ -187,6 +294,7 @@ jobs:
     needs:
       - build
       - release-binaries
+      - test-install-script
     permissions:
       contents: read
 
@@ -203,32 +311,43 @@ jobs:
         timeout-minutes: 1
         run: ls -R
 
+      - name: Extract compressed artifacts
+        timeout-minutes: 2
+        run: |
+          # Extract all compressed archives to get individual binaries
+          for dir in omnistrate-ctl-*-compressed/; do
+            cd "$dir"
+            for file in *.tar.gz; do
+              if [ -f "$file" ]; then
+                tar -xzf "$file"
+              fi
+            done
+            for file in *.zip; do
+              if [ -f "$file" ]; then
+                unzip "$file"
+              fi
+            done
+            cd ..
+          done
+
       - name: Calculate SHA256 checksums
         id: calculate_sha256
         run: |
-          sha_darwin_amd64=$(sha256sum omnistrate-ctl-darwin-amd64/omnistrate-ctl-darwin-amd64 | awk '{ print $1 }')
-          sha_darwin_arm64=$(sha256sum omnistrate-ctl-darwin-arm64/omnistrate-ctl-darwin-arm64 | awk '{ print $1 }')
-          sha_linux_amd64=$(sha256sum omnistrate-ctl-linux-amd64/omnistrate-ctl-linux-amd64 | awk '{ print $1 }')
-          sha_linux_arm64=$(sha256sum omnistrate-ctl-linux-arm64/omnistrate-ctl-linux-arm64 | awk '{ print $1 }')
+          sha_darwin_amd64=$(sha256sum omnistrate-ctl-darwin-amd64-compressed/omnistrate-ctl-darwin-amd64 | awk '{ print $1 }')
+          sha_darwin_arm64=$(sha256sum omnistrate-ctl-darwin-arm64-compressed/omnistrate-ctl-darwin-arm64 | awk '{ print $1 }')
+          sha_linux_amd64=$(sha256sum omnistrate-ctl-linux-amd64-compressed/omnistrate-ctl-linux-amd64 | awk '{ print $1 }')
+          sha_linux_arm64=$(sha256sum omnistrate-ctl-linux-arm64-compressed/omnistrate-ctl-linux-arm64 | awk '{ print $1 }')
           echo "sha_darwin_amd64=${sha_darwin_amd64}" >> "$GITHUB_OUTPUT"
           echo "sha_darwin_arm64=${sha_darwin_arm64}" >> "$GITHUB_OUTPUT"
           echo "sha_linux_amd64=${sha_linux_amd64}" >> "$GITHUB_OUTPUT"
           echo "sha_linux_arm64=${sha_linux_arm64}" >> "$GITHUB_OUTPUT"
-
-      - name: Generate token to update the formula
-        timeout-minutes: 5
-        id: generate_token_cli
-        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a
-        with:
-          app_id: ${{ secrets.CLI_APP_ID }}
-          private_key: ${{ secrets.CLI_APP_PRIVATE_KEY }}
 
       - name: Checkout Homebrew Tap repository
         timeout-minutes: 5
         uses: actions/checkout@v4
         with:
           repository: omnistrate/homebrew-tap
-          token: ${{ steps.generate_token_cli.outputs.token }}
+          token: ${{ secrets.PUBLISH_CTL_PAT }}
 
       - name: Display structure of repository
         timeout-minutes: 1
@@ -249,7 +368,7 @@ jobs:
         id: cpr
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ steps.generate_token_cli.outputs.token }}
+          token: ${{ secrets.PUBLISH_CTL_PAT }}
           title: Update Omnistrate CTL Formula to ${{ steps.get_version.outputs.version }}
           body: |
             This PR updates the Omnistrate CTL Formula to version ${{ steps.get_version.outputs.version }}.
@@ -263,14 +382,14 @@ jobs:
         timeout-minutes: 5
         with:
           repository: omnistrate/homebrew-tap
-          token: ${{ steps.generate_token_cli.outputs.token }}
+          token: ${{ secrets.PUBLISH_CTL_PAT }}
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
           merge-method: squash
 
   release-package-multi-arch:
     environment: Prod
-    runs-on: ubicloud-standard-8
-    needs: update-brew-formula
+    runs-on: ubuntu-latest
+    needs: [sanity-check, smoke-tests]
     permissions:
       contents: read
       packages: write
@@ -322,7 +441,7 @@ jobs:
 
       # https://github.com/docker/build-push-action
       - name: Build and push multi-arch
-        timeout-minutes: 20
+        timeout-minutes: 60
         id: build-and-push
         uses: docker/build-push-action@v6
         with:
@@ -348,23 +467,9 @@ jobs:
       - release-package-multi-arch
       - update-brew-formula
       - release-binaries
+    permissions:
+      contents: write
     uses: ./.github/workflows/docs-deploy.yml
     secrets: inherit
     with:
       environment: Prod
-
-  notification:
-    name: Notify Mattermost
-    runs-on: ubuntu-latest
-    needs:
-      - release-package-multi-arch
-      - update-brew-formula
-      - release-binaries
-      - update-docs
-    steps:
-      - name: Mattermost Notification
-        uses: tferreira/matterfy@v1.9
-        with:
-          type: ${{ job.status }}
-          job_name: "*Deploy to Prod*"
-          url: ${{ secrets.MATTERMOST_DEPLOYMENT_NOTIFICATION_WEBHOOK }}

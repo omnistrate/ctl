@@ -2,11 +2,12 @@ package dataaccess
 
 import (
 	"bytes"
-	"github.com/omnistrate/ctl/internal/dataaccess"
 	"io"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/dataaccess"
 
 	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 )

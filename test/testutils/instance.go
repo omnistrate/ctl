@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
-	"github.com/omnistrate/ctl/cmd"
-	"github.com/omnistrate/ctl/cmd/instance"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/instance"
 	"github.com/pkg/errors"
 )
 

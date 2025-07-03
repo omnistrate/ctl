@@ -6,13 +6,13 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/common"
 	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
-	"github.com/omnistrate/ctl/cmd/common"
 
 	"github.com/chelnak/ysmrr"
-	"github.com/omnistrate/ctl/internal/config"
-	"github.com/omnistrate/ctl/internal/dataaccess"
-	"github.com/omnistrate/ctl/internal/utils"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/config"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/dataaccess"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -128,11 +128,11 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	publicKeyPtr := getPublicKeyPtr(visibility)
 	environmentID, err := dataaccess.CreateServiceEnvironment(
 		cmd.Context(), token,
-		envName, 
-		description, 
+		envName,
+		description,
 		serviceID,
-		visibility, 
-		envType, 
+		visibility,
+		envType,
 		sourceEnvID,
 		defaultDeploymentConfigID,
 		true,

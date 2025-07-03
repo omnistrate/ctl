@@ -3,7 +3,7 @@ package utils
 import (
 	"testing"
 
-	"github.com/omnistrate/ctl/internal/model"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/model"
 	"github.com/stretchr/testify/require"
 )
 

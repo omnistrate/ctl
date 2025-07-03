@@ -6,7 +6,7 @@ import (
 	"github.com/cqroot/prompt"
 	"github.com/cqroot/prompt/choose"
 	"github.com/cqroot/prompt/input"
-	"github.com/omnistrate/ctl/internal/utils"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
