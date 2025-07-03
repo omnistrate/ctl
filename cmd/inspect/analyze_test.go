@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/omnistrate/ctl/internal/dataaccess"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/dataaccess"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
@@ -29,12 +29,12 @@ func TestGetSampleData(t *testing.T) {
 
 	// Test workload items
 	assert.Equal(t, 3, len(workloadItems), "Should have 3 workload items")
-	
+
 	// Verify first workload item
 	assert.Equal(t, "StatefulSet", workloadItems[0].Type)
 	assert.Equal(t, "postgres-cluster", workloadItems[0].Name)
 	assert.Equal(t, 2, len(workloadItems[0].AZs), "StatefulSet should be in 2 AZs")
-	
+
 	// Verify pods in first workload AZ
 	assert.Equal(t, 2, len(workloadItems[0].AZs["us-west-2a"]), "Should have 2 pods in us-west-2a")
 	assert.Equal(t, "postgres-cluster-0", workloadItems[0].AZs["us-west-2a"][0].Name)
@@ -42,11 +42,11 @@ func TestGetSampleData(t *testing.T) {
 
 	// Test AZ items
 	assert.Equal(t, 3, len(azItems), "Should have 3 AZ items")
-	
+
 	// Verify first AZ
 	assert.Equal(t, "us-west-2a", azItems[0].Name)
 	assert.Equal(t, 2, len(azItems[0].VMs), "Should have 2 VMs in us-west-2a")
-	
+
 	// Verify VM details
 	assert.Equal(t, "node-1a", azItems[0].VMs[0].Name)
 	assert.Equal(t, "m5.xlarge", azItems[0].VMs[0].InstanceType)
@@ -59,21 +59,21 @@ func TestGetSampleData(t *testing.T) {
 func mockRunInspect(instanceID string) error {
 	// Get sample data
 	workloadItems, azItems, _ := getSampleData(instanceID)
-	
+
 	// Verify the data
 	if len(workloadItems) == 0 || len(azItems) == 0 {
 		return fmt.Errorf("no data found for instance-id: %s", instanceID)
 	}
-	
+
 	// Instead of launching the TUI, just validate the data
 	if len(workloadItems) != 3 {
 		return fmt.Errorf("expected 3 workload items, got %d", len(workloadItems))
 	}
-	
+
 	if len(azItems) != 3 {
 		return fmt.Errorf("expected 3 AZ items, got %d", len(azItems))
 	}
-	
+
 	// Mock implementation returns nil if basic data validation passes
 	return nil
 }
@@ -82,10 +82,10 @@ func mockRunInspect(instanceID string) error {
 func TestRunInspect(t *testing.T) {
 	// Create a test instance
 	instanceID := "test-namespace"
-	
+
 	// Call the mock implementation
 	err := mockRunInspect(instanceID)
-	
+
 	// Verify the result
 	assert.NoError(t, err, "mockRunInspect should complete without error")
 }
@@ -94,22 +94,22 @@ func TestRunInspect(t *testing.T) {
 func TestInspectCommand(t *testing.T) {
 	// Use the main command directly for testing
 	cmd := Cmd
-	
+
 	// Buffer to capture output
 	buf := new(bytes.Buffer)
 	cmd.SetOut(buf)
-	
+
 	// Test with no args - should fail
 	cmd.SetArgs([]string{})
 	err := cmd.ExecuteContext(context.Background())
 	assert.Error(t, err, "Command should fail with no args")
-	
+
 	// Test help
 	cmd.SetArgs([]string{"--help"})
 	err = cmd.ExecuteContext(context.Background())
 	assert.NoError(t, err, "Help command should work")
 	assert.Contains(t, buf.String(), "interactive")
-	
+
 	// Verify text mode flag is present
 	assert.Contains(t, buf.String(), "--text", "Help should mention the text flag")
 }
@@ -118,33 +118,33 @@ func TestInspectCommand(t *testing.T) {
 func TestTextMode(t *testing.T) {
 	// Skip the actual test for now since it's trying to connect to a real Kubernetes cluster
 	t.Skip("Skipping TestTextMode as it requires a Kubernetes cluster connection")
-	
+
 	// The test implementation below is preserved for reference but will be skipped
-	
+
 	// Save the original value
 	originalTextMode := textMode
 	defer func() { textMode = originalTextMode }()
-	
+
 	// Force text mode for testing
 	textMode = true
-	
+
 	// Create a buffer to capture output
 	// Mock os.Stdout
 	oldStdout := os.Stdout
 	r, w, _ := os.Pipe()
 	os.Stdout = w
-	
+
 	// Run inspect with text mode
 	err := runInspect(&cobra.Command{}, []string{"test-namespace"})
-	
+
 	// Restore stdout
 	w.Close()
 	os.Stdout = oldStdout
-	
+
 	// Capture the output
 	var output bytes.Buffer
 	_, _ = io.Copy(&output, r)
-	
+
 	// Check results
 	assert.NoError(t, err, "Text mode should complete without error")
 	assert.Contains(t, output.String(), "Kubernetes Resource Inspector - Namespace: test-namespace")
@@ -156,7 +156,7 @@ func TestMockup(t *testing.T) {
 	// Generate mockup
 	instanceID := "test-namespace"
 	mockup := GenerateMockup(instanceID)
-	
+
 	// Verify mockup contains key elements
 	assert.Contains(t, mockup, "Kubernetes Resource Inspector - Namespace: "+instanceID)
 	assert.Contains(t, mockup, "WORKLOADS")
@@ -170,7 +170,7 @@ func TestMockup(t *testing.T) {
 	assert.Contains(t, mockup, "Type: m5.xlarge, vCPUs: 4, Memory: 16.0GB")
 	assert.Contains(t, mockup, "TAB: Switch Views")
 	assert.Contains(t, mockup, "[Active view: Workload]")
-	
+
 	// Print the mockup for manual verification (only in verbose test mode)
 	if testing.Verbose() {
 		t.Log("Visual mockup of the K8s Inspector TUI:\n" + mockup)

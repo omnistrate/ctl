@@ -2,14 +2,15 @@ package deploymentcell
 
 import (
 	"context"
-	"github.com/omnistrate/ctl/internal/model"
+
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/model"
 	"github.com/spf13/cobra"
 
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/common"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/config"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/dataaccess"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/utils"
 	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
-	"github.com/omnistrate/ctl/cmd/common"
-	"github.com/omnistrate/ctl/internal/config"
-	"github.com/omnistrate/ctl/internal/dataaccess"
-	"github.com/omnistrate/ctl/internal/utils"
 )
 
 var statusCmd = &cobra.Command{

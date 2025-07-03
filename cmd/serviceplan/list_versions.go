@@ -2,17 +2,18 @@ package serviceplan
 
 import (
 	"fmt"
-	"github.com/omnistrate/ctl/cmd/common"
 	"slices"
 	"strings"
 	"time"
 
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/common"
+
 	"github.com/chelnak/ysmrr"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/config"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/dataaccess"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/model"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/utils"
 	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
-	"github.com/omnistrate/ctl/internal/config"
-	"github.com/omnistrate/ctl/internal/dataaccess"
-	"github.com/omnistrate/ctl/internal/model"
-	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/spf13/cobra"
 )
 

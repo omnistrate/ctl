@@ -6,16 +6,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/omnistrate/ctl/cmd/upgrade/status"
-	"github.com/omnistrate/ctl/internal/model"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/upgrade/status"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/model"
 
 	"github.com/google/uuid"
-	"github.com/omnistrate/ctl/cmd/build"
-	"github.com/omnistrate/ctl/cmd/instance"
-	"github.com/omnistrate/ctl/cmd/upgrade"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/build"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/instance"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/upgrade"
 
-	"github.com/omnistrate/ctl/cmd"
-	"github.com/omnistrate/ctl/test/testutils"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd"
+	"github.com/omnistrate-oss/omnistrate-ctl/test/testutils"
 
 	"github.com/stretchr/testify/require"
 )

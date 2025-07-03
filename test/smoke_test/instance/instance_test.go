@@ -3,13 +3,14 @@ package instance
 import (
 	"context"
 	"fmt"
-	"github.com/google/uuid"
 	"testing"
 	"time"
 
-	"github.com/omnistrate/ctl/cmd"
-	"github.com/omnistrate/ctl/cmd/instance"
-	"github.com/omnistrate/ctl/test/testutils"
+	"github.com/google/uuid"
+
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/instance"
+	"github.com/omnistrate-oss/omnistrate-ctl/test/testutils"
 	"github.com/stretchr/testify/require"
 )
 
