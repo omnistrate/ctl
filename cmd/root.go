@@ -16,6 +16,7 @@ import (
 	"github.com/omnistrate-oss/omnistrate-ctl/cmd/helm"
 	"github.com/omnistrate-oss/omnistrate-ctl/cmd/inspect"
 	"github.com/omnistrate-oss/omnistrate-ctl/cmd/instance"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/mcp"
 	"github.com/omnistrate-oss/omnistrate-ctl/cmd/service"
 	"github.com/omnistrate-oss/omnistrate-ctl/cmd/serviceplan"
 	"github.com/omnistrate-oss/omnistrate-ctl/cmd/servicesorchestration"
@@ -127,6 +128,7 @@ func init() {
 	RootCmd.AddCommand(deploymentcell.Cmd)
 	RootCmd.AddCommand(servicesorchestration.Cmd)
 	RootCmd.AddCommand(inspect.Cmd)
+	RootCmd.AddCommand(mcp.Cmd)
 
 	// Hide the default completion command
 	RootCmd.Root().CompletionOptions.DisableDefaultCmd = true
