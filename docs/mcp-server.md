@@ -35,6 +35,7 @@ Each CLI command is exposed as an MCP tool with the following structure:
 ### Tool Naming Convention
 
 Tools are named using the full command hierarchy:
+
 - `omnistrate-ctl-account-create` for `omnistrate-ctl account create`
 - `omnistrate-ctl-instance-list` for `omnistrate-ctl instance list`
 - `omnistrate-ctl-service-plan-release` for `omnistrate-ctl service-plan release`
@@ -42,6 +43,7 @@ Tools are named using the full command hierarchy:
 ### Parameter Mapping
 
 CLI flags are mapped to tool parameters with the `flag_` prefix:
+
 - `--output json` becomes `"flag_output": "json"`
 - `--environment prod` becomes `"flag_environment": "prod"`
 - `--enabled` becomes `"flag_enabled": true`
@@ -51,16 +53,19 @@ CLI flags are mapped to tool parameters with the `flag_` prefix:
 The MCP server exposes 74+ tools covering all CLI functionality:
 
 ### Account Management
+
 - `omnistrate-ctl-account-create` - Create a Cloud Provider Account
 - `omnistrate-ctl-account-delete` - Delete a Cloud Provider Account
 - `omnistrate-ctl-account-describe` - Describe a Cloud Provider Account
 - `omnistrate-ctl-account-list` - List Cloud Provider Accounts
 
 ### Service Building
+
 - `omnistrate-ctl-build` - Build Services from image, compose spec or service plan spec
 - `omnistrate-ctl-build-from-repo` - Build Service from Git Repository
 
 ### Instance Management
+
 - `omnistrate-ctl-instance-create` - Create an instance deployment
 - `omnistrate-ctl-instance-delete` - Delete an instance deployment
 - `omnistrate-ctl-instance-describe` - Describe an instance deployment
@@ -72,6 +77,7 @@ The MCP server exposes 74+ tools covering all CLI functionality:
 - And many more...
 
 ### Service Plan Management
+
 - `omnistrate-ctl-service-plan-create` - Create a service plan
 - `omnistrate-ctl-service-plan-delete` - Delete a service plan
 - `omnistrate-ctl-service-plan-list` - List service plans
@@ -85,9 +91,11 @@ The MCP server exposes 74+ tools covering all CLI functionality:
 The server implements the following MCP methods:
 
 ### `tools/list`
+
 Returns all available tools with their schemas.
 
 **Request:**
+
 ```json
 {
   "jsonrpc": "2.0",
@@ -98,6 +106,7 @@ Returns all available tools with their schemas.
 ```
 
 **Response:**
+
 ```json
 {
   "jsonrpc": "2.0",
@@ -128,9 +137,11 @@ Returns all available tools with their schemas.
 ```
 
 ### `tools/call`
+
 Executes a tool (CLI command).
 
 **Request:**
+
 ```json
 {
   "jsonrpc": "2.0",
@@ -146,6 +157,7 @@ Executes a tool (CLI command).
 ```
 
 **Response:**
+
 ```json
 {
   "jsonrpc": "2.0",
