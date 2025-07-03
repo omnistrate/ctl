@@ -4,19 +4,20 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 	"time"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/util/homedir"
 
-	"github.com/omnistrate/ctl/internal/dataaccess"
+	"github.com/omnistrate-oss/ctl/internal/dataaccess"
 )
 
 var (

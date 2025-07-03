@@ -3,13 +3,13 @@ package detail
 import (
 	"fmt"
 
-	"github.com/omnistrate/ctl/cmd/common"
+	"github.com/omnistrate-oss/ctl/cmd/common"
 
 	"github.com/chelnak/ysmrr"
-	"github.com/omnistrate/ctl/internal/config"
-	"github.com/omnistrate/ctl/internal/dataaccess"
-	"github.com/omnistrate/ctl/internal/model"
-	"github.com/omnistrate/ctl/internal/utils"
+	"github.com/omnistrate-oss/ctl/internal/config"
+	"github.com/omnistrate-oss/ctl/internal/dataaccess"
+	"github.com/omnistrate-oss/ctl/internal/model"
+	"github.com/omnistrate-oss/ctl/internal/utils"
 	"github.com/spf13/cobra"
 )
 

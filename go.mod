@@ -1,4 +1,4 @@
-module github.com/omnistrate/ctl
+module github.com/omnistrate-oss/ctl
 
 go 1.24.2
 

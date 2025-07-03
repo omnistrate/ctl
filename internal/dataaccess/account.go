@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/omnistrate/ctl/internal/config"
+	"github.com/omnistrate-oss/ctl/internal/config"
 
+	"github.com/omnistrate-oss/ctl/internal/utils"
 	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
-	"github.com/omnistrate/ctl/internal/utils"
 )
 
 func DescribeAccount(ctx context.Context, token string, id string) (*openapiclient.DescribeAccountConfigResult, error) {

@@ -3,13 +3,14 @@ package spec
 import (
 	"context"
 	"fmt"
-	"github.com/omnistrate/ctl/internal/utils"
 	"os"
 	"testing"
 
-	"github.com/omnistrate/ctl/cmd"
-	"github.com/omnistrate/ctl/cmd/build"
-	"github.com/omnistrate/ctl/test/testutils"
+	"github.com/omnistrate-oss/ctl/internal/utils"
+
+	"github.com/omnistrate-oss/ctl/cmd"
+	"github.com/omnistrate-oss/ctl/cmd/build"
+	"github.com/omnistrate-oss/ctl/test/testutils"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"

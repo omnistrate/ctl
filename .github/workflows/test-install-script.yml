@@ -26,7 +26,7 @@ jobs:
         run: |
           # Test the exact curl command from the documentation
           # This simulates what users will actually run
-          curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/main/install-ctl.sh | sh
+          curl -fsSL https://raw.githubusercontent.com/omnistrate-oss/ctl/main/install-ctl.sh | sh
 
           # Add omnistrate-ctl to PATH and get version
           export PATH="$HOME/.omnistrate/bin:$PATH"
@@ -41,7 +41,7 @@ jobs:
         run: |
           # Test the exact curl command from the documentation
           # This simulates what users will actually run
-          curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/main/install-ctl.sh | sh
+          curl -fsSL https://raw.githubusercontent.com/omnistrate-oss/ctl/main/install-ctl.sh | sh
 
           # Add omnistrate-ctl to PATH and get version
           export PATH="$HOME/.omnistrate/bin:$PATH"

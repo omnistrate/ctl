@@ -1,6 +1,6 @@
 package main
 
-import "github.com/omnistrate/ctl/cmd"
+import "github.com/omnistrate-oss/ctl/cmd"
 
 func main() {
 	cmd.Execute()

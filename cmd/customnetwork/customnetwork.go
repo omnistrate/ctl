@@ -1,9 +1,9 @@
 package customnetwork
 
 import (
+	"github.com/omnistrate-oss/ctl/internal/model"
+	"github.com/omnistrate-oss/ctl/internal/utils"
 	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
-	"github.com/omnistrate/ctl/internal/model"
-	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/spf13/cobra"
 )
 

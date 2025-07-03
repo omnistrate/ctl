@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/omnistrate/ctl/internal/utils"
+	"github.com/omnistrate-oss/ctl/internal/utils"
 
 	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 )

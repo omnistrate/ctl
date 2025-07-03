@@ -3,8 +3,8 @@ package dataaccess
 import (
 	"context"
 
+	"github.com/omnistrate-oss/ctl/internal/utils"
 	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
-	"github.com/omnistrate/ctl/internal/utils"
 )
 
 func DeleteProductTier(ctx context.Context, token, serviceID, productTierID string) (err error) {

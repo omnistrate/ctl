@@ -39,17 +39,17 @@ gh repo clone omnistrate-community/ci-cd-example
 omnistrate-ctl is packaged and released in a container image that can be used to execute the command:
 
 ```
-docker run -t ghcr.io/omnistrate/ctl:latest
+docker run -t ghcr.io/omnistrate-oss/ctl:latest
 ```
 
 To log into the container and execute a series of commands, run the following command:
 
 ```
-docker run -it --entrypoint /bin/sh -t ghcr.io/omnistrate/ctl:latest
+docker run -it --entrypoint /bin/sh -t ghcr.io/omnistrate-oss/ctl:latest
 ```
 
 To persist the credentials across multiple container runs, run the following command
 
 ```
-docker run -it -v ~/omnistrate-ctl:/omnistrate/ -t ghcr.io/omnistrate/ctl:latest
+docker run -it -v ~/omnistrate-ctl:/omnistrate/ -t ghcr.io/omnistrate-oss/ctl:latest
 ```

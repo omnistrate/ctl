@@ -12,7 +12,7 @@ To run the CTL in your local environment, you can use the CTL binaries.
 To obtain the latest version of the CTL binaries, execute the following command in your terminal:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/omnistrate/ctl/main/install-ctl.sh | sh
+curl -fsSL https://raw.githubusercontent.com/omnistrate-oss/ctl/main/install-ctl.sh | sh
 ```
 
 This command will automatically download and install the latest version of the CTL binaries onto your system.
@@ -38,7 +38,7 @@ Homebrew will automatically download and install the latest version of the CTL b
 ### Docker Image
 
 To integrate CTL into your CI/CD pipeline, you can use the CTL docker image.
-The latest version of the CTL can be found in the docker image `ghcr.io/omnistrate/ctl:latest`.
+The latest version of the CTL can be found in the docker image `ghcr.io/omnistrate-oss/ctl:latest`.
 Please refer to the [Using CTL with Docker](#using-ctl-with-docker) section for more information.
 
 ### GitHub Action

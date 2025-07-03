@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/omnistrate/ctl/cmd/common"
-	"github.com/omnistrate/ctl/cmd/upgrade/manageupgradelifecycle"
+	"github.com/omnistrate-oss/ctl/cmd/common"
+	"github.com/omnistrate-oss/ctl/cmd/upgrade/manageupgradelifecycle"
 
 	"github.com/chelnak/ysmrr"
-	"github.com/omnistrate/ctl/cmd/upgrade/status"
-	"github.com/omnistrate/ctl/internal/config"
-	"github.com/omnistrate/ctl/internal/dataaccess"
-	"github.com/omnistrate/ctl/internal/model"
-	"github.com/omnistrate/ctl/internal/utils"
+	"github.com/omnistrate-oss/ctl/cmd/upgrade/status"
+	"github.com/omnistrate-oss/ctl/internal/config"
+	"github.com/omnistrate-oss/ctl/internal/dataaccess"
+	"github.com/omnistrate-oss/ctl/internal/model"
+	"github.com/omnistrate-oss/ctl/internal/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )

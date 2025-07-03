@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/atotto/clipboard"
-	"github.com/omnistrate/ctl/internal/config"
-	"github.com/omnistrate/ctl/internal/dataaccess"
-	"github.com/omnistrate/ctl/internal/utils"
+	"github.com/omnistrate-oss/ctl/internal/config"
+	"github.com/omnistrate-oss/ctl/internal/dataaccess"
+	"github.com/omnistrate-oss/ctl/internal/utils"
 	"github.com/pkg/browser"
 	"github.com/pkg/errors"
 )

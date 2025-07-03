@@ -2,10 +2,10 @@ package helm
 
 import (
 	"github.com/chelnak/ysmrr"
+	"github.com/omnistrate-oss/ctl/cmd/common"
+	"github.com/omnistrate-oss/ctl/internal/dataaccess"
+	"github.com/omnistrate-oss/ctl/internal/utils"
 	openapiclient "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
-	"github.com/omnistrate/ctl/cmd/common"
-	"github.com/omnistrate/ctl/internal/dataaccess"
-	"github.com/omnistrate/ctl/internal/utils"
 	"github.com/spf13/cobra"
 )
 
