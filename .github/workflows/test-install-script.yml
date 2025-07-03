@@ -8,7 +8,7 @@ on:
     paths:
       - "install-ctl.sh"
       - ".github/workflows/test-install-script.yml"
-  
+
 jobs:
   test-install-script:
     runs-on: ${{ matrix.os }}
@@ -48,4 +48,3 @@ jobs:
           ctl_version=$(omnistrate-ctl.exe --version)
           echo "Omnistrate CTL version: $ctl_version"
           echo "ctl_version=$ctl_version" >> "$GITHUB_OUTPUT"
-

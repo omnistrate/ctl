@@ -18,7 +18,7 @@ services:
             repositoryUrl: https://github.com/omnistrate-oss/ctl.git
           terraformExecutionIdentity: "arn:aws:iam::339713121445:role/omnistrate-custom-terraform-execution-role"
         gcp:
-          terraformPath:  /test/resources/gcp/terraform
+          terraformPath: /test/resources/gcp/terraform
           gitConfiguration:
             reference: refs/heads/main
             repositoryUrl: https://github.com/omnistrate-oss/ctl.git
