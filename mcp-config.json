@@ -1,0 +1,11 @@
+{
+  "servers": {
+    "omnistrate": {
+      "command": "omnistrate-ctl",
+      "args": ["mcp"],
+      "env": {
+        "PATH": "${env:PATH}"
+      }
+    }
+  }
+}

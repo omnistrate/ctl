@@ -1,0 +1,11 @@
+{
+  "servers": {
+    "omnistrate-ctl": {
+      "command": "./dist/omnistrate-ctl-darwin-arm64",
+      "args": ["mcp"],
+      "env": {
+        "PATH": "${env:PATH}"
+      }
+    }
+  }
+}
