@@ -213,11 +213,25 @@ The MCP server is implemented in Go and automatically discovers all CLI commands
 
 ### Testing
 
-Run the MCP server tests:
+Run the MCP server unit tests:
 
 ```bash
 go test ./cmd/mcp/server/...
 ```
+
+Run the MCP server integration tests (requires binary to be built):
+
+```bash
+make build
+go test -v ./cmd/mcp/server/... -run TestMCPServerIntegration
+```
+
+The integration tests cover:
+- Complete MCP handshake process (initialize, initialized, tools/list)
+- JSON-RPC protocol compliance
+- Tool discovery and validation
+- Error handling for invalid methods and tool calls
+- Server startup and communication via stdin/stdout
 
 ### Building
 
