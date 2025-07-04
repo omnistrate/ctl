@@ -1,8 +1,9 @@
 {
   "mcp.servers": {
     "omnistrate-ctl": {
-      "command": "go",
-      "args": ["run", ".", "mcp"],
+      "command": "${workspaceFolder}/dist/omnistrate-ctl-darwin-arm64",
+      "args": ["mcp"],
+      "cwd": "${workspaceFolder}",
       "env": {
         "PATH": "${env:PATH}:${workspaceFolder}/dist"
       }
