@@ -32,8 +32,8 @@ func NewMCPTestClient(t *testing.T) *MCPTestClient {
 	// Build the binary path based on the current platform
 	binaryPath := getBinaryPath(t)
 	
-	// Create the command
-	cmd := exec.Command(binaryPath, "mcp")
+	// Create the command with --no-auth flag for testing
+	cmd := exec.Command(binaryPath, "mcp", "--no-auth")
 	
 	// Set up pipes
 	stdin, err := cmd.StdinPipe()
