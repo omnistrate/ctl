@@ -83,7 +83,7 @@ You can manually test the MCP server by sending JSON-RPC requests:
 #### List Tools Request
 
 ```json
-{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}
+{ "jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": {} }
 ```
 
 #### Call Tool Request

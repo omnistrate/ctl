@@ -1,5 +1,5 @@
 {
-  "mcp.servers": {
+  "servers": {
     "omnistrate-ctl": {
       "command": "./dist/omnistrate-ctl-darwin-arm64",
       "args": ["mcp"],
