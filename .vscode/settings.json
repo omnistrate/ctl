@@ -1,0 +1,11 @@
+{
+  "mcp.servers": {
+    "omnistrate-ctl": {
+      "command": "go",
+      "args": ["run", ".", "mcp"],
+      "env": {
+        "PATH": "${env:PATH}:${workspaceFolder}/dist"
+      }
+    }
+  }
+}

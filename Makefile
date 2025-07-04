@@ -110,6 +110,35 @@ ctl-windows-arm64: main.go
 .PHONY: ctl
 ctl: ctl-linux-amd64 ctl-linux-arm64 ctl-darwin-amd64 ctl-darwin-arm64 ctl-windows-amd64 ctl-windows-arm64
 
+# MCP (Model Context Protocol) server targets
+.PHONY: mcp-test
+mcp-test:
+	@echo "Running MCP server tests"
+	go test ./cmd/mcp/server/... -v
+
+.PHONY: mcp-list-tools
+mcp-list-tools: build
+	@echo "Listing all available MCP tools"
+	@binary_name="omnistrate-ctl-$(GOOS)-$(GOARCH)"; \
+	if [ "$(GOOS)" = "windows" ]; then \
+		binary_name="$$binary_name.exe"; \
+	fi; \
+	./dist/$$binary_name mcp --list-tools
+
+.PHONY: mcp-run
+mcp-run: build
+	@echo "Starting MCP server"
+	@binary_name="omnistrate-ctl-$(GOOS)-$(GOARCH)"; \
+	if [ "$(GOOS)" = "windows" ]; then \
+		binary_name="$$binary_name.exe"; \
+	fi; \
+	./dist/$$binary_name mcp
+
+.PHONY: mcp-test-integration
+mcp-test-integration:
+	@echo "Running MCP integration tests"
+	./test-mcp.sh
+
 .PHONY: test-coverage-report
 test-coverage-report:
 	go test ./... -skip ./test/... -cover -coverprofile coverage.out -covermode count
