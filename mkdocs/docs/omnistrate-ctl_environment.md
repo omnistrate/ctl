@@ -31,3 +31,4 @@ omnistrate-ctl environment [operation] [flags]
 - [omnistrate-ctl environment describe](omnistrate-ctl_environment_describe.md) - Describe a Service Environment
 - [omnistrate-ctl environment list](omnistrate-ctl_environment_list.md) - List environments for your service
 - [omnistrate-ctl environment promote](omnistrate-ctl_environment_promote.md) - Promote a environment
+- [omnistrate-ctl environment secret](omnistrate-ctl_environment_secret.md) - Manage environment secrets
