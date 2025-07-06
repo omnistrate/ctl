@@ -383,3 +383,38 @@ func AdoptResourceInstance(ctx context.Context, token string, serviceID, service
 	}
 	return
 }
+
+func OneOffPatchResourceInstance(ctx context.Context, token string, serviceID, environmentID, instanceID string, resourceOverrideConfig map[string]openapiclientfleet.ResourceOneOffPatchConfigurationOverride, targetTierVersion string) (err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
+
+	// Create the request
+	request := openapiclientfleet.OneOffPatchResourceInstanceRequest2{
+		ResourceOverrideConfiguration: &resourceOverrideConfig,
+	}
+
+	// Add target tier version if provided
+	if targetTierVersion != "" {
+		request.TargetTierVersion = &targetTierVersion
+	}
+
+	req := apiClient.InventoryApiAPI.InventoryApiOneOffPatchResourceInstance(
+		ctxWithToken,
+		serviceID,
+		environmentID,
+		instanceID,
+	).OneOffPatchResourceInstanceRequest2(request)
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	_, r, err = req.Execute()
+	if err != nil {
+		return handleFleetError(err)
+	}
+	return
+}
