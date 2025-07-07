@@ -48,6 +48,7 @@ type OpsCenterApp struct {
 	summaryView    *tview.TextView
 	sidebar        *tview.List
 	mainFlex       *tview.Flex
+	contentArea    *tview.Flex  // The right side content area
 	configEditor   *tview.TextArea
 	statusBar      *tview.TextView
 	editorHelp     *tview.TextView
@@ -97,6 +98,13 @@ func runOpsCenter(cmd *cobra.Command, args []string) error {
 		resourceID:    resourceID,
 	}
 
+	// Ensure terminal is properly reset on exit
+	defer func() {
+		if app.app != nil {
+			app.app.Stop()
+		}
+	}()
+
 	return app.Run()
 }
 
@@ -105,7 +113,15 @@ func (a *OpsCenterApp) Run() error {
 	a.setupUI()
 	a.app.EnableMouse(true)
 	
-	if err := a.app.SetRoot(a.mainFlex, true).Run(); err != nil {
+	// Set up proper screen handling
+	defer func() {
+		if r := recover(); r != nil {
+			a.app.Stop()
+		}
+	}()
+	
+	// Use SetRoot with resizeToFit=true for better screen handling
+	if err := a.app.SetRoot(a.mainFlex, true).SetFocus(a.sidebar).Run(); err != nil {
 		return err
 	}
 	
@@ -137,7 +153,6 @@ func (a *OpsCenterApp) setupUI() {
 	a.configEditor.SetBorder(true)
 	a.configEditor.SetTitle("Helm Configuration Editor")
 	a.configEditor.SetTitleAlign(tview.AlignLeft)
-	a.configEditor.SetText("Select a resource to edit its configuration...", false)
 	
 	// Configure editor help
 	a.editorHelp.SetBorder(false)
@@ -156,14 +171,19 @@ func (a *OpsCenterApp) setupUI() {
 	// Setup summary content
 	a.setupSummary()
 	
-	// Create main layout
+	// Create FIXED layout structure that never changes
+	// Only the content area will be swapped
+	a.contentArea = tview.NewFlex()
+	a.showSummaryView() // Set initial content
+	
+	contentFlex := tview.NewFlex().
+		SetDirection(tview.FlexColumn).
+		AddItem(a.sidebar, 35, 1, true).
+		AddItem(a.contentArea, 0, 2, false)
+	
 	a.mainFlex = tview.NewFlex().
 		SetDirection(tview.FlexRow).
-		AddItem(
-			tview.NewFlex().
-				SetDirection(tview.FlexColumn).
-				AddItem(a.sidebar, 35, 1, true).
-				AddItem(a.summaryView, 0, 2, false), 0, 1, true).
+		AddItem(contentFlex, 0, 1, true).
 		AddItem(a.statusBar, 1, 1, false)
 	
 	// Setup key handlers
@@ -275,11 +295,34 @@ func (a *OpsCenterApp) setupSummary() {
 	a.summaryView.SetText(summary.String())
 }
 
+// showSummaryView displays the summary view in the content area
+func (a *OpsCenterApp) showSummaryView() {
+	a.contentArea.Clear()
+	a.contentArea.AddItem(a.summaryView, 0, 1, false)
+}
+
+// showEditorView displays the editor in the content area
+func (a *OpsCenterApp) showEditorView() {
+	a.contentArea.Clear()
+	editorFlex := tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(a.configEditor, 0, 1, true).
+		AddItem(a.editorHelp, 1, 1, false)
+	a.contentArea.AddItem(editorFlex, 0, 1, true)
+}
+
 func (a *OpsCenterApp) showInstanceOverview() {
 	// Switch back to overview if showing other panels
 	if a.showingEditor {
 		a.hideEditor()
 	}
+	
+	// Ensure we're in operations mode
+	if a.sidebarMode != "operations" {
+		a.sidebarMode = "operations"
+		a.setupSidebar()
+	}
+	
 	a.updateStatusBar("Instance overview - Press 'p' for patch options")
 }
 
@@ -370,18 +413,8 @@ func (a *OpsCenterApp) showEditor(resourceName string) {
 	a.configEditor.SetTitle(fmt.Sprintf("Helm Configuration Editor - %s", resourceName))
 	a.configEditor.SetText(a.originalConfig, true)
 	
-	// Replace the right pane with editor
-	a.mainFlex.RemoveItem(a.mainFlex.GetItem(0))
-	editorFlex := tview.NewFlex().
-		SetDirection(tview.FlexRow).
-		AddItem(a.configEditor, 0, 1, true).
-		AddItem(a.editorHelp, 1, 1, false)
-	
-	newMainFlex := tview.NewFlex().
-		SetDirection(tview.FlexColumn).
-		AddItem(a.sidebar, 35, 1, false).
-		AddItem(editorFlex, 0, 2, true)
-	a.mainFlex.AddItem(newMainFlex, 0, 1, true)
+	// Simply swap the content area to show editor
+	a.showEditorView()
 	
 	// Set up change detection
 	a.configEditor.SetChangedFunc(func() {
@@ -411,13 +444,17 @@ func (a *OpsCenterApp) closeEditor() {
 	a.showingEditor = false
 	a.hasChanges = false
 	
-	// Return to summary view
-	a.mainFlex.RemoveItem(a.mainFlex.GetItem(0))
-	newFlex := tview.NewFlex().
-		SetDirection(tview.FlexColumn).
-		AddItem(a.sidebar, 35, 1, true).
-		AddItem(a.summaryView, 0, 2, false)
-	a.mainFlex.AddItem(newFlex, 0, 1, true)
+	// Clear the editor state
+	a.configEditor.SetText("", false)
+	a.configEditor.SetTitle("Helm Configuration Editor")
+	a.configEditor.SetChangedFunc(nil)
+	
+	// Simply swap back to summary view
+	a.showSummaryView()
+	
+	// Return to operations mode in sidebar
+	a.sidebarMode = "operations"
+	a.setupSidebar()
 	
 	a.app.SetFocus(a.sidebar)
 	a.updateStatusBar("Press 'q' to quit, 'Tab' to navigate, 'Enter' to select")
@@ -428,15 +465,15 @@ func (a *OpsCenterApp) showSaveDiscardDialog() {
 		SetText("You have unsaved changes.\n\nWhat would you like to do?").
 		AddButtons([]string{"Save", "Discard", "Cancel"}).
 		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
+			// Return to main UI first
+			a.app.SetRoot(a.mainFlex, true)
+			
 			switch buttonLabel {
 			case "Save":
 				a.saveConfiguration()
-				a.app.SetRoot(a.mainFlex, true)
 			case "Discard":
 				a.closeEditor()
-				a.app.SetRoot(a.mainFlex, true)
 			case "Cancel":
-				a.app.SetRoot(a.mainFlex, true)
 				a.app.SetFocus(a.configEditor)
 			}
 		})
@@ -517,11 +554,13 @@ func (a *OpsCenterApp) showConfirmationDialog() {
 		SetText("Configuration saved successfully!\n\nWould you like to start the one-off patch now?").
 		AddButtons([]string{"Yes", "No"}).
 		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
+			// Return to main UI first
+			a.app.SetRoot(a.mainFlex, true)
+			
 			if buttonLabel == "Yes" {
 				a.startPatch()
 			}
 			a.closeEditor()
-			a.app.SetRoot(a.mainFlex, true)
 		})
 	
 	a.app.SetRoot(modal, true)
