@@ -1,4 +1,4 @@
-## omnistrate-ctl environment secret delete
+## omnistrate-ctl secret delete
 
 Delete an environment secret
 
@@ -7,7 +7,7 @@ Delete an environment secret
 This command helps you delete a secret from a specific environment type.
 
 ```
-omnistrate-ctl environment secret delete [environment-type] [secret-name] [flags]
+omnistrate-ctl secret delete [environment-type] [secret-name] [flags]
 ```
 
 ### Examples
@@ -35,4 +35,5 @@ omctl environment secret delete prod db-password
 
 ### SEE ALSO
 
-- [omnistrate-ctl environment secret](omnistrate-ctl_environment_secret.md) - Manage environment secrets
+* [omnistrate-ctl secret](omnistrate-ctl_secret.md)	 - Manage secrets
+

@@ -1,4 +1,4 @@
-## omnistrate-ctl environment secret list
+## omnistrate-ctl secret list
 
 List environment secrets
 
@@ -7,17 +7,17 @@ List environment secrets
 This command helps you list all secrets for a specific environment type.
 
 ```
-omnistrate-ctl environment secret list [environment-type] [flags]
+omnistrate-ctl secret list [environment-type] [flags]
 ```
 
 ### Examples
 
 ```
 # List secrets for dev environment
-omctl environment secret list dev
+omctl secret list dev
 
 # List secrets for prod environment with JSON output
-omctl environment secret list prod --output json
+omctl secret list prod --output json
 ```
 
 ### Options
@@ -35,4 +35,5 @@ omctl environment secret list prod --output json
 
 ### SEE ALSO
 
-- [omnistrate-ctl environment secret](omnistrate-ctl_environment_secret.md) - Manage environment secrets
+* [omnistrate-ctl secret](omnistrate-ctl_secret.md)	 - Manage secrets
+

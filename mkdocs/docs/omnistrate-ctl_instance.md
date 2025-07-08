@@ -25,20 +25,21 @@ omnistrate-ctl instance [operation] [flags]
 
 ### SEE ALSO
 
-- [omnistrate-ctl](omnistrate-ctl.md) - Manage your Omnistrate SaaS from the command line
-- [omnistrate-ctl instance continue-deployment](omnistrate-ctl_instance_continue-deployment.md) - Continue instance deployment
-- [omnistrate-ctl instance create](omnistrate-ctl_instance_create.md) - Create an instance deployment
-- [omnistrate-ctl instance delete](omnistrate-ctl_instance_delete.md) - Delete an instance deployment
-- [omnistrate-ctl instance describe](omnistrate-ctl_instance_describe.md) - Describe an instance deployment for your service
-- [omnistrate-ctl instance disable-debug-mode](omnistrate-ctl_instance_disable-debug-mode.md) - Disable debug mode for an instance deployment
-- [omnistrate-ctl instance enable-debug-mode](omnistrate-ctl_instance_enable-debug-mode.md) - Enable debug mode for an instance deployment
-- [omnistrate-ctl instance get-deployment](omnistrate-ctl_instance_get-deployment.md) - Get the deployment entity metadata of the instance
-- [omnistrate-ctl instance list](omnistrate-ctl_instance_list.md) - List instance deployments for your service
-- [omnistrate-ctl instance list-snapshots](omnistrate-ctl_instance_list-snapshots.md) - List all snapshots for an instance
-- [omnistrate-ctl instance modify](omnistrate-ctl_instance_modify.md) - Modify an instance deployment for your service
-- [omnistrate-ctl instance patch-deployment](omnistrate-ctl_instance_patch-deployment.md) - Patch deployment for an instance deployment
-- [omnistrate-ctl instance restart](omnistrate-ctl_instance_restart.md) - Restart an instance deployment for your service
-- [omnistrate-ctl instance restore](omnistrate-ctl_instance_restore.md) - Create a new instance by restoring from a snapshot
-- [omnistrate-ctl instance start](omnistrate-ctl_instance_start.md) - Start an instance deployment for your service
-- [omnistrate-ctl instance stop](omnistrate-ctl_instance_stop.md) - Stop an instance deployment for your service
-- [omnistrate-ctl instance trigger-backup](omnistrate-ctl_instance_trigger-backup.md) - Trigger an automatic backup for your instance
+* [omnistrate-ctl](omnistrate-ctl.md)	 - Manage your Omnistrate SaaS from the command line
+* [omnistrate-ctl instance continue-deployment](omnistrate-ctl_instance_continue-deployment.md)	 - Continue instance deployment
+* [omnistrate-ctl instance create](omnistrate-ctl_instance_create.md)	 - Create an instance deployment
+* [omnistrate-ctl instance delete](omnistrate-ctl_instance_delete.md)	 - Delete an instance deployment
+* [omnistrate-ctl instance describe](omnistrate-ctl_instance_describe.md)	 - Describe an instance deployment for your service
+* [omnistrate-ctl instance disable-debug-mode](omnistrate-ctl_instance_disable-debug-mode.md)	 - Disable debug mode for an instance deployment
+* [omnistrate-ctl instance enable-debug-mode](omnistrate-ctl_instance_enable-debug-mode.md)	 - Enable debug mode for an instance deployment
+* [omnistrate-ctl instance get-deployment](omnistrate-ctl_instance_get-deployment.md)	 - Get the deployment entity metadata of the instance
+* [omnistrate-ctl instance list](omnistrate-ctl_instance_list.md)	 - List instance deployments for your service
+* [omnistrate-ctl instance list-snapshots](omnistrate-ctl_instance_list-snapshots.md)	 - List all snapshots for an instance
+* [omnistrate-ctl instance modify](omnistrate-ctl_instance_modify.md)	 - Modify an instance deployment for your service
+* [omnistrate-ctl instance patch-deployment](omnistrate-ctl_instance_patch-deployment.md)	 - Patch deployment for an instance deployment
+* [omnistrate-ctl instance restart](omnistrate-ctl_instance_restart.md)	 - Restart an instance deployment for your service
+* [omnistrate-ctl instance restore](omnistrate-ctl_instance_restore.md)	 - Create a new instance by restoring from a snapshot
+* [omnistrate-ctl instance start](omnistrate-ctl_instance_start.md)	 - Start an instance deployment for your service
+* [omnistrate-ctl instance stop](omnistrate-ctl_instance_stop.md)	 - Stop an instance deployment for your service
+* [omnistrate-ctl instance trigger-backup](omnistrate-ctl_instance_trigger-backup.md)	 - Trigger an automatic backup for your instance
+
