@@ -1,11 +1,12 @@
-package environment
+package secret
 
 import (
 	"fmt"
-	"github.com/omnistrate/ctl/cmd/common"
-	"github.com/omnistrate/ctl/internal/config"
-	"github.com/omnistrate/ctl/internal/dataaccess"
-	"github.com/omnistrate/ctl/internal/utils"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/common"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/environment"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/config"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/dataaccess"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -38,7 +39,7 @@ func runSecretDelete(cmd *cobra.Command, args []string) error {
 	secretName := args[1]
 
 	// Validate environment type
-	if err := validateEnvironmentType(environmentType); err != nil {
+	if err := environment.ValidateEnvironmentType(environmentType); err != nil {
 		utils.PrintError(err)
 		return err
 	}

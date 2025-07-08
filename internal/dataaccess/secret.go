@@ -6,8 +6,8 @@ import (
 	openapiclientv1 "github.com/omnistrate-oss/omnistrate-sdk-go/v1"
 )
 
-// CreateOrUpdateSecret creates or updates a secret for the given environment type
-func CreateOrUpdateSecret(ctx context.Context, token, environmentType, name, value string) error {
+// SetSecret sets a secret for the given environment type
+func SetSecret(ctx context.Context, token, environmentType, name, value string) error {
 	ctxWithToken := context.WithValue(ctx, openapiclientv1.ContextAccessToken, token)
 	apiClient := getV1Client()
 

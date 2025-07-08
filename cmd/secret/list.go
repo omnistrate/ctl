@@ -1,20 +1,21 @@
-package environment
+package secret
 
 import (
-	"github.com/omnistrate/ctl/cmd/common"
-	"github.com/omnistrate/ctl/internal/config"
-	"github.com/omnistrate/ctl/internal/dataaccess"
-	"github.com/omnistrate/ctl/internal/model"
-	"github.com/omnistrate/ctl/internal/utils"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/common"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/environment"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/config"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/dataaccess"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/model"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/utils"
 	"github.com/spf13/cobra"
 )
 
 const (
 	secretListExample = `# List secrets for dev environment
-omctl environment secret list dev
+omctl secret list dev
 
 # List secrets for prod environment with JSON output
-omctl environment secret list prod --output json`
+omctl secret list prod --output json`
 )
 
 var secretListCmd = &cobra.Command{
@@ -37,7 +38,7 @@ func runSecretList(cmd *cobra.Command, args []string) error {
 	output, _ := cmd.Flags().GetString("output")
 
 	// Validate environment type
-	if err := validateEnvironmentType(environmentType); err != nil {
+	if err := environment.ValidateEnvironmentType(environmentType); err != nil {
 		utils.PrintError(err)
 		return err
 	}

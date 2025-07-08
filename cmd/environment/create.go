@@ -75,7 +75,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Validate environment type
-	if err := validateEnvironmentType(envType); err != nil {
+	if err := ValidateEnvironmentType(envType); err != nil {
 		utils.PrintError(err)
 		return err
 	}
@@ -177,7 +177,7 @@ func validateCreateArguments(args []string, serviceID string) error {
 	return nil
 }
 
-func validateEnvironmentType(envType string) error {
+func ValidateEnvironmentType(envType string) error {
 	if !slices.Contains([]string{"dev", "qa", "staging", "canary", "prod", "private"}, strings.ToLower(envType)) {
 		return fmt.Errorf("invalid environment type: %s", envType)
 	}
