@@ -64,7 +64,6 @@ func runSecretList(cmd *cobra.Command, args []string) error {
 		secrets = append(secrets, model.Secret{
 			EnvironmentType: secret.GetEnvironmentType(),
 			Name:            secret.GetName(),
-			Value:           "[HIDDEN]", // Don't show actual values in list
 		})
 	}
 

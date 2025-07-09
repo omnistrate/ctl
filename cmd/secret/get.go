@@ -63,7 +63,6 @@ func runSecretGet(cmd *cobra.Command, args []string) error {
 	secret := model.Secret{
 		EnvironmentType: result.GetEnvironmentType(),
 		Name:            result.GetName(),
-		Value:           result.GetValue(),
 	}
 
 	err = utils.PrintTextTableJsonOutput(output, secret)
