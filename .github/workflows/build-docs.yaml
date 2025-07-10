@@ -23,13 +23,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd docs
+          cd mkdocs
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Build documentation
         run: |
-          cd docs
+          cd mkdocs
           mkdocs build --strict
           echo "Documentation build completed successfully!"
           echo "The --strict flag ensures that warnings are treated as errors."
