@@ -2,33 +2,33 @@ name: Build Documentation
 
 on:
   push:
-    branches: [ "master", "main" ]
+    branches: ["master", "main"]
   pull_request:
-    branches: [ "master", "main" ]
+    branches: ["master", "main"]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
 
-    - name: Install dependencies
-      run: |
-        cd docs
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    
-    - name: Build documentation
-      run: |
-        cd docs
-        mkdocs build --strict
-        echo "Documentation build completed successfully!"
-        echo "The --strict flag ensures that warnings are treated as errors."
-        echo "All links, paths, and files have been validated during the build process."
+      - name: Install dependencies
+        run: |
+          cd docs
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build documentation
+        run: |
+          cd docs
+          mkdocs build --strict
+          echo "Documentation build completed successfully!"
+          echo "The --strict flag ensures that warnings are treated as errors."
+          echo "All links, paths, and files have been validated during the build process."
