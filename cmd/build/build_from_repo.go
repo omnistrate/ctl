@@ -39,7 +39,7 @@ omctl build-from-repo --env-var POSTGRES_PASSWORD=default --deployment-type byoa
 omctl build-from-repo --file omnistrate-compose.yaml
 
 # Build service with a custom service name
-omctl build-from-repo --service-name my-custom-service
+omctl build-from-repo --product-name my-custom-service
 
 # Skip building and pushing Docker image
 omctl build-from-repo --skip-docker-build
@@ -69,7 +69,7 @@ omctl build-from-repo
 var BuildFromRepoCmd = &cobra.Command{
 	Use:          "build-from-repo",
 	Short:        "Build Service from Git Repository",
-	Long:         "This command helps to build service from git repository. Run this command from the root of the repository. Make sure you have the Dockerfile in the repository and have the Docker daemon running on your machine. By default, the service name will be the repository name, but you can specify a custom service name with the --service-name flag.\n\nYou can also skip specific stages of the build process using the --skip-* flags. For example, you can skip building the Docker image with --skip-docker-build, skip creating the service with --skip-service-build, skip environment promotion with --skip-environment-promotion, or skip SaaS portal initialization with --skip-saas-portal-init.\n\nFor testing purposes, use the --dry-run flag to only build the Docker image locally without pushing, skip service creation, and generate a local spec file with a '-dry-run' suffix. Note that --dry-run cannot be used together with any of the --skip-* flags as they are mutually exclusive.",
+	Long:         "This command helps to build service from git repository. Run this command from the root of the repository. Make sure you have the Dockerfile in the repository and have the Docker daemon running on your machine. By default, the service name will be the repository name, but you can specify a custom service name with the --product-name flag.\n\nYou can also skip specific stages of the build process using the --skip-* flags. For example, you can skip building the Docker image with --skip-docker-build, skip creating the service with --skip-service-build, skip environment promotion with --skip-environment-promotion, or skip SaaS portal initialization with --skip-saas-portal-init.\n\nFor testing purposes, use the --dry-run flag to only build the Docker image locally without pushing, skip service creation, and generate a local spec file with a '-dry-run' suffix. Note that --dry-run cannot be used together with any of the --skip-* flags as they are mutually exclusive.",
 	Example:      buildFromRepoExample,
 	RunE:         runBuildFromRepo,
 	SilenceUsage: true,
@@ -85,6 +85,7 @@ func init() {
 	BuildFromRepoCmd.Flags().StringP("output", "o", "text", "Output format. Only text is supported")
 	BuildFromRepoCmd.Flags().StringP("file", "f", ComposeFileName, "Specify the compose file to read and write to")
 	BuildFromRepoCmd.Flags().String("service-name", "", "Specify a custom service name. If not provided, the repository name will be used.")
+	BuildFromRepoCmd.Flags().String("product-name", "", "Specify a custom service name. If not provided, the repository name will be used.")
 
 	// Skip flags for different stages
 	BuildFromRepoCmd.Flags().Bool("skip-docker-build", false, "Skip building and pushing the Docker image")
@@ -100,6 +101,19 @@ func init() {
 
 	// Release description flag
 	BuildFromRepoCmd.Flags().String("release-description", "", "Provide a description for the release version")
+
+	// Make --service-name and --product-name mutually exclusive
+	BuildFromRepoCmd.MarkFlagsMutuallyExclusive("service-name", "product-name")
+	// Deprecate the old --service-name flag
+	if err := BuildFromRepoCmd.Flags().MarkDeprecated("service-name", "use --product-name instead"); err != nil {
+		utils.PrintError(err)
+		return
+	}
+	// Hide the deprecated flag from help
+	if err := BuildFromRepoCmd.Flags().MarkHidden("service-name"); err != nil {
+		utils.PrintError(err)
+		return
+	}
 
 	err := BuildFromRepoCmd.MarkFlagFilename("file")
 	if err != nil {
@@ -929,6 +943,17 @@ x-omnistrate-image-registry-attributes:
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
+	}
+	productName, err := cmd.Flags().GetString("product-name")
+	if err != nil {
+		utils.HandleSpinnerError(spinner, sm, err)
+		return err
+	}
+
+	// Use product-name if provided, otherwise use service-name
+	// Since flags are mutually exclusive, only one will be set
+	if productName != "" {
+		serviceName = productName
 	}
 
 	// Use custom service name if provided, otherwise use repo name
