@@ -95,6 +95,7 @@ jobs:
           path: |
             dist/${{ steps.calc_binary_name.outputs.binary_name }}.tar.gz
             dist/${{ steps.calc_binary_name.outputs.binary_name }}.zip
+          retention-days: 7
 
   sanity-check:
     needs: build
