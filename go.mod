@@ -2,6 +2,8 @@ module github.com/omnistrate-oss/omnistrate-ctl
 
 go 1.24.4
 
+replace github.com/omnistrate-oss/omnistrate-sdk-go => ../omnistrate-sdk-go
+
 require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/cenkalti/backoff/v4 v4.3.0

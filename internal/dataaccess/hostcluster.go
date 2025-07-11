@@ -108,3 +108,24 @@ func DeleteHostCluster(ctx context.Context, token string, hostClusterID string) 
 
 	return nil
 }
+
+func GetKubeConfigForHostCluster(ctx context.Context, token string, hostClusterID string) (*openapiclientfleet.KubeConfigHostClusterResult, error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
+
+	req := apiClient.HostclusterApiAPI.HostclusterApiKubeConfigHostCluster(ctxWithToken, hostClusterID)
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	kubeConfig, r, err := req.Execute()
+	if err != nil {
+		return nil, handleFleetError(err)
+	}
+
+	return kubeConfig, nil
+}
