@@ -115,8 +115,6 @@ func init() {
 	BuildCmd.Flags().StringP("image-registry-auth-password", "", "", "Used together with --image flag. Provide the password to authenticate with the image registry if it's a private registry")
 
 	BuildCmd.MarkFlagsRequiredTogether("image-registry-auth-username", "image-registry-auth-password")
-	// Make --name and --product-name mutually exclusive
-	BuildCmd.MarkFlagsMutuallyExclusive("name", "product-name")
 	// Mark one of them as required
 	BuildCmd.MarkFlagsOneRequired("name", "product-name")
 	// Deprecate the old --name flag
@@ -159,6 +157,12 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	}
 	productName, err := cmd.Flags().GetString("product-name")
 	if err != nil {
+		return err
+	}
+
+	if name != "" && productName != "" {
+		err = errors.New("only one of name or product-name can be provided")
+		utils.PrintError(err)
 		return err
 	}
 
