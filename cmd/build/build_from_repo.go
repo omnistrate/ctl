@@ -102,8 +102,6 @@ func init() {
 	// Release description flag
 	BuildFromRepoCmd.Flags().String("release-description", "", "Provide a description for the release version")
 
-	// Make --service-name and --product-name mutually exclusive
-	BuildFromRepoCmd.MarkFlagsMutuallyExclusive("service-name", "product-name")
 	// Deprecate the old --service-name flag
 	if err := BuildFromRepoCmd.Flags().MarkDeprecated("service-name", "use --product-name instead"); err != nil {
 		utils.PrintError(err)
@@ -198,6 +196,30 @@ func runBuildFromRepo(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		utils.PrintError(err)
 		return err
+	}
+
+	// Get the service name from flag
+	serviceName, err := cmd.Flags().GetString("service-name")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+	productName, err := cmd.Flags().GetString("product-name")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	if serviceName != "" && productName != "" {
+		err = errors.New("only one of service-name or product-name can be provided")
+		utils.PrintError(err)
+		return err
+	}
+
+	// Use product-name if provided, otherwise use service-name
+	// Since flags are mutually exclusive, only one will be set
+	if productName != "" {
+		serviceName = productName
 	}
 
 	// Check for incompatible flag combinations
@@ -936,24 +958,6 @@ x-omnistrate-image-registry-attributes:
 		sm.Stop()
 		fmt.Println("Service build was skipped. No service was created.")
 		return nil
-	}
-
-	// Get the service name from flag
-	serviceName, err := cmd.Flags().GetString("service-name")
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
-	productName, err := cmd.Flags().GetString("product-name")
-	if err != nil {
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
-
-	// Use product-name if provided, otherwise use service-name
-	// Since flags are mutually exclusive, only one will be set
-	if productName != "" {
-		serviceName = productName
 	}
 
 	// Use custom service name if provided, otherwise use repo name
