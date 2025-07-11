@@ -5,8 +5,9 @@ x-omnistrate-service-plan:
   tenancyType: "OMNISTRATE_DEDICATED_TENANCY"
   deployment:
     hostedDeployment:
-      AwsAccountId: "237550789389"
-      AwsBootstrapRoleAccountArn: "arn:aws:iam::237550789389:role/omnistrate-bootstrap-role"
+      GcpProjectId: "omnistrate-dataplane-host-dev"
+      GcpProjectNumber: "61114262792"
+      GcpServiceAccountEmail: "bootstrap.getservice@gcp.test.iam"
 
 x-omnistrate-load-balancer:
   tcp:
