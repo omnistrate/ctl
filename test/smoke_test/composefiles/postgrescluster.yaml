@@ -3,9 +3,9 @@ x-omnistrate-service-plan:
   name: "BYOA Postgres cluster"
   tenancyType: "OMNISTRATE_MULTI_TENANCY"
   deployment:
-    hostedDeployment:
-      AwsAccountId: "237550789389"
-      AwsBootstrapRoleAccountArn: "arn:aws:iam::237550789389:role/omnistrate-bootstrap-role"
+    byoaDeployment:
+      AwsAccountId: "339713121445"
+      AwsBootstrapRoleAccountArn: "arn:aws:iam::339713121445:role/omnistrate-bootstrap-role"
 x-omnistrate-integrations:
   - omnistrateLogging
   - omnistrateMetrics

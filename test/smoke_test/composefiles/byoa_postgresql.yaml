@@ -3,10 +3,15 @@ x-omnistrate-service-plan:
   name: "BYOA Postgres"
   tenancyType: "OMNISTRATE_DEDICATED_TENANCY"
   deployment:
-    hostedDeployment:
-      AwsAccountId: "237550789389"
-      AwsBootstrapRoleAccountArn: "arn:aws:iam::237550789389:role/omnistrate-bootstrap-role"
-
+    byoaDeployment:
+      AwsAccountId: "339713121445"
+      AwsBootstrapRoleAccountArn: "arn:aws:iam::339713121445:role/omnistrate-bootstrap-role"
+x-customer-integrations:
+  metrics:
+    prometheusEndpoint: ":9090"
+    provider: native
+  logs:
+    provider: native
 services:
   postgres:
     image: postgres
