@@ -95,6 +95,7 @@ jobs:
           path: |
             dist/${{ steps.calc_binary_name.outputs.binary_name }}.tar.gz
             dist/${{ steps.calc_binary_name.outputs.binary_name }}.zip
+          retention-days: 7
 
   sanity-check:
     needs: build
@@ -222,42 +223,6 @@ jobs:
         timeout-minutes: 1
         run: ls -R
 
-      - name: Extract binaries from compressed archives (legacy - kept for compatibility)
-        timeout-minutes: 5
-        run: |
-          # Extract all compressed archives to get individual binaries
-          for dir in omnistrate-ctl-*-compressed/; do
-            cd "$dir"
-            for file in *.tar.gz; do
-              if [ -f "$file" ]; then
-                tar -xzf "$file"
-              fi
-            done
-            for file in *.zip; do
-              if [ -f "$file" ]; then
-                unzip "$file"
-              fi
-            done
-            cd ..
-          done
-
-      - name: Upload binaries on a new release on cli repo (legacy - kept for compatibility)
-        timeout-minutes: 5
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            omnistrate-ctl-darwin-amd64-compressed/omnistrate-ctl-darwin-amd64
-            omnistrate-ctl-darwin-arm64-compressed/omnistrate-ctl-darwin-arm64
-            omnistrate-ctl-linux-amd64-compressed/omnistrate-ctl-linux-amd64
-            omnistrate-ctl-linux-arm64-compressed/omnistrate-ctl-linux-arm64
-            omnistrate-ctl-windows-amd64.exe-compressed/omnistrate-ctl-windows-amd64.exe
-            omnistrate-ctl-windows-arm64.exe-compressed/omnistrate-ctl-windows-arm64.exe
-          repository: omnistrate/cli
-          token: ${{ secrets.PUBLISH_CTL_PAT }}
-          fail_on_unmatched_files: true
-          draft: false
-          prerelease: false
-
       - name: Upload compressed files to triggering release
         timeout-minutes: 5
         uses: softprops/action-gh-release@v2
@@ -310,33 +275,13 @@ jobs:
       - name: Display structure of downloaded files
         timeout-minutes: 1
         run: ls -R
-
-      - name: Extract compressed artifacts
-        timeout-minutes: 2
-        run: |
-          # Extract all compressed archives to get individual binaries
-          for dir in omnistrate-ctl-*-compressed/; do
-            cd "$dir"
-            for file in *.tar.gz; do
-              if [ -f "$file" ]; then
-                tar -xzf "$file"
-              fi
-            done
-            for file in *.zip; do
-              if [ -f "$file" ]; then
-                unzip "$file"
-              fi
-            done
-            cd ..
-          done
-
       - name: Calculate SHA256 checksums
         id: calculate_sha256
         run: |
-          sha_darwin_amd64=$(sha256sum omnistrate-ctl-darwin-amd64-compressed/omnistrate-ctl-darwin-amd64 | awk '{ print $1 }')
-          sha_darwin_arm64=$(sha256sum omnistrate-ctl-darwin-arm64-compressed/omnistrate-ctl-darwin-arm64 | awk '{ print $1 }')
-          sha_linux_amd64=$(sha256sum omnistrate-ctl-linux-amd64-compressed/omnistrate-ctl-linux-amd64 | awk '{ print $1 }')
-          sha_linux_arm64=$(sha256sum omnistrate-ctl-linux-arm64-compressed/omnistrate-ctl-linux-arm64 | awk '{ print $1 }')
+          sha_darwin_amd64=$(sha256sum omnistrate-ctl-darwin-amd64-compressed/omnistrate-ctl-darwin-amd64.tar.gz | awk '{ print $1 }')
+          sha_darwin_arm64=$(sha256sum omnistrate-ctl-darwin-arm64-compressed/omnistrate-ctl-darwin-arm64.tar.gz | awk '{ print $1 }')
+          sha_linux_amd64=$(sha256sum omnistrate-ctl-linux-amd64-compressed/omnistrate-ctl-linux-amd64.tar.gz | awk '{ print $1 }')
+          sha_linux_arm64=$(sha256sum omnistrate-ctl-linux-arm64-compressed/omnistrate-ctl-linux-arm64.tar.gz | awk '{ print $1 }')
           echo "sha_darwin_amd64=${sha_darwin_amd64}" >> "$GITHUB_OUTPUT"
           echo "sha_darwin_arm64=${sha_darwin_arm64}" >> "$GITHUB_OUTPUT"
           echo "sha_linux_amd64=${sha_linux_amd64}" >> "$GITHUB_OUTPUT"
