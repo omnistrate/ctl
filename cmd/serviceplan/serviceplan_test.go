@@ -174,7 +174,7 @@ func TestValidateUpdateVersionNameArguments(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validateUpdateVersionNameArguments(tt.args, tt.serviceID, tt.planID)
+			err := validateUpdateArguments(tt.args, tt.serviceID, tt.planID)
 			if tt.wantErr {
 				require.Error(err)
 				require.Contains(err.Error(), tt.errMsg)
