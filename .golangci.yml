@@ -1,3 +1,4 @@
+version: "2"
 run:
   concurrency: 4
   tests: true
@@ -19,25 +20,31 @@ linters:
     - predeclared
     - revive
     - unconvert
-linters-settings:
-  gocritic:
-    disabled-checks:
-      - singleCaseSwitch
-      - assignOp
-      - ifElseChain
-  revive:
-    rules:
-      - name: unused-parameter
-        disabled: true
-issues:
-  exclude-use-default: false
-  exclude-rules:
-    - path: third_party
-      linters:
-        - all
-    - path: builtin
-      linters:
-        - all
-    - path: examples
-      linters:
-        - all
+  settings:
+    gocritic:
+      disabled-checks:
+        - singleCaseSwitch
+        - assignOp
+        - ifElseChain
+    revive:
+      rules:
+        - name: unused-parameter
+          disabled: true
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
