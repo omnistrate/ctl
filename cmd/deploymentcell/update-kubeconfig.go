@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"github.com/chelnak/ysmrr"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/model"
+	openapiclientfleet "github.com/omnistrate-oss/omnistrate-sdk-go/fleet"
 	"os"
 	"path/filepath"
 
@@ -75,7 +78,9 @@ type KubeConfigUserData struct {
 }
 
 func init() {
-	updateKubeConfigCmd.Flags().String("kubeconfig", "", "Path to kubeconfig file (default: $HOME/.kube/config)")
+	updateKubeConfigCmd.Flags().String("kubeconfig", "", "Path to kubeconfig file (default: /tmp/kubeconfig)")
+	updateKubeConfigCmd.Flags().String("customer-email", "", "Customer email to filter by (optional)")
+	updateKubeConfigCmd.Flags().String("role", "", "Access role for the kube context (optional, default: 'cluster-reader')")
 }
 
 func runUpdateKubeConfig(cmd *cobra.Command, args []string) error {
@@ -89,14 +94,21 @@ func runUpdateKubeConfig(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	customerEmail, err := cmd.Flags().GetString("customer-email")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	role, err := cmd.Flags().GetString("role")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
 	// Default kubeconfig path
 	if kubeconfigPath == "" {
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			utils.PrintError(fmt.Errorf("failed to get home directory: %w", err))
-			return err
-		}
-		kubeconfigPath = filepath.Join(homeDir, ".kube", "config")
+		kubeconfigPath = "/tmp/kubeconfig"
 	}
 
 	ctx := context.Background()
@@ -106,24 +118,60 @@ func runUpdateKubeConfig(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	sm := ysmrr.NewSpinnerManager()
+	spinner := sm.AddSpinner("Looking up deployment cell...")
+	sm.Start()
+
+	var hostClusters *openapiclientfleet.ListHostClustersResult
+	if hostClusters, err = dataaccess.ListHostClusters(ctx, token, nil, nil); err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	// Convert to model structure and filter by ID / key
+	var deploymentCells []model.DeploymentCell
+	for _, cluster := range hostClusters.GetHostClusters() {
+		if cluster.GetId() != deploymentCellID && cluster.GetKey() != deploymentCellID {
+			continue // Skip if ID or key does not match
+		}
+
+		if customerEmail != "" && cluster.GetCustomerEmail() != customerEmail {
+			continue // Skip if customer email does not match
+		}
+
+		deploymentCell := formatDeploymentCell(&cluster)
+		deploymentCells = append(deploymentCells, deploymentCell)
+	}
+
+	if len(deploymentCells) > 1 {
+		utils.HandleSpinnerError(spinner, sm, fmt.Errorf("multiple deployment cells found for ID %s, please specify a unique ID or a customer email to filter by", deploymentCellID))
+		return fmt.Errorf("multiple deployment cells found for ID %s", deploymentCellID)
+	} else if len(deploymentCells) == 0 {
+		utils.HandleSpinnerError(spinner, sm, fmt.Errorf("no deployment cell found for ID %s", deploymentCellID))
+		return fmt.Errorf("no deployment cell found for ID %s", deploymentCellID)
+	} else {
+		deploymentCellID = deploymentCells[0].ID
+	}
+
 	// Get kubeconfig data from the API
-	kubeConfigResult, err := dataaccess.GetKubeConfigForHostCluster(ctx, token, deploymentCellID)
+	spinner.UpdateMessage("Fetching kubeconfig for deployment cell (this may take a couple of minutes)...")
+	kubeConfigResult, err := dataaccess.GetKubeConfigForHostCluster(ctx, token, deploymentCellID, role)
 	if err != nil {
-		utils.PrintError(fmt.Errorf("failed to get kubeconfig for deployment cell %s: %w", deploymentCellID, err))
+		utils.HandleSpinnerError(spinner, sm, fmt.Errorf("failed to get kubeconfig for deployment cell %s: %w", deploymentCellID, err))
 		return err
 	}
 
 	// Validate base64 encoded data
 	if _, err := base64.StdEncoding.DecodeString(kubeConfigResult.GetCaDataBase64()); err != nil {
-		utils.PrintError(fmt.Errorf("invalid CA data: %w", err))
+		utils.HandleSpinnerError(spinner, sm, fmt.Errorf("invalid CA data: %w", err))
 		return err
 	}
 	if _, err := base64.StdEncoding.DecodeString(kubeConfigResult.GetClientCertificateDataBase64()); err != nil {
-		utils.PrintError(fmt.Errorf("invalid client certificate data: %w", err))
+		utils.HandleSpinnerError(spinner, sm, fmt.Errorf("invalid client certificate data: %w", err))
 		return err
 	}
 	if _, err := base64.StdEncoding.DecodeString(kubeConfigResult.GetClientKeyDataBase64()); err != nil {
-		utils.PrintError(fmt.Errorf("invalid client key data: %w", err))
+		utils.HandleSpinnerError(spinner, sm, fmt.Errorf("invalid client key data: %w", err))
 		return err
 	}
 
@@ -138,11 +186,11 @@ func runUpdateKubeConfig(cmd *cobra.Command, args []string) error {
 		// File exists, load it
 		data, err := os.ReadFile(kubeconfigPath)
 		if err != nil {
-			utils.PrintError(fmt.Errorf("failed to read kubeconfig file: %w", err))
+			utils.HandleSpinnerError(spinner, sm, fmt.Errorf("failed to read kubeconfig file: %w", err))
 			return err
 		}
 		if err := yaml.Unmarshal(data, &kubeConfig); err != nil {
-			utils.PrintError(fmt.Errorf("failed to parse kubeconfig file: %w", err))
+			utils.HandleSpinnerError(spinner, sm, fmt.Errorf("failed to parse kubeconfig file: %w", err))
 			return err
 		}
 	} else {
@@ -193,26 +241,25 @@ func runUpdateKubeConfig(cmd *cobra.Command, args []string) error {
 	kubeConfig.CurrentContext = contextName
 
 	// Ensure directory exists
-	if err := os.MkdirAll(filepath.Dir(kubeconfigPath), 0755); err != nil {
-		utils.PrintError(fmt.Errorf("failed to create kubeconfig directory: %w", err))
+	if err = os.MkdirAll(filepath.Dir(kubeconfigPath), 0755); err != nil {
+		utils.HandleSpinnerError(spinner, sm, fmt.Errorf("failed to create kubeconfig directory: %w", err))
 		return err
 	}
 
 	// Write kubeconfig file
 	data, err := yaml.Marshal(&kubeConfig)
 	if err != nil {
-		utils.PrintError(fmt.Errorf("failed to marshal kubeconfig: %w", err))
+		utils.HandleSpinnerError(spinner, sm, fmt.Errorf("failed to marshal kubeconfig: %w", err))
 		return err
 	}
 
 	if err := os.WriteFile(kubeconfigPath, data, 0600); err != nil {
-		utils.PrintError(fmt.Errorf("failed to write kubeconfig file: %w", err))
+		utils.HandleSpinnerError(spinner, sm, fmt.Errorf("failed to write kubeconfig file: %w", err))
 		return err
 	}
 
-	fmt.Printf("Successfully updated kubeconfig at %s\n", kubeconfigPath)
-	fmt.Printf("Current context set to: %s\n", contextName)
-	fmt.Printf("You can now use kubectl to interact with your deployment cell.\n")
+	utils.HandleSpinnerSuccess(spinner, sm, fmt.Sprintf("Successfully updated kubeconfig at %s\n", kubeconfigPath))
+	utils.PrintInfo(fmt.Sprintf("Current context set to: %s", contextName))
 
 	return nil
 }

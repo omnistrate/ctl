@@ -109,11 +109,23 @@ func DeleteHostCluster(ctx context.Context, token string, hostClusterID string) 
 	return nil
 }
 
-func GetKubeConfigForHostCluster(ctx context.Context, token string, hostClusterID string) (*openapiclientfleet.KubeConfigHostClusterResult, error) {
+func GetKubeConfigForHostCluster(
+	ctx context.Context,
+	token string,
+	hostClusterID string,
+	role string,
+) (
+	*openapiclientfleet.KubeConfigHostClusterResult,
+	error,
+) {
 	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
 	apiClient := getFleetClient()
 
 	req := apiClient.HostclusterApiAPI.HostclusterApiKubeConfigHostCluster(ctxWithToken, hostClusterID)
+
+	if role != "" {
+		req = req.Role(role)
+	}
 
 	var r *http.Response
 	defer func() {

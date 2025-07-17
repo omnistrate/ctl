@@ -31,8 +31,7 @@ func init() {
 	Cmd.AddCommand(listSnapshotsCmd)
 	Cmd.AddCommand(restoreCmd)
 	Cmd.AddCommand(adoptCmd)
-	Cmd.AddCommand(patchCmd)
-	Cmd.AddCommand(opsCenterCmd)
+	Cmd.AddCommand(versionUpgradeCmd)
 }
 
 func run(cmd *cobra.Command, args []string) {

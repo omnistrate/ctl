@@ -2,8 +2,6 @@ module github.com/omnistrate-oss/omnistrate-ctl
 
 go 1.24.4
 
-replace github.com/omnistrate-oss/omnistrate-sdk-go => ../omnistrate-sdk-go
-
 require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/cenkalti/backoff/v4 v4.3.0
@@ -17,7 +15,7 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.6.7
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-wordwrap v1.0.1
-	github.com/omnistrate-oss/omnistrate-sdk-go v0.0.61
+	github.com/omnistrate-oss/omnistrate-sdk-go v0.0.62
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/pkg/errors v0.9.1
 	github.com/rivo/tview v0.0.0-20250625164341-a4a78f1e05cb

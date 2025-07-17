@@ -17,13 +17,16 @@ import (
 )
 
 const (
-	patchExample = `# Issue a one-off patch to an instance with configuration override
-omctl instance patch instance-abcd1234 --configuration-override /path/to/config.yaml
+	versionUpgradeExample = `# Issue a version upgrade for an instance with upgrade configuration override to the latest tier version
+omctl instance version-upgrade instance-abcd1234 --upgrade-configuration-override /path/to/config.yaml
 
-# Issue a one-off patch with target tier version
-omctl instance patch instance-abcd1234 --configuration-override /path/to/config.yaml --target-tier-version v1.2.3
+# Issue a version upgrade to a specific target tier version
+omctl instance version-upgrade instance-abcd1234 --upgrade-configuration-override /path/to/config.yaml --target-tier-version v1.2.3
 
-# Example configuration override YAML file:
+# [HELM ONLY] Use generate-configuration to generate a default deployment instance configuration file based on the current helm values
+omctl instance version-upgrade instance-abcd1234 --upgrade-configuration-override existing-config.yaml --generate-configuration
+
+# Example upgrade configuration override YAML file:
 # resource-key-1:
 #   helmChartValues:
 #     key1: value1
@@ -35,32 +38,32 @@ omctl instance patch instance-abcd1234 --configuration-override /path/to/config.
 #       port: 5432`
 )
 
-var patchCmd = &cobra.Command{
-	Use:          "patch [instance-id]",
-	Short:        "Issue a one-off patch to an instance",
-	Long:         `This command helps you issue a one-off patch to a resource instance with configuration overrides.`,
-	Example:      patchExample,
-	RunE:         runPatch,
+var versionUpgradeCmd = &cobra.Command{
+	Use:          "version-upgrade [instance-id]",
+	Short:        "Issue a version upgrade for a deployment instance",
+	Long:         `This command helps you issue a version upgrade for a deployment instance with the specified upgrade configuration override.`,
+	Example:      versionUpgradeExample,
+	RunE:         runVersionUpgrade,
 	SilenceUsage: true,
 }
 
 func init() {
-	patchCmd.Flags().String("configuration-override", "", "YAML file containing resource configuration overrides")
-	patchCmd.Flags().String("target-tier-version", "", "Target tier version for the patch")
-	patchCmd.Flags().StringP("output", "o", "json", "Output format. Only json is supported")
+	versionUpgradeCmd.Flags().String("upgrade-configuration-override", "", "YAML file containing upgrade configuration override")
+	versionUpgradeCmd.Flags().String("target-tier-version", "", "Target tier version for the version upgrade (optional, defaults to latest released tier version)")
+	versionUpgradeCmd.Flags().Bool("generate-configuration", false, "Generate a default configuration file based on current helm values")
 
-	patchCmd.Args = cobra.ExactArgs(1) // Require exactly one argument
+	versionUpgradeCmd.Args = cobra.ExactArgs(1) // Require exactly one argument (i.e. instance ID)
 
 	var err error
-	if err = patchCmd.MarkFlagRequired("configuration-override"); err != nil {
+	if err = versionUpgradeCmd.MarkFlagRequired("upgrade-configuration-override"); err != nil {
 		return
 	}
-	if err = patchCmd.MarkFlagFilename("configuration-override"); err != nil {
+	if err = versionUpgradeCmd.MarkFlagFilename("upgrade-configuration-override"); err != nil {
 		return
 	}
 }
 
-func runPatch(cmd *cobra.Command, args []string) error {
+func runVersionUpgrade(cmd *cobra.Command, args []string) error {
 	defer config.CleanupArgsAndFlags(cmd, &args)
 
 	if len(args) == 0 {
@@ -73,14 +76,21 @@ func runPatch(cmd *cobra.Command, args []string) error {
 	instanceID := args[0]
 
 	// Retrieve flags
-	configOverrideFile, err := cmd.Flags().GetString("configuration-override")
+	configOverrideFile, err := cmd.Flags().GetString("upgrade-configuration-override")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	// Generate configuration override if requested
+	generateConfig, err := cmd.Flags().GetBool("generate-configuration")
 	if err != nil {
 		utils.PrintError(err)
 		return err
 	}
 
 	if configOverrideFile == "" {
-		err = errors.New("configuration-override is required")
+		err = errors.New("upgrade-configuration-override is required")
 		utils.PrintError(err)
 		return err
 	}
@@ -97,13 +107,6 @@ func runPatch(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Validate output flag
-	if output != "json" {
-		err = errors.New("only json output is supported")
-		utils.PrintError(err)
-		return err
-	}
-
 	// Validate user login
 	token, err := common.GetTokenWithLogin()
 	if err != nil {
@@ -116,16 +119,88 @@ func runPatch(cmd *cobra.Command, args []string) error {
 	var spinner *ysmrr.Spinner
 	if output != "json" {
 		sm = ysmrr.NewSpinnerManager()
-		msg := "Applying one-off patch..."
+		var msg string
+		if generateConfig {
+			msg = "Generating configuration file"
+		} else {
+			msg = "Upgrading deployment instance"
+			if targetTierVersion != "" {
+				msg += fmt.Sprintf(" to target tier version %s", targetTierVersion)
+			} else {
+				msg += " to latest tier version"
+			}
+		}
 		spinner = sm.AddSpinner(msg)
 		sm.Start()
 	}
 
 	// Check if instance exists
+	if spinner != nil {
+		spinner.UpdateMessage("Looking up deployment instance")
+	}
 	serviceID, environmentID, _, _, err := getInstance(cmd.Context(), token, instanceID)
 	if err != nil {
 		utils.HandleSpinnerError(spinner, sm, err)
 		return err
+	}
+
+	// If we have to generate the configuration file, describe the resource instance
+	if generateConfig {
+		// Update spinner message
+		if spinner != nil {
+			spinner.UpdateMessage("Processing instance configuration to generate overrides")
+		}
+		// Describe instance to get current configuration
+		instance, err := dataaccess.DescribeResourceInstance(cmd.Context(), token, serviceID, environmentID, instanceID)
+		if err != nil {
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
+
+		resourceOverrideConfig := make(map[string]openapiclientfleet.ResourceOneOffPatchConfigurationOverride)
+		if len(instance.ConsumptionResourceInstanceResult.DetailedNetworkTopology) == 0 {
+			utils.HandleSpinnerError(spinner, sm, errors.New("no eligible component topology found for the instance"))
+			return errors.New("no eligible component topology found for the instance")
+		}
+
+		if spinner != nil {
+			spinner.UpdateMessage("Looking up Helm releases for deployment instance to generate overrides")
+		}
+		for _, resourceVersionSummary := range instance.ResourceVersionSummaries {
+			// We only support helm overrides for now
+			if resourceVersionSummary.HelmDeploymentConfiguration == nil {
+				// Skip resources that are not helm deployments
+				continue
+			}
+
+			resourceIntfc := instance.ConsumptionResourceInstanceResult.DetailedNetworkTopology[*resourceVersionSummary.ResourceId]
+
+			if resourceIntfc == nil {
+				// Skip
+				continue
+			}
+
+			if resourceMap, ok := resourceIntfc.(map[string]interface{}); ok {
+				resourceKey := resourceMap["resourceKey"].(string)
+				resourceOverrideConfig[resourceKey] = openapiclientfleet.ResourceOneOffPatchConfigurationOverride{
+					HelmChartValues: resourceVersionSummary.HelmDeploymentConfiguration.Values,
+				}
+			}
+		}
+
+		// Write the generated configuration to the specified file
+		var marshalledData []byte
+		if marshalledData, err = yaml.Marshal(resourceOverrideConfig); err != nil {
+			utils.HandleSpinnerError(spinner, sm, errors2.Wrap(err, "failed to marshal generated configuration"))
+			return err
+		}
+
+		if err = os.WriteFile(configOverrideFile, marshalledData, 0644); err != nil {
+			utils.HandleSpinnerError(spinner, sm, errors2.Wrap(err, "failed to write generated configuration to file"))
+			return err
+		}
+		utils.HandleSpinnerSuccess(spinner, sm, fmt.Sprintf("Generated configuration override file: %s", configOverrideFile))
+		return nil
 	}
 
 	// Read and parse configuration override YAML file
@@ -157,7 +232,7 @@ func runPatch(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	utils.HandleSpinnerSuccess(spinner, sm, "Successfully applied one-off patch")
+	utils.HandleSpinnerSuccess(spinner, sm, "Successfully initiated version upgrade for deployment instance")
 
 	// Search for the instance to get updated details
 	searchRes, err := dataaccess.SearchInventory(cmd.Context(), token, fmt.Sprintf("resourceinstance:%s", instanceID))
@@ -167,7 +242,7 @@ func runPatch(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(searchRes.ResourceInstanceResults) == 0 {
-		err = errors.New("failed to find the patched instance")
+		err = errors.New("failed to find the upgraded instance")
 		utils.PrintError(err)
 		return err
 	}

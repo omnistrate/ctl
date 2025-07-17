@@ -29,7 +29,7 @@ func init() {
 	adoptCmd.Flags().StringP("cloud-provider", "c", "", "Cloud provider name (required)")
 	adoptCmd.Flags().StringP("region", "r", "", "Region name (required)")
 	adoptCmd.Flags().StringP("description", "d", "Deployment cell adopted via CLI", "Description for the deployment cell")
-	adoptCmd.Flags().StringP("user-email", "u", "", "User email to adopt the deployment cell for (optional)")
+	adoptCmd.Flags().StringP("customer-email", "u", "", "Customer email to adopt the deployment cell for (optional)")
 
 	_ = adoptCmd.MarkFlagRequired("id")
 	_ = adoptCmd.MarkFlagRequired("cloud-provider")
@@ -63,7 +63,7 @@ func runAdopt(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	userEmail, err := cmd.Flags().GetString("user-email")
+	userEmail, err := cmd.Flags().GetString("customer-email")
 	if err != nil {
 		utils.PrintError(err)
 		return err
