@@ -190,7 +190,7 @@ func DescribeResourceInstance(ctx context.Context, token string, serviceID, envi
 		serviceID,
 		environmentID,
 		instanceID,
-	)
+	).Detail(true)
 
 	var r *http.Response
 	defer func() {
@@ -344,6 +344,75 @@ func UpdateResourceInstance(
 	}()
 
 	r, err = req.Execute()
+	if err != nil {
+		return handleFleetError(err)
+	}
+	return
+}
+
+func AdoptResourceInstance(ctx context.Context, token string, serviceID, servicePlanID, hostClusterID, primaryResourceKey string, request openapiclientfleet.AdoptResourceInstanceRequest2, servicePlanVersion, subscriptionID *string) (res *openapiclientfleet.FleetCreateResourceInstanceResult, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
+
+	req := apiClient.InventoryApiAPI.InventoryApiAdoptResourceInstance(
+		ctxWithToken,
+		serviceID,
+		servicePlanID,
+		hostClusterID,
+		primaryResourceKey,
+	).AdoptResourceInstanceRequest2(request)
+
+	// Add optional parameters if provided
+	if servicePlanVersion != nil && *servicePlanVersion != "" {
+		req = req.ServicePlanVersion(*servicePlanVersion)
+	}
+	if subscriptionID != nil && *subscriptionID != "" {
+		req = req.SubscriptionID(*subscriptionID)
+	}
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	res, r, err = req.Execute()
+	if err != nil {
+		return nil, handleFleetError(err)
+	}
+	return
+}
+
+func OneOffPatchResourceInstance(ctx context.Context, token string, serviceID, environmentID, instanceID string, resourceOverrideConfig map[string]openapiclientfleet.ResourceOneOffPatchConfigurationOverride, targetTierVersion string) (err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
+
+	// Create the request
+	request := openapiclientfleet.OneOffPatchResourceInstanceRequest2{
+		ResourceOverrideConfiguration: &resourceOverrideConfig,
+	}
+
+	// Add target tier version if provided
+	if targetTierVersion != "" {
+		request.TargetTierVersion = &targetTierVersion
+	}
+
+	req := apiClient.InventoryApiAPI.InventoryApiOneOffPatchResourceInstance(
+		ctxWithToken,
+		serviceID,
+		environmentID,
+		instanceID,
+	).OneOffPatchResourceInstanceRequest2(request)
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	_, r, err = req.Execute()
 	if err != nil {
 		return handleFleetError(err)
 	}
