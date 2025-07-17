@@ -14,41 +14,42 @@ import (
 )
 
 const (
-	updateVersionNameExample = `# Update service plan version name
-omctl service-plan update-version-name [service-name] [plan-name] --version=[version] --name=[new-name]
+	updateExample = `# Update service plan version name
+omctl service-plan update [service-name] [plan-name] --version=[version] --name=[new-name]
 
 # Update service plan version name by ID instead of name
-omctl service-plan update-version-name --service-id=[service-id] --plan-id=[plan-id] --version=[version] --name=[new-name]`
+omctl service-plan update --service-id=[service-id] --plan-id=[plan-id] --version=[version] --name=[new-name]`
 )
 
-var updateVersionNameCmd = &cobra.Command{
-	Use:   "update-version-name [service-name] [plan-name] --version=[version] --name=[new-name] [flags]",
-	Short: "Update the name of a Service Plan version",
-	Long: `This command helps you update the name of a specific version of a Service Plan for your service.
+var updateCmd = &cobra.Command{
+	Use:   "update [service-name] [plan-name] --version=[version] --name=[new-name] [flags]",
+	Short: "Update Service Plan properties",
+	Long: `This command helps you update various properties of a Service Plan.
+Currently supports updating the name of a specific version of a Service Plan.
 The version name is used as the release description for the version.`,
-	Example:      updateVersionNameExample,
-	RunE:         runUpdateVersionName,
+	Example:      updateExample,
+	RunE:         runUpdate,
 	SilenceUsage: true,
 }
 
 func init() {
-	updateVersionNameCmd.Flags().String("version", "", "Specify the version number to update the name for.")
-	updateVersionNameCmd.Flags().String("name", "", "Specify the new name for the version.")
-	updateVersionNameCmd.Flags().StringP("environment", "", "", "Environment name. Use this flag with service name and plan name to update the version name in a specific environment")
-	updateVersionNameCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
-	updateVersionNameCmd.Flags().StringP("plan-id", "", "", "Plan ID. Required if plan name is not provided")
+	updateCmd.Flags().String("version", "", "Specify the version number to update the name for.")
+	updateCmd.Flags().String("name", "", "Specify the new name for the version.")
+	updateCmd.Flags().StringP("environment", "", "", "Environment name. Use this flag with service name and plan name to update the version name in a specific environment")
+	updateCmd.Flags().StringP("service-id", "", "", "Service ID. Required if service name is not provided")
+	updateCmd.Flags().StringP("plan-id", "", "", "Plan ID. Required if plan name is not provided")
 
-	err := updateVersionNameCmd.MarkFlagRequired("version")
+	err := updateCmd.MarkFlagRequired("version")
 	if err != nil {
 		return
 	}
-	err = updateVersionNameCmd.MarkFlagRequired("name")
+	err = updateCmd.MarkFlagRequired("name")
 	if err != nil {
 		return
 	}
 }
 
-func runUpdateVersionName(cmd *cobra.Command, args []string) error {
+func runUpdate(cmd *cobra.Command, args []string) error {
 	defer config.CleanupArgsAndFlags(cmd, &args)
 
 	// Retrieve flags
@@ -59,7 +60,7 @@ func runUpdateVersionName(cmd *cobra.Command, args []string) error {
 	environment, _ := cmd.Flags().GetString("environment")
 
 	// Validate input arguments
-	if err := validateUpdateVersionNameArguments(args, serviceID, planID); err != nil {
+	if err := validateUpdateArguments(args, serviceID, planID); err != nil {
 		utils.PrintError(err)
 		return err
 	}
@@ -111,7 +112,7 @@ func runUpdateVersionName(cmd *cobra.Command, args []string) error {
 
 // Helper functions
 
-func validateUpdateVersionNameArguments(args []string, serviceID, planID string) error {
+func validateUpdateArguments(args []string, serviceID, planID string) error {
 	if len(args) == 0 && (serviceID == "" || planID == "") {
 		return fmt.Errorf("please provide the service name and service plan name or the service ID and service plan ID")
 	}
