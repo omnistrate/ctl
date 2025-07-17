@@ -195,7 +195,7 @@ func runVersionUpgrade(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		if err = os.WriteFile(configOverrideFile, marshalledData, 0644); err != nil {
+		if err = os.WriteFile(configOverrideFile, marshalledData, 0600); err != nil {
 			utils.HandleSpinnerError(spinner, sm, errors2.Wrap(err, "failed to write generated configuration to file"))
 			return err
 		}
