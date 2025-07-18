@@ -27,6 +27,7 @@ jobs:
         timeout-minutes: 10
         run: |
           make download
+          
       - name: Generate docs
         timeout-minutes: 10
         run: |
