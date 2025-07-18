@@ -19,6 +19,7 @@ func init() {
 	Cmd.AddCommand(statusCmd)
 	Cmd.AddCommand(listCmd)
 	Cmd.AddCommand(deleteCmd)
+	Cmd.AddCommand(updateKubeConfigCmd)
 }
 
 func run(cmd *cobra.Command, args []string) {

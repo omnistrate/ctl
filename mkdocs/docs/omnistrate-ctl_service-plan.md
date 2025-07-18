@@ -35,3 +35,4 @@ omnistrate-ctl service-plan [operation] [flags]
 - [omnistrate-ctl service-plan list-versions](omnistrate-ctl_service-plan_list-versions.md) - List Versions of a specific Service Plan
 - [omnistrate-ctl service-plan release](omnistrate-ctl_service-plan_release.md) - Release a Service Plan
 - [omnistrate-ctl service-plan set-default](omnistrate-ctl_service-plan_set-default.md) - Set a Version of a Service Plan as Default(Preferred)
+- [omnistrate-ctl service-plan update](omnistrate-ctl_service-plan_update.md) - Update Service Plan properties

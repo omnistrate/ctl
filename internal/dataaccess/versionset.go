@@ -144,3 +144,25 @@ func SetDefaultServicePlan(ctx context.Context, token, serviceID, productTierID,
 	defer r.Body.Close()
 	return res, nil
 }
+
+func UpdateVersionSetName(ctx context.Context, token, serviceID, productTierID, version, newName string) (*openapiclient.TierVersionSet, error) {
+	ctxWithToken := context.WithValue(ctx, openapiclient.ContextAccessToken, token)
+
+	apiClient := getV1Client()
+	updateRequest := openapiclient.NewUpdateTierVersionSetRequest2(newName)
+	
+	res, r, err := apiClient.TierVersionSetApiAPI.TierVersionSetApiUpdateTierVersionSet(
+		ctxWithToken,
+		serviceID,
+		productTierID,
+		version,
+	).UpdateTierVersionSetRequest2(*updateRequest).Execute()
+
+	err = handleV1Error(err)
+	if err != nil {
+		return nil, err
+	}
+
+	defer r.Body.Close()
+	return res, nil
+}
