@@ -125,56 +125,45 @@ func TestValidateUpdateVersionNameArguments(t *testing.T) {
 	require := require.New(t)
 
 	tests := []struct {
-		name      string
-		args      []string
-		serviceID string
-		planID    string
-		wantErr   bool
-		errMsg    string
+		name    string
+		args    []string
+		wantErr bool
+		errMsg  string
 	}{
 		{
-			name:      "valid args - both name and plan provided",
-			args:      []string{"service1", "plan1"},
-			serviceID: "",
-			planID:    "",
-			wantErr:   false,
+			name:    "valid args - service name, plan name, and environment provided",
+			args:    []string{"service1", "plan1", "prod"},
+			wantErr: false,
 		},
 		{
-			name:      "valid args - both IDs provided",
-			args:      []string{},
-			serviceID: "service-id",
-			planID:    "plan-id",
-			wantErr:   false,
+			name:    "invalid args - no arguments provided",
+			args:    []string{},
+			wantErr: true,
+			errMsg:  "invalid arguments: . Need 3 arguments: [service-name] [plan-name] [environment-name]",
 		},
 		{
-			name:      "invalid args - missing service and plan names, no IDs",
-			args:      []string{},
-			serviceID: "",
-			planID:    "",
-			wantErr:   true,
-			errMsg:    "please provide the service name and service plan name or the service ID and service plan ID",
+			name:    "invalid args - only one argument provided",
+			args:    []string{"service1"},
+			wantErr: true,
+			errMsg:  "invalid arguments: service1. Need 3 arguments: [service-name] [plan-name] [environment-name]",
 		},
 		{
-			name:      "invalid args - only one argument provided",
-			args:      []string{"service1"},
-			serviceID: "",
-			planID:    "",
-			wantErr:   true,
-			errMsg:    "invalid arguments: service1. Need 2 arguments: [service-name] [plan-name]",
+			name:    "invalid args - only two arguments provided",
+			args:    []string{"service1", "plan1"},
+			wantErr: true,
+			errMsg:  "invalid arguments: service1 plan1. Need 3 arguments: [service-name] [plan-name] [environment-name]",
 		},
 		{
-			name:      "invalid args - too many arguments",
-			args:      []string{"service1", "plan1", "extra"},
-			serviceID: "",
-			planID:    "",
-			wantErr:   true,
-			errMsg:    "invalid arguments: service1 plan1 extra. Need 2 arguments: [service-name] [plan-name]",
+			name:    "invalid args - too many arguments",
+			args:    []string{"service1", "plan1", "prod", "extra"},
+			wantErr: true,
+			errMsg:  "invalid arguments: service1 plan1 prod extra. Need 3 arguments: [service-name] [plan-name] [environment-name]",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validateUpdateArguments(tt.args, tt.serviceID, tt.planID)
+			err := validateUpdateArguments(tt.args)
 			if tt.wantErr {
 				require.Error(err)
 				require.Contains(err.Error(), tt.errMsg)
