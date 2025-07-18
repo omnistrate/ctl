@@ -30,3 +30,4 @@ omnistrate-ctl deployment-cell [operation] [flags]
 - [omnistrate-ctl deployment-cell delete](omnistrate-ctl_deployment-cell_delete.md) - Delete a deployment cell
 - [omnistrate-ctl deployment-cell list](omnistrate-ctl_deployment-cell_list.md) - List all deployment cells
 - [omnistrate-ctl deployment-cell status](omnistrate-ctl_deployment-cell_status.md) - Get status of a deployment cell
+- [omnistrate-ctl deployment-cell update-kubeconfig](omnistrate-ctl_deployment-cell_update-kubeconfig.md) - Update kubeconfig for a deployment cell

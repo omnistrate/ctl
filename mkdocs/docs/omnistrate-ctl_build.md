@@ -12,7 +12,7 @@ It has two main modes of operation:
 
 Below info served as service plan identifiers:
 
-- service name (--name, required)
+- service name (--product-name, required)
 - environment name (--environment, optional, default: Dev)
 - environment type (--environment-type, optional, default: dev)
 - service plan name (the name field of x-omnistrate-service-plan tag in compose spec file, required)
@@ -21,44 +21,44 @@ Below info served as service plan identifiers:
 This command has an interactive mode. In this mode, you can choose to promote the service plan to production by interacting with the prompts.
 
 ```
-omnistrate-ctl build [--file=file] [--spec-type=spec-type] [--name=service-name] [--description=service-description] [--service-logo-url=service-logo-url] [--environment=environment-name] [--environment-type=environment-type] [--release] [--release-as-preferred] [--release-description=release-description][--interactive] [--image=image-url] [--image-registry-auth-username=username] [--image-registry-auth-password=password] [--env-var="key=var"] [flags]
+omnistrate-ctl build [--file=file] [--spec-type=spec-type] [--product-name=service-name] [--description=service-description] [--service-logo-url=service-logo-url] [--environment=environment-name] [--environment-type=environment-type] [--release] [--release-as-preferred] [--release-description=release-description][--interactive] [--image=image-url] [--image-registry-auth-username=username] [--image-registry-auth-password=password] [--env-var="key=var"] [flags]
 ```
 
 ### Examples
 
 ```
 # Build service from image in dev environment
-omctl build --image docker.io/mysql:5.7 --name MySQL --env-var "MYSQL_ROOT_PASSWORD=password" --env-var "MYSQL_DATABASE=mydb"
+omctl build --image docker.io/mysql:5.7 --product-name MySQL --env-var "MYSQL_ROOT_PASSWORD=password" --env-var "MYSQL_DATABASE=mydb"
 
 # Build service with private image in dev environment
-omctl build --image docker.io/namespace/my-image:v1.2 --name "My Service" --image-registry-auth-username username --image-registry-auth-password password --env-var KEY1:VALUE1 --env-var KEY2:VALUE2
+omctl build --image docker.io/namespace/my-image:v1.2 --product-name "My Service" --image-registry-auth-username username --image-registry-auth-password password --env-var KEY1:VALUE1 --env-var KEY2:VALUE2
 
 # Build service with compose spec in dev environment
-omctl build --file docker-compose.yml --name "My Service"
+omctl build --file docker-compose.yml --product-name "My Service"
 
 # Build service with compose spec in prod environment
-omctl build --file docker-compose.yml --name "My Service" --environment prod --environment-type prod
+omctl build --file docker-compose.yml --product-name "My Service" --environment prod --environment-type prod
 
 # Build service with compose spec and release the service with a release description
-omctl build --file docker-compose.yml --name "My Service" --release --release-description "v1.0.0-alpha"
+omctl build --file docker-compose.yml --product-name "My Service" --release --release-description "v1.0.0-alpha"
 
 # Build service with compose spec and release the service as preferred with a release description
-omctl build --file docker-compose.yml --name "My Service" --release-as-preferred --release-description "v1.0.0-alpha"
+omctl build --file docker-compose.yml --product-name "My Service" --release-as-preferred --release-description "v1.0.0-alpha"
 
 # Build service with compose spec interactively
-omctl build --file docker-compose.yml --name "My Service" --interactive
+omctl build --file docker-compose.yml --product-name "My Service" --interactive
 
 # Build service with compose spec with service description and service logo
-omctl build --file docker-compose.yml --name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png"
+omctl build --file docker-compose.yml --product-name "My Service" --description "My Service Description" --service-logo-url "https://example.com/logo.png"
 
 # Build service with service specification for Helm, Operator or Kustomize in dev environment
-omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Service"
+omctl build --spec-type ServicePlanSpec --file service-spec.yml --product-name "My Service"
 
 # Build service with service specification for Helm, Operator or Kustomize in prod environment
-omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Service" --environment prod --environment-type prod
+omctl build --spec-type ServicePlanSpec --file service-spec.yml --product-name "My Service" --environment prod --environment-type prod
 
 # Build service with service specification for Helm, Operator or Kustomize as preferred
-omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Service" --release-as-preferred --release-description "v1.0.0-alpha"
+omctl build --spec-type ServicePlanSpec --file service-spec.yml --product-name "My Service" --release-as-preferred --release-description "v1.0.0-alpha"
 
 ```
 
@@ -76,7 +76,7 @@ omctl build --spec-type ServicePlanSpec --file service-spec.yml --name "My Servi
       --image-registry-auth-password string   Used together with --image flag. Provide the password to authenticate with the image registry if it's a private registry
       --image-registry-auth-username string   Used together with --image flag. Provide the username to authenticate with the image registry if it's a private registry
   -i, --interactive                           Interactive mode
-  -n, --name string                           Name of the service. A service can have multiple service plans. The build command will build a new or existing service plan inside the specified service.
+      --product-name string                   Name of the service. A service can have multiple service plans. The build command will build a new or existing service plan inside the specified service.
       --release                               Release the service after building it
       --release-as-preferred                  Release the service as preferred after building it
       --release-description string            Used together with --release or --release-as-preferred flag. Provide a description for the release version
