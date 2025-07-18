@@ -13,12 +13,12 @@ omnistrate-ctl deployment-cell adopt [flags]
 ### Options
 
 ```
-  -c, --cloud-provider string       Cloud provider name (required)
-  -d, --description string          Description for the deployment cell (default "Deployment cell adopted via CLI")
-  -h, --help                        help for adopt
-  -i, --id string                   Deployment cell ID (required)
-  -r, --region string               Region name (required)
-  -c, --customer-email string       Customer email to adopt the deployment cell for (optional)
+  -c, --cloud-provider string   Cloud provider name (required)
+  -u, --customer-email string   Customer email to adopt the deployment cell for (optional)
+  -d, --description string      Description for the deployment cell (default "Deployment cell adopted via CLI")
+  -h, --help                    help for adopt
+  -i, --id string               Deployment cell ID (required)
+  -r, --region string           Region name (required)
 ```
 
 ### Options inherited from parent commands

@@ -26,6 +26,7 @@ omnistrate-ctl instance [operation] [flags]
 ### SEE ALSO
 
 - [omnistrate-ctl](omnistrate-ctl.md) - Manage your Omnistrate SaaS from the command line
+- [omnistrate-ctl instance adopt](omnistrate-ctl_instance_adopt.md) - Adopt a resource instance
 - [omnistrate-ctl instance continue-deployment](omnistrate-ctl_instance_continue-deployment.md) - Continue instance deployment
 - [omnistrate-ctl instance create](omnistrate-ctl_instance_create.md) - Create an instance deployment
 - [omnistrate-ctl instance delete](omnistrate-ctl_instance_delete.md) - Delete an instance deployment
@@ -42,3 +43,4 @@ omnistrate-ctl instance [operation] [flags]
 - [omnistrate-ctl instance start](omnistrate-ctl_instance_start.md) - Start an instance deployment for your service
 - [omnistrate-ctl instance stop](omnistrate-ctl_instance_stop.md) - Stop an instance deployment for your service
 - [omnistrate-ctl instance trigger-backup](omnistrate-ctl_instance_trigger-backup.md) - Trigger an automatic backup for your instance
+- [omnistrate-ctl instance version-upgrade](omnistrate-ctl_instance_version-upgrade.md) - Issue a version upgrade for a deployment instance
