@@ -8,6 +8,20 @@
 - Run smoke tests: `make smoke-test` (requires TEST_EMAIL, TEST_PASSWORD)
 - Lint code: `make lint` (install with `make lint-install`)
 - Format code: `make pretty` (uses prettier and go fmt)
+- Generate docs: `make gen-doc` (regenerates CLI documentation)
+- Run everything: `make all` (includes tidy, build, test, lint, check-dependencies, gen-doc, pretty)
+
+## Documentation Generation Requirements
+
+**IMPORTANT**: After making ANY changes to CLI commands, flags, or help text, you MUST run `make gen-doc` to regenerate the documentation. This ensures the docs in `mkdocs/docs/` stay synchronized with the actual CLI behavior.
+
+- The `gen-doc` target runs `go run doc-gen/main.go` which auto-generates markdown files
+- Documentation files are automatically removed and regenerated to stay current
+- Always run `make gen-doc` or `make all` after modifying:
+  - Command definitions in `cmd/` directory
+  - Flag descriptions or help text
+  - Command usage examples
+  - Any cobra command configurations
 
 ## Code Style Guidelines
 
