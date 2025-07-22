@@ -67,10 +67,8 @@ extra_css:
 extra:
   homepage: https://docs.omnistrate.com/
   social:
-    - icon: fontawesome/brands/facebook
-      link: https://www.facebook.com/omnistrate
-    - icon: fontawesome/brands/twitter
-      link: https://twitter.com/omnistrate
+    - icon: fontawesome/brands/x-twitter
+      link: https://x.com/omnistrate/
     - icon: fontawesome/brands/linkedin
       link: https://www.linkedin.com/company/omnistrate/about/
   analytics:
