@@ -523,7 +523,7 @@ func formatTerraformFileList(files map[string]string) string {
 		Children map[string]*TreeNode
 		Files    []string
 	}
-	
+
 	root := &TreeNode{
 		Name:     "root",
 		IsDir:    true,
@@ -542,7 +542,7 @@ func formatTerraformFileList(files map[string]string) string {
 	for _, filePath := range filePaths {
 		parts := strings.Split(filePath, "/")
 		currentNode := root
-		
+
 		// Navigate through directory parts
 		for i, part := range parts {
 			if i == len(parts)-1 {
@@ -567,7 +567,7 @@ func formatTerraformFileList(files map[string]string) string {
 	var renderTree func(node *TreeNode, prefix string, isLast bool) string
 	renderTree = func(node *TreeNode, prefix string, isLast bool) string {
 		result := ""
-		
+
 		// Sort children directories and files
 		var childNames []string
 		for name := range node.Children {
@@ -575,12 +575,12 @@ func formatTerraformFileList(files map[string]string) string {
 		}
 		sort.Strings(childNames)
 		sort.Strings(node.Files)
-		
+
 		// Render child directories
 		for i, childName := range childNames {
 			child := node.Children[childName]
 			isLastChild := (i == len(childNames)-1) && len(node.Files) == 0
-			
+
 			// Choose the right tree symbol
 			var symbol, nextPrefix string
 			if isLastChild {
@@ -590,11 +590,11 @@ func formatTerraformFileList(files map[string]string) string {
 				symbol = "├── "
 				nextPrefix = prefix + "│   "
 			}
-			
+
 			result += fmt.Sprintf("%s[blue]%s%s/[-]\n", prefix, symbol, childName)
 			result += renderTree(child, nextPrefix, true)
 		}
-		
+
 		// Render files
 		for i, fileName := range node.Files {
 			isLastFile := i == len(node.Files)-1
@@ -606,7 +606,7 @@ func formatTerraformFileList(files map[string]string) string {
 			}
 			result += fmt.Sprintf("%s%s%s\n", prefix, symbol, fileName)
 		}
-		
+
 		return result
 	}
 
@@ -650,20 +650,20 @@ func formatTerraformLogs(logs map[string]string) string {
 func addYAMLSyntaxHighlighting(content string) string {
 	lines := strings.Split(content, "\n")
 	var highlighted []string
-	
+
 	for _, line := range lines {
 		trimmed := strings.TrimSpace(line)
 		if trimmed == "" {
 			highlighted = append(highlighted, line)
 			continue
 		}
-		
+
 		// Comments
 		if strings.HasPrefix(trimmed, "#") {
 			highlighted = append(highlighted, fmt.Sprintf("[green]%s[-]", line))
 			continue
 		}
-		
+
 		// Keys (lines containing ':')
 		if strings.Contains(line, ":") && !strings.HasPrefix(trimmed, "-") {
 			parts := strings.SplitN(line, ":", 2)
@@ -674,16 +674,16 @@ func addYAMLSyntaxHighlighting(content string) string {
 				continue
 			}
 		}
-		
+
 		// List items
 		if strings.HasPrefix(trimmed, "-") {
 			highlighted = append(highlighted, fmt.Sprintf("[blue]%s[-]", line))
 			continue
 		}
-		
+
 		highlighted = append(highlighted, line)
 	}
-	
+
 	return strings.Join(highlighted, "\n")
 }
 
@@ -691,28 +691,28 @@ func addYAMLSyntaxHighlighting(content string) string {
 func addTerraformSyntaxHighlighting(content string) string {
 	lines := strings.Split(content, "\n")
 	var highlighted []string
-	
+
 	for _, line := range lines {
 		trimmed := strings.TrimSpace(line)
 		if trimmed == "" {
 			highlighted = append(highlighted, line)
 			continue
 		}
-		
+
 		// Comments
 		if strings.HasPrefix(trimmed, "#") || strings.HasPrefix(trimmed, "//") {
 			highlighted = append(highlighted, fmt.Sprintf("[green]%s[-]", line))
 			continue
 		}
-		
+
 		// Resource/data/variable/output blocks
-		if strings.HasPrefix(trimmed, "resource ") || strings.HasPrefix(trimmed, "data ") || 
-		   strings.HasPrefix(trimmed, "variable ") || strings.HasPrefix(trimmed, "output ") ||
-		   strings.HasPrefix(trimmed, "provider ") || strings.HasPrefix(trimmed, "module ") {
+		if strings.HasPrefix(trimmed, "resource ") || strings.HasPrefix(trimmed, "data ") ||
+			strings.HasPrefix(trimmed, "variable ") || strings.HasPrefix(trimmed, "output ") ||
+			strings.HasPrefix(trimmed, "provider ") || strings.HasPrefix(trimmed, "module ") {
 			highlighted = append(highlighted, fmt.Sprintf("[fuchsia]%s[-]", line))
 			continue
 		}
-		
+
 		// String assignments (key = "value")
 		if strings.Contains(line, "=") && strings.Contains(line, "\"") {
 			parts := strings.SplitN(line, "=", 2)
@@ -727,7 +727,7 @@ func addTerraformSyntaxHighlighting(content string) string {
 				continue
 			}
 		}
-		
+
 		// Simple assignments
 		if strings.Contains(line, "=") {
 			parts := strings.SplitN(line, "=", 2)
@@ -738,10 +738,10 @@ func addTerraformSyntaxHighlighting(content string) string {
 				continue
 			}
 		}
-		
+
 		highlighted = append(highlighted, line)
 	}
-	
+
 	return strings.Join(highlighted, "\n")
 }
 
@@ -749,47 +749,47 @@ func addTerraformSyntaxHighlighting(content string) string {
 func addLogSyntaxHighlighting(content string) string {
 	lines := strings.Split(content, "\n")
 	var highlighted []string
-	
+
 	for _, line := range lines {
 		lower := strings.ToLower(line)
-		
+
 		// Error messages
-		if strings.Contains(lower, "error") || strings.Contains(lower, "failed") || 
-		   strings.Contains(lower, "panic") || strings.Contains(lower, "fatal") {
+		if strings.Contains(lower, "error") || strings.Contains(lower, "failed") ||
+			strings.Contains(lower, "panic") || strings.Contains(lower, "fatal") {
 			highlighted = append(highlighted, fmt.Sprintf("[red]%s[-]", line))
 			continue
 		}
-		
+
 		// Warning messages
 		if strings.Contains(lower, "warn") || strings.Contains(lower, "warning") {
 			highlighted = append(highlighted, fmt.Sprintf("[yellow]%s[-]", line))
 			continue
 		}
-		
+
 		// Success messages
 		if strings.Contains(lower, "success") || strings.Contains(lower, "complete") ||
-		   strings.Contains(lower, "applied") || strings.Contains(lower, "created") {
+			strings.Contains(lower, "applied") || strings.Contains(lower, "created") {
 			highlighted = append(highlighted, fmt.Sprintf("[green]%s[-]", line))
 			continue
 		}
-		
+
 		// Info messages
 		if strings.Contains(lower, "info") || strings.Contains(lower, "applying") ||
-		   strings.Contains(lower, "planning") || strings.Contains(lower, "refreshing") {
+			strings.Contains(lower, "planning") || strings.Contains(lower, "refreshing") {
 			highlighted = append(highlighted, fmt.Sprintf("[blue]%s[-]", line))
 			continue
 		}
-		
+
 		// Timestamps (basic detection)
-		if strings.Contains(line, ":") && (strings.Contains(line, "T") || 
-		   strings.Contains(line, "[") && strings.Contains(line, "]")) {
+		if strings.Contains(line, ":") && (strings.Contains(line, "T") ||
+			strings.Contains(line, "[") && strings.Contains(line, "]")) {
 			highlighted = append(highlighted, fmt.Sprintf("[gray]%s[-]", line))
 			continue
 		}
-		
+
 		highlighted = append(highlighted, line)
 	}
-	
+
 	return strings.Join(highlighted, "\n")
 }
 
@@ -805,7 +805,7 @@ func showFileBrowser(app *tview.Application, terraformData *TerraformData, mainF
 
 	// Build hierarchical file structure
 	dirNodes := make(map[string]*tview.TreeNode)
-	
+
 	// Get sorted file paths for deterministic ordering
 	filePaths := make([]string, 0, len(terraformData.Files))
 	for filePath := range terraformData.Files {
@@ -819,24 +819,24 @@ func showFileBrowser(app *tview.Application, terraformData *TerraformData, mainF
 		if path == "." || path == "" {
 			return root
 		}
-		
+
 		// Check if we already have this directory
 		if node, exists := dirNodes[path]; exists {
 			return node
 		}
-		
+
 		// Create the directory node
 		dirName := filepath.Base(path)
 		dirNode := tview.NewTreeNode(dirName + "/")
 		dirNode.SetColor(tcell.ColorBlue)
 		dirNode.SetExpanded(false) // Allow user to expand/collapse
 		dirNodes[path] = dirNode
-		
+
 		// Get parent directory and add this node to it
 		parentPath := filepath.Dir(path)
 		parentNode := getOrCreateDirNode(parentPath)
 		parentNode.AddChild(dirNode)
-		
+
 		return dirNode
 	}
 
@@ -844,10 +844,10 @@ func showFileBrowser(app *tview.Application, terraformData *TerraformData, mainF
 	for _, filePath := range filePaths {
 		dir := filepath.Dir(filePath)
 		fileName := filepath.Base(filePath)
-		
+
 		// Get the parent directory node (creates all intermediate directories)
 		parentNode := getOrCreateDirNode(dir)
-		
+
 		// Add file to parent directory
 		fileNode := tview.NewTreeNode(fileName)
 		fileNode.SetReference(filePath)
@@ -964,11 +964,9 @@ func showFileBrowser(app *tview.Application, terraformData *TerraformData, mainF
 				if currentNode != nil {
 					reference := currentNode.GetReference()
 					// If it's a file (has reference), switch to content viewer
-					if reference != nil {
-						if _, isFile := reference.(string); isFile {
-							app.SetFocus(fileViewer)
-							return nil
-						}
+					if _, isFile := reference.(string); isFile {
+						app.SetFocus(fileViewer)
+						return nil
 					}
 					// If it's a directory (no reference), let tree handle expansion
 					// Don't consume the event, let it pass through to the tree
@@ -982,7 +980,7 @@ func showFileBrowser(app *tview.Application, terraformData *TerraformData, mainF
 
 	// Set initial focus and selection
 	app.SetFocus(fileTree)
-	
+
 	// Set initial selection to first file if available
 	if len(filePaths) > 0 {
 		// Find the first file node in the tree
@@ -1000,12 +998,12 @@ func showFileBrowser(app *tview.Application, terraformData *TerraformData, mainF
 			}
 			return nil
 		}
-		
+
 		if firstFileNode := findFirstFileNode(root); firstFileNode != nil {
 			fileTree.SetCurrentNode(firstFileNode)
 		}
 	}
-	
+
 	app.SetRoot(modalLayout, true).EnableMouse(false)
 }
 
