@@ -29,6 +29,7 @@ omnistrate-ctl instance [operation] [flags]
 - [omnistrate-ctl instance adopt](omnistrate-ctl_instance_adopt.md) - Adopt a resource instance
 - [omnistrate-ctl instance continue-deployment](omnistrate-ctl_instance_continue-deployment.md) - Continue instance deployment
 - [omnistrate-ctl instance create](omnistrate-ctl_instance_create.md) - Create an instance deployment
+- [omnistrate-ctl instance debug](omnistrate-ctl_instance_debug.md) - Debug instance resources
 - [omnistrate-ctl instance delete](omnistrate-ctl_instance_delete.md) - Delete an instance deployment
 - [omnistrate-ctl instance describe](omnistrate-ctl_instance_describe.md) - Describe an instance deployment for your service
 - [omnistrate-ctl instance disable-debug-mode](omnistrate-ctl_instance_disable-debug-mode.md) - Disable debug mode for an instance deployment
