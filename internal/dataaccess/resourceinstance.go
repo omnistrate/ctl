@@ -233,6 +233,31 @@ func UpdateResourceInstanceDebugMode(ctx context.Context, token string, serviceI
 	return
 }
 
+func DebugResourceInstance(ctx context.Context, token string, serviceID, environmentID, instanceID string) (res *openapiclientfleet.DebugResourceInstanceResult, err error) {
+	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
+	apiClient := getFleetClient()
+
+	req := apiClient.InventoryApiAPI.InventoryApiDebugResourceInstance(
+		ctxWithToken,
+		serviceID,
+		environmentID,
+		instanceID,
+	)
+
+	var r *http.Response
+	defer func() {
+		if r != nil {
+			_ = r.Body.Close()
+		}
+	}()
+
+	res, r, err = req.Execute()
+	if err != nil {
+		return nil, handleFleetError(err)
+	}
+	return
+}
+
 func RestartResourceInstance(ctx context.Context, token string, serviceID, environmentID, resourceID, instanceID string) (err error) {
 	ctxWithToken := context.WithValue(ctx, openapiclientfleet.ContextAccessToken, token)
 	apiClient := getFleetClient()
