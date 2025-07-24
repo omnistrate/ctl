@@ -61,12 +61,13 @@ resourceAdoptionConfiguration:
 
 ```
   -f, --config-file string            YAML file containing resource adoption configuration (optional)
+  -e, --customer-email string         Customer email for notifications (optional)
   -h, --help                          help for adopt
   -c, --host-cluster-id string        Host cluster ID (required)
   -k, --primary-resource-key string   Primary resource key to adopt (required)
   -s, --service-id string             Service ID (required)
   -p, --service-plan-id string        Service plan ID (required)
-      --service-plan-version string   Service plan version (optional)
+  -g, --service-plan-version string   Service plan version (optional)
   -u, --subscription-id string        Subscription ID (optional)
 ```
 
@@ -79,4 +80,5 @@ resourceAdoptionConfiguration:
 
 ### SEE ALSO
 
-- [omnistrate-ctl instance](omnistrate-ctl_instance.md) - Manage Instance Deployments for your service
+* [omnistrate-ctl instance](omnistrate-ctl_instance.md)	 - Manage Instance Deployments for your service
+
