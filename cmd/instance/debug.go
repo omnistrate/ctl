@@ -307,19 +307,20 @@ func launchDebugTUI(data DebugData) error {
 			handleOptionSelection(ref, rightPanel)
 			// Update current terraform data and selection state for file browser
 			if optionType, ok := ref["type"].(string); ok {
-				if optionType == "terraform-files" {
+				switch optionType {
+				case "terraform-files":
 					if resource, ok := ref["resource"].(ResourceInfo); ok {
 						currentTerraformData = resource.TerraformData
 						currentSelectionIsTerraformFiles = true
 						currentSelectionIsTerraformLogs = false
 					}
-				} else if optionType == "terraform-install-logs" {
+				case "terraform-install-logs":
 					if resource, ok := ref["resource"].(ResourceInfo); ok {
 						currentTerraformData = resource.TerraformData
 						currentSelectionIsTerraformFiles = false
 						currentSelectionIsTerraformLogs = true
 					}
-				} else {
+				default:
 					currentSelectionIsTerraformFiles = false
 					currentSelectionIsTerraformLogs = false
 				}
@@ -347,19 +348,20 @@ func launchDebugTUI(data DebugData) error {
 				handleOptionSelection(ref, rightPanel)
 				// Update current terraform data and selection state for file browser
 				if optionType, ok := ref["type"].(string); ok {
-					if optionType == "terraform-files" {
+					switch optionType {
+					case "terraform-files":
 						if resource, ok := ref["resource"].(ResourceInfo); ok {
 							currentTerraformData = resource.TerraformData
 							currentSelectionIsTerraformFiles = true
 							currentSelectionIsTerraformLogs = false
 						}
-					} else if optionType == "terraform-install-logs" {
+					case "terraform-install-logs":
 						if resource, ok := ref["resource"].(ResourceInfo); ok {
 							currentTerraformData = resource.TerraformData
 							currentSelectionIsTerraformFiles = false
 							currentSelectionIsTerraformLogs = true
 						}
-					} else {
+					default:
 						currentSelectionIsTerraformFiles = false
 						currentSelectionIsTerraformLogs = false
 					}
@@ -652,34 +654,6 @@ func formatTerraformFileList(files map[string]string) string {
 	return content
 }
 
-func formatTerraformLogs(logs map[string]string) string {
-	if len(logs) == 0 {
-		return "[yellow]Terraform Logs[white]\n\nNo terraform logs available"
-	}
-
-	content := "[yellow]Terraform Logs[white]\n\n"
-
-	// Sort log names for consistent output
-	var sortedLogNames []string
-	for logName := range logs {
-		sortedLogNames = append(sortedLogNames, logName)
-	}
-	sort.Strings(sortedLogNames)
-
-	for _, logName := range sortedLogNames {
-		logContent := logs[logName]
-		content += fmt.Sprintf("[blue]%s:[white]\n", logName)
-		if logContent != "" {
-			// Apply log syntax highlighting
-			highlightedContent := addLogSyntaxHighlighting(logContent)
-			content += fmt.Sprintf("%s\n\n", highlightedContent)
-		} else {
-			content += "(empty log)\n\n"
-		}
-	}
-
-	return content
-}
 
 func formatTerraformLogsHierarchical(logs map[string]string) string {
 	if len(logs) == 0 {
@@ -747,11 +721,11 @@ func formatTerraformLogsHierarchical(logs map[string]string) string {
 		}
 
 		if root.Children[phaseKey] == nil {
-			displayName := phase
+			var displayName string
 			if isPrevious {
-				displayName = "Previous " + strings.Title(phase)
+				displayName = "Previous " + strings.ToTitle(phase[:1]) + phase[1:]
 			} else {
-				displayName = strings.Title(phase)
+				displayName = strings.ToTitle(phase[:1]) + phase[1:]
 			}
 			root.Children[phaseKey] = &LogTreeNode{
 				Name:     displayName,
@@ -1303,11 +1277,11 @@ func showLogsBrowser(app *tview.Application, terraformData *TerraformData, mainF
 		}
 
 		if logStructure.Children[phaseKey] == nil {
-			displayName := phase
+			var displayName string
 			if isPrevious {
-				displayName = "Previous " + strings.Title(phase)
+				displayName = "Previous " + strings.ToTitle(phase[:1]) + phase[1:]
 			} else {
-				displayName = strings.Title(phase)
+				displayName = strings.ToTitle(phase[:1]) + phase[1:]
 			}
 			logStructure.Children[phaseKey] = &LogTreeNode{
 				Name:     displayName,
@@ -1338,8 +1312,7 @@ func showLogsBrowser(app *tview.Application, terraformData *TerraformData, mainF
 	dirNodes := make(map[string]*tview.TreeNode)
 
 	// Helper function to get or create directory node
-	var getOrCreateLogNode func(path string, node *LogTreeNode, parent *tview.TreeNode) *tview.TreeNode
-	getOrCreateLogNode = func(path string, node *LogTreeNode, parent *tview.TreeNode) *tview.TreeNode {
+	var getOrCreateLogNode = func(path string, node *LogTreeNode, parent *tview.TreeNode) *tview.TreeNode {
 		if existingNode, exists := dirNodes[path]; exists {
 			return existingNode
 		}
