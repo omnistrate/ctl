@@ -189,6 +189,7 @@ func launchDebugTUI(data DebugData) error {
 	// Global state to track current selection and terraform data for file browser
 	var currentTerraformData *TerraformData
 	var currentSelectionIsTerraformFiles bool
+	var currentSelectionIsTerraformLogs bool
 
 	// Create main layout
 	flex := tview.NewFlex()
@@ -287,8 +288,9 @@ func launchDebugTUI(data DebugData) error {
 		if reference == nil {
 			rightPanel.SetTitle("Content")
 			rightPanel.SetText("Select a resource option to view details")
-			// Clear terraform file selection state when no valid selection
+			// Clear terraform selection state when no valid selection
 			currentSelectionIsTerraformFiles = false
+			currentSelectionIsTerraformLogs = false
 			return
 		}
 
@@ -298,18 +300,33 @@ func launchDebugTUI(data DebugData) error {
 			content := formatResourceInfo(ref)
 			rightPanel.SetTitle(fmt.Sprintf("Resource: %s", ref.Name))
 			rightPanel.SetText(content)
-			// Clear terraform file selection state when selecting resource node
+			// Clear terraform selection state when selecting resource node
 			currentSelectionIsTerraformFiles = false
+			currentSelectionIsTerraformLogs = false
 		case map[string]interface{}:
 			handleOptionSelection(ref, rightPanel)
 			// Update current terraform data and selection state for file browser
-			if optionType, ok := ref["type"].(string); ok && optionType == "terraform-files" {
-				if resource, ok := ref["resource"].(ResourceInfo); ok {
-					currentTerraformData = resource.TerraformData
-					currentSelectionIsTerraformFiles = true
+			if optionType, ok := ref["type"].(string); ok {
+				switch optionType {
+				case "terraform-files":
+					if resource, ok := ref["resource"].(ResourceInfo); ok {
+						currentTerraformData = resource.TerraformData
+						currentSelectionIsTerraformFiles = true
+						currentSelectionIsTerraformLogs = false
+					}
+				case "terraform-install-logs":
+					if resource, ok := ref["resource"].(ResourceInfo); ok {
+						currentTerraformData = resource.TerraformData
+						currentSelectionIsTerraformFiles = false
+						currentSelectionIsTerraformLogs = true
+					}
+				default:
+					currentSelectionIsTerraformFiles = false
+					currentSelectionIsTerraformLogs = false
 				}
 			} else {
 				currentSelectionIsTerraformFiles = false
+				currentSelectionIsTerraformLogs = false
 			}
 		}
 	})
@@ -324,18 +341,33 @@ func launchDebugTUI(data DebugData) error {
 				content := formatResourceInfo(ref)
 				rightPanel.SetTitle(fmt.Sprintf("Resource: %s", ref.Name))
 				rightPanel.SetText(content)
-				// Clear terraform file selection state when selecting resource node
+				// Clear terraform selection state when selecting resource node
 				currentSelectionIsTerraformFiles = false
+				currentSelectionIsTerraformLogs = false
 			case map[string]interface{}:
 				handleOptionSelection(ref, rightPanel)
 				// Update current terraform data and selection state for file browser
-				if optionType, ok := ref["type"].(string); ok && optionType == "terraform-files" {
-					if resource, ok := ref["resource"].(ResourceInfo); ok {
-						currentTerraformData = resource.TerraformData
-						currentSelectionIsTerraformFiles = true
+				if optionType, ok := ref["type"].(string); ok {
+					switch optionType {
+					case "terraform-files":
+						if resource, ok := ref["resource"].(ResourceInfo); ok {
+							currentTerraformData = resource.TerraformData
+							currentSelectionIsTerraformFiles = true
+							currentSelectionIsTerraformLogs = false
+						}
+					case "terraform-install-logs":
+						if resource, ok := ref["resource"].(ResourceInfo); ok {
+							currentTerraformData = resource.TerraformData
+							currentSelectionIsTerraformFiles = false
+							currentSelectionIsTerraformLogs = true
+						}
+					default:
+						currentSelectionIsTerraformFiles = false
+						currentSelectionIsTerraformLogs = false
 					}
 				} else {
 					currentSelectionIsTerraformFiles = false
+					currentSelectionIsTerraformLogs = false
 				}
 				return // Don't toggle expansion for options
 			}
@@ -383,6 +415,11 @@ func launchDebugTUI(data DebugData) error {
 					showFileBrowser(app, currentTerraformData, mainFlex, mainInputHandler)
 				}
 				return nil
+			case 'l', 'L':
+				if currentSelectionIsTerraformLogs && currentTerraformData != nil && len(currentTerraformData.Logs) > 0 {
+					showLogsBrowser(app, currentTerraformData, mainFlex, mainInputHandler)
+				}
+				return nil
 			}
 		}
 		return event
@@ -415,7 +452,7 @@ func launchDebugTUI(data DebugData) error {
 
 func createHelpText() *tview.TextView {
 	helpText := tview.NewTextView()
-	helpText.SetText("Navigate: ↑/↓ to move | Enter: view content/expand | Esc: go back | f: file browser | q: quit")
+	helpText.SetText("Navigate: ↑/↓ to move | Enter: view content/expand | Esc: go back | f: file browser | l: logs browser | q: quit")
 	helpText.SetTextAlign(tview.AlignCenter)
 	helpText.SetDynamicColors(true)
 	return helpText
@@ -446,7 +483,7 @@ func handleOptionSelection(ref map[string]interface{}, rightPanel *tview.TextVie
 		}
 	case "terraform-install-logs":
 		if resource.TerraformData != nil {
-			content := formatTerraformLogs(resource.TerraformData.Logs)
+			content := formatTerraformLogsHierarchical(resource.TerraformData.Logs)
 			rightPanel.SetTitle("Install Logs")
 			rightPanel.SetText(content)
 		}
@@ -617,31 +654,198 @@ func formatTerraformFileList(files map[string]string) string {
 	return content
 }
 
-func formatTerraformLogs(logs map[string]string) string {
+
+func formatTerraformLogsHierarchical(logs map[string]string) string {
 	if len(logs) == 0 {
 		return "[yellow]Terraform Logs[white]\n\nNo terraform logs available"
 	}
 
-	content := "[yellow]Terraform Logs[white]\n\n"
+	content := "[yellow]Terraform Logs[white]\n\nLogs available (press 'l' to open logs browser):\n\n"
 
-	// Sort log names for consistent output
-	var sortedLogNames []string
-	for logName := range logs {
-		sortedLogNames = append(sortedLogNames, logName)
+	// Build a hierarchical tree structure for logs
+	type LogTreeNode struct {
+		Name     string
+		IsPhase  bool
+		Children map[string]*LogTreeNode
+		Logs     []string
 	}
-	sort.Strings(sortedLogNames)
 
-	for _, logName := range sortedLogNames {
-		logContent := logs[logName]
-		content += fmt.Sprintf("[blue]%s:[white]\n", logName)
-		if logContent != "" {
-			// Apply log syntax highlighting
-			highlightedContent := addLogSyntaxHighlighting(logContent)
-			content += fmt.Sprintf("%s\n\n", highlightedContent)
-		} else {
-			content += "(empty log)\n\n"
+	root := &LogTreeNode{
+		Name:     "root",
+		IsPhase:  true,
+		Children: make(map[string]*LogTreeNode),
+		Logs:     []string{},
+	}
+
+	// Get sorted log paths for deterministic ordering
+	logPaths := make([]string, 0, len(logs))
+	for logPath := range logs {
+		logPaths = append(logPaths, logPath)
+	}
+	sort.Strings(logPaths)
+
+	// Parse logs into hierarchical structure
+	// Pattern: log/[previous_]<stream>_terraform_<phase>.log
+	// Example: log/stdout_terraform_init.log, log/previous_stderr_terraform_apply.log
+	for _, logPath := range logPaths {
+		if !strings.HasPrefix(logPath, "log/") {
+			continue
 		}
+
+		// Extract log filename without log/ prefix
+		logName := strings.TrimPrefix(logPath, "log/")
+		
+		// Parse the log name to extract phase and stream info
+		// Pattern: [previous_]<stream>_terraform_<phase>.log
+		phase := "unknown"
+		stream := "unknown"
+		isPrevious := false
+
+		if strings.HasPrefix(logName, "previous_") {
+			isPrevious = true
+			logName = strings.TrimPrefix(logName, "previous_")
+		}
+
+		// Parse stream_terraform_phase.log
+		parts := strings.Split(logName, "_")
+		if len(parts) >= 3 && parts[1] == "terraform" {
+			stream = parts[0] // stdout or stderr
+			phasePart := strings.Join(parts[2:], "_")
+			phase = strings.TrimSuffix(phasePart, ".log")
+		}
+
+		// Create phase node (init, apply, destroy, etc.)
+		phaseKey := phase
+		if isPrevious {
+			phaseKey = "previous_" + phase
+		}
+
+		if root.Children[phaseKey] == nil {
+			var displayName string
+			if isPrevious {
+				displayName = "Previous " + strings.ToTitle(phase[:1]) + phase[1:]
+			} else {
+				displayName = strings.ToTitle(phase[:1]) + phase[1:]
+			}
+			root.Children[phaseKey] = &LogTreeNode{
+				Name:     displayName,
+				IsPhase:  true,
+				Children: make(map[string]*LogTreeNode),
+				Logs:     []string{},
+			}
+		}
+
+		// Add stream (stdout/stderr) under the phase
+		phaseNode := root.Children[phaseKey]
+		if phaseNode.Children[stream] == nil {
+			streamDisplayName := strings.ToUpper(stream)
+			phaseNode.Children[stream] = &LogTreeNode{
+				Name:     streamDisplayName,
+				IsPhase:  false,
+				Children: make(map[string]*LogTreeNode),
+				Logs:     []string{},
+			}
+		}
+
+		// Add the actual log file
+		streamNode := phaseNode.Children[stream]
+		streamNode.Logs = append(streamNode.Logs, logPath)
 	}
+
+	// Function to render the tree
+	var renderLogTree func(node *LogTreeNode, prefix string, isLast bool) string
+	renderLogTree = func(node *LogTreeNode, prefix string, isLast bool) string {
+		result := ""
+
+		// Sort children (phases and streams)
+		var childNames []string
+		for name := range node.Children {
+			childNames = append(childNames, name)
+		}
+		
+		// Sort phases in logical order: init, apply, destroy, then previous runs
+		phaseOrder := map[string]int{
+			"init":             1,
+			"plan":             2,
+			"apply":            3,
+			"destroy":          4,
+			"previous_init":    5,
+			"previous_plan":    6,
+			"previous_apply":   7,
+			"previous_destroy": 8,
+		}
+		
+		sort.Slice(childNames, func(i, j int) bool {
+			orderI, hasI := phaseOrder[childNames[i]]
+			orderJ, hasJ := phaseOrder[childNames[j]]
+			
+			if hasI && hasJ {
+				return orderI < orderJ
+			} else if hasI {
+				return true
+			} else if hasJ {
+				return false
+			}
+			return childNames[i] < childNames[j]
+		})
+		
+		sort.Strings(node.Logs)
+
+		// Render child phases/streams
+		for i, childName := range childNames {
+			child := node.Children[childName]
+			isLastChild := (i == len(childNames)-1) && len(node.Logs) == 0
+
+			// Choose the right tree symbol
+			var symbol, nextPrefix string
+			if isLastChild {
+				symbol = "└── "
+				nextPrefix = prefix + "    "
+			} else {
+				symbol = "├── "
+				nextPrefix = prefix + "│   "
+			}
+
+			if child.IsPhase {
+				result += fmt.Sprintf("%s[blue]%s%s/[-]\n", prefix, symbol, child.Name)
+			} else {
+				result += fmt.Sprintf("%s[lightblue]%s%s[-]\n", prefix, symbol, child.Name)
+			}
+			result += renderLogTree(child, nextPrefix, true)
+		}
+
+		// Render log files
+		for i, logPath := range node.Logs {
+			isLastLog := i == len(node.Logs)-1
+			var symbol string
+			if isLastLog {
+				symbol = "└── "
+			} else {
+				symbol = "├── "
+			}
+			
+			// Extract just the filename for display
+			logName := filepath.Base(logPath)
+			
+			// Color code based on content or status
+			logContent := logs[logPath]
+			if strings.Contains(strings.ToLower(logContent), "error") || strings.Contains(strings.ToLower(logContent), "failed") {
+				result += fmt.Sprintf("%s[red]%s%s[-]\n", prefix, symbol, logName)
+			} else if strings.Contains(strings.ToLower(logContent), "warn") {
+				result += fmt.Sprintf("%s[yellow]%s%s[-]\n", prefix, symbol, logName)
+			} else if logContent != "" {
+				result += fmt.Sprintf("%s[green]%s%s[-]\n", prefix, symbol, logName)
+			} else {
+				result += fmt.Sprintf("%s[gray]%s%s (empty)[-]\n", prefix, symbol, logName)
+			}
+		}
+
+		return result
+	}
+
+	// Render the tree starting from root
+	content += renderLogTree(root, "", true)
+	content += "\n[green]Press 'l' to open logs browser and view individual log contents[-]"
 
 	return content
 }
@@ -1001,6 +1205,344 @@ func showFileBrowser(app *tview.Application, terraformData *TerraformData, mainF
 
 		if firstFileNode := findFirstFileNode(root); firstFileNode != nil {
 			fileTree.SetCurrentNode(firstFileNode)
+		}
+	}
+
+	app.SetRoot(modalLayout, true).EnableMouse(false)
+}
+
+func showLogsBrowser(app *tview.Application, terraformData *TerraformData, mainFlex *tview.Flex, originalInputHandler func(event *tcell.EventKey) *tcell.EventKey) {
+	// Create log tree view (hierarchical)
+	logTree := tview.NewTreeView()
+	logTree.SetBorder(true).SetTitle("Terraform Logs")
+
+	// Create root node
+	root := tview.NewTreeNode("Logs")
+	root.SetColor(tcell.ColorYellow)
+	logTree.SetRoot(root)
+
+	// Build hierarchical log structure (same as in formatTerraformLogsHierarchical)
+	type LogTreeNode struct {
+		Name     string
+		IsPhase  bool
+		Children map[string]*LogTreeNode
+		Logs     []string
+	}
+
+	logStructure := &LogTreeNode{
+		Name:     "root",
+		IsPhase:  true,
+		Children: make(map[string]*LogTreeNode),
+		Logs:     []string{},
+	}
+
+	// Get sorted log paths for deterministic ordering
+	logPaths := make([]string, 0, len(terraformData.Logs))
+	for logPath := range terraformData.Logs {
+		logPaths = append(logPaths, logPath)
+	}
+	sort.Strings(logPaths)
+
+	// Parse logs into hierarchical structure
+	for _, logPath := range logPaths {
+		if !strings.HasPrefix(logPath, "log/") {
+			continue
+		}
+
+		// Extract log filename without log/ prefix
+		logName := strings.TrimPrefix(logPath, "log/")
+		
+		// Parse the log name to extract phase and stream info
+		phase := "unknown"
+		stream := "unknown"
+		isPrevious := false
+
+		if strings.HasPrefix(logName, "previous_") {
+			isPrevious = true
+			logName = strings.TrimPrefix(logName, "previous_")
+		}
+
+		// Parse stream_terraform_phase.log
+		parts := strings.Split(logName, "_")
+		if len(parts) >= 3 && parts[1] == "terraform" {
+			stream = parts[0] // stdout or stderr
+			phasePart := strings.Join(parts[2:], "_")
+			phase = strings.TrimSuffix(phasePart, ".log")
+		}
+
+		// Create phase node (init, apply, destroy, etc.)
+		phaseKey := phase
+		if isPrevious {
+			phaseKey = "previous_" + phase
+		}
+
+		if logStructure.Children[phaseKey] == nil {
+			var displayName string
+			if isPrevious {
+				displayName = "Previous " + strings.ToTitle(phase[:1]) + phase[1:]
+			} else {
+				displayName = strings.ToTitle(phase[:1]) + phase[1:]
+			}
+			logStructure.Children[phaseKey] = &LogTreeNode{
+				Name:     displayName,
+				IsPhase:  true,
+				Children: make(map[string]*LogTreeNode),
+				Logs:     []string{},
+			}
+		}
+
+		// Add stream (stdout/stderr) under the phase
+		phaseNode := logStructure.Children[phaseKey]
+		if phaseNode.Children[stream] == nil {
+			streamDisplayName := strings.ToUpper(stream)
+			phaseNode.Children[stream] = &LogTreeNode{
+				Name:     streamDisplayName,
+				IsPhase:  false,
+				Children: make(map[string]*LogTreeNode),
+				Logs:     []string{},
+			}
+		}
+
+		// Add the actual log file
+		streamNode := phaseNode.Children[stream]
+		streamNode.Logs = append(streamNode.Logs, logPath)
+	}
+
+	// Build TreeView nodes from log structure
+	dirNodes := make(map[string]*tview.TreeNode)
+
+	// Helper function to get or create directory node
+	var getOrCreateLogNode = func(path string, node *LogTreeNode, parent *tview.TreeNode) *tview.TreeNode {
+		if existingNode, exists := dirNodes[path]; exists {
+			return existingNode
+		}
+
+		// Create the node
+		var treeNode *tview.TreeNode
+		if node.IsPhase {
+			treeNode = tview.NewTreeNode(node.Name + "/")
+			treeNode.SetColor(tcell.ColorBlue)
+		} else {
+			treeNode = tview.NewTreeNode(node.Name)
+			treeNode.SetColor(tcell.ColorLightBlue)
+		}
+		treeNode.SetExpanded(false) // Allow user to expand/collapse
+		dirNodes[path] = treeNode
+		parent.AddChild(treeNode)
+
+		return treeNode
+	}
+
+	// Sort phases in logical order
+	phaseOrder := map[string]int{
+		"init":             1,
+		"plan":             2,
+		"apply":            3,
+		"destroy":          4,
+		"previous_init":    5,
+		"previous_plan":    6,
+		"previous_apply":   7,
+		"previous_destroy": 8,
+	}
+
+	// Get sorted phase names
+	var phaseNames []string
+	for phaseName := range logStructure.Children {
+		phaseNames = append(phaseNames, phaseName)
+	}
+	sort.Slice(phaseNames, func(i, j int) bool {
+		orderI, hasI := phaseOrder[phaseNames[i]]
+		orderJ, hasJ := phaseOrder[phaseNames[j]]
+		
+		if hasI && hasJ {
+			return orderI < orderJ
+		} else if hasI {
+			return true
+		} else if hasJ {
+			return false
+		}
+		return phaseNames[i] < phaseNames[j]
+	})
+
+	// Build the tree structure
+	for _, phaseName := range phaseNames {
+		phaseNode := logStructure.Children[phaseName]
+		phaseTreeNode := getOrCreateLogNode(phaseName, phaseNode, root)
+
+		// Get sorted stream names (stdout, stderr)
+		var streamNames []string
+		for streamName := range phaseNode.Children {
+			streamNames = append(streamNames, streamName)
+		}
+		sort.Strings(streamNames)
+
+		for _, streamName := range streamNames {
+			streamNode := phaseNode.Children[streamName]
+			streamPath := phaseName + "/" + streamName
+			streamTreeNode := getOrCreateLogNode(streamPath, streamNode, phaseTreeNode)
+
+			// Add log files under the stream
+			for _, logPath := range streamNode.Logs {
+				logName := filepath.Base(logPath)
+				
+				// Color code based on content or status
+				logContent := terraformData.Logs[logPath]
+				logFileNode := tview.NewTreeNode(logName)
+				logFileNode.SetReference(logPath)
+				
+				if strings.Contains(strings.ToLower(logContent), "error") || strings.Contains(strings.ToLower(logContent), "failed") {
+					logFileNode.SetColor(tcell.ColorRed)
+				} else if strings.Contains(strings.ToLower(logContent), "warn") {
+					logFileNode.SetColor(tcell.ColorYellow)
+				} else if logContent != "" {
+					logFileNode.SetColor(tcell.ColorGreen)
+				} else {
+					logFileNode.SetColor(tcell.ColorGray)
+				}
+				
+				streamTreeNode.AddChild(logFileNode)
+			}
+		}
+	}
+
+	root.SetExpanded(true)
+
+	// Create log content viewer
+	logViewer := tview.NewTextView()
+	logViewer.SetBorder(true).SetTitle("Log Content")
+	logViewer.SetScrollable(true)
+	logViewer.SetWrap(false)
+	logViewer.SetDynamicColors(true) // Enable color rendering
+	logViewer.SetText("Select a log from the tree to view its content")
+
+	// Handle tree selection
+	logTree.SetChangedFunc(func(node *tview.TreeNode) {
+		reference := node.GetReference()
+		if reference != nil {
+			if logPath, ok := reference.(string); ok {
+				if content, exists := terraformData.Logs[logPath]; exists {
+					logViewer.SetTitle(fmt.Sprintf("Log: %s", logPath))
+					// Apply log syntax highlighting
+					highlightedContent := addLogSyntaxHighlighting(content)
+					logViewer.SetText(highlightedContent)
+				}
+			}
+		}
+	})
+
+	// Handle tree node selection (Enter key)
+	logTree.SetSelectedFunc(func(node *tview.TreeNode) {
+		reference := node.GetReference()
+		if reference != nil {
+			// If it's a log file, show content and don't toggle expansion
+			if logPath, ok := reference.(string); ok {
+				if content, exists := terraformData.Logs[logPath]; exists {
+					logViewer.SetTitle(fmt.Sprintf("Log: %s", logPath))
+					// Apply log syntax highlighting
+					highlightedContent := addLogSyntaxHighlighting(content)
+					logViewer.SetText(highlightedContent)
+				}
+				return // Don't toggle expansion for log files
+			}
+		}
+		// Toggle expansion for directory nodes (phases and streams)
+		node.SetExpanded(!node.IsExpanded())
+	})
+
+	// Add focus handlers to show which panel is active
+	logTree.SetFocusFunc(func() {
+		logTree.SetBorderColor(tcell.ColorGreen)
+		logViewer.SetBorderColor(tcell.ColorDefault)
+	})
+	logViewer.SetFocusFunc(func() {
+		logViewer.SetBorderColor(tcell.ColorGreen)
+		logTree.SetBorderColor(tcell.ColorDefault)
+	})
+
+	// Create layout for log browser
+	logBrowserFlex := tview.NewFlex()
+	logBrowserFlex.AddItem(logTree, 0, 1, true)
+	logBrowserFlex.AddItem(logViewer, 0, 2, false)
+
+	// Create modal frame
+	modal := tview.NewFlex().SetDirection(tview.FlexRow)
+	modal.AddItem(nil, 0, 1, false)
+	modal.AddItem(tview.NewFlex().
+		AddItem(nil, 0, 1, false).
+		AddItem(logBrowserFlex, 0, 8, true).
+		AddItem(nil, 0, 1, false), 0, 8, true)
+	modal.AddItem(nil, 0, 1, false)
+
+	// Help text for log browser
+	helpText := tview.NewTextView()
+	helpText.SetText("Navigate: ↑/↓ to select log | Enter: view content/expand | Esc: back/close | Content scrollable when focused")
+	helpText.SetTextAlign(tview.AlignCenter)
+	helpText.SetDynamicColors(true)
+
+	// Final modal layout
+	modalLayout := tview.NewFlex().SetDirection(tview.FlexRow)
+	modalLayout.AddItem(modal, 0, 1, true)
+	modalLayout.AddItem(helpText, 1, 0, false)
+
+	// Handle key events in log browser
+	app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch event.Key() {
+		case tcell.KeyEscape:
+			if app.GetFocus() == logViewer {
+				// If viewing content, go back to log tree
+				app.SetFocus(logTree)
+				return nil
+			} else {
+				// If on log tree, close log browser and return to main view
+				app.SetInputCapture(originalInputHandler) // Restore original input handler
+				app.SetRoot(mainFlex, true)
+				return nil
+			}
+		case tcell.KeyEnter:
+			if app.GetFocus() == logTree {
+				// Let the tree view handle Enter first (for expand/collapse)
+				// Only switch to content viewer if a log is selected
+				currentNode := logTree.GetCurrentNode()
+				if currentNode != nil {
+					reference := currentNode.GetReference()
+					// If it's a log file (has reference), switch to content viewer
+					if _, isLogFile := reference.(string); isLogFile {
+						app.SetFocus(logViewer)
+						return nil
+					}
+					// If it's a directory (no reference), let tree handle expansion
+					// Don't consume the event, let it pass through to the tree
+					return event
+				}
+			}
+			// If already viewing content, let default behavior handle scrolling
+		}
+		return event
+	})
+
+	// Set initial focus and selection
+	app.SetFocus(logTree)
+
+	// Set initial selection to first log if available
+	if len(logPaths) > 0 {
+		// Find the first log file node in the tree
+		var findFirstLogNode func(node *tview.TreeNode) *tview.TreeNode
+		findFirstLogNode = func(node *tview.TreeNode) *tview.TreeNode {
+			if node.GetReference() != nil {
+				// This is a log file node
+				return node
+			}
+			// Check children for log nodes
+			for _, child := range node.GetChildren() {
+				if result := findFirstLogNode(child); result != nil {
+					return result
+				}
+			}
+			return nil
+		}
+
+		if firstLogNode := findFirstLogNode(root); firstLogNode != nil {
+			logTree.SetCurrentNode(firstLogNode)
 		}
 	}
 
