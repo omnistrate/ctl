@@ -56,8 +56,12 @@ func DescribeServiceOffering(ctx context.Context, token, serviceID, productTierI
 	apiClient := getFleetClient()
 
 	req := apiClient.InventoryApiAPI.InventoryApiDescribeServiceOffering(ctxWithToken, serviceID)
-	req = req.ProductTierId(productTierID)
-	req = req.ProductTierVersion(productTierVersion)
+	if productTierID != "" {
+		req = req.ProductTierId(productTierID)
+	}
+	if productTierVersion != "" {
+		req = req.ProductTierVersion(productTierVersion)
+	}
 	var r *http.Response
 	defer func() {
 		if r != nil {
