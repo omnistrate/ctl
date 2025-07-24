@@ -55,9 +55,6 @@ func init() {
 	versionUpgradeCmd.Args = cobra.ExactArgs(1) // Require exactly one argument (i.e. instance ID)
 
 	var err error
-	if err = versionUpgradeCmd.MarkFlagRequired("upgrade-configuration-override"); err != nil {
-		return
-	}
 	if err = versionUpgradeCmd.MarkFlagFilename("upgrade-configuration-override"); err != nil {
 		return
 	}
@@ -85,12 +82,6 @@ func runVersionUpgrade(cmd *cobra.Command, args []string) error {
 	// Generate configuration override if requested
 	generateConfig, err := cmd.Flags().GetBool("generate-configuration")
 	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
-	if configOverrideFile == "" {
-		err = errors.New("upgrade-configuration-override is required")
 		utils.PrintError(err)
 		return err
 	}
@@ -204,19 +195,21 @@ func runVersionUpgrade(cmd *cobra.Command, args []string) error {
 	}
 
 	// Read and parse configuration override YAML file
-	configData, err := os.ReadFile(configOverrideFile)
-	if err != nil {
-		err = errors2.Wrap(err, "failed to read configuration override file")
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
-	}
-
 	var resourceOverrideConfig map[string]openapiclientfleet.ResourceOneOffPatchConfigurationOverride
-	err = yaml.Unmarshal(configData, &resourceOverrideConfig)
-	if err != nil {
-		err = errors2.Wrap(err, "failed to parse configuration override YAML")
-		utils.HandleSpinnerError(spinner, sm, err)
-		return err
+	if configOverrideFile != "" {
+		configData, err := os.ReadFile(configOverrideFile)
+		if err != nil {
+			err = errors2.Wrap(err, "failed to read configuration override file")
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
+
+		err = yaml.Unmarshal(configData, &resourceOverrideConfig)
+		if err != nil {
+			err = errors2.Wrap(err, "failed to parse configuration override YAML")
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
 	}
 
 	// Issue one-off patch
