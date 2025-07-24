@@ -72,10 +72,11 @@ func GetSubscriptionByCustomerEmail(ctx context.Context, token string, serviceID
 			}
 
 			// Search user by email
-			listUsersRes, _, err := apiClient.InventoryApiAPI.InventoryApiListAllUsers(ctxWithToken).Execute()
+			listUsersRes, r, err := apiClient.InventoryApiAPI.InventoryApiListAllUsers(ctxWithToken).Execute()
 			if err != nil {
 				return nil, handleFleetError(errors.Wrap(err, "failed to list users"))
 			}
+			_ = r.Body.Close()
 
 			userID := ""
 			for _, user := range listUsersRes.Users {
@@ -99,10 +100,11 @@ func GetSubscriptionByCustomerEmail(ctx context.Context, token string, serviceID
 				OnBehalfOfCustomerUserId: userID,
 			})
 
-			createResp, _, err := createReq.Execute()
+			createResp, r, err := createReq.Execute()
 			if err != nil {
 				return nil, handleFleetError(errors.Wrapf(err, "failed to create subscription for user %s", customerEmail))
 			}
+			_ = r.Body.Close()
 
 			// Describe the newly created subscription
 			resp, err = DescribeSubscription(ctx, token, serviceID, offering.ServiceEnvironmentID, *createResp.Id)
