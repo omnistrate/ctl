@@ -119,5 +119,5 @@ func isFieldMatch(field reflect.Value, value string) bool {
 		return false
 	}
 
-	return fieldValue == value
+	return strings.ToLower(fieldValue) == strings.ToLower(value)
 }

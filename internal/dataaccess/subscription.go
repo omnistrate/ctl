@@ -109,6 +109,8 @@ func GetSubscriptionByCustomerEmail(ctx context.Context, token string, serviceID
 			if err != nil {
 				return nil, handleFleetError(errors.Wrapf(err, "failed to describe newly created subscription for user %s", customerEmail))
 			}
+
+			return resp, nil
 		}
 	}
 

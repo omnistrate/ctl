@@ -21,10 +21,10 @@ const (
 omctl instance version-upgrade instance-abcd1234 --upgrade-configuration-override /path/to/config.yaml
 
 # Issue a version upgrade to a specific target tier version
-omctl instance version-upgrade instance-abcd1234 --upgrade-configuration-override /path/to/config.yaml --target-tier-version v1.2.3
+omctl instance version-upgrade instance-abcd1234 --upgrade-configuration-override /path/to/config.yaml --target-tier-version 3.0
 
-# [HELM ONLY] Use generate-configuration to generate a default deployment instance configuration file based on the current helm values
-omctl instance version-upgrade instance-abcd1234 --upgrade-configuration-override existing-config.yaml --generate-configuration
+# [HELM ONLY] Use generate-configuration with a target tier version to generate a default deployment instance configuration file based on the current helm values as well as the proposed helm values for the target tier version
+omctl instance version-upgrade instance-abcd1234 --existing-configuration existing-config.yaml --proposed-configuration proposed-config.yaml --generate-configuration --target-tier-version 3.0 
 
 # Example upgrade configuration override YAML file:
 # resource-key-1:
@@ -49,13 +49,22 @@ var versionUpgradeCmd = &cobra.Command{
 
 func init() {
 	versionUpgradeCmd.Flags().String("upgrade-configuration-override", "", "YAML file containing upgrade configuration override")
-	versionUpgradeCmd.Flags().String("target-tier-version", "", "Target tier version for the version upgrade (optional, defaults to latest released tier version)")
-	versionUpgradeCmd.Flags().Bool("generate-configuration", false, "Generate a default configuration file based on current helm values")
+	versionUpgradeCmd.Flags().String("existing-configuration", "", "Path to write the existing configuration to (optional, used with --generate-configuration)")
+	versionUpgradeCmd.Flags().String("proposed-configuration", "", "Path to write the proposed configuration to (optional, used with --generate-configuration)")
+	versionUpgradeCmd.Flags().String("target-tier-version", "", "Target tier version for the version upgrade")
+	versionUpgradeCmd.Flags().Bool("generate-configuration", false, "Generate a default configuration file based on current helm values and proposed helm values for the target tier version."+
+		"This will not perform an upgrade, but will generate a configuration file that can be used for the upgrade.")
 
 	versionUpgradeCmd.Args = cobra.ExactArgs(1) // Require exactly one argument (i.e. instance ID)
 
 	var err error
 	if err = versionUpgradeCmd.MarkFlagFilename("upgrade-configuration-override"); err != nil {
+		return
+	}
+	if err = versionUpgradeCmd.MarkFlagFilename("existing-configuration"); err != nil {
+		return
+	}
+	if err = versionUpgradeCmd.MarkFlagFilename("proposed-configuration"); err != nil {
 		return
 	}
 }
@@ -73,12 +82,6 @@ func runVersionUpgrade(cmd *cobra.Command, args []string) error {
 	instanceID := args[0]
 
 	// Retrieve flags
-	configOverrideFile, err := cmd.Flags().GetString("upgrade-configuration-override")
-	if err != nil {
-		utils.PrintError(err)
-		return err
-	}
-
 	// Generate configuration override if requested
 	generateConfig, err := cmd.Flags().GetBool("generate-configuration")
 	if err != nil {
@@ -90,6 +93,11 @@ func runVersionUpgrade(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		utils.PrintError(err)
 		return err
+	}
+
+	if targetTierVersion == "" {
+		utils.PrintError(errors.New("target tier version is required for version upgrade"))
+		return errors.New("target tier version is required for version upgrade")
 	}
 
 	output, err := cmd.Flags().GetString("output")
@@ -108,18 +116,21 @@ func runVersionUpgrade(cmd *cobra.Command, args []string) error {
 	// Initialize spinner if output is not JSON
 	var sm ysmrr.SpinnerManager
 	var spinner *ysmrr.Spinner
+
+	defer func() {
+		if spinner != nil {
+			spinner.Complete()
+		}
+		if sm != nil {
+			sm.Stop()
+		}
+	}()
+
 	if output != "json" {
 		sm = ysmrr.NewSpinnerManager()
 		var msg string
-		if generateConfig {
-			msg = "Generating configuration file"
-		} else {
-			msg = "Upgrading deployment instance"
-			if targetTierVersion != "" {
-				msg += fmt.Sprintf(" to target tier version %s", targetTierVersion)
-			} else {
-				msg += " to latest tier version"
-			}
+		if !generateConfig {
+			msg = fmt.Sprintf("Upgrading deployment instance to target tier version %s", targetTierVersion)
 		}
 		spinner = sm.AddSpinner(msg)
 		sm.Start()
@@ -137,6 +148,30 @@ func runVersionUpgrade(cmd *cobra.Command, args []string) error {
 
 	// If we have to generate the configuration file, describe the resource instance
 	if generateConfig {
+		if spinner != nil {
+			spinner.UpdateMessage("Generating existing configuration for deployment instance")
+		}
+
+		// Retrieve existing and proposed configuration file paths
+		existingConfigFile, err := cmd.Flags().GetString("existing-configuration")
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+
+		proposedConfigFile, err := cmd.Flags().GetString("proposed-configuration")
+		if err != nil {
+			utils.PrintError(err)
+			return err
+		}
+
+		// Validate that both existing and proposed configuration files are provided
+		if existingConfigFile == "" || proposedConfigFile == "" {
+			err = errors.New("both --existing-configuration and --proposed-configuration must be provided when generating configuration")
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
+
 		// Update spinner message
 		if spinner != nil {
 			spinner.UpdateMessage("Processing instance configuration to generate overrides")
@@ -155,8 +190,9 @@ func runVersionUpgrade(cmd *cobra.Command, args []string) error {
 		}
 
 		if spinner != nil {
-			spinner.UpdateMessage("Looking up Helm releases for deployment instance to generate overrides")
+			spinner.UpdateMessage("Looking up Helm releases for deployment instance to generate existing configuration")
 		}
+
 		for _, resourceVersionSummary := range instance.ResourceVersionSummaries {
 			// We only support helm overrides for now
 			if resourceVersionSummary.HelmDeploymentConfiguration == nil {
@@ -179,22 +215,71 @@ func runVersionUpgrade(cmd *cobra.Command, args []string) error {
 			}
 		}
 
-		// Write the generated configuration to the specified file
+		// Write the existing configuration to the specified file
 		var marshalledData []byte
 		if marshalledData, err = yaml.Marshal(resourceOverrideConfig); err != nil {
-			utils.HandleSpinnerError(spinner, sm, errors2.Wrap(err, "failed to marshal generated configuration"))
+			utils.HandleSpinnerError(spinner, sm, errors2.Wrap(err, "failed to marshal existing configuration"))
 			return err
 		}
 
-		if err = os.WriteFile(configOverrideFile, marshalledData, 0600); err != nil {
-			utils.HandleSpinnerError(spinner, sm, errors2.Wrap(err, "failed to write generated configuration to file"))
+		if err = os.WriteFile(existingConfigFile, marshalledData, 0600); err != nil {
+			utils.HandleSpinnerError(spinner, sm, errors2.Wrap(err, "failed to write existing configuration to file"))
 			return err
 		}
-		utils.HandleSpinnerSuccess(spinner, sm, fmt.Sprintf("Generated configuration override file: %s", configOverrideFile))
+
+		// Write the proposed configuration to the specified file
+		if spinner != nil {
+			spinner.UpdateMessage("Writing proposed configuration to file")
+		}
+
+		proposedConfig := make(map[string]openapiclientfleet.ResourceOneOffPatchConfigurationOverride)
+
+		// Get list of resources in the target tier version
+		resources, err := dataaccess.ListResources(cmd.Context(), token, serviceID, instance.ProductTierId, &targetTierVersion)
+		if err != nil {
+			utils.HandleSpinnerError(spinner, sm, err)
+			return err
+		}
+
+		for _, resource := range resources.Resources {
+			// We only support helm overrides for now
+			if resource.HelmChartConfiguration == nil {
+				// Skip resources that are not helm deployments
+				continue
+			}
+
+			resourceKey := resource.Key
+			proposedConfig[resourceKey] = openapiclientfleet.ResourceOneOffPatchConfigurationOverride{
+				HelmChartValues: resource.HelmChartConfiguration.ChartValues,
+			}
+		}
+
+		// Write the proposed configuration to the specified file
+		if marshalledData, err = yaml.Marshal(proposedConfig); err != nil {
+			utils.HandleSpinnerError(spinner, sm, errors2.Wrap(err, "failed to marshal proposed configuration"))
+			return err
+		}
+
+		if err = os.WriteFile(proposedConfigFile, marshalledData, 0600); err != nil {
+			utils.HandleSpinnerError(spinner, sm, errors2.Wrap(err, "failed to write proposed configuration to file"))
+			return err
+		}
+
+		utils.HandleSpinnerSuccess(spinner, sm, fmt.Sprintf("Saved existing configuration to file: %s; Proposed configuration to file: %s", existingConfigFile, proposedConfigFile))
+		if spinner != nil {
+			spinner.UpdateMessage("Configuration files generated successfully. You can now use them to perform the upgrade.")
+		}
+
 		return nil
 	}
 
 	// Read and parse configuration override YAML file
+	configOverrideFile, err := cmd.Flags().GetString("upgrade-configuration-override")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
 	var resourceOverrideConfig map[string]openapiclientfleet.ResourceOneOffPatchConfigurationOverride
 	if configOverrideFile != "" {
 		configData, err := os.ReadFile(configOverrideFile)
