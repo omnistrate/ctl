@@ -21,27 +21,17 @@ import (
 )
 
 var (
-	outputFlag      string
-	textMode        bool // Flag for text mode output
-	kubeconfig      string
-	kubeContext     string
-	defaultKubeConf string
+	outputFlag  string
+	textMode    bool // Flag for text mode output
+	kubeconfig  string
+	kubeContext string
 )
 
 func init() {
-	// Get default kubeconfig location from environment or standard path
-	defaultKubeConf = os.Getenv("KUBECONFIG")
-	if defaultKubeConf == "" {
-		// If KUBECONFIG is not set, use the standard path
-		if home := homedir.HomeDir(); home != "" {
-			defaultKubeConf = filepath.Join(home, ".kube", "config")
-		}
-	}
-
 	// Add flags for the command
 	Cmd.Flags().StringVarP(&outputFlag, "output", "o", "table", "Output format (table|text|json)")
 	Cmd.Flags().BoolVar(&textMode, "text", false, "Output text representation (shorthand for --output=text)")
-	Cmd.Flags().StringVar(&kubeconfig, "kubeconfig", defaultKubeConf, "Path to the kubeconfig file")
+	Cmd.Flags().StringVar(&kubeconfig, "kubeconfig", "", "Path to the kubeconfig file (default \"~/.kube/config\")")
 	Cmd.Flags().StringVar(&kubeContext, "context", "", "Kubernetes context to use")
 }
 
@@ -52,6 +42,16 @@ func runInspect(cmd *cobra.Command, args []string) error {
 	}
 
 	instanceID := args[0]
+
+	// Set default kubeconfig path if not provided
+	if kubeconfig == "" {
+		kubeconfig = os.Getenv("KUBECONFIG")
+		if kubeconfig == "" {
+			if home := homedir.HomeDir(); home != "" {
+				kubeconfig = filepath.Join(home, ".kube", "config")
+			}
+		}
+	}
 
 	// Check if kubeconfig exists
 	if _, err := os.Stat(kubeconfig); os.IsNotExist(err) {

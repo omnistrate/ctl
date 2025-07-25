@@ -9,6 +9,12 @@ import (
 	"github.com/spf13/pflag"
 )
 
+var (
+	CommitID  string
+	Version   string
+	Timestamp string
+)
+
 const (
 	dryRunEnv            = "OMNISTRATE_DRY_RUN"
 	logLevel             = "OMNISTRATE_LOG_LEVEL"
@@ -76,6 +82,14 @@ func IsDryRun() bool {
 func GetClientTimeout() time.Duration {
 	timeoutInSeconds := GetEnvAsInteger(clientTimeout, "300")
 	return time.Duration(timeoutInSeconds) * time.Second
+}
+
+// GetUserAgent returns the User-Agent string for HTTP requests
+func GetUserAgent() string {
+	if Version == "" {
+		return "omnistrate-ctl/unknown"
+	}
+	return "omnistrate-ctl/" + Version
 }
 
 func CleanupArgsAndFlags(cmd *cobra.Command, args *[]string) {
