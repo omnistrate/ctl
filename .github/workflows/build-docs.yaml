@@ -35,7 +35,7 @@ jobs:
 
       - name: Diff generated code
         run: |
-          git diff --compact-summary --exit-code -- ./docs || \
+          git diff --compact-summary --exit-code -- ./mkdocs/docs || \
             (echo; echo "Unexpected difference in directories after docs generation. Run 'make gen-doc' command and commit"; exit 1)
 
   build-docs:
