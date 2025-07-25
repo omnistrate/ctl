@@ -60,7 +60,7 @@ func runRoot(cmd *cobra.Command, args []string) {
 	// Check if the version flag is set
 	versionFlag, err := cmd.Flags().GetBool("version")
 	if err == nil && versionFlag {
-		fmt.Println(fmt.Sprintf(versionDescription, config.GetVersion()))
+		fmt.Println(fmt.Sprintf(versionDescription, config.Version))
 		return
 	}
 

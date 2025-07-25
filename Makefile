@@ -172,7 +172,7 @@ gen-doc:
 docker: docker-build
 .PHONY: docker-build
 docker-build:
-	docker build --platform=${DOCKER_PLATFORM} --build-arg GIT_USER=${GIT_USER} --build-arg GIT_TOKEN=${GIT_TOKEN} -f ./build/Dockerfile  -t ${PROJECT_NAME}:latest .
+	docker build --platform=${DOCKER_PLATFORM} --build-arg GIT_USER=${GIT_USER} --build-arg GIT_TOKEN=${GIT_TOKEN} --build-arg GIT_COMMIT=${GIT_COMMIT} --build-arg GIT_VERSION=${GIT_VERSION} -f ./build/Dockerfile  -t ${PROJECT_NAME}:latest .
 
 .PHONY: docker-run
 docker-run:

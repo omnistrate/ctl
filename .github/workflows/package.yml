@@ -72,6 +72,11 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            GIT_COMMIT=${{ github.sha }}
+            GIT_VERSION=${{ github.ref_name }}
+            GOPROXY=https://proxy.golang.org,direct
+            GOSUMDB=sum.golang.org
 
   package-multi-arch:
     runs-on: ubuntu-latest
@@ -126,3 +131,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            GIT_COMMIT=${{ github.sha }}
+            GIT_VERSION=${{ github.ref_name }}
+            GOPROXY=https://proxy.golang.org,direct
+            GOSUMDB=sum.golang.org
