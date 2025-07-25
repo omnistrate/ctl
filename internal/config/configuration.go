@@ -3,7 +3,6 @@ package config
 import (
 	_ "embed"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -11,10 +10,9 @@ import (
 )
 
 var (
-	CommitID    string
-	Version     string
-	Timestamp   string
-	versionOnce sync.Once
+	CommitID  string
+	Version   string
+	Timestamp string
 )
 
 const (
