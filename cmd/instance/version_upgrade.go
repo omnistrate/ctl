@@ -24,7 +24,10 @@ omctl instance version-upgrade instance-abcd1234 --upgrade-configuration-overrid
 omctl instance version-upgrade instance-abcd1234 --upgrade-configuration-override /path/to/config.yaml --target-tier-version 3.0
 
 # [HELM ONLY] Use generate-configuration with a target tier version to generate a default deployment instance configuration file based on the current helm values as well as the proposed helm values for the target tier version
-omctl instance version-upgrade instance-abcd1234 --existing-configuration existing-config.yaml --proposed-configuration proposed-config.yaml --generate-configuration --target-tier-version 3.0 
+omctl instance version-upgrade instance-abcd1234 --existing-configuration existing-config.yaml --proposed-configuration proposed-config.yaml --generate-configuration --target-tier-version 3.0
+
+# [HELM ONLY] Use generate-configuration with --reuse-values to merge existing helm chart values into the proposed configuration
+omctl instance version-upgrade instance-abcd1234 --existing-configuration existing-config.yaml --proposed-configuration proposed-config.yaml --generate-configuration --reuse-values --target-tier-version 3.0 
 
 # Example upgrade configuration override YAML file:
 # resource-key-1:
@@ -54,6 +57,7 @@ func init() {
 	versionUpgradeCmd.Flags().String("target-tier-version", "", "Target tier version for the version upgrade")
 	versionUpgradeCmd.Flags().Bool("generate-configuration", false, "Generate a default configuration file based on current helm values and proposed helm values for the target tier version."+
 		"This will not perform an upgrade, but will generate a configuration file that can be used for the upgrade.")
+	versionUpgradeCmd.Flags().Bool("reuse-values", false, "When used with --generate-configuration, merge existing helm chart values into the proposed configuration, giving preference to existing values")
 
 	versionUpgradeCmd.Args = cobra.ExactArgs(1) // Require exactly one argument (i.e. instance ID)
 
@@ -67,6 +71,40 @@ func init() {
 	if err = versionUpgradeCmd.MarkFlagFilename("proposed-configuration"); err != nil {
 		return
 	}
+}
+
+// mergeHelmValues merges two helm value maps, giving preference to existing values
+func mergeHelmValues(existing, proposed map[string]interface{}) map[string]interface{} {
+	if existing == nil {
+		return proposed
+	}
+	if proposed == nil {
+		return existing
+	}
+
+	result := make(map[string]interface{})
+	
+	// Start with proposed values as base
+	for k, v := range proposed {
+		result[k] = v
+	}
+	
+	// Override with existing values (giving them preference)
+	for k, existingValue := range existing {
+		if proposedValue, exists := result[k]; exists {
+			// If both values are maps, merge them recursively
+			if existingMap, ok := existingValue.(map[string]interface{}); ok {
+				if proposedMap, ok := proposedValue.(map[string]interface{}); ok {
+					result[k] = mergeHelmValues(existingMap, proposedMap)
+					continue
+				}
+			}
+		}
+		// Otherwise, existing value takes precedence
+		result[k] = existingValue
+	}
+	
+	return result
 }
 
 func runVersionUpgrade(cmd *cobra.Command, args []string) error {
@@ -85,6 +123,19 @@ func runVersionUpgrade(cmd *cobra.Command, args []string) error {
 	// Generate configuration override if requested
 	generateConfig, err := cmd.Flags().GetBool("generate-configuration")
 	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	reuseValues, err := cmd.Flags().GetBool("reuse-values")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	// Validate that reuse-values is only used with generate-configuration
+	if reuseValues && !generateConfig {
+		err = errors.New("--reuse-values can only be used with --generate-configuration")
 		utils.PrintError(err)
 		return err
 	}
@@ -249,8 +300,17 @@ func runVersionUpgrade(cmd *cobra.Command, args []string) error {
 			}
 
 			resourceKey := resource.Key
+			helmValues := resource.HelmChartConfiguration.ChartValues
+
+			// If reuse-values is enabled and we have existing values for this resource, merge them
+			if reuseValues {
+				if existingOverride, exists := resourceOverrideConfig[resourceKey]; exists {
+					helmValues = mergeHelmValues(existingOverride.HelmChartValues, helmValues)
+				}
+			}
+
 			proposedConfig[resourceKey] = openapiclientfleet.ResourceOneOffPatchConfigurationOverride{
-				HelmChartValues: resource.HelmChartConfiguration.ChartValues,
+				HelmChartValues: helmValues,
 			}
 		}
 

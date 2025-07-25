@@ -20,7 +20,10 @@ omctl instance version-upgrade instance-abcd1234 --upgrade-configuration-overrid
 omctl instance version-upgrade instance-abcd1234 --upgrade-configuration-override /path/to/config.yaml --target-tier-version 3.0
 
 # [HELM ONLY] Use generate-configuration with a target tier version to generate a default deployment instance configuration file based on the current helm values as well as the proposed helm values for the target tier version
-omctl instance version-upgrade instance-abcd1234 --existing-configuration existing-config.yaml --proposed-configuration proposed-config.yaml --generate-configuration --target-tier-version 3.0 
+omctl instance version-upgrade instance-abcd1234 --existing-configuration existing-config.yaml --proposed-configuration proposed-config.yaml --generate-configuration --target-tier-version 3.0
+
+# [HELM ONLY] Use generate-configuration with --reuse-values to merge existing helm chart values into the proposed configuration
+omctl instance version-upgrade instance-abcd1234 --existing-configuration existing-config.yaml --proposed-configuration proposed-config.yaml --generate-configuration --reuse-values --target-tier-version 3.0 
 
 # Example upgrade configuration override YAML file:
 # resource-key-1:
@@ -41,6 +44,7 @@ omctl instance version-upgrade instance-abcd1234 --existing-configuration existi
       --generate-configuration                  Generate a default configuration file based on current helm values and proposed helm values for the target tier version.This will not perform an upgrade, but will generate a configuration file that can be used for the upgrade.
   -h, --help                                    help for version-upgrade
       --proposed-configuration string           Path to write the proposed configuration to (optional, used with --generate-configuration)
+      --reuse-values                            When used with --generate-configuration, merge existing helm chart values into the proposed configuration, giving preference to existing values
       --target-tier-version string              Target tier version for the version upgrade
       --upgrade-configuration-override string   YAML file containing upgrade configuration override
 ```
