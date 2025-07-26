@@ -118,7 +118,6 @@ plugins:
       separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
       lang: 
         - en
-      prebuild_index: true
   - minify:
       minify_html: true
       minify_js: true
