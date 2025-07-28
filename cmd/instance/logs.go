@@ -8,20 +8,122 @@ import (
     "strings"
     "time"
 
+    // WebSocket client for log streaming
     "github.com/gorilla/websocket"
+    "github.com/gdamore/tcell/v2"
+    "github.com/rivo/tview"
+
     "github.com/omnistrate-oss/omnistrate-ctl/cmd/common"
     "github.com/omnistrate-oss/omnistrate-ctl/internal/config"
     "github.com/omnistrate-oss/omnistrate-ctl/internal/dataaccess"
     "github.com/omnistrate-oss/omnistrate-ctl/internal/utils"
     "github.com/spf13/cobra"
 )
+// LogStream represents a pod or log source for TUI
+type LogStream struct {
+    PodName string
+    LogsURL string
+}
+
+// launchLogsTUI displays a TUI for selecting pods and viewing logs
+func launchLogsTUI(instanceID string, logStreams []LogStream) error {
+    app := tview.NewApplication()
+
+    // Left panel: list of pods (use tview.List for AddItem/SetSelectedFunc)
+    leftPanel := tview.NewList()
+    leftPanel.SetBorder(true)
+    leftPanel.SetTitle("Pods")
+
+    // Right panel: log output
+    rightPanel := tview.NewTextView()
+    rightPanel.SetBorder(true)
+    rightPanel.SetTitle("Logs")
+    rightPanel.SetDynamicColors(true)
+    rightPanel.SetWrap(true)
+    rightPanel.SetScrollable(true)
+
+    // Help text
+    helpText := tview.NewTextView().
+        SetText("Navigate: ↑/↓ | Enter: view logs | Esc: go back | q: quit").
+        SetTextAlign(tview.AlignCenter).
+        SetDynamicColors(true)
+
+    // Layout
+    flex := tview.NewFlex()
+    flex.AddItem(leftPanel, 0, 1, true)
+    flex.AddItem(rightPanel, 0, 2, false)
+
+    mainFlex := tview.NewFlex().SetDirection(tview.FlexRow)
+    mainFlex.AddItem(flex, 0, 1, true)
+    mainFlex.AddItem(helpText, 1, 0, false)
+
+    // Populate left panel with pods
+    for i, stream := range logStreams {
+        leftPanel.AddItem(stream.PodName, "", rune('a'+i), nil)
+    }
+
+    // When a pod is selected, show logs in right panel
+    leftPanel.SetSelectedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
+        if index < 0 || index >= len(logStreams) {
+            return
+        }
+        rightPanel.SetText(fmt.Sprintf("Connecting to logs for pod: %s...", logStreams[index].PodName))
+        go func(logsURL string) {
+            c, _, err := websocket.DefaultDialer.Dial(logsURL, nil)
+            if err != nil {
+                app.QueueUpdateDraw(func() {
+                    rightPanel.SetText(fmt.Sprintf("Failed to connect: %v", err))
+                })
+                return
+            }
+            defer c.Close()
+            app.QueueUpdateDraw(func() {
+                rightPanel.SetText("")
+            })
+            for {
+                _, message, err := c.ReadMessage()
+                if err != nil {
+                    app.QueueUpdateDraw(func() {
+                        rightPanel.SetText(fmt.Sprintf("Connection closed: %v", err))
+                    })
+                    break
+                }
+                app.QueueUpdateDraw(func() {
+                    rightPanel.Write([]byte(string(message) + "\n"))
+                })
+            }
+        }(logStreams[index].LogsURL)
+        app.SetFocus(rightPanel)
+    })
+
+    // Keyboard navigation
+    app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+        switch event.Key() {
+        case tcell.KeyCtrlC, tcell.KeyRune:
+            if event.Rune() == 'q' || event.Rune() == 'Q' {
+                app.Stop()
+                return nil
+            }
+        case tcell.KeyEscape:
+            app.SetFocus(leftPanel)
+            return nil
+        }
+        return event
+    })
+
+    app.SetFocus(leftPanel)
+    if err := app.SetRoot(mainFlex, true).EnableMouse(true).Run(); err != nil {
+        return fmt.Errorf("failed to run logs TUI: %w", err)
+    }
+    return nil
+}
 
 const (
     logsExample = `# Stream logs for an instance deployment
-omctl instance logs instance-abcd1234
+omnistrate-ctl instance logs instance-abcd1234
 
 # Get a snapshot of logs in JSON format
-omctl instance logs instance-abcd1234 -o json`
+omnistrate-ctl instance logs instance-abcd1234 -o json`
 )
 
 var logsCmd = &cobra.Command{
