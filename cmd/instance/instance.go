@@ -2,6 +2,7 @@ package instance
 
 import (
 	"github.com/spf13/cobra"
+	
 )
 
 var Cmd = &cobra.Command{
@@ -32,6 +33,7 @@ func init() {
 	Cmd.AddCommand(restoreCmd)
 	Cmd.AddCommand(adoptCmd)
 	Cmd.AddCommand(versionUpgradeCmd)
+	Cmd.AddCommand(logsCmd)
 }
 
 func run(cmd *cobra.Command, args []string) {
