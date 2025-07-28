@@ -28,12 +28,12 @@ type ResourceAdoptionConfig struct {
 
 // HelmAdoptionConfig represents the Helm adoption configuration
 type HelmAdoptionConfig struct {
-	ChartRepoURL          string                     `yaml:"chartRepoURL"`
-	Password              *string                    `yaml:"password,omitempty"`
-	ReleaseName           string                     `yaml:"releaseName"`
-	ReleaseNamespace      string                     `yaml:"releaseNamespace"`
-	RuntimeConfiguration  *HelmRuntimeConfig         `yaml:"runtimeConfiguration,omitempty"`
-	Username              *string                    `yaml:"username,omitempty"`
+	ChartRepoURL         string             `yaml:"chartRepoURL"`
+	Password             *string            `yaml:"password,omitempty"`
+	ReleaseName          string             `yaml:"releaseName"`
+	ReleaseNamespace     string             `yaml:"releaseNamespace"`
+	RuntimeConfiguration *HelmRuntimeConfig `yaml:"runtimeConfiguration,omitempty"`
+	Username             *string            `yaml:"username,omitempty"`
 }
 
 // HelmRuntimeConfig represents the Helm runtime configuration
@@ -107,8 +107,9 @@ func init() {
 	adoptCmd.Flags().StringP("service-plan-id", "p", "", "Service plan ID (required)")
 	adoptCmd.Flags().StringP("host-cluster-id", "c", "", "Host cluster ID (required)")
 	adoptCmd.Flags().StringP("primary-resource-key", "k", "", "Primary resource key to adopt (required)")
-	adoptCmd.Flags().String("service-plan-version", "", "Service plan version (optional)")
+	adoptCmd.Flags().StringP("service-plan-version", "g", "", "Service plan version (optional)")
 	adoptCmd.Flags().StringP("subscription-id", "u", "", "Subscription ID (optional)")
+	adoptCmd.Flags().StringP("customer-email", "e", "", "Customer email for notifications (optional)")
 	adoptCmd.Flags().StringP("config-file", "f", "", "YAML file containing resource adoption configuration (optional)")
 
 	_ = adoptCmd.MarkFlagRequired("service-id")
@@ -156,6 +157,17 @@ func runAdopt(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	customerEmail, err := cmd.Flags().GetString("customer-email")
+	if err != nil {
+		utils.PrintError(err)
+		return err
+	}
+
+	if customerEmail != "" && subscriptionID != "" {
+		utils.PrintError(fmt.Errorf("cannot specify both customer email and subscription ID"))
+		return fmt.Errorf("cannot specify both customer email and subscription ID")
+	}
+
 	configFile, err := cmd.Flags().GetString("config-file")
 	if err != nil {
 		utils.PrintError(err)
@@ -174,6 +186,16 @@ func runAdopt(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		utils.PrintError(err)
 		return err
+	}
+
+	// If the customer email is provided, lookup subscription for this customer for the given service and plan
+	if customerEmail != "" {
+		subscription, err := dataaccess.GetSubscriptionByCustomerEmail(context.Background(), token, serviceID, servicePlanID, customerEmail)
+		if err != nil {
+			utils.PrintError(fmt.Errorf("failed to retrieve subscription ID for customer email %s: %w", customerEmail, err))
+			return err
+		}
+		subscriptionID = subscription.Id
 	}
 
 	// Initialize spinner if output is not JSON
@@ -213,7 +235,7 @@ func runAdopt(cmd *cobra.Command, args []string) error {
 
 	// Build the adoption request
 	request := openapiclientfleet.AdoptResourceInstanceRequest2{}
-	
+
 	// Convert YAML config to SDK format if provided
 	if adoptionConfig != nil && len(adoptionConfig.ResourceAdoptionConfiguration) > 0 {
 		sdkConfig := convertToSDKResourceAdoptionConfiguration(adoptionConfig.ResourceAdoptionConfiguration)
@@ -276,18 +298,18 @@ func parseConfigFile(configFile string) (*AdoptionConfig, error) {
 // convertToSDKResourceAdoptionConfiguration converts YAML config to SDK format
 func convertToSDKResourceAdoptionConfiguration(yamlConfig map[string]ResourceAdoptionConfig) map[string]openapiclientfleet.ResourceAdoptionConfiguration {
 	sdkConfig := make(map[string]openapiclientfleet.ResourceAdoptionConfiguration)
-	
+
 	for resourceKey, resourceConfig := range yamlConfig {
 		sdkResourceConfig := openapiclientfleet.ResourceAdoptionConfiguration{}
-		
+
 		if resourceConfig.HelmAdoptionConfiguration != nil {
 			helmConfig := convertToSDKHelmAdoptionConfiguration(resourceConfig.HelmAdoptionConfiguration)
 			sdkResourceConfig.HelmAdoptionConfiguration = &helmConfig
 		}
-		
+
 		sdkConfig[resourceKey] = sdkResourceConfig
 	}
-	
+
 	return sdkConfig
 }
 
@@ -298,20 +320,20 @@ func convertToSDKHelmAdoptionConfiguration(yamlConfig *HelmAdoptionConfig) opena
 		ReleaseName:      yamlConfig.ReleaseName,
 		ReleaseNamespace: yamlConfig.ReleaseNamespace,
 	}
-	
+
 	if yamlConfig.Username != nil {
 		sdkConfig.Username = yamlConfig.Username
 	}
-	
+
 	if yamlConfig.Password != nil {
 		sdkConfig.Password = yamlConfig.Password
 	}
-	
+
 	if yamlConfig.RuntimeConfiguration != nil {
 		runtimeConfig := convertToSDKHelmRuntimeConfiguration(yamlConfig.RuntimeConfiguration)
 		sdkConfig.RuntimeConfiguration = &runtimeConfig
 	}
-	
+
 	return sdkConfig
 }
 

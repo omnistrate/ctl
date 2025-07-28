@@ -18,7 +18,7 @@ TESTCOVERAGE_THRESHOLD=0
 REPO_ROOT=$(shell git rev-parse --show-toplevel)
 
 # Build info
-BUILD_INFO_PKG=github.com/omnistrate-oss/omnistrate-ctl/cmd
+BUILD_INFO_PKG=github.com/omnistrate-oss/omnistrate-ctl/internal/config
 BUILD_TIMESTAMP=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 BUILD_FLAGS=-trimpath -ldflags "-X $(BUILD_INFO_PKG).CommitID=$(GIT_COMMIT) -X $(BUILD_INFO_PKG).Timestamp=$(BUILD_TIMESTAMP) -X $(BUILD_INFO_PKG).Version=$(GIT_VERSION)"
 
@@ -172,7 +172,7 @@ gen-doc:
 docker: docker-build
 .PHONY: docker-build
 docker-build:
-	docker build --platform=${DOCKER_PLATFORM} --build-arg GIT_USER=${GIT_USER} --build-arg GIT_TOKEN=${GIT_TOKEN} -f ./build/Dockerfile  -t ${PROJECT_NAME}:latest .
+	docker build --platform=${DOCKER_PLATFORM} --build-arg GIT_USER=${GIT_USER} --build-arg GIT_TOKEN=${GIT_TOKEN} --build-arg GIT_COMMIT=${GIT_COMMIT} --build-arg GIT_VERSION=${GIT_VERSION} -f ./build/Dockerfile  -t ${PROJECT_NAME}:latest .
 
 .PHONY: docker-run
 docker-run:

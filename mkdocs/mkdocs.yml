@@ -2,7 +2,8 @@ site_name: " "
 site_url: https://ctl.omnistrate.cloud/
 site_description: >-
   Omnistrate CTL Manual
-
+repo_url: https://github.com/omnistrate-oss/omnistrate-ctl
+repo_name: omnistrate-oss/omnistrate-ctl
 
 # TODO 0.0.0.0
 
@@ -10,6 +11,8 @@ theme:
   logo: assets/logo.png
   name: material
   favicon: images/favicon.png
+  icon:
+    repo: fontawesome/brands/github
   features:
     #- navigation.tabs
     #- navigation.sections
@@ -55,7 +58,9 @@ nav:
       - domain: "omnistrate-ctl_domain.md"
       - environment: "omnistrate-ctl_environment.md"
       - helm: "omnistrate-ctl_helm.md"
+      - inspect: "omnistrate-ctl_inspect.md"
       - instance: "omnistrate-ctl_instance.md"
+      - secret: "omnistrate-ctl_secret.md"
       - service: "omnistrate-ctl_service.md"
       - services-orchestration: "omnistrate-ctl_services-orchestration.md"
       - service-plan: "omnistrate-ctl_service-plan.md"
@@ -68,16 +73,15 @@ extra_css:
 extra:
   homepage: https://docs.omnistrate.com/
   social:
-    - icon: fontawesome/brands/facebook
-      link: https://www.facebook.com/omnistrate
-    - icon: fontawesome/brands/twitter
-      link: https://twitter.com/omnistrate
+    - icon: fontawesome/brands/x-twitter
+      link: https://x.com/omnistrate/
     - icon: fontawesome/brands/linkedin
       link: https://www.linkedin.com/company/omnistrate/about/
+    - icon: fontawesome/brands/github
+      link: https://github.com/omnistrate-oss/omnistrate-ctl
   analytics:
     provider: google
     property: G-2VH2LJR946
-
 extra_javascript:
   # - javascripts/mathjax.js
   # - javascripts/tawk.js
@@ -110,7 +114,17 @@ plugins:
       skip_classes:
         - skip-lightbox
   - include_dir_to_nav
-  - search
+  - search:
+      separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+      lang: 
+        - en
+  - minify:
+      minify_html: true
+      minify_js: true
+      minify_css: true
+      htmlmin_opts:
+        remove_comments: true
+      cache_safe: true
 
 copyright: |
   &copy; 2023 Omnistrate.Inc All rights reserved.

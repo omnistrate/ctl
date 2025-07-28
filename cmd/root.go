@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/omnistrate-oss/omnistrate-ctl/cmd/account"
+	"github.com/omnistrate-oss/omnistrate-ctl/cmd/alarms"
 	"github.com/omnistrate-oss/omnistrate-ctl/cmd/auth/login"
 	"github.com/omnistrate-oss/omnistrate-ctl/cmd/auth/logout"
 	"github.com/omnistrate-oss/omnistrate-ctl/cmd/build"
@@ -22,17 +23,12 @@ import (
 	"github.com/omnistrate-oss/omnistrate-ctl/cmd/servicesorchestration"
 	"github.com/omnistrate-oss/omnistrate-ctl/cmd/subscription"
 	"github.com/omnistrate-oss/omnistrate-ctl/cmd/upgrade"
+	"github.com/omnistrate-oss/omnistrate-ctl/internal/config"
 	"github.com/omnistrate-oss/omnistrate-ctl/internal/utils"
 
 	"github.com/fatih/color"
 	"github.com/mitchellh/go-wordwrap"
 	"github.com/spf13/cobra"
-)
-
-var (
-	CommitID  string
-	Version   string
-	Timestamp string
 )
 
 const versionDescription = "Omnistrate CTL %s"
@@ -65,7 +61,7 @@ func runRoot(cmd *cobra.Command, args []string) {
 	// Check if the version flag is set
 	versionFlag, err := cmd.Flags().GetBool("version")
 	if err == nil && versionFlag {
-		fmt.Println(fmt.Sprintf(versionDescription, Version))
+		fmt.Println(fmt.Sprintf(versionDescription, config.Version))
 		return
 	}
 
@@ -117,6 +113,7 @@ func init() {
 
 	RootCmd.AddCommand(service.Cmd)
 	RootCmd.AddCommand(account.Cmd)
+	RootCmd.AddCommand(alarms.Cmd)
 	RootCmd.AddCommand(domain.Cmd)
 	RootCmd.AddCommand(upgrade.Cmd)
 	RootCmd.AddCommand(helm.Cmd)

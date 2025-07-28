@@ -19,6 +19,7 @@ func getV1Client() *openapiclientv1.APIClient {
 	configuration.Host = config.GetHost()
 	configuration.Scheme = config.GetHostScheme()
 	configuration.Debug = false // We set logging on the retryablehttp client
+	configuration.UserAgent = config.GetUserAgent() // Set User-Agent header
 
 	var servers openapiclientv1.ServerConfigurations
 	for _, server := range configuration.Servers {
@@ -56,6 +57,7 @@ func getFleetClient() *openapiclientfleet.APIClient {
 	configuration.Host = config.GetHost()
 	configuration.Scheme = config.GetHostScheme()
 	configuration.Debug = false // We set logging on the retryablehttp client
+	configuration.UserAgent = config.GetUserAgent() // Set User-Agent header
 
 	var servers openapiclientfleet.ServerConfigurations
 	for _, server := range configuration.Servers {
