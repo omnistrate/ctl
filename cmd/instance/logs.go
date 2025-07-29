@@ -298,28 +298,33 @@ func launchLogsTUI(instanceDetail InstanceDetail, logStreams []LogStream) error 
         rightPanel.SetTitle(fmt.Sprintf("Logs: %s", logStreams[idx].PodName))
         rightPanel.SetText(fmt.Sprintf("Connecting to logs for resource: %s...", logStreams[idx].PodName))
         go func(logsURL string) {
-            c, _, err := websocket.DefaultDialer.Dial(logsURL, nil)
-            if err != nil {
-                app.QueueUpdateDraw(func() {
-                    rightPanel.SetText(fmt.Sprintf("Failed to connect: %v", err))
-                })
-                return
-            }
-            defer c.Close()
-            app.QueueUpdateDraw(func() {
-                rightPanel.SetText("")
-            })
             for {
-                _, message, err := c.ReadMessage()
+                c, _, err := websocket.DefaultDialer.Dial(logsURL, nil)
                 if err != nil {
                     app.QueueUpdateDraw(func() {
-                        rightPanel.SetText(fmt.Sprintf("Connection closed: %v", err))
+                        rightPanel.SetText(fmt.Sprintf("Failed to connect: %v", err))
                     })
-                    break
+                    time.Sleep(5 * time.Second)
+                    continue
                 }
+                defer c.Close()
                 app.QueueUpdateDraw(func() {
-                    rightPanel.Write([]byte(string(message) + "\n"))
+                    rightPanel.SetText("")
                 })
+                for {
+                    _, message, err := c.ReadMessage()
+                    if err != nil {
+                        app.QueueUpdateDraw(func() {
+                            rightPanel.SetText(fmt.Sprintf("Connection closed: %v", err))
+                        })
+                        break
+                    }
+                    app.QueueUpdateDraw(func() {
+                        rightPanel.Write([]byte(string(message) + "\n"))
+                    })
+                }
+                c.Close()
+                time.Sleep(5 * time.Second)
             }
         }(logStreams[idx].LogsURL)
         app.SetFocus(rightPanel)
