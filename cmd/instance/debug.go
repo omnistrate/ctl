@@ -288,7 +288,13 @@ func launchDebugTUI(data DebugData) error {
 			continue
 		}
 
-		resourceNode := tview.NewTreeNode(fmt.Sprintf("%s (%s)", resource.Name, resource.Type))
+		var nodeLabel string
+		if resource.Type == "generic" {
+			nodeLabel = resource.Name
+		} else {
+			nodeLabel = fmt.Sprintf("%s (%s)", resource.Name, resource.Type)
+		}
+		resourceNode := tview.NewTreeNode(nodeLabel)
 		resourceNode.SetReference(resource)
 		resourceNode.SetColor(tcell.ColorBlue)
 
