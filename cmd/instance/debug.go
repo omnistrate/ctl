@@ -43,15 +43,10 @@ type ResourceInfo struct {
 }
 
 type GenericData struct {
-	Nodes        []LogsStream `json:"nodes"` // Key-value pairs for generic data
+	LiveLogs    []LogsStream    `json:"liveLogs"`
 }
 
 
-
-
-type NodeData struct {
-	Nodes        []LogsStream `json:"nodes"` // Key-value pairs for generic data
-}
 
 
 type LogsStream struct {
@@ -69,7 +64,8 @@ type HelmData struct {
 	ChartVersion  string                 `json:"chartVersion"`
 	ChartValues   map[string]interface{} `json:"chartValues"`
 	InstallLog    string                 `json:"installLog"`
-	NodeData      []NodeData             `json:"nodeData"`
+	LiveLogs    []LogsStream    `json:"liveLogs"`
+
 	Namespace     string                 `json:"namespace"`
 	ReleaseName   string                 `json:"releaseName"`
 }
@@ -77,7 +73,8 @@ type HelmData struct {
 type TerraformData struct {
 	Files   map[string]string `json:"files"`
 	Logs    map[string]string `json:"logs"`
-	NodeData []NodeData       `json:"nodeData"`
+LiveLogs    []LogsStream    `json:"liveLogs"`
+
 }
 
 func runDebug(_ *cobra.Command, args []string) error {
@@ -114,95 +111,101 @@ func runDebug(_ *cobra.Command, args []string) error {
 	}
 
 	// Use instanceData directly as a struct for BuildLogStreams and IsLogsEnabledStruct
-	IsLogsEnabled := IsLogsEnabledStruct(instanceData )
-
-if debugResult.ResourcesDebug != nil {
-    for resourceKey, resourceDebugInfo := range debugResult.ResourcesDebug {
-        resourceInfo := ResourceInfo{
-            ID:        resourceKey,
-            Name:      resourceKey,
-            Type:      "unknown",
-            DebugData: resourceDebugInfo,
-        }
-
-        if debugData, ok := resourceDebugInfo.(map[string]interface{}); ok {
-            if actualDebugData, ok := debugData["debugData"].(map[string]interface{}); ok {
-                // Check if it's a helm resource
-                if _, hasChart := actualDebugData["chartRepoName"]; hasChart {
-                    resourceInfo.Type = "helm"
-                    resourceInfo.HelmData = parseHelmData(actualDebugData)
-                    if IsLogsEnabled {
-						nodeData := BuildLogStreams(instanceData, instanceID, resourceKey)
-						if nodeData != nil {
-							resourceInfo.HelmData.NodeData = []NodeData{{Nodes: nodeData}}
-						}
-                    }
-                } else {
-                    // Check if it's a terraform resource by looking for terraform files or logs
-                    hasTerraformFiles := false
-                    hasTerraformLogs := false
-                    for key := range actualDebugData {
-                        if strings.HasPrefix(key, "rendered/") && strings.HasSuffix(key, ".tf") {
-                            hasTerraformFiles = true
-                        } else if strings.HasPrefix(key, "log/") && strings.Contains(key, "terraform") {
-                            hasTerraformLogs = true
-                        }
-                    }
-                    if hasTerraformFiles || hasTerraformLogs {
-                        resourceInfo.Type = "terraform"
-                        resourceInfo.TerraformData = parseTerraformData(actualDebugData)
-                    }
-                    if IsLogsEnabled {
-                        nodeData := BuildLogStreams(instanceData, instanceID, resourceKey)
-                        if nodeData != nil && resourceInfo.TerraformData != nil {
-                            resourceInfo.TerraformData.NodeData = []NodeData{{Nodes: nodeData}}
-                        }
-                    }
-                }
-            }
-        }
-        data.Resources = append(data.Resources, resourceInfo)
-    }
-}
-// ...Launch TUI as before...
-	if instanceData != nil && debugResult.ResourcesDebug == nil {
-		// Convert instanceData to map[string]interface{} for dynamic access
+	IsLogsEnabled := IsLogsEnabledStruct(instanceData)
 	
-		// Assuming instanceData.ConsumptionResourceInstanceResult.DetailedNetworkTopology is a slice of resources
-		if instanceData != nil {
-			detailedNetworkTopology := instanceData.ConsumptionResourceInstanceResult.DetailedNetworkTopology
-			for _, resource := range detailedNetworkTopology {
-				if resource != nil {
-					resourceMap, ok := resource.(map[string]interface{})
-					if !ok {
-						continue
-					}
-					resourceKey, _ := resourceMap["resourceKey"].(string)
-					resourceName, _ := resourceMap["resourceName"].(string)
-					resourceInfo := ResourceInfo{
-						ID:        resourceKey,
-						Name:      resourceName,
-						Type:      "instance",
-						DebugData: resource,
-						GenericData: &GenericData{},
-					}
+	if debugResult.ResourcesDebug != nil {
+		for resourceKey, resourceDebugInfo := range debugResult.ResourcesDebug {
+			resourceInfo := ResourceInfo{
+				ID:        resourceKey,
+				Name:      resourceKey,
+				Type:      "unknown",
+				DebugData: resourceDebugInfo,
+			}
+
+		// Skip adding omnistrateobserv as a resource
+		if resourceKey == "omnistrateobserv" {
+			continue
+		}
+			if debugData, ok := resourceDebugInfo.(map[string]interface{}); ok {
+				if actualDebugData, ok := debugData["debugData"].(map[string]interface{}); ok {
+					// Check if it's a helm resource
+					if _, hasChart := actualDebugData["chartRepoName"]; hasChart {
+						resourceInfo.Type = "helm"
+						resourceInfo.HelmData = parseHelmData(actualDebugData)
+						if IsLogsEnabled {
+							nodeData := BuildLogStreams(instanceData, instanceID, resourceKey)
+							if nodeData != nil {
+								resourceInfo.HelmData.LiveLogs = nodeData
+							}
+						}
+					} else {
+						// Check if it's a terraform resource by looking for terraform files or logs
+						hasTerraformFiles := false
+						hasTerraformLogs := false
+						for key := range actualDebugData {
+							if strings.HasPrefix(key, "rendered/") && strings.HasSuffix(key, ".tf") {
+								hasTerraformFiles = true
+							} else if strings.HasPrefix(key, "log/") && strings.Contains(key, "terraform") {
+								hasTerraformLogs = true
+							}
+						}
+						if hasTerraformFiles || hasTerraformLogs {
+							resourceInfo.Type = "terraform"
+							resourceInfo.TerraformData = parseTerraformData(actualDebugData)
+							if IsLogsEnabled {
+								nodeData := BuildLogStreams(instanceData, instanceID, resourceKey)
+								if nodeData != nil {
+									resourceInfo.TerraformData.LiveLogs = nodeData
+								}
+							}
+						} else {
+							resourceInfo.Type = "generic"
+							resourceInfo.GenericData = &GenericData{}
+							if IsLogsEnabled {
+								nodeData := BuildLogStreams(instanceData, instanceID, resourceKey)
+								if nodeData != nil  {
+									resourceInfo.GenericData.LiveLogs = nodeData
+								}
+							}
+						}
+
+					} 
+				} else {
+					resourceInfo.Type = "generic"
+					resourceInfo.GenericData = &GenericData{}
 					if IsLogsEnabled {
 						nodeData := BuildLogStreams(instanceData, instanceID, resourceKey)
-						if nodeData != nil {
-							// If you want to use NodeData slice, wrap it as below
-							// resourceInfo.GenericData.NodeData = []NodeData{{Nodes: nodeData}}
-							// But GenericData.Nodes is []LogsStream, so assign directly:
-							resourceInfo.GenericData.Nodes = nodeData
+						if nodeData != nil  {
+							resourceInfo.GenericData.LiveLogs = nodeData
 						}
 					}
-					data.Resources = append(data.Resources, resourceInfo)
+						}
+				
+			} else {
+				resourceInfo.Type = "generic"
+				resourceInfo.GenericData = &GenericData{}
+				if IsLogsEnabled {
+					nodeData := BuildLogStreams(instanceData, instanceID, resourceKey)
+					if nodeData != nil  {
+						resourceInfo.GenericData.LiveLogs = nodeData
+					}
 				}
-			}
+
+				}
+			data.Resources = append(data.Resources, resourceInfo)
 		}
 	}
 
 	
-	fmt.Printf("Debug data for instance %s: %s\n", instanceID, data)
+
+
+	dataResult, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		fmt.Printf("data: %v\n: (failed to marshal debugResult: %v)\n", IsLogsEnabled, err)
+	} else {
+		fmt.Printf("data: %v\n:%s\n", IsLogsEnabled, string(dataResult))
+	}
+
 	// Launch TUI
 	return launchDebugTUI(data)
 }
@@ -236,10 +239,10 @@ func parseHelmData(debugData map[string]interface{}) *HelmData {
 		}
 	}
 
-	// // Parse install log
-	// if installLog, ok := debugData["log/install.log"].(string); ok {
-	// 	helmData.InstallLog = installLog
-	// }
+	// Parse install log
+	if installLog, ok := debugData["log/install.log"].(string); ok {
+		helmData.InstallLog = installLog
+	}
 
 	return helmData
 }
@@ -287,7 +290,7 @@ func launchDebugTUI(data DebugData) error {
 	// Add resources (only helm and terraform, skip unknown types)
 	for _, resource := range data.Resources {
 		// Skip unknown resource types
-		if resource.Type != "helm" && resource.Type != "terraform" {
+		if resource.Type != "helm" && resource.Type != "terraform" && resource.Type != "generic" {
 			continue
 		}
 
@@ -317,10 +320,10 @@ func launchDebugTUI(data DebugData) error {
 				resourceNode.AddChild(installLogNode)
 			}
 			// Add Live Log option
-			if resource.HelmData.NodeData != nil {
+			if resource.HelmData.LiveLogs != nil {
 				liveLogNode := tview.NewTreeNode("Live Log")
 				liveLogNode.SetReference(map[string]interface{}{
-					"type":     "helm-live-log",
+					"type":     "helm-live-logs",
 					"resource": resource,
 				})
 				liveLogNode.SetColor(tcell.ColorGreen)
@@ -340,7 +343,7 @@ func launchDebugTUI(data DebugData) error {
 
 			// Add Install Log option
 			if len(resource.TerraformData.Logs) > 0 {
-				installLogNode := tview.NewTreeNode("Install Logs")
+				installLogNode := tview.NewTreeNode("Install Log")
 				installLogNode.SetReference(map[string]interface{}{
 					"type":     "terraform-install-logs",
 					"resource": resource,
@@ -350,10 +353,22 @@ func launchDebugTUI(data DebugData) error {
 			}
 
 			// Add Live Log option
-			if len(resource.TerraformData.NodeData) > 0 {
-				liveLogNode := tview.NewTreeNode("Live Logs")
+			if len(resource.TerraformData.LiveLogs) > 0 {
+				liveLogNode := tview.NewTreeNode("Live Log")
 				liveLogNode.SetReference(map[string]interface{}{
 					"type":     "terraform-live-logs",
+					"resource": resource,
+				})
+				liveLogNode.SetColor(tcell.ColorGreen)
+				resourceNode.AddChild(liveLogNode)
+			}
+		} else if resource.Type == "generic" && resource.GenericData != nil {
+		
+			// Add Live Log option
+			if resource.GenericData.LiveLogs != nil {
+				liveLogNode := tview.NewTreeNode("Live Log")
+				liveLogNode.SetReference(map[string]interface{}{
+					"type":     "generic-live-logs",
 					"resource": resource,
 				})
 				liveLogNode.SetColor(tcell.ColorGreen)
@@ -577,6 +592,12 @@ func handleOptionSelection(ref map[string]interface{}, rightPanel *tview.TextVie
 			rightPanel.SetTitle("Install Log")
 			rightPanel.SetText(content)
 		}
+	case "helm-live-log":
+		if resource.HelmData != nil {
+			content := formatLiveLogs(resource.HelmData.LiveLogs)
+			rightPanel.SetTitle("Live Log")
+			rightPanel.SetText(content)
+		}
 	case "terraform-files":
 		if resource.TerraformData != nil {
 			content := formatTerraformFileList(resource.TerraformData.Files)
@@ -587,6 +608,18 @@ func handleOptionSelection(ref map[string]interface{}, rightPanel *tview.TextVie
 		if resource.TerraformData != nil {
 			content := formatTerraformLogsHierarchical(resource.TerraformData.Logs)
 			rightPanel.SetTitle("Install Logs")
+			rightPanel.SetText(content)
+		}
+	case "terraform-live-logs":
+		if resource.TerraformData != nil {
+			content := formatLiveLogs(resource.TerraformData.LiveLogs)
+			rightPanel.SetTitle("Live Logs")
+			rightPanel.SetText(content)
+		}
+	case "generic-live-logs":
+		if resource.GenericData != nil {
+			content := formatLiveLogs(resource.GenericData.LiveLogs)
+			rightPanel.SetTitle("Live Logs")
 			rightPanel.SetText(content)
 		}
 	}
@@ -950,6 +983,19 @@ func formatTerraformLogsHierarchical(logs map[string]string) string {
 	content += "\n[green]Press 'l' to open logs browser and view individual log contents[-]"
 
 	return content
+}
+
+// formatLiveLogs formats the Helm live logs for display in the TUI.
+func formatLiveLogs(liveLogs []LogsStream) string {
+	if len(liveLogs) == 0 {
+		return "[yellow]Live Logs[white]\n\nNo live logs available"
+	}
+	var sb strings.Builder
+	sb.WriteString("[yellow]Live Logs[white]\n\n")
+	for _, log := range liveLogs {
+		sb.WriteString(fmt.Sprintf("Pod: [cyan]%s[white]\nURL: [blue]%s[white]\n\n", log.PodName, log.LogsURL))
+	}
+	return sb.String()
 }
 
 // addYAMLSyntaxHighlighting adds basic syntax highlighting for YAML content
@@ -1661,8 +1707,8 @@ func init() {
 
 // New function to check logs enabled directly on struct
 func IsLogsEnabledStruct(instance *fleet.ResourceInstance) bool {
-    // Check if logs are enabled via LOGS#INTERNAL feature
-    isLogsEnabled := false
+	// Check if logs are enabled via LOGS#INTERNAL feature
+	isLogsEnabled := false
 	features := instance.ConsumptionResourceInstanceResult.ProductTierFeatures
 	if features != nil {
 		if featRaw, ok := features["LOGS#INTERNAL"]; ok {
