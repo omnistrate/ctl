@@ -7,8 +7,10 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/gorilla/websocket"
 	"github.com/rivo/tview"
 	"github.com/spf13/cobra"
 
@@ -319,15 +321,22 @@ func launchDebugTUI(data DebugData) error {
 				installLogNode.SetColor(tcell.ColorGreen)
 				resourceNode.AddChild(installLogNode)
 			}
-			// Add Live Log option
-			if resource.HelmData.LiveLogs != nil {
-				liveLogNode := tview.NewTreeNode("Live Log")
-				liveLogNode.SetReference(map[string]interface{}{
-					"type":     "helm-live-logs",
-					"resource": resource,
-				})
-				liveLogNode.SetColor(tcell.ColorGreen)
-				resourceNode.AddChild(liveLogNode)
+			// Add Live Logs tree
+			if len(resource.HelmData.LiveLogs) > 0 {
+				liveLogsNode := tview.NewTreeNode("Live Log")
+				liveLogsNode.SetColor(tcell.ColorGreen)
+				for _, log := range resource.HelmData.LiveLogs {
+					podNode := tview.NewTreeNode(log.PodName)
+					podNode.SetReference(map[string]interface{}{
+						"type":     "live-log-pod",
+						"resource": resource,
+						"podName":  log.PodName,
+						"logsUrl":  log.LogsURL,
+					})
+					podNode.SetColor(tcell.ColorLightCyan)
+					liveLogsNode.AddChild(podNode)
+				}
+				resourceNode.AddChild(liveLogsNode)
 			}
 		} else if resource.Type == "terraform" && resource.TerraformData != nil {
 			// Add Terraform Files option
@@ -352,27 +361,40 @@ func launchDebugTUI(data DebugData) error {
 				resourceNode.AddChild(installLogNode)
 			}
 
-			// Add Live Log option
+			// Add Live Logs tree
 			if len(resource.TerraformData.LiveLogs) > 0 {
-				liveLogNode := tview.NewTreeNode("Live Log")
-				liveLogNode.SetReference(map[string]interface{}{
-					"type":     "terraform-live-logs",
-					"resource": resource,
-				})
-				liveLogNode.SetColor(tcell.ColorGreen)
-				resourceNode.AddChild(liveLogNode)
+				liveLogsNode := tview.NewTreeNode("Live Log")
+				liveLogsNode.SetColor(tcell.ColorGreen)
+				for _, log := range resource.TerraformData.LiveLogs {
+					podNode := tview.NewTreeNode(log.PodName)
+					podNode.SetReference(map[string]interface{}{
+						"type":     "live-log-pod",
+						"resource": resource,
+						"podName":  log.PodName,
+						"logsUrl":  log.LogsURL,
+					})
+					podNode.SetColor(tcell.ColorLightCyan)
+					liveLogsNode.AddChild(podNode)
+				}
+				resourceNode.AddChild(liveLogsNode)
 			}
 		} else if resource.Type == "generic" && resource.GenericData != nil {
-		
-			// Add Live Log option
-			if resource.GenericData.LiveLogs != nil {
-				liveLogNode := tview.NewTreeNode("Live Log")
-				liveLogNode.SetReference(map[string]interface{}{
-					"type":     "generic-live-logs",
-					"resource": resource,
-				})
-				liveLogNode.SetColor(tcell.ColorGreen)
-				resourceNode.AddChild(liveLogNode)
+			// Add Live Logs tree
+			if len(resource.GenericData.LiveLogs) > 0 {
+				liveLogsNode := tview.NewTreeNode("Live Log")
+				liveLogsNode.SetColor(tcell.ColorGreen)
+				for _, log := range resource.GenericData.LiveLogs {
+					podNode := tview.NewTreeNode(log.PodName)
+					podNode.SetReference(map[string]interface{}{
+						"type":     "live-log-pod",
+						"resource": resource,
+						"podName":  log.PodName,
+						"logsUrl":  log.LogsURL,
+					})
+					podNode.SetColor(tcell.ColorLightCyan)
+					liveLogsNode.AddChild(podNode)
+				}
+				resourceNode.AddChild(liveLogsNode)
 			}
 		}
 
@@ -404,7 +426,12 @@ func launchDebugTUI(data DebugData) error {
 		reference := node.GetReference()
 		if reference == nil {
 			rightPanel.SetTitle("Content")
-			rightPanel.SetText("Select a resource option to view details")
+			// If the currently selected node is a Live Logs node, show node-specific message
+			if node.GetText() == "Live Log" {
+				rightPanel.SetText("Select a Node option to view details")
+			} else {
+				rightPanel.SetText("Select a resource option to view details")
+			}
 			// Clear terraform selection state when no valid selection
 			currentSelectionIsTerraformFiles = false
 			currentSelectionIsTerraformLogs = false
@@ -421,29 +448,38 @@ func launchDebugTUI(data DebugData) error {
 			currentSelectionIsTerraformFiles = false
 			currentSelectionIsTerraformLogs = false
 		case map[string]interface{}:
-			handleOptionSelection(ref, rightPanel)
-			// Update current terraform data and selection state for file browser
-			if optionType, ok := ref["type"].(string); ok {
-				switch optionType {
-				case "terraform-files":
-					if resource, ok := ref["resource"].(ResourceInfo); ok {
-						currentTerraformData = resource.TerraformData
-						currentSelectionIsTerraformFiles = true
+			if t, ok := ref["type"].(string); ok && t == "live-log-pod" {
+				// Open pod log view (websocket connect)
+				podName, _ := ref["podName"].(string)
+				logsUrl, _ := ref["logsUrl"].(string)
+				rightPanel.SetTitle(fmt.Sprintf("Live Log: %s", podName))
+				rightPanel.SetText(fmt.Sprintf("Connecting to ..."))
+				go connectAndStreamLogs(app, logsUrl, rightPanel)
+			} else {
+				handleOptionSelection(ref, rightPanel)
+				// Update current terraform data and selection state for file browser
+				if optionType, ok := ref["type"].(string); ok {
+					switch optionType {
+					case "terraform-files":
+						if resource, ok := ref["resource"].(ResourceInfo); ok {
+							currentTerraformData = resource.TerraformData
+							currentSelectionIsTerraformFiles = true
+							currentSelectionIsTerraformLogs = false
+						}
+					case "terraform-install-logs":
+						if resource, ok := ref["resource"].(ResourceInfo); ok {
+							currentTerraformData = resource.TerraformData
+							currentSelectionIsTerraformFiles = false
+							currentSelectionIsTerraformLogs = true
+						}
+					default:
+						currentSelectionIsTerraformFiles = false
 						currentSelectionIsTerraformLogs = false
 					}
-				case "terraform-install-logs":
-					if resource, ok := ref["resource"].(ResourceInfo); ok {
-						currentTerraformData = resource.TerraformData
-						currentSelectionIsTerraformFiles = false
-						currentSelectionIsTerraformLogs = true
-					}
-				default:
+				} else {
 					currentSelectionIsTerraformFiles = false
 					currentSelectionIsTerraformLogs = false
 				}
-			} else {
-				currentSelectionIsTerraformFiles = false
-				currentSelectionIsTerraformLogs = false
 			}
 		}
 	})
@@ -1733,8 +1769,8 @@ func BuildLogStreams(instance *fleet.ResourceInstance, instanceID string, resour
 	}
 	var logStreams []LogsStream
 
-    // Find omnistrateobserv resource for log endpoint
-    var baseURL, username, password string
+	// Find omnistrateobserv resource for log endpoint
+	var baseURL, username, password string
 	for _, entry := range topology {
 		if entry == nil {
 			continue
@@ -1759,7 +1795,7 @@ func BuildLogStreams(instance *fleet.ResourceInstance, instanceID string, resour
 		}
 	}
 
-    // Find the topology entry matching the resourceKey and build log URLs for its nodes
+	// Find the topology entry matching the resourceKey and build log URLs for its nodes
 	for _, entry := range topology {
 		if entry == nil {
 			continue
@@ -1790,4 +1826,44 @@ func BuildLogStreams(instance *fleet.ResourceInstance, instanceID string, resour
 		}
 	}
 	return logStreams
+}
+
+// Connect to websocket and stream logs to the rightPanel (reusable, modeled after logs.go)
+func connectAndStreamLogs(app *tview.Application, logsUrl string, rightPanel *tview.TextView) {
+	if logsUrl == "" {
+		app.QueueUpdateDraw(func() {
+			rightPanel.SetText("[red]No log URL provided[-]")
+		})
+		return
+	}
+	go func() {
+		for {
+			c, _, err := websocket.DefaultDialer.Dial(logsUrl, nil)
+			if err != nil {
+				app.QueueUpdateDraw(func() {
+					rightPanel.SetText(fmt.Sprintf("[red]Failed to connect: %v[-]", err))
+				})
+				time.Sleep(5 * time.Second)
+				continue
+			}
+			defer c.Close()
+			app.QueueUpdateDraw(func() {
+				rightPanel.SetText("")
+			})
+			for {
+				_, message, err := c.ReadMessage()
+				if err != nil {
+					app.QueueUpdateDraw(func() {
+						rightPanel.SetText(fmt.Sprintf("[yellow]Connection closed: %v[-]", err))
+					})
+					break
+				}
+				app.QueueUpdateDraw(func() {
+					rightPanel.Write([]byte(string(message) + "\n"))
+				})
+			}
+			c.Close()
+			time.Sleep(5 * time.Second)
+		}
+	}()
 }
