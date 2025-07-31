@@ -198,15 +198,6 @@ func runDebug(_ *cobra.Command, args []string) error {
 		}
 	}
 
-	
-
-
-	dataResult, err := json.MarshalIndent(data, "", "  ")
-	if err != nil {
-		fmt.Printf("data: %v\n: (failed to marshal debugResult: %v)\n", IsLogsEnabled, err)
-	} else {
-		fmt.Printf("data: %v\n:%s\n", IsLogsEnabled, string(dataResult))
-	}
 
 	// Launch TUI
 	return launchDebugTUI(data)
@@ -1869,8 +1860,9 @@ func connectAndStreamLogs(app *tview.Application, logsUrl string, rightPanel *tv
 					})
 					break
 				}
+				formatted := addLogSyntaxHighlighting(string(message))
 				app.QueueUpdateDraw(func() {
-					rightPanel.Write([]byte(string(message) + "\n"))
+					rightPanel.Write([]byte(formatted + "\n"))
 				})
 			}
 			c.Close()
