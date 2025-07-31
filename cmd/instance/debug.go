@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -1830,6 +1831,16 @@ func BuildLogStreams(instance *fleet.ResourceInstance, instanceID string, resour
 	return logStreams
 }
 
+
+
+var ansiEscape = regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
+
+// Clean log line for live logs (no color, no escape codes)
+func cleanLiveLogLine(line string) string {
+	return ansiEscape.ReplaceAllString(line, "")
+}
+
+
 // Connect to websocket and stream logs to the rightPanel (reusable, modeled after logs.go)
 func connectAndStreamLogs(app *tview.Application, logsUrl string, rightPanel *tview.TextView) {
 	if logsUrl == "" {
@@ -1860,7 +1871,8 @@ func connectAndStreamLogs(app *tview.Application, logsUrl string, rightPanel *tv
 					})
 					break
 				}
-				formatted := addLogSyntaxHighlighting(string(message))
+				cleanedLogLine := cleanLiveLogLine(string(message))
+				formatted := addLogSyntaxHighlighting(cleanedLogLine)
 				app.QueueUpdateDraw(func() {
 					rightPanel.Write([]byte(formatted + "\n"))
 				})
