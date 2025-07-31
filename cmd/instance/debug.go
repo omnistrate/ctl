@@ -425,11 +425,22 @@ func launchDebugTUI(data DebugData) error {
 	leftPanel.SetChangedFunc(func(node *tview.TreeNode) {
 		reference := node.GetReference()
 		if reference == nil {
-			rightPanel.SetTitle("Content")
-			// If the currently selected node is a Live Logs node, show node-specific message
+			// If the currently selected node is a Live Logs node, show pod list
 			if node.GetText() == "Live Log" {
-				rightPanel.SetText("Select a Node option to view details")
+				rightPanel.SetTitle("Live Log")
+				// Find pod children and list their names
+				podNames := []string{}
+				for _, child := range node.GetChildren() {
+					podNames = append(podNames, child.GetText())
+				}
+				if len(podNames) > 0 {
+					rightPanel.SetText("[yellow]Live Log[white]\n\n Nodes:\n  " + strings.Join(podNames, "\n  ") + "\n\nSelect a node option to view details")
+				} else {
+					rightPanel.SetText("[yellow]Live Log[white]\n No pods available")
+				}
+
 			} else {
+				rightPanel.SetTitle("Content")
 				rightPanel.SetText("Select a resource option to view details")
 			}
 			// Clear terraform selection state when no valid selection
